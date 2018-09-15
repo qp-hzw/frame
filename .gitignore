@@ -1,0 +1,11 @@
+﻿ipch
+Release_Unicode
+Debug_Unicode
+*.opensdf
+*.sdf
+四五趣游
+.sdf
+发布组件/
+*.lib
+*.exp
+子依赖项/
