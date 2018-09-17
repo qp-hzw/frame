@@ -5,6 +5,9 @@
 
 #define		MAX_TABLE_EX				 200;	//最大桌子数目
 
+#define LEN_MAX_RECORD_SIZE				 4096								//录像大小
+#define LEN_MAX_SERVICE_MEG_SIZE		 50									//客服消息大小
+
 
 
 const  BYTE		_MYSTERY				=		 2;				   //公司ID	

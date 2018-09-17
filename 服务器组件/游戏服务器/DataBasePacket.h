@@ -1,6 +1,7 @@
 #ifndef DATA_BASE_PACKET_HEAD_FILE
 #define DATA_BASE_PACKET_HEAD_FILE
 
+#include "../../全局定义/Define.h"
 #pragma pack(1)
 
 //用户Socket关闭事件
