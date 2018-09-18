@@ -1130,7 +1130,7 @@ bool CAttemperEngineSink::On_DBO_UPDATA_MARQUEE(DWORD dwContextID, VOID * pData,
 		strMarquee.dwMarqueeID =  (pMarquee+i)->dwMarqueeID;
 		strMarquee.dwMaruqeeTime = (pMarquee+i)->dwMaruqeeTime;
 		memcpy(&strMarquee.timeStartTime, &(pMarquee+i)->timeStartTime, sizeof(SYSTEMTIME));
-		memcpy(&strMarquee.timeStartTime, &(pMarquee+i)->timeStartTime, sizeof(SYSTEMTIME));
+		memcpy(&strMarquee.timeEndTime, &(pMarquee+i)->timeEndTime, sizeof(SYSTEMTIME));
 		memcpy(strMarquee.szMarqueeMsg, (pMarquee+i)->szMarqueeMsg, sizeof(strMarquee.szMarqueeMsg));
 
 		//≤Â»Î¡–±Ì

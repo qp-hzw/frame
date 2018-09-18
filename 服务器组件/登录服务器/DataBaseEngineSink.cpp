@@ -2240,6 +2240,7 @@ bool CDataBaseEngineSink::On_DBR_UPDATA_MARQUEE(DWORD dwContextID, VOID * pData,
 {
 	try
 	{
+
 		//构造参数
 		m_PlatformDBAide.ResetParameter();
 		m_PlatformDBAide.AddParameter(TEXT("@byCompanyID"),_MYSTERY);

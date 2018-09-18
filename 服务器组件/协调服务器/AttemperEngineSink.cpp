@@ -591,7 +591,10 @@ bool CAttemperEngineSink::OnTCPNetworkMainManagerService(WORD wSubCmdID, VOID * 
 	case CPR_WP_WEB_MARQUEE: //跑马灯消息
 		{
 			//效验大小
-			if (wDataSize!=sizeof(STR_CPR_WP_WEB_MARQUEE)) return false;
+			if (wDataSize!=sizeof(STR_CPR_WP_WEB_MARQUEE)) 
+			{
+				return false;
+			}
 
 			//校验数据
 			STR_CPR_WP_WEB_MARQUEE *pSub = (STR_CPR_WP_WEB_MARQUEE*) pData;
@@ -608,7 +611,6 @@ bool CAttemperEngineSink::OnTCPNetworkMainManagerService(WORD wSubCmdID, VOID * 
 			//效验大小
 			if (wDataSize!=sizeof(STR_CPR_WP_WEB_SYSTEM_MESSAGE))
 			{
-				CTraceService::TraceStringEx(TraceLevel_Normal,TEXT("收到, 大小不一样"));
 				return false;
 			}
 
