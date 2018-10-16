@@ -1875,8 +1875,7 @@ bool CAttemperEngineSink::On_SUB_CL_Logon_Register(VOID * pData, WORD wDataSize,
 	//效验版本
 	if ( On_CMD_LC_Logon_UpdateNotify(pSUBLogonRegister->dwVersionCheck, dwSocketID) )
 	{
-		//TODONOW added by WangChengQing 暂时不校验版本
-		//return true;
+		return true;
 	}
 	
 
@@ -2042,7 +2041,13 @@ bool CAttemperEngineSink::On_CMD_LC_Logon_UpdateNotify(DWORD dwVersionCheck, DWO
 	DWORD serverFrameVersion = Get_Framework_Version();  //服务端 frame 版本
 	DWORD clientFrameVersion = dwVersionCheck; //client  Hall 版本
 
+	
 	byte ret = Compate_Hall_LogonServer(clientFrameVersion, serverFrameVersion);
+
+	//构造提示
+	TCHAR szString[512]=TEXT("");
+	_sntprintf_s(szString,CountArray(szString),TEXT("版本校验结果:%d  服务器版本:%ld  客户端版本:%ld"), ret, serverFrameVersion, clientFrameVersion);
+	CTraceService::TraceString(szString,TraceLevel_Normal);
 
 
 	//版本匹配, 则直接退出, 不需要发送消息

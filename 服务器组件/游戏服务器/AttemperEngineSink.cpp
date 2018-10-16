@@ -3611,6 +3611,14 @@ bool CAttemperEngineSink::On_CMD_GC_USER_JOIN_TABLE_HALL_GOLD( DWORD dwContextID
 		SendRequestFailure(pIServerUserItem, TEXT("加入失败, 房间规则不存在!"), REQUEST_FAILURE_NORMAL);
 		return false;
 	}
+	//构造提示 TODONOW
+	TCHAR szString[512]=TEXT("");
+	_sntprintf_s(szString,CountArray(szString),TEXT("加入 房间号: %ld, 进场金币：%ld, 局数: %d"), 
+		dwPassword,
+		pCfg->dwLevelGold,
+		pCfg->GameCount
+		);
+	CTraceService::TraceString(szString,TraceLevel_Normal);
 
 	/* 8. 判断桌子是否在游戏中 */
 	if(GAME_STATUS_FREE != pCurrTableFrame->GetGameStatus())

@@ -65,10 +65,6 @@
 
 #define CMD_LC_LIST_ROOM_ONLINE		105									//房间人数 TODONOW client需要增加
 
-//client --> logon, logon --> cpd, cpd-->logon, logon --> client
-#define SUB_CL_LIST_QUERY_GAMEID	6									//创建房间查询 client向服务器查询可用gameID
-#define CMD_LC_LIST_QUERY_GAMEID	106									//创建房间查询 服务器返回给client
-
 #pragma endregion
 
 #pragma region MDM_SERVICE 用户服务

@@ -281,8 +281,9 @@ bool CTableFrame::OnEventApplyDismissRoom(WORD wChairID, bool bAgree)
 	{
 		//判断房间是否可以解散
 		tagTableRule* pCfg = (tagTableRule*)GetCustomRule();
-		if(1 == pCfg -> bDissolve)
-		{
+		//俱乐部模式 && 房间设置不可解散 时候才生效 
+		if((0 != pCfg->byClubCreate) && (1 == pCfg -> bDissolve)) 
+ 		{
 			STR_CMD_GR_FRMAE_ASK_DISMISS_RESULT cmdResult;
 			ZeroMemory(&cmdResult, sizeof(cmdResult));
 			cmdResult.lResultCode = 1;
