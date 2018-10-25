@@ -79,7 +79,7 @@ struct tagTableRule
 	BYTE	GameCountType;			//大局类型 是第一大局, 第二大局, 还是第三大局
 	BYTE	PlayerCount;			//玩家数量 0-任意人数可开
 	BYTE	cbPayType;				//支付方式，0房主支付、1AA制
-	DWORD	lSinglePayCost;			//*待删除  AA每个人需要的房卡或房主支付需要的总房卡
+	DWORD	lSinglePayCost;			//金币场 入场门票  TODONOW 该字段仅在扣除门票的时候有用，其他的调用均是以前的, 可以删除
 	WORD	CellScore;				//*底分	  默认为1 -- 子游戏使用的是该字段
 	DWORD	MaxFan;					//*封顶番数 0-不封顶 
 	DWORD	LeaveScore;				//*离场分数 0-无限制         -- 已舍弃

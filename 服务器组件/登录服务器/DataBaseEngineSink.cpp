@@ -2709,13 +2709,6 @@ bool CDataBaseEngineSink::On_DBR_Logon_Accounts(DWORD dwContextID, VOID * pData,
 		m_AccountsDBAide.AddParameter(TEXT("@strMachineID"),pDBRLogonAccounts->szMachineID);
 		m_AccountsDBAide.AddParameter(TEXT("@ProxyID"),pDBRLogonAccounts->dwProxyID);
 
-		//构造提示
-		TCHAR szString[512]=TEXT("");
-		_sntprintf_s(szString,CountArray(szString),
-			TEXT("账号登录 代理 = %ld"),
-			pDBRLogonAccounts->dwProxyID);
-		CTraceService::TraceString(szString,TraceLevel_Normal);
-
 		//输出参数ssss
 		TCHAR szDescribeString[128]=TEXT("");
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
@@ -2914,6 +2907,13 @@ bool CDataBaseEngineSink::On_DBR_Logon_Platform(DWORD dwContextID, VOID * pData,
 		//输出参数
 		TCHAR szDescribeString[128]=TEXT("");
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
+
+		//构造提示
+		TCHAR szString[512]=TEXT("");
+		_sntprintf_s(szString,CountArray(szString),
+			TEXT("平台登录 代理 = %ld"),
+			pDBRLogonPlatform->dwProxyID);
+		CTraceService::TraceString(szString,TraceLevel_Normal);
 
 		//输出执行
 		LogicTraceHelper(TEXT("GSP_CL_Logon_Platform"));

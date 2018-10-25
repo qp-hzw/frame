@@ -811,6 +811,25 @@ bool CTableFrame::XJGameTickets(BYTE byTableMode, BYTE byRound)
 		}	
 	}
 
+
+	//非俱乐部 金币模式
+	if( (byTableMode == TABLE_MODE_GOLD)
+		&& (1 == byRound))
+	{
+		//遍历桌子上的每个人，扣除金币
+		for (WORD i=0; i<m_wChairCount && i<MAX_CHAIR; i++)
+		{
+			//获取用户
+			IServerUserItem *pIServerUserItem = GetTableUserItem(i);
+			if (pIServerUserItem == NULL) continue;
+
+			SCORE cost =  pCfg->lSinglePayCost;
+
+			//扣除房卡 
+			pIServerUserItem->ModifyUserTreasure(GetPassword(), byTableMode, 0, -cost, 0);//创建房间时候的 byRount = 0
+		}
+	}
+
 	return true;
 }
 
@@ -1180,6 +1199,7 @@ bool CTableFrame::SendTableData(WORD wChairID, WORD wSubCmdID, VOID * pData, WOR
 			//获取用户
 			IServerUserItem * pIServerUserItem=GetTableUserItem(i);
 			if ((pIServerUserItem==NULL)||(pIServerUserItem->IsClientReady()==false)) continue;
+
 			//防止不在同一桌子里面  但是仍能收到消息号
 			if(pIServerUserItem->GetTableID() != m_wTableID) continue;
 
