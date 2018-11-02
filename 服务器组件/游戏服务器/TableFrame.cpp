@@ -1394,8 +1394,9 @@ bool CTableFrame::OnEventUserOffLine(IServerUserItem * pIServerUserItem)
 	WORD wChairID=pIServerUserItem->GetChairID();
 	BYTE cbUserStatus=pIServerUserItem->GetUserStatus();
 
-	//断线处理		游戏中断线重连		
-	if ( cbUserStatus==US_PLAYING )
+	//断线处理		不为空 并且 不为null  就进行断线重连		
+	//if ( (cbUserStatus != US_FREE ) && (cbUserStatus != US_NULL))
+	if ( cbUserStatus == US_PLAYING )
 	{
 		//校验用户
 		if (pIServerUserItem!=GetTableUserItem(wChairID)) return false;
@@ -2094,10 +2095,11 @@ bool CTableFrame::PerformStandUpAction(IServerUserItem *pIServerUserItem)
 		//事件通知
 		if(m_pIMatchTableAction != NULL) 
 			m_pIMatchTableAction->OnActionUserStandUp(wChairID,pIServerUserItem,false);
-
+		
 		//设置用户状态
 		pIServerUserItem->SetClientReady(false);
-		pIServerUserItem->SetUserStatus((cbUserStatus==US_OFFLINE) ? US_OFFLINE:US_FREE, INVALID_TABLE, INVALID_CHAIR);
+		pIServerUserItem->SetUserStatus(US_FREE, INVALID_TABLE, INVALID_CHAIR);
+		//pIServerUserItem->SetUserStatus((cbUserStatus==US_OFFLINE) ? US_OFFLINE:US_FREE, INVALID_TABLE, INVALID_CHAIR);
 
 		//变量定义
 		bool bTableLocked = IsTableLocked();
