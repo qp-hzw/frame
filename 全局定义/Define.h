@@ -9,9 +9,19 @@
 #define LEN_MAX_SERVICE_MEG_SIZE		 50									//客服消息大小
 
 
+/*
+//test服务器
+const  BYTE		_MYSTERY				=		 0;				   //公司ID	
+const  TCHAR	_GAME_SERVER_ADDR[32]	=		 TEXT("192.168.5.94");		//游戏服地址 node = 1
+*/
 
+
+
+//聚贤庄服务器
 const  BYTE		_MYSTERY				=		 2;				   //公司ID	
 const  TCHAR	_GAME_SERVER_ADDR[32]	=		 TEXT("121.43.164.10");		//游戏服地址 node = 1
+//const  TCHAR	_GAME_SERVER_ADDR[32]	=		 TEXT("120.27.238.146");	//游戏服地址 node = 2
+
 
 
 /* 服务器端口配置 */
