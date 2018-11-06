@@ -3,27 +3,29 @@
 
 #pragma pack(1)
 
-#define		MAX_TABLE_EX				 200;	//最大桌子数目
-
-#define LEN_MAX_RECORD_SIZE				 4096								//录像大小
-#define LEN_MAX_SERVICE_MEG_SIZE		 50									//客服消息大小
 
 
-/*
+/***********************************************游戏服地址********************************************/
+//const  BYTE		_MYSTERY				=		 0;				   //test服务器	
+const  BYTE		_MYSTERY				=		 2;				   //聚贤庄
+
+
+/***********************************************登陆服地址********************************************/
+//聚贤庄服务器
+const  TCHAR	_LOGON_SERVER_ADDR[32]	=		 TEXT("116.62.149.123");	//游戏服地址 node = 1
+
+
+/***********************************************游戏服地址********************************************/
 //test服务器
-const  BYTE		_MYSTERY				=		 0;				   //公司ID	
-const  TCHAR	_GAME_SERVER_ADDR[32]	=		 TEXT("192.168.5.94");		//游戏服地址 node = 1
-*/
-
+//const  TCHAR	_GAME_SERVER_ADDR[32]	=		 TEXT("192.168.5.94");		//游戏服地址 node = 1
 
 
 //聚贤庄服务器
-const  BYTE		_MYSTERY				=		 2;				   //公司ID	
 const  TCHAR	_GAME_SERVER_ADDR[32]	=		 TEXT("121.43.164.10");		//游戏服地址 node = 1
 //const  TCHAR	_GAME_SERVER_ADDR[32]	=		 TEXT("120.27.238.146");	//游戏服地址 node = 2
 
 
-
+/***********************************************协调服 登陆服  游戏服 端口********************************************/
 /* 服务器端口配置 */
 const WORD _MIN_PORT		=           8600;                    			//服务器开放的最小端口 -- [min， min+9]为进程预留
 const WORD _MAX_PORT		=           8900;                         	    //服务器开放的最大端口
@@ -34,6 +36,16 @@ const WORD  PORT_MANAGER	=			_MIN_PORT+2;						//管理端口 (未使用)
 
 const WORD _MIN_SERVER_PORT =           _MIN_PORT+10;                       //最小的ServerPort
 const WORD _MAX_SERVER_PORT =           _MAX_PORT;                          //最大的ServerPort
+
+
+
+
+//以后扔到define。h中
+#define		MAX_TABLE_EX				 200;	//最大桌子数目
+
+#define LEN_MAX_RECORD_SIZE				 4096								//录像大小
+#define LEN_MAX_SERVICE_MEG_SIZE		 50									//客服消息大小
+
 #pragma pack()
 
 #endif

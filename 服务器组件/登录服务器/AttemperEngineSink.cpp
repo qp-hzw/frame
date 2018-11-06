@@ -148,7 +148,7 @@ bool CAttemperEngineSink::OnEventControl(WORD wIdentifier, VOID * pData, WORD wD
 
 			//构造提示
 			TCHAR szString[512]=TEXT("");
-			_sntprintf_s(szString,CountArray(szString),TEXT("正在连接协调服务器 [ %s:%d ]"),temp.szCorrspAddr, PORT_CENTER);
+			_sntprintf_s(szString,CountArray(szString),TEXT("正在连接协调服务器"));
 			CTraceService::TraceString(szString,TraceLevel_Normal);
 
 			return true;
@@ -188,7 +188,7 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 
 			//构造提示
 			TCHAR szString[512]=TEXT("");
-			_sntprintf_s(szString,CountArray(szString),TEXT("正在连接协调服务器 [ %s:%d ]"),temp.szCorrspAddr,PORT_CENTER);
+			_sntprintf_s(szString,CountArray(szString),TEXT("正在连接协调服务器"));
 
 			//提示消息
 			CTraceService::TraceString(szString,TraceLevel_Normal);
@@ -926,11 +926,8 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		STR_CPR_LP_REGISTER_LOGON CPR;
 		ZeroMemory(&CPR,sizeof(CPR));
 
-        CWHIniData IniData;
-        tagServerParameter temp = IniData.GetServerInfo();
-
-		//设置变量
-		lstrcpyn(CPR.szServerAddr,temp.szServicAddr,CountArray(CPR.szServerAddr));
+		//设置变量 todonow 改为在frame的define中 定义
+		lstrcpyn(CPR.szServerAddr,_LOGON_SERVER_ADDR ,CountArray(CPR.szServerAddr));
 
 		//发送数据
 		m_pITCPSocketService->SendData(MDM_REGISTER,CPR_LP_REGISTER_LOGON,&CPR,sizeof(CPR));

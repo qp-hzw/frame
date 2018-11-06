@@ -223,7 +223,7 @@ bool CAttemperEngineSink::OnEventControl(WORD wIdentifier, VOID * pData, WORD wD
 
 			//构造提示
 			TCHAR szString[512]=TEXT("");
-			_sntprintf_s(szString,CountArray(szString),TEXT("正在连接协调服务器 [ %s:%d ]"),temp.szCorrspAddr,PORT_CENTER);
+			_sntprintf_s(szString,CountArray(szString),TEXT("正在连接协调服务器"));
 
 			//提示消息
 			CTraceService::TraceString(szString,TraceLevel_Normal);
@@ -299,7 +299,7 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 
 				//构造提示
 				TCHAR szString[512]=TEXT("");
-				_sntprintf_s(szString,CountArray(szString),TEXT("正在连接协调服务器 [ %s:%d ]"),temp.szCorrspAddr, PORT_CENTER);
+				_sntprintf_s(szString,CountArray(szString),TEXT("正在连接协调服务器"));
 
 				//提示消息
 				CTraceService::TraceString(szString,TraceLevel_Normal);
