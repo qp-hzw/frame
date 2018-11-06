@@ -595,7 +595,9 @@ bool CTableFrame::ConcludeGame(BYTE cbGameStatus)
 				else
 				{
 					//设置状态
-					pIServerUserItem->SetUserStatus(US_SIT,m_wTableID,i);
+					//pIServerUserItem->SetUserStatus(US_SIT,m_wTableID,i);
+
+					PerformStandUpAction(pIServerUserItem);
 
 					//机器处理
 					if (pIServerUserItem->IsAndroidUser()==true)
@@ -1395,8 +1397,7 @@ bool CTableFrame::OnEventUserOffLine(IServerUserItem * pIServerUserItem)
 	BYTE cbUserStatus=pIServerUserItem->GetUserStatus();
 
 	//断线处理		不为空 并且 不为null  就进行断线重连		
-	//if ( (cbUserStatus != US_FREE ) && (cbUserStatus != US_NULL))
-	if ( cbUserStatus == US_PLAYING )
+	if ( (cbUserStatus == US_PLAYING)  || (cbUserStatus == US_SIT))
 	{
 		//校验用户
 		if (pIServerUserItem!=GetTableUserItem(wChairID)) return false;

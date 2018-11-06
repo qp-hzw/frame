@@ -638,6 +638,7 @@ bool CAttemperEngineSink::OnEventTCPNetworkShut(DWORD dwClientAddr, DWORD dwActi
 
 			//是否需要处理断线重连
 			bool bRet = m_TableFrameArray[wTableID]->OnEventUserOffLine(pIServerUserItem);
+
 			if(bRet &&  (m_GameProgress == 3)) //只有3期工程才会有断线重连
 			{
 				DWORD dwServerID = (m_pGameServiceOption->dwServerID) &0xFFFFFF00;
@@ -2777,7 +2778,7 @@ bool CAttemperEngineSink::CreateTableNormal(tagTableRule * pCfg, IServerUserItem
 		return true ; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
 	}
 
-		//设置通用房间规则  
+	//设置通用房间规则  
 	pCurrTableFrame->SetCommonRule(pCfg);
 
 	//设置子游戏房间规则
@@ -3672,11 +3673,16 @@ bool CAttemperEngineSink::On_SUB_User_ReconnectRoom(VOID * pData, WORD wDataSize
 	//获校验户
 	WORD wBindIndex = LOWORD(dwSocketID);
 	IServerUserItem *pIServerUserItem = GetBindUserItem(wBindIndex);
-	if (NULL == pIServerUserItem) return true;
+	if (NULL == pIServerUserItem)
+	{
+		return true;
+	}
 
 	//校验数据包
 	if ( wDataSize != sizeof(STR_SUB_CG_USER_RECONNECT_ROOM))
+	{
 		return true;
+	}
 
 	//校验用户桌子号和椅子号
 	WORD wChairID = pIServerUserItem->GetChairID();
@@ -3692,7 +3698,7 @@ bool CAttemperEngineSink::On_SUB_User_ReconnectRoom(VOID * pData, WORD wDataSize
 		else //桌子已经结束, 则将wOldTableID设置为无效
 		{
 			CTableFrame* pOldTable = m_TableFrameArray.GetAt(wOldTableID);
-			if(pOldTable == NULL || pOldTable->GetGameStatus() == GAME_STATUS_FREE)
+			if(pOldTable == NULL)
 			{
 				wOldTableID = INVALID_TABLE;
 			}
