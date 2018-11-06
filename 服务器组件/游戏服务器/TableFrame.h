@@ -29,7 +29,7 @@ class CTableFrame : public ITableFrame
 protected:
 	WORD							m_wTableID;							//桌子号码		从0开始，在桌子初始化的时候已经赋值
 	WORD							m_wChairCount;						//椅子数目
-	BYTE							m_cbStartMode;						//开始模式
+	BYTE							m_cbStartMode;						//开始模式      子游戏初始化时候 传递给frame
 	WORD							m_wUserCount;						//用户数目
 	DWORD							m_dwTableOwner;						//桌主用户（第一个坐下的玩家）
 	DWORD							m_dwCreateTableUser;				//创建桌子用户

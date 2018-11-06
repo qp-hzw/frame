@@ -75,6 +75,7 @@ protected:
 
 	DWORD							m_dwOfflineGameID;					//断线重连标志 
 
+	BYTE							m_OldGameStatus;					//用户断线之前的状态
 
 protected:
 
@@ -132,6 +133,13 @@ public:
 	virtual DWORD GetUserID() { return m_UserInfo.dwUserID; }
 	//用户昵称
 	virtual LPCTSTR GetNickName() { return m_UserInfo.szNickName; }
+
+	//用户断线之前的状态
+	virtual void SetOldGameStatus(BYTE gamestatus) { m_OldGameStatus = gamestatus;}
+
+	//用户断线之前的状态
+	virtual BYTE GetOldGameStatus() { return m_OldGameStatus;}
+
 
 	//状态接口
 public:

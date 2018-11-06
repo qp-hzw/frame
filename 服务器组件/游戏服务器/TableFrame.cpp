@@ -154,7 +154,6 @@ void CTableFrame::SetTableAutoDismiss(DWORD dwMinutes)
 bool CTableFrame::StartGame()
 {
 	//游戏状态
-	ASSERT(m_bDrawStarted==false);
 	if (m_bDrawStarted==true) return false;
 
 	//删除自动解散定时器
@@ -222,7 +221,9 @@ bool CTableFrame::StartGame()
 
 	//通知事件
 	if (m_pITableFrameSink!=NULL) 
+	{
 		m_pITableFrameSink->OnEventGameStart();
+	}
 
 	return true;
 }
@@ -1397,14 +1398,21 @@ bool CTableFrame::OnEventUserOffLine(IServerUserItem * pIServerUserItem)
 	BYTE cbUserStatus=pIServerUserItem->GetUserStatus();
 
 	//断线处理		不为空 并且 不为null  就进行断线重连		
-	if ( (cbUserStatus == US_PLAYING)  || (cbUserStatus == US_SIT))
+	if ( (cbUserStatus == US_PLAYING)  || (cbUserStatus == US_SIT) || (cbUserStatus == US_READY))
 	{
 		//校验用户
 		if (pIServerUserItem!=GetTableUserItem(wChairID)) return false;
 
+		//构造提示
+		TCHAR szString[512]=TEXT("");
+		_sntprintf_s(szString,CountArray(szString),TEXT("玩家掉线, 状态被设置为 US_OFFLINE"));
+		CTraceService::TraceString(szString,TraceLevel_Normal);
+
 		//用户设置
 		pIServerUserItem->SetClientReady(false);
+		pIServerUserItem->SetOldGameStatus(cbUserStatus);
 		pIServerUserItem->SetUserStatus(US_OFFLINE,m_wTableID,wChairID);
+
 		if (m_pITableUserAction!=NULL)
 		{
 			m_pITableUserAction->OnActionUserNetCut(wChairID,pIServerUserItem,false);
@@ -1600,12 +1608,6 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 			bool bSendSecret=((cbUserStatus!=US_LOOKON)||(m_bAllowLookon[wChairID]==true));
 			m_pITableFrameSink->OnEventSendGameScene(wChairID,pIServerUserItem,m_cbGameStatus,bSendSecret);
 
-			//开始判断
-			if ((cbUserStatus==US_READY)&&(EfficacyStartGame(wChairID)==true))
-			{
-				StartGame(); 
-			}
-
 			return true;
 		}
 	case SUB_GF_USER_READY:		//用户准备
@@ -1615,26 +1617,15 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 			BYTE cbUserStatus=pIServerUserItem->GetUserStatus();
 
 			//效验状态
-			ASSERT(GetTableUserItem(wChairID)==pIServerUserItem);
 			if (GetTableUserItem(wChairID)!=pIServerUserItem) return false;
 
 			//效验状态
-			//ASSERT(cbUserStatus==US_SIT);
-			if (cbUserStatus!=US_SIT) return true;
-
-			//防作弊分组判断
-			if(((m_pGameServiceAttrib->wChairCount < MAX_CHAIR))
-				&& ( CheckDistribute()))
+			if (cbUserStatus!=US_SIT) 
 			{
-				//发送消息
-				LPCTSTR pszMessage=TEXT("系统重新分配桌子，请稍后！");
-				SendGameMessage(pIServerUserItem,pszMessage,SMT_CHAT);
-
-				//发送消息
-				m_pIMainServiceFrame->InsertWaitDistribute(pIServerUserItem);
-
-				//用户起立
-				PerformStandUpAction(pIServerUserItem);
+				//构造提示
+			TCHAR szString[512]=TEXT("");
+			_sntprintf_s(szString,CountArray(szString),TEXT("cbUserStatus = %d"), cbUserStatus);
+			CTraceService::TraceString(szString,TraceLevel_Normal);
 
 				return true;
 			}
@@ -1649,15 +1640,8 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 			if(m_pIMatchTableAction!=NULL && !m_pIMatchTableAction->OnActionUserOnReady(wChairID,pIServerUserItem, pData,wDataSize))
 				return true;
 
-			//开始判断
-			if (EfficacyStartGame(wChairID)==false)
-			{
-				pIServerUserItem->SetUserStatus(US_READY,m_wTableID,wChairID);
-			}
-			else
-			{
-				StartGame(); 
-			}
+			pIServerUserItem->SetUserStatus(US_READY,m_wTableID,wChairID);
+
 			return true;
 		}
 	case SUB_RG_FRAME_CHAT:		//用户聊天
@@ -2141,11 +2125,6 @@ bool CTableFrame::PerformStandUpAction(IServerUserItem *pIServerUserItem)
 		//结束桌子,设置桌子未未开始状态
 		ConcludeTable();
 
-		//开始判断 TODO 用户起立判断游戏开始干嘛？
-		if (EfficacyStartGame(INVALID_CHAIR) == true)
-		{
-			StartGame();
-		}
 
 		//发送状态
 		if ((bTableLocked != IsTableLocked()) || (bTableStarted != IsTableStarted()))
@@ -2366,34 +2345,11 @@ bool CTableFrame::PerformSitDownAction(WORD wChairID, IServerUserItem * pIServer
 	//m_pIMainServiceFrame->JoinTable(m_wTableID, pIServerUserItem->GetUserID());
 
 	/* 设置游戏用户状态 */
-	if ( (!IsGameStarted()) || (m_cbStartMode!=START_MODE_TIME_CONTROL) )
-	{
-		if ( true)//!CServerRule::IsAllowAvertCheatMode(m_pGameServiceOption->dwServerRule))
-		{
-			pIServerUserItem->SetClientReady(false);
-			pIServerUserItem->SetUserStatus(US_SIT,m_wTableID,wChairID);		//设置用户桌子ID和椅子ID
-		}
-		else
-		{
-			pIServerUserItem->SetClientReady(false);
-			pIServerUserItem->SetUserStatus(US_READY,m_wTableID,wChairID);
-		}
-	}
-	else
-	{
 
-		//设置状态
-		pIServerUserItem->SetClientReady(false);
+	//设置状态
+	pIServerUserItem->SetClientReady(false);
+	pIServerUserItem->SetUserStatus(US_SIT, m_wTableID, wChairID);
 
-		//动态加入需要先坐下
-		if( (pIServerUserItem->GetTableID()==INVALID_TABLE) && 
-			(pIServerUserItem->GetChairID()==INVALID_CHAIR)  )
-		{
-			pIServerUserItem->SetUserStatus(US_SIT, m_wTableID, wChairID);
-		}
-
-		pIServerUserItem->SetUserStatus(US_PLAYING, m_wTableID, wChairID);
-	}
 
 	//设置变量
 	m_wUserCount = GetSitUserCount();
@@ -2512,14 +2468,30 @@ bool CTableFrame::SendRequestFailure(IServerUserItem * pIServerUserItem, LPCTSTR
 //开始效验
 bool CTableFrame::EfficacyStartGame(WORD wReadyChairID)
 {
+	TCHAR szString[512]=TEXT("");
+
 	//状态判断
-	if (m_bGameStarted==true) return false;
+	if (m_bGameStarted==true) 
+	{
+		return false;
+	}
 
 	//模式过滤
-	if (m_cbStartMode==START_MODE_TIME_CONTROL) return false;
-	if (m_cbStartMode==START_MODE_MASTER_CONTROL) return false;
-	if (((tagTableRule*)GetCustomRule())->GameMode == TABLE_MODE_DW)	return true;  //电玩模式，游戏创建后立即开始
-
+	if (m_cbStartMode==START_MODE_TIME_CONTROL) 
+	{
+		return false;
+	}
+	
+	if (m_cbStartMode==START_MODE_MASTER_CONTROL)
+	{
+		return false;
+	}
+	
+	//电玩模式，游戏创建后立即开始
+	if (((tagTableRule*)GetCustomRule())->GameMode == TABLE_MODE_DW)
+	{
+		return true;
+	}  
 
 	//准备人数
 	WORD wReadyUserCount=0;
@@ -2532,12 +2504,17 @@ bool CTableFrame::EfficacyStartGame(WORD wReadyChairID)
 		//用户统计
 		if (pITableUserItem!=NULL)
 		{
-			//状态判断
-			if (pITableUserItem->IsClientReady()==false) return false;
-			if ((wReadyChairID!=i)&&(pITableUserItem->GetUserStatus()!=US_READY)) return false;
+			//状态判断 -- 有人掉线则不开始游戏
+			if (pITableUserItem->IsClientReady()==false)
+			{
+				return false;
+			}
 
-			//用户计数
-			wReadyUserCount++;
+			//准备状态的玩家 数量
+			if (pITableUserItem->GetUserStatus()==US_READY)
+			{
+				wReadyUserCount++;
+			}
 		}
 	}
 
@@ -2547,14 +2524,20 @@ bool CTableFrame::EfficacyStartGame(WORD wReadyChairID)
 	case START_MODE_ALL_READY:			//所有准备
 		{
 			//数目判断
-			if (wReadyUserCount>=1L) return true;
+			if (wReadyUserCount>=1L)
+			{
+				return true;
+			}
 
 			return false;
 		}
 	case START_MODE_FULL_READY:			//满人开始
 		{
 			//人数判断
-			if (wReadyUserCount==m_wChairCount) return true;
+			if (wReadyUserCount==m_wChairCount)
+			{
+				return true;
+			}
 
 			return false;
 		}
@@ -2580,7 +2563,6 @@ bool CTableFrame::EfficacyStartGame(WORD wReadyChairID)
 		}
 	default:
 		{
-			ASSERT(FALSE);
 			return false;
 		}
 	}

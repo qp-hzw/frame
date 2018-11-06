@@ -141,10 +141,6 @@ bool CServerUserItem::ContrastNickName(LPCTSTR pszNickName)
 //设置状态
 bool CServerUserItem::SetUserStatus(BYTE cbUserStatus, WORD wTableID, WORD wChairID, bool bNotify)
 {
-	//效验状态
-	ASSERT(m_UserInfo.dwUserID!=0L);
-	if (m_UserInfo.dwUserID==0L) return false;
-
 	//记录信息
 	WORD wOldTableID=m_UserInfo.wTableID;
 	WORD wOldChairID=m_UserInfo.wChairID;
@@ -277,7 +273,6 @@ bool CServerUserItem::SetUserParameter(DWORD dwClientAddr, WORD wBindIndex, TCHA
 									   bool bClientReady, const double &dLongitude, const double &dLatitude)
 {
 	//效验状态
-	ASSERT(m_UserInfo.dwUserID!=0L);
 	if (m_UserInfo.dwUserID==0L) return false;
 
 	//用户属性

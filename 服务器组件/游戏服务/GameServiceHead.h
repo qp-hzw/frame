@@ -570,6 +570,12 @@ public:
 	virtual DWORD GetUserID()=NULL;
 	//用户昵称
 	virtual LPCTSTR GetNickName()=NULL;
+	
+	//用户断线之前的状态
+	virtual void SetOldGameStatus(BYTE gamestatus) = NULL;
+
+	//用户断线之前的状态
+	virtual BYTE GetOldGameStatus() = NULL;
 
 	//状态接口
 public:

@@ -1031,7 +1031,6 @@ bool CAttemperEngineSink::OnEventModifyUserTreasure(IServerUserItem *pIServerUse
 bool CAttemperEngineSink::OnEventUserItemStatus(IServerUserItem * pIServerUserItem, WORD wOldTableID, WORD wOldChairID)
 {
 	//效验参数
-	ASSERT(pIServerUserItem!=NULL);
 	if (pIServerUserItem==NULL) return false;
 
 	//变量定义
@@ -1052,31 +1051,6 @@ bool CAttemperEngineSink::OnEventUserItemStatus(IServerUserItem * pIServerUserIt
 	else
 		SendDataBatchToMobileUser(wOldTableID,MDM_USER,SUB_GR_USER_STATUS,&UserStatus,sizeof(UserStatus));
 
-	//发送其他桌子上用户状态给该用户
-	//DWORD wEnumIndex = 0;
-	//while(wEnumIndex<m_ServerUserManager.GetUserItemCount())
-	//{
-	//	//过滤用户
-	//	IServerUserItem *pOtherIServerUserItem=m_ServerUserManager.EnumUserItem(wEnumIndex++);
-	//	if(pOtherIServerUserItem==NULL || pOtherIServerUserItem == pIServerUserItem ) continue;
-	//	if(pOtherIServerUserItem->GetTableID() != pIServerUserItem->GetTableID())
-	//		continue;
-	//	if(pOtherIServerUserItem->GetUserStatus() < US_SIT) 
-	//		continue;
-
-	//	//变量定义
-	//	CMD_GR_UserStatus OtherUserStatus;
-	//	ZeroMemory(&OtherUserStatus,sizeof(OtherUserStatus));
-
-	//	//构造数据
-	//	OtherUserStatus.dwUserID=pOtherIServerUserItem->GetUserID();
-	//	OtherUserStatus.UserStatus.wTableID=pOtherIServerUserItem->GetTableID();
-	//	OtherUserStatus.UserStatus.wChairID=pOtherIServerUserItem->GetChairID();
-	//	OtherUserStatus.UserStatus.cbUserStatus=pOtherIServerUserItem->GetUserStatus();
-
-	//	//发送消息
-	//	SendData(pIServerUserItem,MDM_USER,SUB_GR_USER_STATUS,&OtherUserStatus,sizeof(CMD_GR_UserStatus));
-	//}
 
 	//离开判断
 	if (pIServerUserItem->GetUserStatus()==US_NULL)
@@ -1116,7 +1090,6 @@ bool CAttemperEngineSink::OnEventUserItemStatus(IServerUserItem * pIServerUserIt
 	if (pIServerUserItem->GetUserStatus()==US_READY)
 	{
 		//状态校验
-		ASSERT(pIServerUserItem->GetTableID()!=INVALID_TABLE);
 		CTableFrame *pTableFrame=m_TableFrameArray[pIServerUserItem->GetTableID()];
 
 		//开始判断
@@ -1588,6 +1561,7 @@ bool CAttemperEngineSink::On_SUB_CG_Logon_UserID(VOID * pData, WORD wDataSize, D
 		}
 	}
 
+	
 	//切换判断 TODONOW 重点查看
 	if( NULL != pIServerUserItem )
 	{
@@ -1600,6 +1574,7 @@ bool CAttemperEngineSink::On_SUB_CG_Logon_UserID(VOID * pData, WORD wDataSize, D
 			wBindIndex,
 			pLogonUserID->dLongitude, pLogonUserID->dLatitude);
 	}
+	
 
 	//变量定义
 	STR_DBR_CG_LOGON_USERID LogonUserID;
@@ -1662,6 +1637,7 @@ bool CAttemperEngineSink::On_CMD_GC_Logon_UserID(DWORD dwContextID, VOID * pData
 	//在用户列表中获取 用户
 	IServerUserItem *pIServerUserItem = m_ServerUserManager.SearchUserItem(pDBOLogon->dwUserID);
 
+	/*
 	//重复登录判断 TODONOW
 	if (pIServerUserItem!=NULL)
 	{
@@ -1678,6 +1654,7 @@ bool CAttemperEngineSink::On_CMD_GC_Logon_UserID(DWORD dwContextID, VOID * pData
 
 		return true;
 	}
+	*/
 
 	//激活用户
 	ActiveUserItem(&pIServerUserItem, dwContextID, pBindParameter, pDBOLogon, wBindIndex);
@@ -1926,24 +1903,6 @@ bool CAttemperEngineSink::SwitchUserItemConnect(IServerUserItem * pIServerUserIt
 			m_pITCPNetworkEngine->ShutDownSocket(pSourceParameter->dwSocketID);
 		}
 	}
-
-	//断线状态切换
-	bool bIsOffLine=false;
-	if (pIServerUserItem->GetUserStatus()==US_OFFLINE)
-	{
-		//变量定义
-		WORD wTableID = pIServerUserItem->GetTableID();
-		WORD wChairID = pIServerUserItem->GetChairID();
-
-		//设置用户游戏中状态
-		bIsOffLine=true;
-		pIServerUserItem->SetUserStatus(US_PLAYING, wTableID, wChairID);
-	}
-	//else	//非断线重连状态，清空用户状态  added by lizhihu 现在放在OnEventUserOffLine中处理，两者均可
-	//{
-	//	//游戏状态切换
-	//	pIServerUserItem->SetUserStatus(US_NULL, INVALID_TABLE, INVALID_CHAIR);
-	//}
 
 	//机器判断
 	LPCTSTR pszMachineID = pIServerUserItem->GetMachineID();
@@ -3718,8 +3677,16 @@ bool CAttemperEngineSink::On_SUB_User_ReconnectRoom(VOID * pData, WORD wDataSize
 	//用户坐下
 	if( m_TableFrameArray[wOldTableID]->PerformSitDownAction(wChairID, pIServerUserItem))
 	{
-		//设置玩家状态
-		pIServerUserItem->SetUserStatus(US_PLAYING, wOldTableID, wChairID);
+		BYTE OldGameStatus = pIServerUserItem->GetOldGameStatus();
+
+		if(OldGameStatus == US_READY)
+		{
+			pIServerUserItem->SetUserStatus(US_SIT, wOldTableID, wChairID);
+		}
+		else
+		{
+			pIServerUserItem->SetUserStatus(OldGameStatus, wOldTableID, wChairID);	
+		}
 
 		//发送房间消息
 		tagTableRule* pRule = (tagTableRule* )m_TableFrameArray[wOldTableID]->GetCustomRule();
@@ -4314,7 +4281,6 @@ bool CAttemperEngineSink::SendRequestFailure(IServerUserItem * pIServerUserItem,
 bool CAttemperEngineSink::SendUserInfoPacket(IServerUserItem *pIServerUserItem, DWORD dwSocketID)
 {
 	//效验参数
-	ASSERT(pIServerUserItem!=NULL);
 	if (pIServerUserItem==NULL) return false;
 
 	//变量定义
