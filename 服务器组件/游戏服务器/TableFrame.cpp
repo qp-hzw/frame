@@ -98,6 +98,7 @@ CTableFrame::CTableFrame()
 
 	//解散信息
 	m_bUnderDissState = false;
+	m_dissmisserChaiID = 0xFF;
 
 	//房卡信息
 	m_dwPassword = 0;
@@ -172,6 +173,7 @@ bool CTableFrame::StartGame()
 	ZeroMemory(m_bResponseDismiss,sizeof(m_bResponseDismiss));
 	ZeroMemory(m_bAgree,sizeof(m_bAgree));
 	m_bUnderDissState = false;
+	m_dissmisserChaiID = 0xFF;
 
 	//开始时间
 	GetLocalTime(&m_SystemTimeStart);
@@ -322,6 +324,7 @@ bool CTableFrame::OnEventApplyDismissRoom(WORD wChairID, bool bAgree)
 
 		//设置房间处于解散状态
 		m_bUnderDissState = true;
+		m_dissmisserChaiID = wChairID;
 
 		return true;
 	}
@@ -424,6 +427,7 @@ bool CTableFrame::OnEventVoteDismissRoom(WORD wChairID, bool bAgree)
 
 			//设置房间不处于解散状态
 			m_bUnderDissState = false;
+			m_dissmisserChaiID = 0xFF;
 
 			//游戏中，结束子游戏（大局结束）
 			if (m_pITableFrameSink!=NULL) 
@@ -446,6 +450,7 @@ bool CTableFrame::OnEventVoteDismissRoom(WORD wChairID, bool bAgree)
 
 			//设置房间不处于解散状态
 			m_bUnderDissState = false;
+			m_dissmisserChaiID = 0xFF;
 		}
 		else					//有玩家还未表决，中间状态
 		{
@@ -465,6 +470,7 @@ bool CTableFrame::ConcludeGame(BYTE cbGameStatus)
 {
 	//设置房间不处于解散状态
 	m_bUnderDissState = false;
+	m_dissmisserChaiID = 0xFF;
 
 	//结束等待续费，玩家需要从准备状态退出为坐下
 	if (cbGameStatus == GAME_CONCLUDE_CONTINUE)
@@ -1608,6 +1614,66 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 			bool bSendSecret=((cbUserStatus!=US_LOOKON)||(m_bAllowLookon[wChairID]==true));
 			m_pITableFrameSink->OnEventSendGameScene(wChairID,pIServerUserItem,m_cbGameStatus,bSendSecret);
 
+			//发送解散面板状态 -- 只有处于解散状态 才会发送
+			if(m_bUnderDissState)
+			{
+				STR_CMD_GR_FRAME_GAME_DISSMISS cmd_dismiss;
+				ZeroMemory(&cmd_dismiss, sizeof(cmd_dismiss));
+
+				BYTE num = 0;
+
+				//发起者 放到第一位
+				if (m_dissmisserChaiID != 0xFF)
+				{
+					IServerUserItem *pTableUserItem = GetTableUserItem(m_dissmisserChaiID);
+					if(pTableUserItem != NULL)
+					{
+						cmd_dismiss.dwUserID[0] = pTableUserItem->GetUserID();
+
+						if(!m_bResponseDismiss[m_dissmisserChaiID]) //未表决
+						{
+							cmd_dismiss.cbAgree[0] = 2;
+						}
+						else if(m_bAgree[m_dissmisserChaiID]) //同意
+						{
+							cmd_dismiss.cbAgree[0] = 1;
+						}
+						else
+						{
+							cmd_dismiss.cbAgree[0] = 0;
+						}
+
+						num ++;	
+					}
+				}
+
+				for(int i=0; i<MAX_CHAIR && num <=(MAX_CHAIR-1); i++)
+				{
+					if(i == m_dissmisserChaiID) continue;
+
+					IServerUserItem *pTableUserItem = GetTableUserItem(i);
+					if(pTableUserItem == NULL) continue;
+
+					cmd_dismiss.dwUserID[num] = pTableUserItem->GetUserID();
+		
+					if(!m_bResponseDismiss[i]) //未表决
+					{
+						cmd_dismiss.cbAgree[num] = 2;
+					}
+					else if(m_bAgree[i]) //同意
+					{
+						cmd_dismiss.cbAgree[num] = 1;
+					}
+					else
+					{
+						cmd_dismiss.cbAgree[num] = 0;
+					}
+
+					num++;
+				}
+
+				m_pIMainServiceFrame->SendData(pIServerUserItem,MDM_G_FRAME,CMD_GR_FRAME_GAME_DISSMISS,&cmd_dismiss,sizeof(cmd_dismiss));
+			}
 			return true;
 		}
 	case SUB_GF_USER_READY:		//用户准备

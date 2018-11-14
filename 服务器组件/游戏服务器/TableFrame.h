@@ -59,6 +59,8 @@ protected:
 	bool							m_bResponseDismiss[MAX_CHAIR];			//响应解散
 	bool							m_bUnderDissState;						//桌子是否处于解散状态
 
+	WORD							m_dissmisserChaiID;						//解散发起者
+
 	//时间变量
 protected:
 	DWORD							m_dwDrawStartTime;					//开始时间

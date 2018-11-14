@@ -773,6 +773,15 @@ struct STR_CMD_GC_FRAME_USER_CHAT
 	DWORD dwChairID;			//椅子号
 	DWORD dwMsgID;				//0-15:语音标识
 };
+
+
+//断线重连  解散面板状态
+struct STR_CMD_GR_FRAME_GAME_DISSMISS
+{
+	DWORD					dwUserID[MAX_CHAIR];					//用户ID
+	BYTE					cbAgree[MAX_CHAIR];						    //是否同意解散		0-不同意	1-同意   2-未表决
+};
+
 #pragma endregion
 
 #pragma region MDM_GF_GAME 子游戏命令

@@ -145,6 +145,7 @@
 #define SUB_RG_FRAME_OPTION					1								//游戏配置
 #define CMD_GR_FRAME_GAME_OPTION			101								//游戏场景
 #define CMD_GR_FRAME_GAME_STATUS			102								//游戏状态
+#define CMD_GR_FRAME_GAME_DISSMISS			301							    //解散面板状态
 
 //解散房间
 #define SUB_RG_FRAME_ASK_DISMISS			2								//发起申请解散房间
