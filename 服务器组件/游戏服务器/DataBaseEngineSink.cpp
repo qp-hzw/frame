@@ -2592,6 +2592,25 @@ bool CDataBaseEngineSink::On_DBR_CG_USER_JOIN_TABLE_NO_PASS(DWORD dwContextID, v
 			Dbo.dLatitude = pDbReq->dLatitude;
 			Dbo.dwPassword = m_TreasureDBAide.GetValue_DWORD(TEXT("TableID"));
 			Dbo.dwClubRoomID = pDbReq->dwClubRoomID;
+
+			
+			//这个存储过程是判断 房卡是否足够
+			STR_SUB_CG_USER_CREATE_ROOM CreateRoom = Dbo.strCreateRoom;
+			tagTableRule *pCfg = (tagTableRule*)CreateRoom.CommonRule;
+
+			BYTE byPlayNum = pCfg->PlayerCount;
+			BYTE byGameCountType = pCfg->GameCountType;
+			SCORE cost = byPlayNum * byGameCountType;
+
+			//数据库传入参数
+			m_TreasureDBAide.ResetParameter();
+			m_TreasureDBAide.AddParameter(TEXT("@cost"), cost);
+			m_TreasureDBAide.AddParameter(TEXT("@dwClubRoomID"), pDbReq->dwClubRoomID);
+
+			//输出执行
+			LogicTraceHelper(TEXT("GSP_CL_CLUB_ROOM_INFO_COST")); 
+			//执行查询
+			Dbo.lResultCode2 = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_INFO_COST"), false);
 		}
 
 		return m_pIDataBaseEngineEvent->OnEventDataBaseResult(DBO_GC_USER_JOIN_TABLE_NO_PASS,dwContextID,&Dbo,sizeof(Dbo));

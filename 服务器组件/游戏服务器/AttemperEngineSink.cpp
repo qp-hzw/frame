@@ -3080,13 +3080,6 @@ bool CAttemperEngineSink::CreateTableAutoClub(STR_DBO_CG_USER_JOIN_TABLE_NO_PASS
 	//内部使用, 不校验指针
 	tagTableRule *pCfg = (tagTableRule*)pDbo->strCreateRoom.CommonRule;
 
-
-	//检查加入门票
-	if(!CheckCreateTableTicket(pCfg, pIServerUserItem))
-	{
-		return true; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
-	}
-
 	/* 第一步 寻找空闲房间 */
 	CTableFrame *pCurrTableFrame = GetNextEmptyTable();
 
@@ -3361,10 +3354,17 @@ bool CAttemperEngineSink::On_CMD_GC_USER_JOIN_TABLE_NO_PASS( DWORD dwContextID, 
 	}
 
 	/* 3. 数据库校验 */
+
 	STR_DBO_CG_USER_JOIN_TABLE_NO_PASS *pJoin = (STR_DBO_CG_USER_JOIN_TABLE_NO_PASS *)pData;
 	if( pJoin->lResultCode != DB_SUCCESS)//返回值不为0, 则认为身上金币不足 或者 不是本公司的人
 	{
 		SendRequestFailure(pIServerUserItem,TEXT("未找到合适房间, 请稍后重试"),REQUEST_FAILURE_NORMAL);
+		return false;
+	}
+
+	if( pJoin->lResultCode2 != DB_SUCCESS)//返回值不为0, 则工会房卡不足
+	{
+		SendRequestFailure(pIServerUserItem,TEXT("工会房卡不足, 请联系管理员充值"),REQUEST_FAILURE_NORMAL);
 		return false;
 	}
 

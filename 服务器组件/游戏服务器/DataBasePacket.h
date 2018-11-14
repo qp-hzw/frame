@@ -327,6 +327,7 @@ struct STR_DBO_CG_USER_JOIN_TABLE_NO_PASS
 	double							dLongitude;		//经度
 	double							dLatitude;		//纬度
 	long							lResultCode;	//非0表示 没有找到可以加入的房间
+	long							lResultCode2;	//非0表示 房卡不足
 
 	DWORD							dwClubRoomID;	//俱乐部房间编号
 	STR_SUB_CG_USER_CREATE_ROOM		strCreateRoom;	//房间规则
