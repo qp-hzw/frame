@@ -3,7 +3,7 @@
 #include "DlgLogonServer.h"
 
 
-#include "..\..\依赖项\内核引擎\TraceService.h"
+#include "//www.45quyou.com/share\依赖项\内核引擎\TraceService.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 

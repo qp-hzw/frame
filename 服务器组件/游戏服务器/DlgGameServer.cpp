@@ -2,7 +2,7 @@
 #include "Resource.h"
 #include "DlgGameServer.h"
 
-#include "..\..\依赖项\服务核心\WHService.h"
+#include "//www.45quyou.com/share\依赖项\服务核心\WHService.h"
 #include "..\..\服务器组件\模块管理\DlgServerItem.h"
 #include "..\..\服务器组件\模块管理\DlgServerWizard.h"
 

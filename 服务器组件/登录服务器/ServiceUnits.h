@@ -6,7 +6,7 @@
 #include "Stdafx.h"
 #include "AttemperEngineSink.h"
 #include "DataBaseEngineSink.h"
-#include "..\..\依赖项\服务核心\WHDataQueue.h"
+#include "//www.45quyou.com/share\依赖项\服务核心\WHDataQueue.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 

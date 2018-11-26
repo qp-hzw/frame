@@ -8,9 +8,9 @@
 #include "RankManager.h"
 
 
-#include "..\..\依赖项\内核引擎\TraceService.h"
-#include "..\..\依赖项\服务核心\WHService.h"
-#include "..\..\依赖项\全局定义\Array.h"
+#include "//www.45quyou.com/share\依赖项\内核引擎\TraceService.h"
+#include "//www.45quyou.com/share\依赖项\服务核心\WHService.h"
+#include "//www.45quyou.com/share\依赖项\全局定义\Array.h"
 #include "..\..\全局定义\Define.h"
 #include "..\..\消息定义\STR_CMD_GameServer.h"
 

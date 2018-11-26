@@ -79,41 +79,41 @@
 
 /***全局文件***/
 //定义文件
-#include "../../依赖项/全局定义/Macro.h"
-#include "../../依赖项/全局定义/Define.h"
+#include "//www.45quyou.com/share/依赖项/全局定义/Macro.h"
+#include "//www.45quyou.com/share/依赖项/全局定义/Define.h"
 
 //结构文件
 #include "../../全局定义/Struct.h"
-#include "../../依赖项/全局定义/Packet.h"
+#include "//www.45quyou.com/share/依赖项/全局定义/Packet.h"
 #include "../../全局定义/Property.h"
 
 //模板文件
-#include "../../依赖项/全局定义/Array.h"
-#include "../../依赖项/全局定义/Module.h"
-#include "../../依赖项/全局定义/PacketAide.h"
+#include "//www.45quyou.com/share/依赖项/全局定义/Array.h"
+#include "//www.45quyou.com/share/依赖项/全局定义/Module.h"
+#include "//www.45quyou.com/share/依赖项/全局定义/PacketAide.h"
 #include "../../全局定义/ServerRule.h"
 #include "../../全局定义/RightDefine.h"
 
 //配置文件
-#include "../../依赖项/全局定义/Version.h"
+#include "//www.45quyou.com/share/依赖项/全局定义/Version.h"
 
 //////////////////////////////////////////////////////////////////////////
 //组件头文件
 #include "..\..\服务器组件\游戏服务\GameServiceHead.h"
-#include "..\..\依赖项\内核引擎\DataBaseAide.h"
+#include "//www.45quyou.com/share\依赖项\内核引擎\DataBaseAide.h"
 
 
 //////////////////////////////////////////////////////////////////////////////////
 //链接代码
 
 #ifndef _DEBUG
-		#pragma comment (lib,"../../依赖项/链接库/ServiceCore.lib")
-		#pragma comment (lib,"../../依赖项/链接库/GameService.lib")
-		#pragma comment (lib,"../../依赖项/链接库/KernelEngine.lib")
+		#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/ServiceCore.lib")
+		#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/GameService.lib")
+		#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/KernelEngine.lib")
 #else
-		#pragma comment (lib,"../../依赖项/链接库/ServiceCoreD.lib")
-		#pragma comment (lib,"../../依赖项/链接库/GameServiceD.lib")
-		#pragma comment (lib,"../../依赖项/链接库/KernelEngineD.lib")
+		#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/ServiceCoreD.lib")
+		#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/GameServiceD.lib")
+		#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/KernelEngineD.lib")
 #endif
 
 //////////////////////////////////////////////////////////////////////////

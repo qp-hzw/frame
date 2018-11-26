@@ -4,8 +4,8 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 //组件定义
-#include "..\..\依赖项\服务核心\ServiceCoreHead.h"
-#include "..\..\依赖项\内核引擎\KernelEngineHead.h"
+#include "//www.45quyou.com/share\依赖项\服务核心\ServiceCoreHead.h"
+#include "//www.45quyou.com/share\依赖项\内核引擎\KernelEngineHead.h"
 
 #include "..\..\服务器组件\游戏服务\GameServiceHead.h"
 

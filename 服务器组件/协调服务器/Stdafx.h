@@ -40,50 +40,50 @@
 //包含文件
 /***全局文件***/
 //定义文件
-#include "../../依赖项/全局定义/Macro.h"
-#include "../../依赖项/全局定义/Define.h"
+#include "//www.45quyou.com/share/依赖项/全局定义/Macro.h"
+#include "//www.45quyou.com/share/依赖项/全局定义/Define.h"
 #include "../../全局定义/Define.h"
 
 //结构文件
 #include "../../全局定义/Struct.h"
-#include "../../依赖项/全局定义/Struct.h"
-#include "../../依赖项/全局定义/Packet.h"
+#include "//www.45quyou.com/share/依赖项/全局定义/Struct.h"
+#include "//www.45quyou.com/share/依赖项/全局定义/Packet.h"
 #include "../../全局定义/Property.h"
 
 //模板文件
-#include "../../依赖项/全局定义/Array.h"
-#include "../../依赖项/全局定义/Module.h"
-#include "../../依赖项/全局定义/PacketAide.h"
+#include "//www.45quyou.com/share/依赖项/全局定义/Array.h"
+#include "//www.45quyou.com/share/依赖项/全局定义/Module.h"
+#include "//www.45quyou.com/share/依赖项/全局定义/PacketAide.h"
 #include "../../全局定义/ServerRule.h"
 #include "../../全局定义/RightDefine.h"
 
 //配置文件
-#include "../../依赖项/全局定义/Version.h"
+#include "//www.45quyou.com/share/依赖项/全局定义/Version.h"
 
 /*** Other ***/
 //平台定义
 #include "..\..\消息定义\CMD_Correspond.h"
 
 //组件定义
-#include "..\..\依赖项\服务核心\ServiceCoreHead.h"
-#include "..\..\依赖项\服务核心\WHIniData.h"
-#include "..\..\依赖项\服务核心\WHDataLocker.h"
+#include "//www.45quyou.com/share\依赖项\服务核心\ServiceCoreHead.h"
+#include "//www.45quyou.com/share\依赖项\服务核心\WHIniData.h"
+#include "//www.45quyou.com/share\依赖项\服务核心\WHDataLocker.h"
 
 
-#include "..\..\依赖项\内核引擎\KernelEngineHead.h"
-#include "..\..\依赖项\内核引擎\DataBaseAide.h"
-#include "..\..\依赖项\内核引擎\TraceService.h"
+#include "//www.45quyou.com/share\依赖项\内核引擎\KernelEngineHead.h"
+#include "//www.45quyou.com/share\依赖项\内核引擎\DataBaseAide.h"
+#include "//www.45quyou.com/share\依赖项\内核引擎\TraceService.h"
 
 
 //////////////////////////////////////////////////////////////////////////////////
 //链接代码
 
 #ifndef _DEBUG
-	#pragma comment (lib,"../../依赖项/链接库/ServiceCore.lib")
-	#pragma comment (lib,"../../依赖项/链接库/KernelEngine.lib")
+	#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/ServiceCore.lib")
+	#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/KernelEngine.lib")
 #else
-	#pragma comment (lib,"../../依赖项/链接库/ServiceCoreD.lib")
-	#pragma comment (lib,"../../依赖项/链接库/KernelEngineD.lib")
+	#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/ServiceCoreD.lib")
+	#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/KernelEngineD.lib")
 #endif
 
 //////////////////////////////////////////////////////////////////////////////////

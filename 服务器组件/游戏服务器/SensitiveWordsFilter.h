@@ -5,8 +5,8 @@
 #include "Stdafx.h"
 #include <vector>        
 #include <algorithm>        
-#include "..\..\依赖项\全局定义\array.h"
-#include "..\..\依赖项\全局定义\macro.h"
+#include "//www.45quyou.com/share\依赖项\全局定义\array.h"
+#include "//www.45quyou.com/share\依赖项\全局定义\macro.h"
 
 //////////////////////////////////////////////////////////////////////////
 #define MAX_CH 65535 //最大的中文字符数        

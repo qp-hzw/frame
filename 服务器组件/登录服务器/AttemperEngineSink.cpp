@@ -5,8 +5,8 @@
 #include "RankManager.h"
 
 
-#include "..\..\依赖项\内核引擎\TraceService.h"
-#include "..\..\依赖项\服务核心\WHEncrypt.h"
+#include "//www.45quyou.com/share\依赖项\内核引擎\TraceService.h"
+#include "//www.45quyou.com/share\依赖项\服务核心\WHEncrypt.h"
 #include "..\..\消息定义\CMD_Correspond.h"
 
 //////////////////////////////////////////////////////////////////////////////////

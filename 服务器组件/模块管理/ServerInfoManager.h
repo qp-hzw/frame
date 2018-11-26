@@ -5,7 +5,7 @@
 
 #include "AfxTempl.h"
 #include "ModuleManagerHead.h"
-#include "..\..\依赖项\内核引擎\DataBaseAide.h"
+#include "//www.45quyou.com/share\依赖项\内核引擎\DataBaseAide.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 

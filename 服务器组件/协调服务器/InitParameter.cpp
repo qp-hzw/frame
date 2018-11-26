@@ -2,7 +2,7 @@
 #include "InitParameter.h"
 
 
-#include "..\..\依赖项\服务核心\WHService.h"
+#include "//www.45quyou.com/share\依赖项\服务核心\WHService.h"
 //////////////////////////////////////////////////////////////////////////////////
 
 #define REG_ITEM_NAME				TEXT("Information")					//注册表项

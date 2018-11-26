@@ -1,10 +1,10 @@
 #include "StdAfx.h"
 #include "ServerInfoManager.h"
 
-#include "..\..\依赖项\内核引擎\DataBaseAide.h"
-#include "..\..\依赖项\内核引擎\TraceService.h"
-#include "..\..\依赖项\服务核心\WHService.h"
-#include "..\..\依赖项\服务核心\WHIniData.h"
+#include "//www.45quyou.com/share\依赖项\内核引擎\DataBaseAide.h"
+#include "//www.45quyou.com/share\依赖项\内核引擎\TraceService.h"
+#include "//www.45quyou.com/share\依赖项\服务核心\WHService.h"
+#include "//www.45quyou.com/share\依赖项\服务核心\WHIniData.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 
