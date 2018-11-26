@@ -108,11 +108,11 @@
 
 #ifndef _DEBUG
 		#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/ServiceCore.lib")
-		#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/GameService.lib")
+		#pragma comment (lib,"../../依赖项/链接库/GameService.lib")
 		#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/KernelEngine.lib")
 #else
 		#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/ServiceCoreD.lib")
-		#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/GameServiceD.lib")
+		#pragma comment (lib,"../../依赖项/链接库/GameServiceD.lib")
 		#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/KernelEngineD.lib")
 #endif
 

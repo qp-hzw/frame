@@ -88,14 +88,14 @@
 
 #ifndef _DEBUG
 	#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/ServiceCore.lib")
-	#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/GameService.lib")
+	#pragma comment (lib,"../../依赖项/链接库/GameService.lib")
 	#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/KernelEngine.lib")
-	#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/ModuleManager.lib")
+	#pragma comment (lib,"../../依赖项/链接库/ModuleManager.lib")
 #else
 	#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/ServiceCoreD.lib")
-	#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/GameServiceD.lib")
+	#pragma comment (lib,"../../依赖项/链接库/GameServiceD.lib")
 	#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/KernelEngineD.lib")
-	#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/ModuleManagerD.lib")
+	#pragma comment (lib,"../../依赖项/链接库/ModuleManagerD.lib")
 #endif
 
 //控制台
