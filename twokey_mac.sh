@@ -1,11 +1,14 @@
 #!/bin/bash
 
+export LC_COLLATE='C'
+export LC_CTYPE='C'
 ###################################################
 ##                    main
 ###################################################
 
-g_FrameDependence='依赖项'
-g_SubDependence='子依赖项'
+g_FrameDependence='/Users/clay/share/依赖项'
+g_SubDependence='/Users/clay/share/子依赖项'
+g_CodePath='/Users/clay/Desktop/server/frame_server/'
 
 g_Frame_kernel='内核引擎'
 g_Frame_service='服务核心'
@@ -36,12 +39,13 @@ mkdir ${g_Sub_service}
 mkdir ${g_Sub_gameser}
 mkdir ${g_Sub_global}
 mkdir ${g_Sub_message}
-cd ../
+
+cd ${g_CodePath}
 
 ##全局定义
 cp -r ${g_FrameDependence}/${g_Frame_global}/*.h ${g_SubDependence}//${g_Sub_global}
 ## - -删除文件最后三行
-sed -i '$d' ${g_SubDependence}/${g_Sub_global}/Version.h
+sed -i '' '$d' ${g_SubDependence}/${g_Sub_global}/Version.h
 echo -e '\n#define SUB_INCLUDE_IMPORT_FILES\n\n#endif' >> ${g_SubDependence}/${g_Sub_global}/Version.h
 cp -r 全局定义/Struct.h ${g_SubDependence}//${g_Sub_global}/Struct_Frame.h
 
