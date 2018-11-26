@@ -66,12 +66,19 @@ cp 服务器组件/游戏服务/GameServiceHead.h ${g_SubDependence}/${g_Sub_gam
 # 说明文件
 cat ${g_FrameDependence}/${g_ReadMe} > ${g_SubDependence}/${g_ReadMe}
 
-echo -e "\n\nSubGame依赖项 自动化脚本" >> ${g_SubDependence}/${g_ReadMe}
+echo -e "\n\n--------------------------------------"  >> ${g_SubDependence}/${g_ReadMe}
+echo -e "SubGame依赖项 自动化脚本" >> ${g_SubDependence}/${g_ReadMe}
 sed -n '/PLATFORM_VERSION:/p' ${g_CodePath}/全局定义/Version.h >> ${g_SubDependence}/${g_ReadMe}
-echo "author:  " >> ${g_SubDependence}/${g_ReadMe}
+echo -e "\n" >>  ${g_SubDependence}/${g_ReadMe}
+echo -e `git log -1` >>  ${g_SubDependence}/${g_ReadMe}
+echo -e "\nauthor:  " >> ${g_SubDependence}/${g_ReadMe}
 echo "WangChengQing    " >>  ${g_SubDependence}/${g_ReadMe}
-echo "date:  " >> ${g_SubDependence}/${g_ReadMe}
+echo -e "\ndate:  " >> ${g_SubDependence}/${g_ReadMe}
 echo `date`  >> ${g_SubDependence}/${g_ReadMe}
+
+
+# 自动化发布
+`source twokey_release_mac.sh `
 
 ## msg
 echo -e "Everything is ready, enjoy it!\n"
