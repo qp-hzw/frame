@@ -217,9 +217,7 @@ bool CAttemperEngineSink::OnEventControl(WORD wIdentifier, VOID * pData, WORD wD
 	case CT_CONNECT_CORRESPOND:		//连接协调
 		{
 			//发起连接
-            CWHIniData IniData;
-            tagServerParameter temp = IniData.GetServerInfo();
-			m_pITCPSocketService->Connect(temp.szCorrspAddr, PORT_CENTER);
+			m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
 
 			//构造提示
 			TCHAR szString[512]=TEXT("");
@@ -293,9 +291,7 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 		case IDI_CONNECT_CORRESPOND:	//连接协调
 			{
 				//发起连接 TODONOWW
-                CWHIniData IniData;
-                tagServerParameter temp = IniData.GetServerInfo();
-                m_pITCPSocketService->Connect(temp.szCorrspAddr, PORT_CENTER);
+                m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
 
 				//构造提示
 				TCHAR szString[512]=TEXT("");

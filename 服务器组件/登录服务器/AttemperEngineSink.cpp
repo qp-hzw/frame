@@ -142,9 +142,7 @@ bool CAttemperEngineSink::OnEventControl(WORD wIdentifier, VOID * pData, WORD wD
 	case CT_CONNECT_CORRESPOND:		//连接协调		//lee：加载列表的返回结果，会触发这个消息
 		{
 			//发起连接
-            CWHIniData IniData;
-            tagServerParameter temp = IniData.GetServerInfo();
-			m_pITCPSocketService->Connect(temp.szCorrspAddr, PORT_CENTER);
+			m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
 
 			//构造提示
 			TCHAR szString[512]=TEXT("");
@@ -182,9 +180,7 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 		{
 			m_pITimerEngine->KillTimer(IDI_CONNECT_CORRESPOND);
 			//发起连接
-            CWHIniData IniData;
-            tagServerParameter temp = IniData.GetServerInfo();
-			m_pITCPSocketService->Connect(temp.szCorrspAddr, PORT_CENTER);
+			m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
 
 			//构造提示
 			TCHAR szString[512]=TEXT("");

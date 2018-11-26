@@ -7,8 +7,9 @@
 //test服务器 -- 本地测试服务器
 
 const  BYTE		_MYSTERY				=		 0;				          //test服务器	
-const  TCHAR	    _LOGON_SERVER_ADDR[32]	=		 TEXT("192.168.5.94");	  //登录服 node = 1
-const  TCHAR	   _GAME_SERVER_ADDR[32]	=		 TEXT("192.168.5.94");	  //游戏服 node = 1
+const  TCHAR    _CPD_SERVER_ADDR[32]    =        TEXT("192.168.5.94");	  //协调服
+const  TCHAR	_LOGON_SERVER_ADDR[32]	=		 TEXT("192.168.5.94");	  //登录服 node = 1
+const  TCHAR	_GAME_SERVER_ADDR[32]	=		 TEXT("192.168.5.94");	  //游戏服 node = 1
 
 
 /***********************************************11111111111111********************************************/
@@ -24,6 +25,7 @@ const  TCHAR	_GAME_SERVER_ADDR[32]	=		 TEXT("47.99.46.57");		 //游戏服 node = 1
 /*
 //聚贤庄服务器
 const  BYTE		_MYSTERY				=		 2;				   //聚贤庄
+const  TCHAR    _CPD_SERVER_ADDR[32]    =        TEXT("120.79.45.100");		 //协调服
 const  TCHAR	_LOGON_SERVER_ADDR[32]	=		 TEXT("116.62.149.123");	//登录服 node = 1
 const  TCHAR	_GAME_SERVER_ADDR[32]	=		 TEXT("121.43.164.10");		//游戏服 node = 1
 //const  TCHAR	_GAME_SERVER_ADDR[32]	=		 TEXT("120.27.238.146");	//游戏服 node = 2
