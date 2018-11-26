@@ -184,7 +184,7 @@ bool CDlgServerWizardItem1::SaveInputInfo()
 	m_pDlgServerWizard->SetWizardParameter(m_GameServiceManager.GetInterface(),NULL, pGameGameItem->szGameName);
 
 	//配置模块（加载dll）之后, 进行版本校验  子游戏中的框架版本 与 真实的框架版本
-	DWORD realFrameVersion = Get_Framework_Version();
+	DWORD realFrameVersion = Get_Framework_Version(PLATFORM_VERSION);
 	DWORD subGameFrameVersion = m_pGameServiceAttrib->dwSubGameVersion;
 	if ( 0 != Compare_Dll_Framework(realFrameVersion, subGameFrameVersion))
 	{

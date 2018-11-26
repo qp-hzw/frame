@@ -2035,7 +2035,7 @@ bool CAttemperEngineSink::On_CMD_LC_Logon_RepeatLogon(DWORD UserID, DWORD dwCont
 //升级提示（版本校验）
 bool CAttemperEngineSink::On_CMD_LC_Logon_UpdateNotify(DWORD dwVersionCheck, DWORD dwSocketID)
 {
-	DWORD serverFrameVersion = Get_Framework_Version();  //服务端 frame 版本
+	DWORD serverFrameVersion = Get_Framework_Version(PLATFORM_VERSION);  //服务端 frame 版本
 	DWORD clientFrameVersion = dwVersionCheck; //client  Hall 版本
 
 	

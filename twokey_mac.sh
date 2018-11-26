@@ -67,9 +67,7 @@ cp 服务器组件/游戏服务/GameServiceHead.h ${g_SubDependence}/${g_Sub_gam
 cat ${g_FrameDependence}/${g_ReadMe} > ${g_SubDependence}/${g_ReadMe}
 
 echo -e "\n\nSubGame依赖项 自动化脚本" >> ${g_SubDependence}/${g_ReadMe}
-sed -n '/CODE_VERSION:/p' ${g_SubDependence}/${g_Sub_global}/Version.h >> ${g_SubDependence}/${g_ReadMe}
-sed -n '/KERNEL_VERSION:/p' ${g_SubDependence}/${g_Sub_global}/Version.h >> ${g_SubDependence}/${g_ReadMe}
-sed -n '/PLATFORM_VERSION:/p' ${g_SubDependence}/${g_Sub_global}/Version.h >> ${g_SubDependence}/${g_ReadMe}
+sed -n '/PLATFORM_VERSION:/p' ${g_CodePath}/全局定义/Version.h >> ${g_SubDependence}/${g_ReadMe}
 echo "author:  " >> ${g_SubDependence}/${g_ReadMe}
 echo "WangChengQing    " >>  ${g_SubDependence}/${g_ReadMe}
 echo "date:  " >> ${g_SubDependence}/${g_ReadMe}

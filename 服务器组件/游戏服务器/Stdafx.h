@@ -60,6 +60,7 @@
 
 //配置文件
 #include "//www.45quyou.com/share/依赖项/全局定义/Version.h"
+#include "../../全局定义/Version.h"
 
 /*** Other ***/
 //消息定义
