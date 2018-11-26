@@ -8,4 +8,5 @@ Debug_Unicode
 发布组件/
 *.lib
 *.exp
-子依赖项/
+子依赖项/.DS_Store
+.DS_Store
