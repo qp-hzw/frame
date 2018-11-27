@@ -186,6 +186,9 @@ bool CDlgServerWizardItem1::SaveInputInfo()
 	//配置模块（加载dll）之后, 进行版本校验  子游戏中的框架版本 与 真实的框架版本
 	DWORD realFrameVersion = Get_Framework_Version(PLATFORM_VERSION);
 	DWORD subGameFrameVersion = m_pGameServiceAttrib->dwSubGameVersion;
+	
+	//TODONOW 暂时取消这个判断 
+	/*
 	if ( 0 != Compare_Dll_Framework(realFrameVersion, subGameFrameVersion))
 	{
 		TCHAR pszString2[512]=TEXT("");
@@ -196,6 +199,7 @@ bool CDlgServerWizardItem1::SaveInputInfo()
 
 		return false; 
 	}
+	*/
 
 	//m_pGameServiceOption第一次赋值, 数据来源于数据库
 	m_pGameServiceOption->dwServerID = GetServerID();
