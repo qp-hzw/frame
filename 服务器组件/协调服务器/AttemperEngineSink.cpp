@@ -204,7 +204,7 @@ bool CAttemperEngineSink::OnTCPNetworkMainRegister(WORD wSubCmdID, VOID * pData,
 			//消息定义
 			STR_CPR_LP_REGISTER_LOGON * pCPR=(STR_CPR_LP_REGISTER_LOGON *)pData;
 
-			//有效判断		//lee：登陆服地址和名字，只在这里用到了
+			//有效判断
 			if (pCPR->szServerAddr[0]==0)
 			{
 				//变量定义

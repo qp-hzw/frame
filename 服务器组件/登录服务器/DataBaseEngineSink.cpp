@@ -50,6 +50,11 @@ bool CDataBaseEngineSink::OnDataBaseEngineStart(IUnknownEx * pIUnknownEx)
 
 	try
 	{
+		//构造提示
+		TCHAR szString[512]=TEXT("");
+		_sntprintf_s(szString,CountArray(szString),TEXT("连接数据库 TEST = %d"), _TEST);
+		CTraceService::TraceString(szString,TraceLevel_Normal);
+
 		//设置连接
 		m_PlatformDBModule->SetConnectionInfo(1, _TEST);
 		m_AccountsDBModule->SetConnectionInfo(2, _TEST);

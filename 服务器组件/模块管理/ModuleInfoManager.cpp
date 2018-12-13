@@ -198,33 +198,6 @@ bool CModuleInfoManager::LoadGameModuleInfo(CGameItemMap & ModuleInfoBuffer)
 	//连接数据库
 	try
 	{
-		/*
-		//TODONOW 获取服务器IP地址 暂时写在这里，之后房间通用类中  added by WangChengQing 2018/5/19
-		string addr;
-		char name[256];
-		int getNameRet=gethostname(name,sizeof(name));
-		hostent *host=gethostbyname(name);
-
-		if(NULL == host){
-			return  true;
-		}
-
-		in_addr *pAddr=(in_addr*)*host->h_addr_list;
-
-		for(int i=0;i<(strlen((char*)*host->h_addr_list)-strlen(host->h_name) )/4 && pAddr;i++){
-			addr=inet_ntoa(pAddr[i]);
-			cout<<addr.c_str()<<endl;
-			break;
-		}
-		
-		TCHAR szIPAddr[32];  
-#ifdef UNICODE  
- _stprintf_s(szIPAddr, 32, _T("%S"), addr.c_str());//%S宽字符  
-#else  
- _stprintf_s(szIPAddr, 32, _T("%s"), addr.c_str());//%s单字符  
-#endif 
- */
-
 		//设置连接
 		PlatformDBModule->SetConnectionInfo(1, _TEST);
 
