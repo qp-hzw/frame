@@ -81,7 +81,7 @@ BEGIN
             VALUE "FileDescription", "棋牌游科技"
             VALUE "FileVersion", "4.5.0.0"
             VALUE "InternalName", "MatchService.dll"
-            VALUE "LegalCopyright", "www.45quyou.com 版权所有。"
+            VALUE "LegalCopyright", "武汉四五趣游科技有限公司 版权所有。"
             VALUE "OriginalFilename", "MatchService.dll"
             VALUE "ProductName", "棋牌游斗地主服务端"
             VALUE "ProductVersion", "4.5.0.0"

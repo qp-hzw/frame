@@ -107,11 +107,11 @@ bool CDataBaseEngineSink::OnDataBaseEngineStart(IUnknownEx * pIUnknownEx)
 	{
 		//一个GameID对应一个服务器, 一个服务器只会开启一个进程, 所以这边只会有一个
 		//设置连接
-		m_PlatformDBModule->SetConnectionInfo(1);
+		m_PlatformDBModule->SetConnectionInfo(1, _TEST);
 		//设置连接
-		m_GameDBModule->SetConnectionInfo(3);
+		m_GameDBModule->SetConnectionInfo(3, _TEST);
 		//设置连接
-		m_TreasureDBModule->SetConnectionInfo(3);
+		m_TreasureDBModule->SetConnectionInfo(3, _TEST);
 		
 
 		//发起连接

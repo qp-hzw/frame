@@ -3,8 +3,6 @@
 #include "ControlPacket.h"
 #include "AttemperEngineSink.h"
 
-#include "//www.45quyou.com/share\依赖项\服务核心\WHEncrypt.h"
-#include "..\..\消息定义\STR_CMD_LogonServer.h"
 //////////////////////////////////////////////////////////////////////////////////
 
 //构造函数

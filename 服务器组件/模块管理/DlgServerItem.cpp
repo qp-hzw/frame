@@ -2,9 +2,6 @@
 #include "Resource.h"
 #include "DlgServerItem.h"
 
-#include "//www.45quyou.com/share\依赖项\内核引擎\TraceService.h"
-#include "//www.45quyou.com/share\依赖项\服务核心\WHService.h"
-
 //////////////////////////////////////////////////////////////////////////////////
 
 //列表属性

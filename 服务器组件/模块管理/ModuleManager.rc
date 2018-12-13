@@ -82,7 +82,7 @@ BEGIN
             VALUE "FileDescription", "模块管理"
             VALUE "FileVersion", "6, 6, 0, 3"
             VALUE "InternalName", "ModuleManager.dll"
-            VALUE "LegalCopyright", "www.45quyou.com 版权所有。"
+            VALUE "LegalCopyright", "武汉四五趣游科技有限公司 版权所有。"
             VALUE "OriginalFilename", "ModuleManager.dll"
             VALUE "ProductName", "模块管理"
             VALUE "ProductVersion", "6, 6, 0, 3"
@@ -122,7 +122,7 @@ BEGIN
     LTEXT           "游戏名字：",IDC_STATIC,189,18,41,8
     LTEXT           "子游戏版本：",IDC_STATIC,181,33,49,8
     LTEXT           "版权所有：",IDC_STATIC,24,68,41,8
-    LTEXT           "武汉四五趣游网络科技有限公司  www.45quyou.com  027-59766689",IDC_STATIC,76,68,257,11
+    LTEXT           "武汉四五趣游网络科技有限公司 ",IDC_STATIC,76,68,257,11
 END
 
 IDD_SERVER_WIZARD_2 DIALOGEX 0, 0, 345, 254
@@ -135,7 +135,7 @@ BEGIN
     LTEXT           "房间名字：",IDC_STATIC,45,24,41,8
     GROUPBOX        "常规配置：",IDC_STATIC,6,7,333,136
     GROUPBOX        "使用说明：",IDC_STATIC,5,157,333,90
-    LTEXT           "请在官方指导下使用, 详见www.45quyou.com",IDC_STATIC,41,188,278,20
+    LTEXT           "请在官方指导下使用",IDC_STATIC,41,188,278,20
 END
 
 IDD_SERVER_WIZARD_1 DIALOGEX 0, 0, 346, 225

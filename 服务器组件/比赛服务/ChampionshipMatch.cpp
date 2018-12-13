@@ -3,9 +3,6 @@
 #include <cmath>
 
 
-#include "//www.45quyou.com/share\ÒÀÀµÏî\ÄÚºËÒıÇæ\TraceService.h"
-
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE

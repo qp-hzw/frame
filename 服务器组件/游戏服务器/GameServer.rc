@@ -91,7 +91,7 @@ BEGIN
             VALUE "FileDescription", "游戏服务器"
             VALUE "FileVersion", "4.5.0.0"
             VALUE "InternalName", "GameServer.exe"
-            VALUE "LegalCopyright", "www.45quyou.com 版权所有。"
+            VALUE "LegalCopyright", "武汉四五趣游网络科技有限公司 版权所有。"
             VALUE "OriginalFilename", "GameServer.exe"
             VALUE "ProductName", "游戏服务器"
             VALUE "ProductVersion", "4.5.0.0"

@@ -107,7 +107,7 @@ BEGIN
             VALUE "FileDescription", "登录服务器"
             VALUE "FileVersion", "4.5.0.0"
             VALUE "InternalName", "LogonServer.exe"
-            VALUE "LegalCopyright", "www.45quyou.com 版权所有。"
+            VALUE "LegalCopyright", "武汉四五趣游网络科技 版权所有。"
             VALUE "OriginalFilename", "LogonServer.exe"
             VALUE "ProductName", "登录服务器"
             VALUE "ProductVersion", "4.5.0.0"

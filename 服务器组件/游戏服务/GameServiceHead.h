@@ -11,8 +11,8 @@
     #include "..\..\消息定义\STR_CMD_GameServer.h"
 
 	//组件定义
-	#include "//www.45quyou.com/share\依赖项\服务核心\ServiceCoreHead.h"
-	#include "//www.45quyou.com/share\依赖项\内核引擎\KernelEngineHead.h"
+	#include "../../../../share\依赖项\服务核心\ServiceCoreHead.h"
+	#include "../../../../share\依赖项\内核引擎\KernelEngineHead.h"
 
 
 #else

@@ -3,12 +3,6 @@
 #include "DlgServerWizard.h"
 #include ".\dlgserverwizard.h"
 
-#include "//www.45quyou.com/share\依赖项\服务核心\WHService.h"
-#include "//www.45quyou.com/share\依赖项\内核引擎\TraceService.h"
-#include "//www.45quyou.com/share\依赖项\服务核心\WHIniData.h"
-#include "..\..\全局定义\Struct.h"
-#include "//www.45quyou.com/share\依赖项\服务核心\WHEncrypt.h"
-
 #pragma region DECLARE_MESSAGE_MAP
 BEGIN_MESSAGE_MAP(CDlgServerWizardItem, CDialog)
 	ON_WM_SIZE()

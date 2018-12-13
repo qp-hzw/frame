@@ -5,12 +5,6 @@
 
 #include "..\游戏服务器\DataBasePacket.h"
 
-
-#include "//www.45quyou.com/share\依赖项\内核引擎\TraceService.h"
-
-#include "//www.45quyou.com/share\依赖项\服务核心\WHIniData.h"
-#include "//www.45quyou.com/share\依赖项\服务核心\WHService.h"
-#include "//www.45quyou.com/share\依赖项\服务核心\WHService.h"
 //////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG

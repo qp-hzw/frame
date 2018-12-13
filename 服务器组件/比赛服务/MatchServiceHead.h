@@ -3,6 +3,8 @@
 
 //////////////////////////////////////////////////////////////////////////////////
 
+#include "stdafx.h"
+
 //消息定义
 #include "..\..\消息定义\CMD_Commom.h"
 #include "..\..\消息定义\CMD_Correspond.h"
@@ -10,8 +12,7 @@
 
 //平台文件
 #include "..\..\服务器组件\游戏服务\GameServiceHead.h"
-#include "//www.45quyou.com/share\依赖项\服务核心\ServiceCoreHead.h"
-#include "//www.45quyou.com/share\依赖项\内核引擎\KernelEngineHead.h"
+
 
 //////////////////////////////////////////////////////////////////////////////////
 //导出定义

@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "Stdafx.h"
 #include <vector>
 #include <string>
 #include <algorithm> 
@@ -7,12 +7,6 @@
 #include "LogicTraceHelper.h"
 #include "RankManager.h"
 
-
-#include "//www.45quyou.com/share\依赖项\内核引擎\TraceService.h"
-#include "//www.45quyou.com/share\依赖项\服务核心\WHService.h"
-#include "//www.45quyou.com/share\依赖项\全局定义\Array.h"
-#include "..\..\全局定义\Define.h"
-#include "..\..\消息定义\STR_CMD_GameServer.h"
 
 //构造函数
 CDataBaseEngineSink::CDataBaseEngineSink()
@@ -57,9 +51,9 @@ bool CDataBaseEngineSink::OnDataBaseEngineStart(IUnknownEx * pIUnknownEx)
 	try
 	{
 		//设置连接
-		m_PlatformDBModule->SetConnectionInfo(1);
-		m_AccountsDBModule->SetConnectionInfo(2);
-		m_TreasureDBModule->SetConnectionInfo(3);
+		m_PlatformDBModule->SetConnectionInfo(1, _TEST);
+		m_AccountsDBModule->SetConnectionInfo(2, _TEST);
+		m_TreasureDBModule->SetConnectionInfo(3, _TEST);
 
 		//发起连接
 		m_AccountsDBModule->OpenConnection();

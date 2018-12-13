@@ -40,24 +40,24 @@
 //包含文件
 /***全局文件***/
 //定义文件
-#include "//www.45quyou.com/share/依赖项/全局定义/Macro.h"
-#include "//www.45quyou.com/share/依赖项/全局定义/Define.h"
+#include "../../../../share/依赖项/全局定义/Macro.h"
+#include "../../../../share/依赖项/全局定义/Define.h"
 #include "../../全局定义/Define.h"
 
 //结构文件
 #include "../../全局定义/Struct.h"
-#include "//www.45quyou.com/share/依赖项/全局定义/Packet.h"
+#include "../../../../share/依赖项/全局定义/Packet.h"
 #include "../../全局定义/Property.h"
 
 //模板文件
-#include "//www.45quyou.com/share/依赖项/全局定义/Array.h"
-#include "//www.45quyou.com/share/依赖项/全局定义/Module.h"
-#include "//www.45quyou.com/share/依赖项/全局定义/PacketAide.h"
+#include "../../../../share/依赖项/全局定义/Array.h"
+#include "../../../../share/依赖项/全局定义/Module.h"
+#include "../../../../share/依赖项/全局定义/PacketAide.h"
 #include "../../全局定义/ServerRule.h"
 #include "../../全局定义/RightDefine.h"
 
 //配置文件
-#include "//www.45quyou.com/share/依赖项/全局定义/Version.h"
+#include "../../../../share/依赖项/全局定义/Version.h"
 #include "../../全局定义/Version.h"
 
 
@@ -65,26 +65,29 @@
 //平台定义
 #include "..\..\消息定义\CMD_Correspond.h"
 #include "..\..\消息定义\CMD_LogonServer.h"
+#include "..\..\消息定义\CMD_GameServer.h"
 
 //组件定义
-#include "//www.45quyou.com/share\依赖项\服务核心\ServiceCoreHead.h"
-#include "//www.45quyou.com/share\依赖项\服务核心\WHIniData.h"
-#include "//www.45quyou.com/share\依赖项\服务核心\WHDataLocker.h"
+#include "../../../../share\依赖项\服务核心\ServiceCoreHead.h"
+#include "../../../../share\依赖项\服务核心\WHIniData.h"
+#include "../../../../share\依赖项\服务核心\WHDataLocker.h"
+#include "../../../../share\依赖项\服务核心\WHDataQueue.h"
+#include "../../../../share\依赖项\服务核心\WHService.h"
 
-#include "//www.45quyou.com/share\依赖项\内核引擎\KernelEngineHead.h"
-#include "//www.45quyou.com/share\依赖项\内核引擎\DataBaseAide.h"
-#include "//www.45quyou.com/share\依赖项\内核引擎\TraceService.h"
+#include "../../../../share\依赖项\内核引擎\KernelEngineHead.h"
+#include "../../../../share\依赖项\内核引擎\DataBaseAide.h"
+#include "../../../../share\依赖项\内核引擎\TraceService.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 //链接代码
 
 #ifndef _DEBUG
-	#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/ServiceCore.lib")
-	#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/KernelEngine.lib")
+	#pragma comment (lib,"../../../../share/依赖项/链接库/ServiceCore.lib")
+	#pragma comment (lib,"../../../../share/依赖项/链接库/KernelEngine.lib")
 #else
 
-	#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/ServiceCoreD.lib")
-	#pragma comment (lib,"//www.45quyou.com/share/依赖项/链接库/KernelEngineD.lib")
+	#pragma comment (lib,"../../../../share/依赖项/链接库/ServiceCoreD.lib")
+	#pragma comment (lib,"../../../../share/依赖项/链接库/KernelEngineD.lib")
 #endif
 
 //////////////////////////////////////////////////////////////////////////////////

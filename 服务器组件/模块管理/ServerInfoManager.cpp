@@ -1,11 +1,6 @@
 #include "StdAfx.h"
 #include "ServerInfoManager.h"
 
-#include "//www.45quyou.com/share\依赖项\内核引擎\DataBaseAide.h"
-#include "//www.45quyou.com/share\依赖项\内核引擎\TraceService.h"
-#include "//www.45quyou.com/share\依赖项\服务核心\WHService.h"
-#include "//www.45quyou.com/share\依赖项\服务核心\WHIniData.h"
-
 //////////////////////////////////////////////////////////////////////////////////
 
 //构造函数
@@ -548,7 +543,7 @@ bool CServerInfoManager::ConnectPlatformDB(CDataBaseHelper & PlatformDBModule)
 	}
 
 	//设置连接
-	PlatformDBModule->SetConnectionInfo(1);
+	PlatformDBModule->SetConnectionInfo(1, _TEST);
 
 	//发起连接
 	PlatformDBModule->OpenConnection();

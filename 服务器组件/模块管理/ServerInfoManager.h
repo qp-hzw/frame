@@ -5,7 +5,6 @@
 
 #include "AfxTempl.h"
 #include "ModuleManagerHead.h"
-#include "//www.45quyou.com/share\ÒÀÀµÏî\ÄÚºËÒıÇæ\DataBaseAide.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 

@@ -2,9 +2,6 @@
 #include "Resource.h"
 #include "DlgLogonServer.h"
 
-
-#include "//www.45quyou.com/share\ÒÀÀµÏî\ÄÚºËÒýÇæ\TraceService.h"
-
 //////////////////////////////////////////////////////////////////////////////////
 
 BEGIN_MESSAGE_MAP(CLogonServerDlg, CDialog)
