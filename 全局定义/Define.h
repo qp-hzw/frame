@@ -10,10 +10,9 @@ const BYTE    _TEST						=		1;							//是否测试 0不是  1是
 
 //聚贤庄服务器
 const  BYTE		_MYSTERY				=		 2;				   //聚贤庄
-const  TCHAR    _CPD_SERVER_ADDR[32]    =        TEXT("120.27.235.52");		//协调服
-const  TCHAR	_LOGON_SERVER_ADDR[32]	=		 TEXT("120.27.235.52");	//登录服 node = 1
+const  TCHAR    _CPD_SERVER_ADDR[32]    =        TEXT("120.27.235.52");		//协调服 -- 只能手动指定
+const  TCHAR	_LOGON_SERVER_ADDR[32]	=		 TEXT("120.27.235.52");		//登录服 node = 1
 const  TCHAR	_GAME_SERVER_ADDR[32]	=		 TEXT("120.27.235.52");		//游戏服 node = 1
-//const  TCHAR	_GAME_SERVER_ADDR[32]	=		 TEXT("120.27.238.146");	//游戏服 node = 2
 
 
 /***********************************************协调服 登陆服  游戏服 端口********************************************/

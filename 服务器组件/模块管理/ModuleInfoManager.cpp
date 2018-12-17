@@ -1,105 +1,106 @@
-#include "StdAfx.h"
+ï»¿#include "StdAfx.h"
 #include "ModuleInfoManager.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 #include <WinSock2.h>
 #include <iostream>
+#include <regex> 
 using namespace std;
 //#pragma comment(lib, "ws2_32.lib");
 
 
 //////////////////////////////////////////////////////////////////////////////////
 
-//¹¹Ôìº¯Êı
+//æ„é€ å‡½æ•°
 CGameItemMap::CGameItemMap()
 {
 }
 
-//Îö¹¹º¯Êı
+//ææ„å‡½æ•°
 CGameItemMap::~CGameItemMap()
 {
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	DWORD wModuleID=0;
 	tagGameGame * pGameGameItem=NULL;
 	POSITION Position=m_GameModuleInfoMap.GetStartPosition();
 
-	//É¾³ıË÷Òı
+	//åˆ é™¤ç´¢å¼•
 	while (Position!=NULL)
 	{
 		m_GameModuleInfoMap.GetNextAssoc(Position,wModuleID,pGameGameItem);
 		SafeDelete(pGameGameItem);
 	}
 
-	//É¾³ıÊı×é
+	//åˆ é™¤æ•°ç»„
 	for (INT_PTR i=0;i<m_GameModuleInfoArray.GetCount();i++)
 	{
 		pGameGameItem=m_GameModuleInfoArray[i];
 		SafeDelete(pGameGameItem);
 	}
 
-	//É¾³ıÒıÓÃ
+	//åˆ é™¤å¼•ç”¨
 	m_GameModuleInfoMap.RemoveAll();
 	m_GameModuleInfoArray.RemoveAll();
 
 	return;
 }
 
-//ÖØÖÃÊı¾İ
+//é‡ç½®æ•°æ®
 bool CGameItemMap::ResetModuleInfo()
 {
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	DWORD wModuleID=0;
 	tagGameGame * pGameGameItem=NULL;
 	POSITION Position=m_GameModuleInfoMap.GetStartPosition();
 
-	//É¾³ı¶ÔÏó
+	//åˆ é™¤å¯¹è±¡
 	while (Position!=NULL)
 	{
 		m_GameModuleInfoMap.GetNextAssoc(Position,wModuleID,pGameGameItem);
 		m_GameModuleInfoArray.Add(pGameGameItem);
 	}
 
-	//É¾³ıË÷Òı
+	//åˆ é™¤ç´¢å¼•
 	m_GameModuleInfoMap.RemoveAll();
 
 	return true;
 }
 
-//É¾³ıÊı¾İ
+//åˆ é™¤æ•°æ®
 bool CGameItemMap::DeleteModuleInfo(DWORD wModuleID)
 {
-	//²éÕÒÀàĞÍ
+	//æŸ¥æ‰¾ç±»å‹
 	tagGameGame * pGameGameItem=NULL;
 	if (m_GameModuleInfoMap.Lookup(wModuleID,pGameGameItem)==FALSE) return false;
 
-	//É¾³ıÊı¾İ
+	//åˆ é™¤æ•°æ®
 	m_GameModuleInfoMap.RemoveKey(wModuleID);
 	m_GameModuleInfoArray.Add(pGameGameItem);
 
-	//ÉèÖÃ±äÁ¿
+	//è®¾ç½®å˜é‡
 	ZeroMemory(pGameGameItem,sizeof(tagGameGame));
 
 	return true;
 }
 
-//²åÈëÊı¾İ
+//æ’å…¥æ•°æ®
 bool CGameItemMap::InsertModuleInfo(tagGameGame * pGameGameItem)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	ASSERT(pGameGameItem!=NULL);
 	if (pGameGameItem==NULL) return false;
 
-	//²éÕÒÏÖ´æ
+	//æŸ¥æ‰¾ç°å­˜
 	DWORD wGameID=pGameGameItem->wGameID;
 	tagGameGame * pGameModuleInsert=SearchModuleInfo(wGameID);
 
-	//´´½¨ÅĞ¶Ï
+	//åˆ›å»ºåˆ¤æ–­
 	if (pGameModuleInsert==NULL)
 	{
-		//´´½¨¶ÔÏó
+		//åˆ›å»ºå¯¹è±¡
 		pGameModuleInsert=CreateModuleInfo();
 
-		//½á¹ûÅĞ¶Ï
+		//ç»“æœåˆ¤æ–­
 		if (pGameModuleInsert==NULL)
 		{
 			ASSERT(FALSE);
@@ -107,20 +108,20 @@ bool CGameItemMap::InsertModuleInfo(tagGameGame * pGameGameItem)
 		}
 	}
 
-	//ÉèÖÃÊı¾İ
+	//è®¾ç½®æ•°æ®
 	m_GameModuleInfoMap[wGameID]=pGameModuleInsert;
 	CopyMemory(pGameModuleInsert,pGameGameItem,sizeof(tagGameGame));
 
 	return true;
 }
 
-//»ñÈ¡ÊıÄ¿
+//è·å–æ•°ç›®
 DWORD CGameItemMap::GetModuleInfoCount()
 {
 	return (DWORD)(m_GameModuleInfoMap.GetCount());
 }
 
-//²éÕÒÊı¾İ
+//æŸ¥æ‰¾æ•°æ®
 tagGameGame * CGameItemMap::SearchModuleInfo(DWORD wModuleID)
 {
 	tagGameGame * pGameGameItem=NULL;
@@ -128,13 +129,13 @@ tagGameGame * CGameItemMap::SearchModuleInfo(DWORD wModuleID)
 	return pGameGameItem;
 }
 
-//´´½¨¶ÔÏó
+//åˆ›å»ºå¯¹è±¡
 tagGameGame * CGameItemMap::CreateModuleInfo()
 {
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	tagGameGame * pGameGameItem=NULL;
 
-	//´´½¨¶ÔÏó
+	//åˆ›å»ºå¯¹è±¡
 	try
 	{
 		INT_PTR nArrayCount=m_GameModuleInfoArray.GetCount();
@@ -151,7 +152,7 @@ tagGameGame * CGameItemMap::CreateModuleInfo()
 	}
 	catch (...) { return false; }
 
-	//ÉèÖÃ±äÁ¿
+	//è®¾ç½®å˜é‡
 	ZeroMemory(pGameGameItem,sizeof(tagGameGame));
 
 	return pGameGameItem;
@@ -159,87 +160,165 @@ tagGameGame * CGameItemMap::CreateModuleInfo()
 
 //////////////////////////////////////////////////////////////////////////////////
 
-//¹¹Ôìº¯Êı
+//æ„é€ å‡½æ•°
 CModuleInfoManager::CModuleInfoManager()
 {
 }
 
-//Îö¹¹º¯Êı
+//ææ„å‡½æ•°
 CModuleInfoManager::~CModuleInfoManager()
 {
 }
 
-//×¢²áÄ£¿é
+//æ³¨å†Œæ¨¡å—
 bool CModuleInfoManager::RegisterGameModule(LPCTSTR pszModuleName)
 {
 	return true;
 }
 
-//×¢ÏúÄ£¿é
+//æ³¨é”€æ¨¡å—
 bool CModuleInfoManager::UnRegisterGameModule(LPCTSTR pszModuleName)
 {
 	return true;
 }
 
-//¼ÓÔØÄ£¿é
+int GetInternetIP( )
+{
+	TCHAR szInernet_ip[32] = TEXT("0.0.0.0");
+	
+	//ä¸‹è½½è„šæœ¬
+	TCHAR szTempPath[_MAX_PATH] = {0}, szTempFile[MAX_PATH] = {0};
+	GetTempPath(MAX_PATH, szTempPath);
+
+	UINT nResult = GetTempFileName(szTempPath, _T("~ex"), 0, szTempFile);
+	int ret=URLDownloadToFile(NULL,_T("http://www.net.cn/static/customercare/yourip.asp"),szTempFile,BINDF_GETNEWESTVERSION,NULL);
+	if (ret == S_FALSE)
+		return 1;
+
+	//åˆ¤æ–­è„šæœ¬æ˜¯å¦ä¸‹è½½æˆåŠŸ
+	FILE *fp;
+	if (_wfopen_s(&fp,szTempFile,_T("rb"))!=0)
+		return 2;
+
+	fseek(fp,0,SEEK_END);//å¾—åˆ°æ–‡ä»¶å¤§å°
+	int ilength=ftell(fp);
+	fseek(fp,0,SEEK_SET);
+
+
+	//è¯»å–è„šæœ¬ä¸­çš„ipåœ°å€
+	if(ilength>0)
+	{ 
+		std::string buffer;
+		buffer.resize(ilength);
+		fread(&buffer[0],sizeof(TCHAR),ilength,fp);
+		fclose(fp);
+		DeleteFile(_T("ip.ini"));
+		
+
+		//std::string pattern = "((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])"; // fixed telephone 
+		std::string pattern = "120";
+		std::regex re (pattern);
+
+		std::match_results<std::string::iterator> results1;
+
+		CTraceService::TraceString(TEXT("é•¿åº¦å¤§äº0"), TraceLevel_Normal);
+
+		if(std::regex_match(buffer, re))
+		{
+			CTraceService::TraceString(TEXT("æ‰¾åˆ°2"), TraceLevel_Normal);
+		}
+
+		if(std::regex_match(buffer.begin(), buffer.end(), results1, re))
+		{
+			CTraceService::TraceString(TEXT("æ‰¾åˆ°1"), TraceLevel_Normal);
+			std::match_results<std::string::iterator>::const_iterator iter;
+			for (iter = results1.begin(); iter != results1.end(); iter++)
+			{
+				CTraceService::TraceString(TEXT("æ‰¾åˆ°"), TraceLevel_Normal);
+				MultiByteToWideChar(CP_ACP, 0,  &(iter->str())[0], -1, szInernet_ip, 32);
+				CTraceService::TraceString(szInernet_ip, TraceLevel_Normal);
+
+				//std::cout << iter->length() << ": " << iter->str() << std::endl;
+			}
+
+			return 0;
+		}
+		else
+		{
+			return 3;
+		}
+	}
+	else
+	{
+		fclose(fp);
+		return 4;
+	}
+
+	return 5;
+}
+
+
+//åŠ è½½æ¨¡å—
 bool CModuleInfoManager::LoadGameModuleInfo(CGameItemMap & ModuleInfoBuffer)
 {
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	CDataBaseAide PlatformDBAide;
 	CDataBaseHelper PlatformDBModule;
 
-	//´´½¨¶ÔÏó
+	GetInternetIP();
+
+	//åˆ›å»ºå¯¹è±¡
 	if ((PlatformDBModule.GetInterface()==NULL)&&(PlatformDBModule.CreateInstance()==false))
 	{
-		AfxMessageBox(TEXT("LoadGameModuleInfo ´´½¨ PlatformDBModule ¶ÔÏóÊ§°Ü"),MB_ICONERROR);
+		AfxMessageBox(TEXT("LoadGameModuleInfo åˆ›å»º PlatformDBModule å¯¹è±¡å¤±è´¥"),MB_ICONERROR);
 		return false;
 	}
 
-	//Á¬½ÓÊı¾İ¿â
+	//è¿æ¥æ•°æ®åº“
 	try
 	{
-		//ÉèÖÃÁ¬½Ó
+		//è®¾ç½®è¿æ¥
 		PlatformDBModule->SetConnectionInfo(1, _TEST);
 
-		//·¢ÆğÁ¬½Ó
+		//å‘èµ·è¿æ¥
 		PlatformDBModule->OpenConnection();
 		PlatformDBAide.SetDataBase(PlatformDBModule.GetInterface());
 
-		//¶ÁÈ¡ÁĞ±í
+		//è¯»å–åˆ—è¡¨
 		PlatformDBAide.ResetParameter();
 		PlatformDBAide.AddParameter(TEXT("byMystery"), _MYSTERY);
 		PlatformDBAide.AddParameter(TEXT("IP"), _GAME_SERVER_ADDR);
-		CTraceService::TraceString(_GAME_SERVER_ADDR, TraceLevel_Normal);
+		//CTraceService::TraceString(_GAME_SERVER_ADDR, TraceLevel_Normal);
 		if (PlatformDBAide.ExecuteProcess(TEXT("GSP_GS_LoadGameGameItem"),true)==DB_SUCCESS)
 		{
-			//Çå¿ÕÁĞ±í
+			//æ¸…ç©ºåˆ—è¡¨
 			ModuleInfoBuffer.ResetModuleInfo();
 
-			//¶ÁÈ¡ÁĞ±í
+			//è¯»å–åˆ—è¡¨
 			while (PlatformDBModule->IsRecordsetEnd()==false)
 			{
-				//±äÁ¿¶¨Òå
+				//å˜é‡å®šä¹‰
 				tagGameGame GameModuleInfo;
 				ZeroMemory(&GameModuleInfo,sizeof(GameModuleInfo));
 
-				//Ä£¿éÊôĞÔ
+				//æ¨¡å—å±æ€§
 				GameModuleInfo.wGameID=PlatformDBAide.GetValue_DWORD(TEXT("GameID"));
 				PlatformDBAide.GetValue_String(TEXT("GameName"),GameModuleInfo.szGameName,CountArray(GameModuleInfo.szGameName));
 
-				//ÓÎÏ··şµØÖ·
+				//æ¸¸æˆæœåœ°å€
 				PlatformDBAide.GetValue_String(TEXT("GameServerAddr"),GameModuleInfo.szGameServerAddr,CountArray(GameModuleInfo.szGameServerAddr));
 
-				//ÓÎÏ·ÊôĞÔ
+				//æ¸¸æˆå±æ€§
 				PlatformDBAide.GetValue_String(TEXT("ServerDLLName"),GameModuleInfo.szDLLName,CountArray(GameModuleInfo.szDLLName));
 	
-				//±¾µØ°æ±¾
+				//æœ¬åœ°ç‰ˆæœ¬
 				LPCTSTR pszServerDLLName=GameModuleInfo.szDLLName;
 				CWHService::GetModuleVersion(pszServerDLLName,GameModuleInfo.dwNativeVersion);
 
-				//ÁĞ±í´¦Àí
+				//åˆ—è¡¨å¤„ç†
 				ModuleInfoBuffer.InsertModuleInfo(&GameModuleInfo);
 
-				//ÒÆ¶¯¼ÇÂ¼
+				//ç§»åŠ¨è®°å½•
 				PlatformDBModule->MoveToNext();
 			}	
 		}
@@ -248,28 +327,28 @@ bool CModuleInfoManager::LoadGameModuleInfo(CGameItemMap & ModuleInfoBuffer)
 	}
 	catch (IDataBaseException * pIException)
 	{
-		//´íÎóĞÅÏ¢
+		//é”™è¯¯ä¿¡æ¯
 		LPCTSTR pszDescribe=pIException->GetExceptionDescribe();
 		CTraceService::TraceString(pszDescribe,TraceLevel_Exception);
 
-		//´íÎóÌáÊ¾
+		//é”™è¯¯æç¤º
 		AfxMessageBox(pszDescribe,MB_ICONERROR);
 	}
 
 	return false;
 }
 
-//Ä£¿éÊôĞÔ
+//æ¨¡å—å±æ€§
 bool CModuleInfoManager::GetGameServiceAttrib(LPCTSTR pszModuleName, tagGameServiceAttrib & GameServiceAttrib)
 {
-	//ÉèÖÃ±äÁ¿
+	//è®¾ç½®å˜é‡
 	ZeroMemory(&GameServiceAttrib,sizeof(GameServiceAttrib));
 
-	//ÓÎÏ·Ä£¿é
+	//æ¸¸æˆæ¨¡å—
 	CGameServiceManagerHelper GameServiceManager;
 	GameServiceManager.SetModuleCreateInfo(pszModuleName,GAME_SERVICE_CREATE_NAME);
 
-	//¼ÓÔØÄ£¿é
+	//åŠ è½½æ¨¡å—
 	if (GameServiceManager.CreateInstance()==true)
 	{
 		GameServiceManager->GetServiceAttrib(GameServiceAttrib);
