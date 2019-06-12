@@ -217,7 +217,14 @@ bool CAttemperEngineSink::OnEventControl(WORD wIdentifier, VOID * pData, WORD wD
 	case CT_CONNECT_CORRESPOND:		//连接协调
 		{
 			//发起连接
-			m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
+			if(1 == _TEST)
+			{
+				m_pITCPSocketService->Connect(TEXT("127.0.0.1"), PORT_CENTER);
+			}
+			else
+			{
+				m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
+			}
 
 			//构造提示
 			TCHAR szString[512]=TEXT("");
@@ -291,8 +298,15 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 		case IDI_CONNECT_CORRESPOND:	//连接协调
 			{
 				//发起连接 TODONOWW
-                m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
-
+				if(1 == _TEST)
+				{
+					m_pITCPSocketService->Connect(TEXT("127.0.0.1"), PORT_CENTER);
+				}
+				else
+				{
+					m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
+				}
+ 
 				//构造提示
 				TCHAR szString[512]=TEXT("");
 				_sntprintf_s(szString,CountArray(szString),TEXT("正在连接协调服务器"));

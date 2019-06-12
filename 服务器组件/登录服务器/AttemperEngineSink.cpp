@@ -4,6 +4,11 @@
 #include "AttemperEngineSink.h"
 #include "RankManager.h"
 
+#include <WinSock2.h>
+#include <iostream>
+#include <regex> 
+using namespace std;
+
 //////////////////////////////////////////////////////////////////////////////////
 # pragma region 定时器
 //时间标识
@@ -137,7 +142,14 @@ bool CAttemperEngineSink::OnEventControl(WORD wIdentifier, VOID * pData, WORD wD
 	case CT_CONNECT_CORRESPOND:		//连接协调		//lee：加载列表的返回结果，会触发这个消息
 		{
 			//发起连接
-			m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
+			if(1 == _TEST)
+			{
+				m_pITCPSocketService->Connect(TEXT("127.0.0.1"), PORT_CENTER);
+			}
+			else
+			{
+				m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
+			}
 
 			//构造提示
 			TCHAR szString[512]=TEXT("");
@@ -175,7 +187,14 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 		{
 			m_pITimerEngine->KillTimer(IDI_CONNECT_CORRESPOND);
 			//发起连接
-			m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
+			if(1 == _TEST)
+			{
+				m_pITCPSocketService->Connect(TEXT("127.0.0.1"), PORT_CENTER);
+			}
+			else
+			{
+				m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
+			}
 
 			//构造提示
 			TCHAR szString[512]=TEXT("");
@@ -886,6 +905,63 @@ bool CAttemperEngineSink::OnEventTCPSocketShut(WORD wServiceID, BYTE cbShutReaso
 	return false;
 }
 
+//获取外网ip
+int GetInternetIP( TCHAR *szInernet_ip)
+{
+	//下载脚本
+	TCHAR szTempPath[_MAX_PATH] = {0}, szTempFile[MAX_PATH] = {0};
+	GetTempPath(MAX_PATH, szTempPath);
+
+	UINT nResult = GetTempFileName(szTempPath, _T("ex"), 0, szTempFile);
+	int ret=URLDownloadToFile(NULL,_T("http://www.net.cn/static/customercare/yourip.asp"),szTempFile,BINDF_GETNEWESTVERSION,NULL);
+	if (ret == S_FALSE)
+		return 1;
+
+	//判断脚本是否下载成功
+	FILE *fp;
+	if (_wfopen_s(&fp,szTempFile,_T("r"))!=0)
+		return 2;
+
+
+	fseek(fp,0,SEEK_END);//得到文件大小
+	int ilength=ftell(fp);
+	fseek(fp,0,SEEK_SET);
+
+
+	//读取脚本中的ip地址
+	if(ilength>0)
+	{ 
+		std::string buffer;
+		buffer.resize(ilength);
+		int iReadNum = fread(&buffer[0],sizeof(TCHAR),ilength,fp);
+		fclose(fp);
+		DeleteFile(szTempFile);
+
+		std::regex re ("(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})");
+ 
+		std::regex_iterator<std::string::const_iterator> begin(buffer.cbegin(), buffer.cend(), re);
+		for (auto iter = begin; iter != std::sregex_iterator(); iter++)
+		{
+			MultiByteToWideChar(CP_ACP, 0,  &(iter->str())[0], -1, szInernet_ip, 32);
+
+			//构造提示
+			TCHAR szDescribe[128]=TEXT("");
+			_sntprintf_s(szDescribe,CountArray(szDescribe),TEXT("外网IP: %s"),szInernet_ip);
+			//提示消息
+			CTraceService::TraceString(szDescribe,TraceLevel_Normal);
+			//std::cout << iter->length() << ": " << iter->str() << std::endl;
+		}
+	}
+	else
+	{
+		fclose(fp);
+		return 4;
+	}
+
+	return 5;
+}
+
+
 //连接事件		//内核里面处理逻辑，连接协调服之后内核会发送这个消息给登陆服
 bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 {
@@ -917,8 +993,17 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		STR_CPR_LP_REGISTER_LOGON CPR;
 		ZeroMemory(&CPR,sizeof(CPR));
 
-		//设置变量 todonow 改为在frame的define中 定义
-		lstrcpyn(CPR.szServerAddr,_LOGON_SERVER_ADDR ,CountArray(CPR.szServerAddr));
+		//设置变量
+		if(1 == _TEST)
+		{
+			lstrcpyn(CPR.szServerAddr,TEXT("127.0.0.1") ,CountArray(CPR.szServerAddr));
+		}
+		else
+		{
+			TCHAR szInernet_ip[32] = TEXT("0.0.0.0");
+			GetInternetIP(szInernet_ip);
+			lstrcpyn(CPR.szServerAddr,szInernet_ip ,CountArray(CPR.szServerAddr));
+		}
 
 		//发送数据
 		m_pITCPSocketService->SendData(MDM_REGISTER,CPR_LP_REGISTER_LOGON,&CPR,sizeof(CPR));

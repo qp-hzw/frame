@@ -182,23 +182,22 @@ bool CModuleInfoManager::UnRegisterGameModule(LPCTSTR pszModuleName)
 	return true;
 }
 
-int GetInternetIP( )
+int GetInternetIP( TCHAR *szInernet_ip)
 {
-	TCHAR szInernet_ip[32] = TEXT("0.0.0.0");
-	
 	//下载脚本
 	TCHAR szTempPath[_MAX_PATH] = {0}, szTempFile[MAX_PATH] = {0};
 	GetTempPath(MAX_PATH, szTempPath);
 
-	UINT nResult = GetTempFileName(szTempPath, _T("~ex"), 0, szTempFile);
+	UINT nResult = GetTempFileName(szTempPath, _T("ex"), 0, szTempFile);
 	int ret=URLDownloadToFile(NULL,_T("http://www.net.cn/static/customercare/yourip.asp"),szTempFile,BINDF_GETNEWESTVERSION,NULL);
 	if (ret == S_FALSE)
 		return 1;
 
 	//判断脚本是否下载成功
 	FILE *fp;
-	if (_wfopen_s(&fp,szTempFile,_T("rb"))!=0)
+	if (_wfopen_s(&fp,szTempFile,_T("r"))!=0)
 		return 2;
+
 
 	fseek(fp,0,SEEK_END);//得到文件大小
 	int ilength=ftell(fp);
@@ -210,42 +209,23 @@ int GetInternetIP( )
 	{ 
 		std::string buffer;
 		buffer.resize(ilength);
-		fread(&buffer[0],sizeof(TCHAR),ilength,fp);
+		int iReadNum = fread(&buffer[0],sizeof(TCHAR),ilength,fp);
 		fclose(fp);
-		DeleteFile(_T("ip.ini"));
-		
+		DeleteFile(szTempFile);
 
-		//std::string pattern = "((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])"; // fixed telephone 
-		std::string pattern = "120";
-		std::regex re (pattern);
-
-		std::match_results<std::string::iterator> results1;
-
-		CTraceService::TraceString(TEXT("长度大于0"), TraceLevel_Normal);
-
-		if(std::regex_match(buffer, re))
+		std::regex re ("(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})");
+ 
+		std::regex_iterator<std::string::const_iterator> begin(buffer.cbegin(), buffer.cend(), re);
+		for (auto iter = begin; iter != std::sregex_iterator(); iter++)
 		{
-			CTraceService::TraceString(TEXT("找到2"), TraceLevel_Normal);
-		}
+			MultiByteToWideChar(CP_ACP, 0,  &(iter->str())[0], -1, szInernet_ip, 32);
 
-		if(std::regex_match(buffer.begin(), buffer.end(), results1, re))
-		{
-			CTraceService::TraceString(TEXT("找到1"), TraceLevel_Normal);
-			std::match_results<std::string::iterator>::const_iterator iter;
-			for (iter = results1.begin(); iter != results1.end(); iter++)
-			{
-				CTraceService::TraceString(TEXT("找到"), TraceLevel_Normal);
-				MultiByteToWideChar(CP_ACP, 0,  &(iter->str())[0], -1, szInernet_ip, 32);
-				CTraceService::TraceString(szInernet_ip, TraceLevel_Normal);
-
-				//std::cout << iter->length() << ": " << iter->str() << std::endl;
-			}
-
-			return 0;
-		}
-		else
-		{
-			return 3;
+			//构造提示
+			TCHAR szDescribe[128]=TEXT("");
+			_sntprintf_s(szDescribe,CountArray(szDescribe),TEXT("外网IP: %s"),szInernet_ip);
+			//提示消息
+			CTraceService::TraceString(szDescribe,TraceLevel_Normal);
+			//std::cout << iter->length() << ": " << iter->str() << std::endl;
 		}
 	}
 	else
@@ -265,7 +245,8 @@ bool CModuleInfoManager::LoadGameModuleInfo(CGameItemMap & ModuleInfoBuffer)
 	CDataBaseAide PlatformDBAide;
 	CDataBaseHelper PlatformDBModule;
 
-	GetInternetIP();
+	TCHAR szInernet_ip[32] = TEXT("0.0.0.0");
+	GetInternetIP(szInernet_ip);
 
 	//创建对象
 	if ((PlatformDBModule.GetInterface()==NULL)&&(PlatformDBModule.CreateInstance()==false))
@@ -287,8 +268,8 @@ bool CModuleInfoManager::LoadGameModuleInfo(CGameItemMap & ModuleInfoBuffer)
 		//读取列表
 		PlatformDBAide.ResetParameter();
 		PlatformDBAide.AddParameter(TEXT("byMystery"), _MYSTERY);
-		PlatformDBAide.AddParameter(TEXT("IP"), _GAME_SERVER_ADDR);
-		//CTraceService::TraceString(_GAME_SERVER_ADDR, TraceLevel_Normal);
+		PlatformDBAide.AddParameter(TEXT("IP"), szInernet_ip);
+		//CTraceService::TraceString(szInernet_ip, TraceLevel_Normal);
 		if (PlatformDBAide.ExecuteProcess(TEXT("GSP_GS_LoadGameGameItem"),true)==DB_SUCCESS)
 		{
 			//清空列表
