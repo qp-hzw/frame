@@ -1,4 +1,4 @@
-#include "Stdafx.h"
+#include "ServiceUnits.h"
 #include "CorrespondServer.h"
 #include "DlgCorrespondServer.h"
 
@@ -13,11 +13,6 @@ BEGIN_MESSAGE_MAP(CCorrespondServerApp, CWinApp)
 END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////////////////
-
-//构造函数
-CCorrespondServerApp::CCorrespondServerApp()
-{
-}
 
 //启动函数
 BOOL CCorrespondServerApp::InitInstance()
@@ -36,5 +31,3 @@ BOOL CCorrespondServerApp::InitInstance()
  
 	return FALSE;
 }
-
-//////////////////////////////////////////////////////////////////////////////////

@@ -4,7 +4,6 @@
 #pragma once
 
 #include "Stdafx.h"
-#include "InitParameter.h"
 #include "GlobalInfoManager.h"
 
 #pragma region 辅助结构体
@@ -37,7 +36,6 @@ typedef CWHArray<WORD> CWordArrayTemplate;
 //调度钩子
 class CAttemperEngineSink : public IAttemperEngineSink
 {
-	//友元定义
 	friend class CServiceUnits;
 
 #pragma region 成员变量
@@ -48,7 +46,6 @@ protected:
 
 	//变量定义
 protected:
-	CInitParameter *				m_pInitParameter;					//配置参数
     tagBindParameter *				m_pBindParameter;					//辅助数组
 
 	//组件变量
@@ -57,7 +54,6 @@ protected:
 
 	//组件接口
 protected:
-	ITimerEngine *					m_pITimerEngine;					//时间引擎
 	ITCPNetworkEngine *				m_pITCPNetworkEngine;				//网络引擎
 #pragma endregion
 
@@ -92,16 +88,7 @@ public:
 	//自定事件
     virtual bool OnEventAttemperData(WORD wRequestID, VOID * pData, WORD wDataSize){return false;}
 
-	//内核事件
-public:
-	//定时器事件
-	virtual bool OnEventTimer(DWORD dwTimerID, WPARAM wBindParam){return false;}
-	//数据库事件
-	virtual bool OnEventDataBase(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize){return false;}
-#pragma endregion
-
-#pragma region Socket系统函数
-	//本地Socket事件
+	//socket::client
 public:
 	//连接事件
     virtual bool OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode){return false;}
@@ -110,7 +97,7 @@ public:
 	//读取事件
 	virtual bool OnEventTCPSocketRead(WORD wServiceID, TCP_Command Command, VOID * pData, WORD wDataSize){return true;}
 
-	//网络Socket事件 -- 与(登录服,游戏服,Web后台)
+	//socket::server
 public:
 	//应答事件
 	virtual bool OnEventTCPNetworkBind(DWORD dwClientAddr, DWORD dwSocketID);
@@ -119,6 +106,15 @@ public:
 	//读取事件
 	virtual bool OnEventTCPNetworkRead(TCP_Command Command, VOID * pData, WORD wDataSize, DWORD dwSocketID);
 
+	//
+public:
+	//定时器事件
+	virtual bool OnEventTimer(DWORD dwTimerID, WPARAM wBindParam){return false;}
+	//数据库事件
+	virtual bool OnEventDataBase(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize){return false;}
+#pragma endregion
+
+#pragma region Socket系统函数
 	//网络Socket事件 读取事件 辅助函数
 protected:
 	//注册模块
