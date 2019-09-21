@@ -124,7 +124,7 @@ bool CServiceUnits::StartService()
 			_sntprintf_s(pszString2,CountArray(pszString2),TEXT("服务启动失败, 内核版本不匹配, realKernel: %ld; frameKernel: %ld\n"),
 					realKernel,
 					frameKernel);
-			CTraceService::TraceString(pszString2,TraceLevel_Exception);
+			CLog::Log(pszString2,log_error);
 			bResult = false;
 			break;
 		}
@@ -141,7 +141,7 @@ bool CServiceUnits::StartService()
 
 	if(!bResult)
 	{
-		CTraceService::TraceString(szText,TraceLevel_Exception);
+		CLog::Log(szText,log_error);
 		ConcludeService();
 		return false;
 	}
@@ -217,49 +217,49 @@ bool CServiceUnits::CreateServiceDLL()
 	//时间引擎
 	if ((m_TimerEngine.GetInterface()==NULL)&&(m_TimerEngine.CreateInstance()==false))
 	{
-		CTraceService::TraceString(m_TimerEngine.GetErrorDescribe(),TraceLevel_Exception);
+		CLog::Log(m_TimerEngine.GetErrorDescribe(),log_error);
 		return false;
 	}
 
 	//调度引擎
 	if ((m_AttemperEngine.GetInterface()==NULL)&&(m_AttemperEngine.CreateInstance()==false))
 	{
-		CTraceService::TraceString(m_AttemperEngine.GetErrorDescribe(),TraceLevel_Exception);
+		CLog::Log(m_AttemperEngine.GetErrorDescribe(),log_error);
 		return false;
 	}
 
 	//网络组件
 	if ((m_TCPSocketService.GetInterface()==NULL)&&(m_TCPSocketService.CreateInstance()==false))
 	{
-		CTraceService::TraceString(m_TCPSocketService.GetErrorDescribe(),TraceLevel_Exception);
+		CLog::Log(m_TCPSocketService.GetErrorDescribe(),log_error);
 		return false;
 	}
 
 	//网络引擎
 	if ((m_TCPNetworkEngine.GetInterface()==NULL)&&(m_TCPNetworkEngine.CreateInstance()==false))
 	{
-		CTraceService::TraceString(m_TCPNetworkEngine.GetErrorDescribe(),TraceLevel_Exception);
+		CLog::Log(m_TCPNetworkEngine.GetErrorDescribe(),log_error);
 		return false;
 	}
 
 	//数据组件
 	if ((m_KernelDataBaseEngine.GetInterface()==NULL)&&(m_KernelDataBaseEngine.CreateInstance()==false))
 	{
-		CTraceService::TraceString(m_KernelDataBaseEngine.GetErrorDescribe(),TraceLevel_Exception);
+		CLog::Log(m_KernelDataBaseEngine.GetErrorDescribe(),log_error);
 		return false;
 	}
 
 	//数据组件
 	if ((m_RecordDataBaseEngine.GetInterface()==NULL)&&(m_RecordDataBaseEngine.CreateInstance()==false))
 	{
-		CTraceService::TraceString(m_RecordDataBaseEngine.GetErrorDescribe(),TraceLevel_Exception);
+		CLog::Log(m_RecordDataBaseEngine.GetErrorDescribe(),log_error);
 		return false;
 	}
 
 	//游戏模块
 	if ((m_GameServiceManager.GetInterface()==NULL)&&(m_GameServiceManager.CreateInstance()==false))
 	{
-		CTraceService::TraceString(m_GameServiceManager.GetErrorDescribe(),TraceLevel_Exception);
+		CLog::Log(m_GameServiceManager.GetErrorDescribe(),log_error);
 		return false;
 	}
 
@@ -268,7 +268,7 @@ bool CServiceUnits::CreateServiceDLL()
 	{
 		if ((m_GameMatchServiceManager.GetInterface()==NULL)&&(m_GameMatchServiceManager.CreateInstance()==false))
 		{
-			CTraceService::TraceString(m_GameMatchServiceManager.GetErrorDescribe(),TraceLevel_Exception);
+			CLog::Log(m_GameMatchServiceManager.GetErrorDescribe(),log_error);
 			return false;
 		}
 	}
@@ -357,7 +357,7 @@ bool CServiceUnits::InitializeService()
 	_sntprintf_s(szIniFile,CountArray(szIniFile),TEXT("GameServer-%d.log"), m_GameServiceOption.dwServerID);
 
 	//设置服务器日志输出等级
-	CTraceService::EnableTrace(TraceLevel_Info,TraceLevel_Debug,szIniFile);
+	CLog::EnableTrace(log_debug,log_debug,szIniFile);
 
 	return true;
 }
@@ -432,7 +432,7 @@ bool CServiceUnits::RectifyServiceParameter()
 	//调整参数
 	if (m_GameServiceManager->RectifyParameter(m_GameServiceOption)==false)
 	{
-		CTraceService::TraceString(TEXT("游戏模块调整配置参数失败"),TraceLevel_Exception);
+		CLog::Log(TEXT("游戏模块调整配置参数失败"),log_error);
 		return false;
 	}
 
@@ -455,7 +455,7 @@ bool CServiceUnits::SetServiceStatus(enServiceStatus ServiceStatus)
 		if ((m_ServiceStatus!=ServiceStatus_Service)&&(ServiceStatus==ServiceStatus_Stopping))
 		{
 			LPCTSTR pszString=TEXT("服务启动失败");
-			CTraceService::TraceString(pszString,TraceLevel_Exception);
+			CLog::Log(pszString,log_error);
 		}
 
 		//设置变量
@@ -567,7 +567,7 @@ LRESULT CServiceUnits::OnUIControlRequest(WPARAM wParam, LPARAM lParam)
 			//失败处理
 			if ((m_ServiceStatus!=ServiceStatus_Stopping)&&(pControlResult->cbSuccess==ER_FAILURE))
 			{
-				CTraceService::TraceString(TEXT("停止失败"),TraceLevel_Exception);
+				CLog::Log(TEXT("停止失败"),log_error);
 			}
 
 			StopServiceImmediate();

@@ -4,13 +4,7 @@
 //启动服务
 bool CServiceUnits::StartService()
 {
-	//配置服务
-	if (InitializeService()==false)
-	{
-		ConcludeService();
-		return false;
-	}
-
+	/*
 	//内核版本判断
 	CWHIniData InitData;
 	DWORD realKernel = InitData.Get_Code_Kernel_Version();
@@ -21,18 +15,31 @@ bool CServiceUnits::StartService()
 		_sntprintf_s(pszString2,CountArray(pszString2),TEXT("服务启动失败, 内核版本不匹配, realKernel: %ld; frameKernel: %ld\n"),
 					realKernel,
 					frameKernel);
-		CTraceService::TraceString(TraceLevel_Exception, pszString2);
+		CLog::Log(log_error, pszString2);
 
 		return false;
 	}
+	*/
 
-	//启动内核
-	if (StartKernelService()==false)
+	//配置服务
+	int iRet = InitializeService();
+	if (iRet != 0 )
 	{
+		CLog::Log(log_error, TEXT("%s : %d"), TEXT("CServiceUnits::InitializeService"), iRet);
 		ConcludeService();
 		return false;
 	}
 
+	//启动内核
+	iRet = StartKernelService();
+	if (iRet != 0)
+	{
+		CLog::Log(log_error, TEXT("%s : %d"), TEXT("CServiceUnits::StartKernelService"), iRet);
+		ConcludeService();
+		return false;
+	}
+
+	CLog::Log(log_error, TEXT("%s : %d"), TEXT("CServiceUnits::StartService"), iRet);
 	return true;
 }
 
@@ -47,21 +54,24 @@ bool CServiceUnits::ConcludeService()
 }
 
 //配置组件
-bool CServiceUnits::InitializeService()
+int CServiceUnits::InitializeService()
 {
+	//设置服务器日志输出等级
+	CLog::EnableTrace(log_debug,log_debug,TEXT("correspond.log"));
+
 	//创建组件
-	if ((m_AttemperEngine.GetInterface()==NULL)&&(m_AttemperEngine.CreateInstance()==false)) return false;
-	if ((m_TCPNetworkEngine.GetInterface()==NULL)&&(m_TCPNetworkEngine.CreateInstance()==false)) return false;
+	if ((m_AttemperEngine.GetInterface()==NULL)&&(m_AttemperEngine.CreateInstance()==false)) return 1;
+	if ((m_TCPNetworkEngine.GetInterface()==NULL)&&(m_TCPNetworkEngine.CreateInstance()==false)) return 2;
 
 	//组件接口
 	IUnknownEx * pIAttemperEngine=m_AttemperEngine.GetInterface();
 	IUnknownEx * pIAttemperEngineSink=QUERY_OBJECT_INTERFACE(m_AttemperEngineSink,IUnknownEx);
 
 	//设置各服务回调为AttemperEngine
-	if (m_TCPNetworkEngine->SetTCPNetworkEngineEvent(pIAttemperEngine)==false) return false;
+	if (m_TCPNetworkEngine->SetTCPNetworkEngineEvent(pIAttemperEngine)==false) return 3;
 
 	//AttemperEngine设置回调
-	if (m_AttemperEngine->SetAttemperEngineSink(pIAttemperEngineSink)==false) return false;
+	if (m_AttemperEngine->SetAttemperEngineSink(pIAttemperEngineSink)==false) return 4;
 
 	//调度回调
 	m_AttemperEngineSink.m_pITCPNetworkEngine=m_TCPNetworkEngine.GetInterface();
@@ -69,32 +79,25 @@ bool CServiceUnits::InitializeService()
 	//配置网络
 	WORD wMaxConnect=MAX_CONTENT;
 	WORD wServicePort=PORT_CENTER;
-	if (m_TCPNetworkEngine->SetServiceParameter(wServicePort,wMaxConnect, TRUE)==false) return false;
+	if (m_TCPNetworkEngine->SetServiceParameter(wServicePort,wMaxConnect, TRUE)==false) return 5;
 
-	//log的配置信息
-	TCHAR szIniFile[MAX_PATH]=TEXT("");
-	_sntprintf_s(szIniFile,CountArray(szIniFile),TEXT("correspond.log"));
-
-	//设置服务器日志输出等级
-	CTraceService::EnableTrace(TraceLevel_Info,TraceLevel_Debug,szIniFile);
-
-	return true;
+	return 0;
 }
 
 //启动内核
-bool CServiceUnits::StartKernelService()
+int CServiceUnits::StartKernelService()
 {
 	//调度引擎
 	if (m_AttemperEngine->StartService()==false)
 	{
-		return false;
+		return 1;
 	}
 
 	//网络引擎
 	if (m_TCPNetworkEngine->StartService()==false)
 	{
-		return false;
+		return 2;
 	}
 
-	return true;
+	return 0;
 }

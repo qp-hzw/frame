@@ -4,7 +4,6 @@
 #include <algorithm> 
 #include "ServiceUnits.h"
 #include "DataBaseEngineSink.h"
-#include "LogicTraceHelper.h"
 #include "RankManager.h"
 
 
@@ -37,28 +36,21 @@ bool CDataBaseEngineSink::OnDataBaseEngineStart(IUnknownEx * pIUnknownEx)
 	//创建对象
 	if ((m_TreasureDBModule.GetInterface()==NULL)&&(m_TreasureDBModule.CreateInstance()==false))
 	{
-		ASSERT(FALSE);
 		return false;
 	}
 
 	//创建对象
 	if ((m_PlatformDBModule.GetInterface()==NULL)&&(m_PlatformDBModule.CreateInstance()==false))
 	{
-		ASSERT(FALSE);
 		return false;
 	}
 
 	try
 	{
-		//构造提示
-		TCHAR szString[512]=TEXT("");
-		_sntprintf_s(szString,CountArray(szString),TEXT("连接数据库 TEST = %d"), _TEST);
-		CTraceService::TraceString(szString,TraceLevel_Normal);
-
 		//设置连接
-		m_PlatformDBModule->SetConnectionInfo(1, _TEST);
-		m_AccountsDBModule->SetConnectionInfo(2, _TEST);
-		m_TreasureDBModule->SetConnectionInfo(3, _TEST);
+		m_PlatformDBModule->SetConnectionInfo(1);
+		m_AccountsDBModule->SetConnectionInfo(2);
+		m_TreasureDBModule->SetConnectionInfo(3);
 
 		//发起连接
 		m_AccountsDBModule->OpenConnection();
@@ -78,7 +70,7 @@ bool CDataBaseEngineSink::OnDataBaseEngineStart(IUnknownEx * pIUnknownEx)
 	{
 		//错误信息
 		LPCTSTR pszDescribe=pIException->GetExceptionDescribe();
-		CTraceService::TraceString(pszDescribe,TraceLevel_Exception);
+		CLog::Log(log_error, pszDescribe);
 
 		return false;
 	}
@@ -423,9 +415,6 @@ bool CDataBaseEngineSink::On_DBR_Service_UserFeedback( DWORD dwContextID, VOID *
 		m_AccountsDBAide.AddParameter(TEXT("@chFB_Content"),pUserSuggestion->szFB_Content);
 		m_AccountsDBAide.AddParameter(TEXT("@chContact"),pUserSuggestion->szContact);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_Service_Feedback"));	
-
 		//结果处理
 		LONG lResultCode=m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_Service_Feedback"),true);		//在QPAccountsDB数据库的AccountsInfo表中插入用户反馈
 
@@ -437,7 +426,7 @@ bool CDataBaseEngineSink::On_DBR_Service_UserFeedback( DWORD dwContextID, VOID *
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		//结果处理
 		On_DBO_Service_UserFeedback(dwContextID,DB_ERROR,TEXT("由于数据库操作异常，请您稍后重试！"));
@@ -486,9 +475,6 @@ bool CDataBaseEngineSink::On_DBR_Service_RefreshUserInfo( DWORD dwContextID, VOI
 		WCHAR szDescribe[128]=L"";
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribe,sizeof(szDescribe),adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_Service_RefreshUserInfo"));		
-
 		//结果处理
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_Service_RefreshUserInfo"),true);
 
@@ -502,7 +488,7 @@ bool CDataBaseEngineSink::On_DBR_Service_RefreshUserInfo( DWORD dwContextID, VOI
 	catch(IDataBaseException * pIException)		//异常通用处理
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		////异常结果处理
 		//DBR_CommandSource wRequestID ;
@@ -605,9 +591,6 @@ bool CDataBaseEngineSink::On_DBR_Service_QueryRoomList(DWORD dwContextID, void *
 		m_TreasureDBAide.AddParameter(TEXT("dwOwnerID"),pGetTableInfo->dwUserID);
 
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_Service_GetRoomList"));		
-
 		//执行查询
 		LONG lResultCode = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CL_Service_GetRoomList"),true);	//查询QPTreasure数据库的TableInfo表
 
@@ -617,7 +600,7 @@ bool CDataBaseEngineSink::On_DBR_Service_QueryRoomList(DWORD dwContextID, void *
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		//TODO 错误的处理
 
@@ -695,9 +678,7 @@ bool CDataBaseEngineSink::On_DBR_Service_GetRichList(DWORD dwContextID, void * p
 			return false;
 
 		m_AccountsDBAide.ResetParameter();
-
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_Service_GetRichList")); 
+ 
 		//执行查询
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_Service_GetRichList"), true);		//查询数据库[QPAccountsDB]中的RegalRank表
 
@@ -708,7 +689,7 @@ bool CDataBaseEngineSink::On_DBR_Service_GetRichList(DWORD dwContextID, void * p
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		return false;
 	}
@@ -761,9 +742,6 @@ bool CDataBaseEngineSink::On_DBR_Service_GetUserRecordList(DWORD dwContextID, vo
 
 		m_TreasureDBAide.AddParameter(TEXT("@UserID"),pDbReq->dwUserID);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_Service_GetRecordList"));
-
 		//执行查询
 		LONG lResultCode = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CL_Service_GetRecordList"),true);		//查询数据库[QPTreasureDB]中的GameRecord表
 
@@ -773,7 +751,7 @@ bool CDataBaseEngineSink::On_DBR_Service_GetUserRecordList(DWORD dwContextID, vo
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		return false;
 	}
@@ -906,8 +884,6 @@ bool CDataBaseEngineSink::On_DBR_Service_GetSpecifiRecord(DWORD dwContextID, voi
 		//输出参数
 		TCHAR szDescribeString[128]=TEXT("");
 		m_TreasureDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_Service_GetSpecificRecord"));
 
 		//执行查询
 		LONG lResultCode = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CL_Service_GetSpecificRecord"),true);		//查询数据库[QPTreasureDB]中的GameRecord表
@@ -921,7 +897,7 @@ bool CDataBaseEngineSink::On_DBR_Service_GetSpecifiRecord(DWORD dwContextID, voi
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		return false;
 	}
@@ -979,8 +955,6 @@ bool CDataBaseEngineSink::On_DBR_Service_OnlineReward(DWORD dwContextID, void * 
 		m_TreasureDBAide.AddParameter(TEXT("@lOpenRoomCard"), 0);
 		m_TreasureDBAide.AddParameter(TEXT("@lDiamond"), 0);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_Service_ModifyUserMoney")); 
 		//执行查询
 		LONG lResultCode = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CL_Service_ModifyUserMoney"), true);	//修改[QPTreasureDB]数据库中的GameScoreInfo表
 
@@ -991,7 +965,7 @@ bool CDataBaseEngineSink::On_DBR_Service_OnlineReward(DWORD dwContextID, void * 
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		return false;
 	}
@@ -1051,8 +1025,6 @@ bool CDataBaseEngineSink::On_DBR_Service_GetTaskList(DWORD dwContextID, void * p
 		//获取任务列表
 		m_AccountsDBAide.ResetParameter();
 		m_AccountsDBAide.AddParameter(TEXT("@dwUserID"), pDbReq->dwUserID);
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_Service_GetTaskList"));
 
 		//执行查询
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_Service_GetTaskList"), true);		//查询[QPAccountsDB]数据库的TaskList表
@@ -1064,7 +1036,7 @@ bool CDataBaseEngineSink::On_DBR_Service_GetTaskList(DWORD dwContextID, void * p
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		return false;
 	}
@@ -1149,9 +1121,6 @@ bool CDataBaseEngineSink::On_DBR_Service_GetTaskReward(DWORD dwContextID, void *
 		WCHAR szDescribe[128]=L"";
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribe,sizeof(szDescribe),adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_Service_GetTaskReward"));
-
 		//执行查询
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_Service_GetTaskReward"), true);		//查询数据库[QPAccountsDB]中的AccountsTaskStatus表，更新数据库中的GameScoreInfo表
 		//结果处理
@@ -1165,7 +1134,7 @@ bool CDataBaseEngineSink::On_DBR_Service_GetTaskReward(DWORD dwContextID, void *
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		return false;
 	}
@@ -1226,8 +1195,6 @@ bool CDataBaseEngineSink::On_DBR_Service_RequestLottery(DWORD dwContextID, void 
 		WCHAR szDescribe[128]=L"";
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribe,sizeof(szDescribe),adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_Service_RequestLottery")); 
 		//执行查询,执行抽奖
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_Service_RequestLottery"), true);		//查询数据库[QPAccountsDB]的LotteryList表，执行抽奖操作；游戏服也有个请求抽奖；
 		//结果处理
@@ -1239,7 +1206,7 @@ bool CDataBaseEngineSink::On_DBR_Service_RequestLottery(DWORD dwContextID, void 
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		return false;
 	}
@@ -1321,8 +1288,6 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_STANDING_LIST(DWORD dwContextID
 		m_AccountsDBAide.AddParameter(TEXT("mystery"), _MYSTERY);
 		m_AccountsDBAide.AddParameter(TEXT("dwUserID"), pDbReq->dwUserID);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_SERVICE_PURE_STANDING_LIST")); 
 		//执行查询,执行抽奖
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_STANDING_LIST"), true);		//查询数据库[QPAccountsDB]的LotteryList表，执行抽奖操作；游戏服也有个请求抽奖；
 
@@ -1368,7 +1333,7 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_STANDING_LIST(DWORD dwContextID
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		return false;
 	}
@@ -1396,8 +1361,6 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_RECORD_LIST(DWORD dwContextID, 
 		m_TreasureDBAide.AddParameter(TEXT("byMask"), pDbReq->byMask);
 		//m_TreasureDBAide.AddParameter(TEXT("tmQueryEndData"), pDbReq->tmQueryEndData);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_SERVICE_PURE_RECORD_LIST")); 
 		//执行查询,执行抽奖
 		LONG lResultCode = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_RECORD_LIST"), true);
 
@@ -1462,8 +1425,6 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_RECORD_LIST(DWORD dwContextID, 
 		m_TreasureDBAide.AddParameter(TEXT("byMask"), pDbReq->byMask);
 		//m_TreasureDBAide.AddParameter(TEXT("tmQueryEndData"), pDbReq->tmQueryEndData);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_SERVICE_PURE_RECORD_LIST_PLAYINFO")); 
 		//执行查询,执行抽奖
 		LONG lResultCode2 = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_RECORD_LIST_PLAYINFO"), true);
 
@@ -1512,7 +1473,7 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_RECORD_LIST(DWORD dwContextID, 
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		return false;
 	}
@@ -1536,8 +1497,6 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_XJ_RECORD_LIST(DWORD dwContextI
 		m_TreasureDBAide.ResetParameter();
 		m_TreasureDBAide.AddParameter(TEXT("dwDrawID"), pDbReq->dwDrawID);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_SERVICE_PURE_XJ_RECORD_LIST")); 
 		//执行查询
 		LONG lResultCode = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_XJ_RECORD_LIST"), true);
 
@@ -1576,16 +1535,14 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_XJ_RECORD_LIST(DWORD dwContextI
 			_sntprintf_s(szString,CountArray(szString),TEXT("lResultCode = %ld"), lResultCode);
 
 			//提示消息
-			CTraceService::TraceString(szString,TraceLevel_Warning);
+			CLog::Log(log_warn, szString);
 		}
 #pragma endregion
 
 #pragma region 小局上的玩家信息
 		m_TreasureDBAide.ResetParameter();
 		m_TreasureDBAide.AddParameter(TEXT("dwDrawID"), pDbReq->dwDrawID);
-	
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_SERVICE_PURE_XJ_RECORD_LIST_PLAYINFO")); 
+
 		//执行查询,执行抽奖
 		LONG lResultCode2 = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_XJ_RECORD_LIST_PLAYINFO"), true);
 
@@ -1625,7 +1582,7 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_XJ_RECORD_LIST(DWORD dwContextI
 			_sntprintf_s(szString,CountArray(szString),TEXT("lResultCode = %ld"), lResultCode2);
 
 			//提示消息
-			CTraceService::TraceString(szString,TraceLevel_Warning);
+			CLog::Log(log_warn, szString);
 		}
 #pragma endregion
 
@@ -1640,7 +1597,7 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_XJ_RECORD_LIST(DWORD dwContextI
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		return false;
 	}
@@ -1668,8 +1625,6 @@ bool CDataBaseEngineSink::On_DBR_CL_Service_XJRecordPlayback(DWORD dwContextID, 
 		WCHAR szDescribe[128] = L"";
 		m_TreasureDBAide.AddParameterOutput(TEXT("@strErrorDescribe"), szDescribe, sizeof(szDescribe), adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_GETVIDEORECORD"));
 		//执行查询
 		LONG lResultCode = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CL_GETVIDEORECORD"), true);
 		if (lResultCode == DB_SUCCESS)
@@ -1697,7 +1652,7 @@ bool CDataBaseEngineSink::On_DBR_CL_Service_XJRecordPlayback(DWORD dwContextID, 
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		return false;
 	}
@@ -1722,8 +1677,6 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_CUSTOMER_MESSEGE(DWORD dwContextID, 
 		m_PlatformDBAide.AddParameter(TEXT("@FirmID"), _MYSTERY);
 		m_PlatformDBAide.AddParameter(TEXT("@MessageType"), pDbReq->cbMessegeFlag);
 		
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_GP_GET_SERVICE_MESSAGE"));
 		//执行查询
 		LONG lResultCode = m_PlatformDBAide.ExecuteProcess(TEXT("GSP_GP_GET_SERVICE_MESSAGE"), true);
 		if (lResultCode == DB_SUCCESS)
@@ -1742,7 +1695,7 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_CUSTOMER_MESSEGE(DWORD dwContextID, 
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		return false;
 	}
@@ -1769,8 +1722,6 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_GOLD_INFO(DWORD dwContextID, void * 
 		m_TreasureDBAide.AddParameter(TEXT("dwKindID"), pDbReq->dwKindID);
 		m_TreasureDBAide.AddParameter(TEXT("mystery"), _MYSTERY);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_SERVICE_GOLD_INFO")); 
 		//执行查询
 		LONG lResultCode = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CL_SERVICE_GOLD_INFO"), true);
 
@@ -1816,7 +1767,7 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_GOLD_INFO(DWORD dwContextID, void * 
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		return false;
 	}
@@ -1855,8 +1806,6 @@ bool CDataBaseEngineSink::On_DBR_Service_ModifyPersonalInfo(DWORD dwContextID, v
 		WCHAR szDescribe[128] = L"";
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"), szDescribe, sizeof(szDescribe), adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_Service_ModifyPersonalInfo"));
 		//执行查询
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_Service_ModifyPersonalInfo"), true);
 
@@ -1870,7 +1819,7 @@ bool CDataBaseEngineSink::On_DBR_Service_ModifyPersonalInfo(DWORD dwContextID, v
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		return false;
 	}
@@ -1910,9 +1859,6 @@ bool CDataBaseEngineSink::On_DBR_Other_RechargeInfo( DWORD dwContextID, VOID * p
 		//构造参数
 		m_AccountsDBAide.ResetParameter();
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_GP_UserRechangeInfo"));
-
 		//结果处理
 		LONG lResultCode=m_AccountsDBAide.ExecuteProcess(TEXT("GSP_GP_UserRechangeInfo"),true);
 
@@ -1921,7 +1867,7 @@ bool CDataBaseEngineSink::On_DBR_Other_RechargeInfo( DWORD dwContextID, VOID * p
 	catch(IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		//错误处理
 		DBR_CommandSource wRequestID ;
@@ -1984,9 +1930,6 @@ bool CDataBaseEngineSink::On_DBR_Other_ExchangeInfo( DWORD dwContextID, VOID * p
 		m_AccountsDBAide.ResetParameter();
 		m_AccountsDBAide.AddParameter(TEXT("@UserID"),pUserRequest->dwUserID);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_GP_UserExchangeInfo"));
-
 		//结果处理
 		LONG lResultCode=m_AccountsDBAide.ExecuteProcess(TEXT("GSP_GP_UserExchangeInfo"),true);
 
@@ -1995,7 +1938,7 @@ bool CDataBaseEngineSink::On_DBR_Other_ExchangeInfo( DWORD dwContextID, VOID * p
 	catch(IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		//结果处理
 		DBR_CommandSource wRequestID ;
@@ -2054,9 +1997,6 @@ bool CDataBaseEngineSink::OnRequestLoadGameList(DWORD dwContextID, VOID * pData,
 		//加载类型
 		m_PlatformDBAide.ResetParameter();
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_GP_LoadGameTypeItem"));
-
 		m_PlatformDBAide.ExecuteProcess(TEXT("GSP_GP_LoadGameTypeItem"),true);
 
 		//发送种类
@@ -2086,9 +2026,6 @@ bool CDataBaseEngineSink::OnRequestLoadGameList(DWORD dwContextID, VOID * pData,
 
 		//读取类型
 		m_PlatformDBAide.ResetParameter();
-
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_GP_LoadGameKindItem"));
 
 		m_PlatformDBAide.ExecuteProcess(TEXT("GSP_GP_LoadGameKindItem"),true);
 
@@ -2120,9 +2057,6 @@ bool CDataBaseEngineSink::OnRequestLoadGameList(DWORD dwContextID, VOID * pData,
 
 		//读取节点
 		m_PlatformDBAide.ResetParameter();
-
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_GP_LoadGameNodeItem"));
 
 		m_PlatformDBAide.ExecuteProcess(TEXT("GSP_GP_LoadGameNodeItem"),true);
 
@@ -2168,7 +2102,7 @@ bool CDataBaseEngineSink::OnRequestLoadGameList(DWORD dwContextID, VOID * pData,
 	{
 		//输出错误
 		LPCTSTR pszDescribe=pIException->GetExceptionDescribe();
-		CTraceService::TraceString(pszDescribe,TraceLevel_Exception);
+		CLog::Log(log_error, pszDescribe);
 
 		//变量定义
 		DBO_GP_GameListResult GameListResult;
@@ -2215,9 +2149,6 @@ bool CDataBaseEngineSink::OnRequestOnLineCountInfo(DWORD dwContextID, VOID * pDa
 		m_PlatformDBAide.AddParameter(TEXT("@dwOnLineCountSum"),pOnLineCountInfo->dwOnLineCountSum);
 		m_PlatformDBAide.AddParameter(TEXT("@strOnLineCountGame"),szOnLineCountGame);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_GP_OnLineCountInfo"));
-
 		//执行命令
 		m_PlatformDBAide.ExecuteProcess(TEXT("GSP_GP_OnLineCountInfo"),false);
 
@@ -2226,7 +2157,7 @@ bool CDataBaseEngineSink::OnRequestOnLineCountInfo(DWORD dwContextID, VOID * pDa
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		return false;
 	}
@@ -2244,8 +2175,6 @@ bool CDataBaseEngineSink::On_DBR_UPDATA_MARQUEE(DWORD dwContextID, VOID * pData,
 		m_PlatformDBAide.ResetParameter();
 		m_PlatformDBAide.AddParameter(TEXT("@byCompanyID"),_MYSTERY);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_GP_UPDATA_MARQUEE"));
 		//执行命令
 		long lResultCode = m_PlatformDBAide.ExecuteProcess(TEXT("GSP_GP_UPDATA_MARQUEE"),true);
 
@@ -2286,7 +2215,7 @@ bool CDataBaseEngineSink::On_DBR_UPDATA_MARQUEE(DWORD dwContextID, VOID * pData,
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		return false;
 	}
@@ -2312,9 +2241,6 @@ bool CDataBaseEngineSink::On_DBR_QueryScoreInfo(DWORD dwContextID, VOID * pData,
 		m_TreasureDBAide.ResetParameter();
 		m_TreasureDBAide.AddParameter(TEXT("@dwUserID"),pQueryScoreInfo->dwUserID);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_Service_GetUserScoreInfo"));
-
 		//执行查询
 		LONG lResultCode=m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CL_Service_GetUserScoreInfo"),true);
 
@@ -2326,7 +2252,7 @@ bool CDataBaseEngineSink::On_DBR_QueryScoreInfo(DWORD dwContextID, VOID * pData,
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		//结果处理
 		//OnOperateDisposeResult(dwContextID,DB_ERROR,TEXT("由于数据库操作异常，请您稍后重试！"),false);
@@ -2391,7 +2317,7 @@ bool CDataBaseEngineSink::On_DBR_GP_QUIT(DWORD dwContextID, VOID * pData, WORD w
 	catch(IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 
@@ -2421,9 +2347,6 @@ bool CDataBaseEngineSink::OnDBUpdateRankUserItem(DWORD dwContextID, void * pData
 		WCHAR szDescribe[128]=L"";
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribe,sizeof(szDescribe),adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_GP_UpdateRankUserItem"));
-
 		//执行查询
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_GP_UpdateRankUserItem"), true);
 		//结果处理
@@ -2438,7 +2361,7 @@ bool CDataBaseEngineSink::OnDBUpdateRankUserItem(DWORD dwContextID, void * pData
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		return false;
 	}
@@ -2459,29 +2382,15 @@ bool CDataBaseEngineSink::OnDBReadRankList(DWORD dwContextID, void * pData, WORD
 
 		RankManager* pRankManager = (RankManager*)pData;
 		m_AccountsDBAide.ResetParameter();
-		//输出执行
-		//LogicTraceHelper(TEXT("GSP_GP_GetRankList"));
-
-		/* 删除 创梦版 大厅的 排行榜功能 added by WangChengQing 2018/6/4
-		//执行查询
-		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_GP_GetRankList"), true);
-		//结果处理
-		if(lResultCode == DB_SUCCESS)
-		{
-			pRankManager->InitRankList(m_AccountsDBAide,m_AccountsDBModule);
-		}
-		*/
+		return true;
 	}
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		return false;
 	}
-
-	return true;
-
 }
 
 //领取任务奖励
@@ -2504,9 +2413,6 @@ bool CDataBaseEngineSink::OnReceiveRankReward(DWORD dwContextID, void * pData, W
 		//输出变量
 		WCHAR szDescribe[128]=L"";
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribe,sizeof(szDescribe),adParamOutput);
-
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_GP_GetRankReward"));
 
 		//执行查询
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_GP_GetRankReward"), true);
@@ -2541,7 +2447,7 @@ bool CDataBaseEngineSink::OnReceiveRankReward(DWORD dwContextID, void * pData, W
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		return false;
 	}
@@ -2575,9 +2481,6 @@ bool CDataBaseEngineSink::OnModifyUserInsure(DWORD dwContextID, void * pData, WO
 		WCHAR szDescribe[128]=L"";
 		m_TreasureDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribe,sizeof(szDescribe),adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_GP_GetRankReward"));
-
 		//执行查询
 		LONG lResultCode = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_GP_GetRankReward"), true);
 		//结果处理
@@ -2604,7 +2507,7 @@ bool CDataBaseEngineSink::OnModifyUserInsure(DWORD dwContextID, void * pData, WO
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		return false;
 	}
@@ -2635,8 +2538,6 @@ bool CDataBaseEngineSink::On_DBR_CL_GIFT_GIVE_PROPS(DWORD dwContextID, void * pD
 		TCHAR szDescribe[128]=TEXT("");
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribe,sizeof(szDescribe),adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_GIFT_GIVE_PROPS")); 
 		//执行查询
 		long lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_GIFT_GIVE_PROPS"), true);
 
@@ -2669,7 +2570,7 @@ bool CDataBaseEngineSink::On_DBR_CL_GIFT_GIVE_PROPS(DWORD dwContextID, void * pD
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		return false;
 	}
@@ -2712,8 +2613,6 @@ bool CDataBaseEngineSink::On_DBR_Logon_Accounts(DWORD dwContextID, VOID * pData,
 		TCHAR szDescribeString[128]=TEXT("");
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_Logon_Accounts"));
 		//执行查询
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_Logon_Accounts"),true);
 
@@ -2727,7 +2626,7 @@ bool CDataBaseEngineSink::On_DBR_Logon_Accounts(DWORD dwContextID, VOID * pData,
 	catch (IDataBaseException * pIException)
 	{
 		//错误信息
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		//错误处理
 		On_DBO_Logon_Accounts(dwContextID,DB_ERROR,TEXT("由于数据库操作异常，请您稍后重试或选择另一服务器登录！"));
@@ -2843,9 +2742,6 @@ bool CDataBaseEngineSink::On_DBR_Logon_Register(DWORD dwContextID, VOID * pData,
 		TCHAR szDescribeString[128]=TEXT("");
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_Logon_Register"));
-
 		//执行查询
 		LONG lResultCode=m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_Logon_Register"),true);
 
@@ -2859,7 +2755,7 @@ bool CDataBaseEngineSink::On_DBR_Logon_Register(DWORD dwContextID, VOID * pData,
 	catch (IDataBaseException * pIException)
 	{
 		//错误信息
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		//错误处理
 		On_DBO_Logon_Accounts(dwContextID,DB_ERROR,TEXT("由于数据库操作异常，请您稍后重试或选择另一服务器登录！"));
@@ -2907,15 +2803,6 @@ bool CDataBaseEngineSink::On_DBR_Logon_Platform(DWORD dwContextID, VOID * pData,
 		TCHAR szDescribeString[128]=TEXT("");
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-		//构造提示
-		TCHAR szString[512]=TEXT("");
-		_sntprintf_s(szString,CountArray(szString),
-			TEXT("平台登录 代理 = %ld"),
-			pDBRLogonPlatform->dwProxyID);
-		CTraceService::TraceString(szString,TraceLevel_Normal);
-
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_Logon_Platform"));
 		//执行查询			
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_Logon_Platform"),true);
 
@@ -2929,7 +2816,7 @@ bool CDataBaseEngineSink::On_DBR_Logon_Platform(DWORD dwContextID, VOID * pData,
 	catch (IDataBaseException * pIException)
 	{
 		//错误信息
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		//错误处理
 		On_DBO_Logon_Platform(dwContextID,DB_ERROR,TEXT("由于数据库操作异常，请您稍后重试或选择另一服务器登录！"));
@@ -3045,9 +2932,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ALL_CLUB_INFO_LIST(DWORD dwContextID, V
 		//加载类型
 		m_AccountsDBAide.ResetParameter();
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_ALL_CLUB_INFO_LIST"));
-
 		m_AccountsDBAide.AddParameter(TEXT("@UserID"),pDbr->dwUserID);
 		m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_ALL_CLUB_INFO_LIST"),true);
 
@@ -3086,7 +2970,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ALL_CLUB_INFO_LIST(DWORD dwContextID, V
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		return false;
 	}
@@ -3110,9 +2994,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_LIST(DWORD dwContextID, VOID * pDa
 
 		//构造参数
 		m_AccountsDBAide.AddParameter(TEXT("@ClubID"),DBR.dwClubID);
-
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_ROOM_LIST"));
 
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_LIST"),true);
 
@@ -3181,7 +3062,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_LIST(DWORD dwContextID, VOID * pDa
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		return false;
 	}
@@ -3202,8 +3083,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_RANDOM_CLUB_LIST(DWORD dwContextID, VOI
 		m_AccountsDBAide.AddParameter(TEXT("@Mystery"),_MYSTERY);
 		m_AccountsDBAide.AddParameter(TEXT("@UserID"),pDBR->dwUserID);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_RANDOM_CLUB_LIST"));
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_RANDOM_CLUB_LIST"),true);
 
 		//列表发送
@@ -3249,7 +3128,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_RANDOM_CLUB_LIST(DWORD dwContextID, VOI
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		return false;
 	}
@@ -3276,8 +3155,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_JOIN_CLUB(DWORD dwContextID, VOID * pDa
 		TCHAR szDescribeString[128]=TEXT("");
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_JOIN_CLUB"));
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_JOIN_CLUB"),true);
 
 		//结果处理
@@ -3316,7 +3193,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_JOIN_CLUB(DWORD dwContextID, VOID * pDa
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -3342,8 +3219,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_NOTICE(DWORD dwContextID, VOID * pData,
 		TCHAR szDescribeString[128]=TEXT("");
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_NOTICE"));
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_NOTICE"),true);
 
 		//结果处理
@@ -3362,7 +3237,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_NOTICE(DWORD dwContextID, VOID * pData,
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -3388,8 +3263,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_MESSAGE(DWORD dwContextID, VOID * pData
 		TCHAR szDescribeString[128]=TEXT("");
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_MESSAGE"));
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_MESSAGE"),true);
 
 		//结果处理
@@ -3408,7 +3281,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_MESSAGE(DWORD dwContextID, VOID * pData
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -3434,8 +3307,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_CONTRIBUTE_FK(DWORD dwContextID, VOID *
 		TCHAR szDescribeString[128]=TEXT("");
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_CONTRIBUTE_FK"));
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_CONTRIBUTE_FK"),true);
 
 		//结果处理
@@ -3455,7 +3326,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_CONTRIBUTE_FK(DWORD dwContextID, VOID *
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -3483,8 +3354,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_AUTO_AGREE(DWORD dwContextID, VOID * pD
 		TCHAR szDescribeString[128]=TEXT("");
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_AUTO_AGREE"));
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_AUTO_AGREE"),true);
 
 		//结果处理
@@ -3503,7 +3372,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_AUTO_AGREE(DWORD dwContextID, VOID * pD
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -3530,8 +3399,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_INVITE(DWORD dwContextID, VOID * pData,
 		TCHAR szDescribeString[128]=TEXT("");
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_INVITE"));
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_INVITE"),true);
 
 		//结果处理
@@ -3557,7 +3424,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_INVITE(DWORD dwContextID, VOID * pData,
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -3583,8 +3450,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_INVITE_RESULT(DWORD dwContextID, VOID *
 		TCHAR szDescribeString[128]=TEXT("");
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_INVITE_RESULT"));
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_INVITE_RESULT"),true);
 
 		//结果处理
@@ -3604,7 +3469,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_INVITE_RESULT(DWORD dwContextID, VOID *
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -3624,8 +3489,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_INQUERY_LIST(DWORD dwContextID, VOID * 
 		//构造参数
 		m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_INQUERY_LIST"));
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_INQUERY_LIST"),true);
 
 		//发送列表
@@ -3670,7 +3533,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_INQUERY_LIST(DWORD dwContextID, VOID * 
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -3691,8 +3554,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_APPLICANT_LIST(DWORD dwContextID, VOID 
 		m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
 		m_AccountsDBAide.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_APPLICANT_LIST"));
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_APPLICANT_LIST"),true);
 
 		//发送列表
@@ -3732,7 +3593,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_APPLICANT_LIST(DWORD dwContextID, VOID 
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -3759,8 +3620,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_APPOINTMENT(DWORD dwContextID, VOID * p
 		TCHAR szDescribeString[128]=TEXT("");
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_APPOINTMENT"));
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_APPOINTMENT"),true);
 
 		//结果处理
@@ -3786,7 +3645,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_APPOINTMENT(DWORD dwContextID, VOID * p
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -3807,8 +3666,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_RECORD_LIST(DWORD dwContextID, VOID * p
 		m_AccountsDBAide.AddParameter(TEXT("tmQueryStartData"),pDbr->tmQueryStartData);
 		m_AccountsDBAide.AddParameter(TEXT("tmQueryEndData"),pDbr->tmQueryEndData);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_RECORD_LIST"));
 		LONG lResultCode2 = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_RECORD_LIST"),true);
 
 		//发送列表
@@ -3864,7 +3721,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_RECORD_LIST(DWORD dwContextID, VOID * p
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -3886,8 +3743,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_CHAT(DWORD dwContextID, VOID * pData, W
 		m_AccountsDBAide.ResetParameter();
 		m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_CHAT_GETINFO"));
 		LONG lResultCode2 = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_CHAT_GETINFO"),true);
 
 		if(lResultCode2 != DB_SUCCESS)
@@ -3903,8 +3758,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_CHAT(DWORD dwContextID, VOID * pData, W
 		m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
 		m_AccountsDBAide.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_CHAT"));
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_CHAT"),true);
 
 		//发送列表
@@ -3952,7 +3805,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_CHAT(DWORD dwContextID, VOID * pData, W
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -3974,8 +3827,6 @@ bool CDataBaseEngineSink::On_DBR_CL_WORD_CHAT(DWORD dwContextID, VOID * pData, W
 		m_AccountsDBAide.ResetParameter();
 		m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_CHAT_GETINFO"));
 		LONG lResultCode2 = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_CHAT_GETINFO"),true);
 
 		if(lResultCode2 != DB_SUCCESS)
@@ -4006,7 +3857,7 @@ bool CDataBaseEngineSink::On_DBR_CL_WORD_CHAT(DWORD dwContextID, VOID * pData, W
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -4028,8 +3879,6 @@ bool CDataBaseEngineSink::On_DBR_CL_SYSTEM_CHAT(DWORD dwContextID, VOID * pData,
 		m_AccountsDBAide.ResetParameter();
 		m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_CHAT_GETINFO"));
 		LONG lResultCode2 = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_CHAT_GETINFO"),true);
 
 		if(lResultCode2 != DB_SUCCESS)
@@ -4064,7 +3913,7 @@ bool CDataBaseEngineSink::On_DBR_CL_SYSTEM_CHAT(DWORD dwContextID, VOID * pData,
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -4086,8 +3935,6 @@ bool CDataBaseEngineSink::On_DBR_CL_SECRET_CHAT(DWORD dwContextID, VOID * pData,
 		m_AccountsDBAide.ResetParameter();
 		m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_CHAT_GETINFO"));
 		LONG lResultCode2 = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_CHAT_GETINFO"),true);
 
 		if(lResultCode2 != DB_SUCCESS)
@@ -4121,7 +3968,7 @@ bool CDataBaseEngineSink::On_DBR_CL_SECRET_CHAT(DWORD dwContextID, VOID * pData,
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -4141,8 +3988,6 @@ bool CDataBaseEngineSink::On_DBR_CL_STICKY_POST(DWORD dwContextID, VOID * pData,
 		m_AccountsDBAide.AddParameter(TEXT("dwClubID"),pDbr->dwClubID);
 		m_AccountsDBAide.AddParameter(TEXT("dwStickyMark"),pDbr->cbTopFlag);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_STICK"));
 		LONG lResultCode2 = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_STICK"),true);
 
 		//构造DBO数据
@@ -4155,7 +4000,7 @@ bool CDataBaseEngineSink::On_DBR_CL_STICKY_POST(DWORD dwContextID, VOID * pData,
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -4176,8 +4021,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_USER_LEAVE(DWORD dwContextID, VOID
 		m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
 		m_AccountsDBAide.AddParameter(TEXT("RoomID"),pDbr->dwClubRoomID);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_ROOM_USER_LEAVE"));
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_USER_LEAVE"),true);
 
 		return true;
@@ -4185,7 +4028,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_USER_LEAVE(DWORD dwContextID, VOID
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -4204,14 +4047,12 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_SETTING(DWORD dwContextID, VOID * 
 		m_AccountsDBAide.ResetParameter();
 		m_AccountsDBAide.AddParameter(TEXT("@dwClubRoomID"), pDbr->dwRoomID);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_ROOM_SETTING_QUERY_INFO")); 
 		//执行查询
 		LONG lResultCode1 = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_SETTING_QUERY_INFO"), true);
 
 		if(lResultCode1 != DB_SUCCESS)
 		{
-			CTraceService::TraceString(TEXT("GSP_CL_CLUB_ROOM_SETTING_QUERY_INFO Return 非0"), TraceLevel_Warning);
+			CLog::Log(log_warn, TEXT("GSP_CL_CLUB_ROOM_SETTING_QUERY_INFO Return 非0"));
 			return false ;
 		}
 
@@ -4285,8 +4126,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_SETTING(DWORD dwContextID, VOID * 
 		TCHAR szDescribeString[128]=TEXT("");
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_ROOM_SETTING"));
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_SETTING"),true);
 
 		//结果处理
@@ -4328,7 +4167,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_SETTING(DWORD dwContextID, VOID * 
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -4353,8 +4192,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_QUERY_SETTING(DWORD dwContextID, V
 		TCHAR szDescribeString[128]=TEXT("");
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_ROOM_QUERY_SETTING"));
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_QUERY_SETTING"),true);
 
 		//结果处理
@@ -4395,7 +4232,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_QUERY_SETTING(DWORD dwContextID, V
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -4422,8 +4259,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_DISSOLVE(DWORD dwContextID, VOID *
 		TCHAR szDescribeString[128]=TEXT("");
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_ROOM_DISSOLVE"));
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_DISSOLVE"),true);
 
 		//结果处理
@@ -4442,7 +4277,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_DISSOLVE(DWORD dwContextID, VOID *
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -4469,8 +4304,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_TABLE_DISSOLVE(DWORD dwContextID, VOID 
 		TCHAR szDescribeString[128]=TEXT("");
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_TABLE_DISSOLVE"));
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_TABLE_DISSOLVE"),true);
 
 		if(lResultCode == DB_SUCCESS)
@@ -4500,7 +4333,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_TABLE_DISSOLVE(DWORD dwContextID, VOID 
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -4525,8 +4358,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_DISS_CLUB(DWORD dwContextID, VOID * pDa
 		TCHAR szDescribeString[128]=TEXT("");
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_DISS_CLUB"));
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_DISS_CLUB"),true);
 
 		//结果处理
@@ -4545,7 +4376,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_DISS_CLUB(DWORD dwContextID, VOID * pDa
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -4577,8 +4408,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_CREATE_CLUB(DWORD dwContextID, VOID * p
 		TCHAR szDescribeString[128]=TEXT("");
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_CREATE_CLUB"));
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_CREATE_CLUB"),true);
 
 		//结果处理
@@ -4604,7 +4433,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_CREATE_CLUB(DWORD dwContextID, VOID * p
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -4634,8 +4463,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_JOIN_ROOM(DWORD dwContextID, VOID * pDa
 		TCHAR szDescribeString[128]=TEXT("");
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_JOIN_ROOM_TABLE"));
 		long ResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_JOIN_ROOM_TABLE"),true);
 
 		//结果处理
@@ -4697,8 +4524,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_JOIN_ROOM(DWORD dwContextID, VOID * pDa
 		TCHAR szDescribeString2[128]=TEXT("");
 		m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString2),adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_JOIN_ROOM_USER"));
 		long ResultCode2 = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_JOIN_ROOM_USER"),true);
 
 		//列表发送
@@ -4744,8 +4569,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_JOIN_ROOM(DWORD dwContextID, VOID * pDa
 		m_AccountsDBAide.ResetParameter();
 		m_AccountsDBAide.AddParameter(TEXT("@RoomID"),pDBbr->dwRoomID);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_JOIN_ROOM_USER_NUM"));
 		ResultCode2 = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_JOIN_ROOM_USER_NUM"),true);
 
 		if(ResultCode2 == DB_SUCCESS)
@@ -4764,7 +4587,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_JOIN_ROOM(DWORD dwContextID, VOID * pDa
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -4790,8 +4613,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_APPLICANT_RESULT(DWORD dwContextID, VOI
 	TCHAR szDescribeString[128]=TEXT("");
 	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-	//输出执行
-	LogicTraceHelper(TEXT("GSP_CL_CLUB_APPLICANT_RESULT"));
 	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_APPLICANT_RESULT"),true);
 
 	//结果处理
@@ -4829,8 +4650,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_QUIT(DWORD dwContextID, VOID * pData, W
 	TCHAR szDescribeString[128]=TEXT("");
 	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-	//输出执行
-	LogicTraceHelper(TEXT("GSP_CL_CLUB_QUIT"));
 	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_QUIT"),true);
 
 	//结果处理
@@ -4863,8 +4682,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_MEMBER_MANAGER(DWORD dwContextID, VOID 
 		m_AccountsDBAide.AddParameter(TEXT("@UserID"),pDBR->dwUserID);
 		m_AccountsDBAide.AddParameter(TEXT("@ClubID"),pDBR->dwClubID);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_DATA"));
 		LONG lResultCode2 =  m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_DATA"),true);
 
 		if(DB_SUCCESS == lResultCode2)
@@ -4901,8 +4718,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_MEMBER_MANAGER(DWORD dwContextID, VOID 
 		m_AccountsDBAide.AddParameter(TEXT("@UserID"),pDBR->dwUserID);
 		m_AccountsDBAide.AddParameter(TEXT("@ClubID"),pDBR->dwClubID);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_CLUB_MEMBER_MANAGER"));
 		LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_MEMBER_MANAGER"),true);
 
 		//列表发送
@@ -4943,7 +4758,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_MEMBER_MANAGER(DWORD dwContextID, VOID 
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 
@@ -4967,9 +4782,6 @@ bool CDataBaseEngineSink::On_DBR_CL_SHOP_QUERY(DWORD dwContextID, VOID * pData, 
 		m_PlatformDBAide.AddParameter(TEXT("@Mystery"),_MYSTERY);
 		m_PlatformDBAide.AddParameter(TEXT("@GoodsType"),pDBR->byGoodsType);
 		m_PlatformDBAide.AddParameter(TEXT("@UserID"),pDBR->dwUserID);
-
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_SHOP_QUERY"));
 
 		LONG lResultCode  = m_PlatformDBAide.ExecuteProcess(TEXT("GSP_CL_SHOP_QUERY"),true);
 
@@ -5010,7 +4822,7 @@ bool CDataBaseEngineSink::On_DBR_CL_SHOP_QUERY(DWORD dwContextID, VOID * pData, 
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -5049,9 +4861,6 @@ bool CDataBaseEngineSink::On_DBR_CL_SHOP_DIAMOND(DWORD dwContextID, VOID * pData
 		TCHAR szDescribeString[128]=TEXT("");
 		m_PlatformDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-		//输出执行
-		LogicTraceHelper(TEXT("GSP_CL_SHOP_BUY"));
-
 		LONG lResultCode = m_PlatformDBAide.ExecuteProcess(TEXT("GSP_CL_SHOP_BUY"),true);
 
 		//结果处理
@@ -5070,7 +4879,7 @@ bool CDataBaseEngineSink::On_DBR_CL_SHOP_DIAMOND(DWORD dwContextID, VOID * pData
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 }
@@ -5091,8 +4900,6 @@ bool CDataBaseEngineSink::On_DBR_CL_BAG_QUERY(DWORD dwContextID, VOID * pData, W
 	//构造参数
 	m_PlatformDBAide.AddParameter(TEXT("@UserID"),DBR.dwUserID);
 
-	//输出执行
-	LogicTraceHelper(TEXT("GSP_CL_BAG_QUERY"));
 	LONG lResultCode = m_PlatformDBAide.ExecuteProcess(TEXT("GSP_CL_BAG_QUERY"),true);
 
 	//列表发送
@@ -5129,8 +4936,6 @@ bool CDataBaseEngineSink::On_DBR_CL_BAG_QUERY(DWORD dwContextID, VOID * pData, W
 	//构造参数
 	m_PlatformDBAide.AddParameter(TEXT("@UserID"),DBR.dwUserID);
 
-	//输出执行
-	LogicTraceHelper(TEXT("GSP_CL_BAG_QUERY_LOVENESS"));
 	lResultCode = m_PlatformDBAide.ExecuteProcess(TEXT("GSP_CL_BAG_QUERY_LOVENESS"),true);
 
 	STR_CMD_LC_BAG_FINISH CMD2;

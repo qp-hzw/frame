@@ -36,9 +36,9 @@ public:
 	//辅助函数
 protected:
 	//配置组件
-	bool InitializeService();
+	int InitializeService();
 	//启动内核
-	bool StartKernelService();
+	int StartKernelService();
 };
 
 #endif

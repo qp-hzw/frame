@@ -189,7 +189,7 @@ bool CDlgServerWizardItem1::SaveInputInfo()
 		_sntprintf_s(pszString2,CountArray(pszString2),TEXT("dll加载失败, 框架版本不匹配, realFrame: %ld; subGameFrame: %ld\n"),
 					realFrameVersion,
 					subGameFrameVersion);
-		CTraceService::TraceString(pszString2,TraceLevel_Exception);
+		CLog::Log(pszString2,log_error);
 
 		return false; 
 	}
@@ -780,11 +780,11 @@ VOID CDlgServerWizard::OnBnClickedFinish()
 	//插入房间（将从对话框界面上获取的数据写入数据库）
 	if (ServerInfoManager.InsertGameServer(&m_ModuleInitParameter.GameServiceOption)==false) 
 	{
-		CTraceService::TraceString(TEXT("创建房间失败"), TraceLevel_Normal);
+		CLog::Log(TEXT("创建房间失败"), log_debug);
 		return;
 	}
 	else
-		CTraceService::TraceString(TEXT("创建房间成功"), TraceLevel_Normal);
+		CLog::Log(TEXT("创建房间成功"), log_debug);
 
 	//关闭窗口
 	EndDialog(IDOK);

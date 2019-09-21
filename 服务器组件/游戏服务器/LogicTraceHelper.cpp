@@ -6,16 +6,16 @@ LogicTraceHelper::LogicTraceHelper(LPCTSTR text)
 	: m_pszText(text)
 	, m_bDone(true)
 {
-	CTraceService::TraceStringEx(
-		TraceLevel_Debug, 
+	CLog::TraceStringEx(
+		log_debug, 
 		TEXT("Enter %s"), 
 		text);
 }
 
 LogicTraceHelper::~LogicTraceHelper(void)
 {
-	CTraceService::TraceStringEx(
-		TraceLevel_Debug, 
+	CLog::TraceStringEx(
+		log_debug, 
 		TEXT("Leave %s %s"), 
 		m_pszText, 
 		m_bDone?TEXT("finished"):TEXT("failed"));

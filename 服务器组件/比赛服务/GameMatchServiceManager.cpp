@@ -180,7 +180,7 @@ bool  CGameMatchServiceManager::OnUserJoinGame(IServerUserItem * pIServerUserIte
 				{
 					CString strTace;
 					strTace.Format(TEXT("起立失败（%d）"),__LINE__);
-					CTraceService::TraceString(strTace,TraceLevel_Exception);
+					CLog::Log(strTace,log_error);
 					return false;
 				}
 			}
@@ -373,7 +373,7 @@ bool  CGameMatchServiceManager::OnEventTimer(DWORD dwTimerID, WPARAM dwBindParam
 						{
 							CString strTace;
 							strTace.Format(TEXT("起立失败（%d）"),__LINE__);
-							CTraceService::TraceString(strTace,TraceLevel_Exception);
+							CLog::Log(strTace,log_error);
 						}
 					}		
 				}
@@ -412,7 +412,7 @@ bool  CGameMatchServiceManager::OnEventTimer(DWORD dwTimerID, WPARAM dwBindParam
 									{
 										CString str;
 										str.Format(TEXT("比赛结束，用户：%s起立失败,桌子号：%d"),pUserTemp->GetNickName(),wTableID);
-										CTraceService::TraceString(str,TraceLevel_Exception);
+										CLog::Log(str,log_error);
 										bSuccess=false;
 										break;
 									}
@@ -465,7 +465,7 @@ bool  CGameMatchServiceManager::OnEventTimer(DWORD dwTimerID, WPARAM dwBindParam
 					pSink->SetGameEventSink(NULL);
 					CString str;
 					str.Format(TEXT("%d桌子回收成功"),wTableID+1);
-					CTraceService::TraceString(str,TraceLevel_Normal);
+					CLog::Log(str,log_debug);
 				}
 			}
 
@@ -525,7 +525,7 @@ bool  CGameMatchServiceManager::RectifyServiceOption(tagGameServiceOption * pGam
 	}
 	catch(LPCTSTR pszString)
 	{
-		CTraceService::TraceString(pszString,TraceLevel_Exception);
+		CLog::Log(pszString,log_error);
 		return false;
 	}
 
@@ -620,7 +620,7 @@ bool CGameMatchServiceManager::OnMatchStart(CChampionshipMatch *pMatch)
 	}
 	catch(...)
 	{
-		CTraceService::TraceString(TEXT("OnMatchStart Exception!"),TraceLevel_Exception);
+		CLog::Log(TEXT("OnMatchStart Exception!"),log_error);
 	}
 
 	return true;
@@ -808,11 +808,11 @@ bool CGameMatchServiceManager::AssignTable(CChampionshipMatch *pMatch, WORD wTab
 					{
 						CString str;
 						str.Format(TEXT("玩家%s（%s)坐在第%d桌%d椅"),pTableUserItem->GetNickName(),pTableUserItem->IsAndroidUser()?TEXT("机器人"):TEXT("真人"),n+1,i+1);
-						CTraceService::TraceString(str,TraceLevel_Exception);
+						CLog::Log(str,log_error);
 					}
 					catch(...)
 					{
-						CTraceService::TraceString(TEXT("分配桌子错误，获取用户指针不为空也不是有效指针。"),TraceLevel_Exception);
+						CLog::Log(TEXT("分配桌子错误，获取用户指针不为空也不是有效指针。"),log_error);
 					}
 					bEmpty=false;
 					m_bTableUsed[n]=true;

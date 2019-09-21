@@ -117,7 +117,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
@@ -181,17 +181,11 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
   <ItemGroup>
     <ClCompile Include="AttemperEngineSink.cpp" />
     <ClCompile Include="DataBaseEngineSink.cpp" />
-    <ClCompile Include="LogicTraceHelper.cpp" />
+    <ClCompile Include="DlgLogon.cpp" />
     <ClCompile Include="LogonServer.cpp" />
-    <ClCompile Include="DlgLogonServer.cpp" />
     <ClCompile Include="RankManager.cpp" />
     <ClCompile Include="ServerListManager.cpp" />
     <ClCompile Include="ServiceUnits.cpp" />
-    <ClCompile Include="Stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_Unicode|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_Unicode|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_Unicode_License|Win32'">Create</PrecompiledHeader>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\消息定义\CMD_LogonServer.h" />
@@ -200,9 +194,8 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClInclude Include="ControlPacket.h" />
     <ClInclude Include="DataBaseEngineSink.h" />
     <ClInclude Include="DataBasePacket.h" />
-    <ClInclude Include="LogicTraceHelper.h" />
+    <ClInclude Include="DlgLogon.h" />
     <ClInclude Include="LogonServer.h" />
-    <ClInclude Include="DlgLogonServer.h" />
     <ClInclude Include="RankManager.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ServerListManager.h" />
@@ -221,4 +214,9 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="LogonServer.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

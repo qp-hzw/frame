@@ -108,7 +108,7 @@ bool CGameMatchSink::OnActionUserSitDown(WORD wChairID, IServerUserItem * pIServ
 		return m_pGameEventSink->OnActionUserSitDown(m_pITableFrame->GetTableID(), wChairID, pIServerUserItem, bLookonUser);
 	else
 	{
-		CTraceService::TraceString(TEXT("玩家坐下桌子非比赛桌子"),TraceLevel_Exception);
+		CLog::Log(TEXT("玩家坐下桌子非比赛桌子"),log_error);
 	}
 
 	return false;

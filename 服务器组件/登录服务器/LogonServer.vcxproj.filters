@@ -7,9 +7,6 @@
     <ClCompile Include="DataBaseEngineSink.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="LogicTraceHelper.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="LogonServer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -22,10 +19,7 @@
     <ClCompile Include="ServerListManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Stdafx.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="DlgLogonServer.cpp">
+    <ClCompile Include="DlgLogon.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -37,9 +31,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="DataBaseEngineSink.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="LogicTraceHelper.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="LogonServer.h">
@@ -66,11 +57,11 @@
     <ClInclude Include="DataBasePacket.h">
       <Filter>消息定义</Filter>
     </ClInclude>
-    <ClInclude Include="DlgLogonServer.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\消息定义\STR_CMD_LogonServer.h">
       <Filter>消息定义</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgLogon.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

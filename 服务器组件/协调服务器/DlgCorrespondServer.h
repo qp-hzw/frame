@@ -1,14 +1,8 @@
 #ifndef CORRESPOND_SERVER_DLG_HEAD_FILE
 #define CORRESPOND_SERVER_DLG_HEAD_FILE
 
-
 #include "Stdafx.h"
 #include "ServiceUnits.h"
-
-/*
-** 后期可以直接删除
-*/
-
 
 //主对话框
 class CCorrespondServerDlg : public CDialog
@@ -29,17 +23,6 @@ public:
 protected:
 	//控件绑定
 	virtual VOID DoDataExchange(CDataExchange * pDX);
-
-	//按钮消息
-protected:
-	//启动服务
-	VOID OnBnClickedStartService();
-	//停止服务
-	VOID OnBnClickedStopService();
-
-	DECLARE_MESSAGE_MAP()
 };
-
-//////////////////////////////////////////////////////////////////////////////////
 
 #endif

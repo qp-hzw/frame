@@ -80,15 +80,8 @@
 
 //////////////////////////////////////////////////////////////////////////////////
 //链接代码
-
-#ifndef _DEBUG
-	#pragma comment (lib,"../../../../share/依赖项/链接库/ServiceCore.lib")
-	#pragma comment (lib,"../../../../share/依赖项/链接库/KernelEngine.lib")
-#else
-
-	#pragma comment (lib,"../../../../share/依赖项/链接库/ServiceCoreD.lib")
-	#pragma comment (lib,"../../../../share/依赖项/链接库/KernelEngineD.lib")
-#endif
+#pragma comment (lib,"../../../../share/依赖项/链接库/ServiceCore.lib")
+#pragma comment (lib,"../../../../share/依赖项/链接库/KernelEngine.lib")
 
 //////////////////////////////////////////////////////////////////////////////////
 

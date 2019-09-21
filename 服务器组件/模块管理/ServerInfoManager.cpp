@@ -203,7 +203,7 @@ bool CServerInfoManager::LoadGameServerInfo(TCHAR szMachineID[LEN_MACHINE_ID], C
 			PlatformDBAide.GetParameter(TEXT("@strErrorDescribe"),szDescribeString,CountArray(szDescribeString));
 
 			//错误提示
-			CTraceService::TraceString(szDescribeString,TraceLevel_Exception);
+			CLog::Log(szDescribeString,log_error);
 
 			//错误提示
 			AfxMessageBox(szDescribeString,MB_ICONERROR);
@@ -234,7 +234,7 @@ bool CServerInfoManager::LoadGameServerInfo(TCHAR szMachineID[LEN_MACHINE_ID], C
 	{
 		//错误信息
 		LPCTSTR pszDescribe=pIException->GetExceptionDescribe();
-		CTraceService::TraceString(pszDescribe,TraceLevel_Exception);
+		CLog::Log(pszDescribe,log_error);
 
 		//错误提示
 		AfxMessageBox(pszDescribe,MB_ICONERROR);
@@ -281,7 +281,7 @@ bool CServerInfoManager::LoadGameServerInfo(TCHAR szMachineID[LEN_MACHINE_ID], D
 			PlatformDBAide.GetParameter(TEXT("@strErrorDescribe"),szDescribeString,CountArray(szDescribeString));
 
 			//错误提示
-			CTraceService::TraceString(szDescribeString,TraceLevel_Exception);
+			CLog::Log(szDescribeString,log_error);
 
 			//错误提示
 			AfxMessageBox(szDescribeString,MB_ICONERROR);
@@ -302,7 +302,7 @@ bool CServerInfoManager::LoadGameServerInfo(TCHAR szMachineID[LEN_MACHINE_ID], D
 	{
 		//错误信息
 		LPCTSTR pszDescribe=pIException->GetExceptionDescribe();
-		CTraceService::TraceString(pszDescribe,TraceLevel_Exception);
+		CLog::Log(pszDescribe,log_error);
 
 		//错误提示
 		AfxMessageBox(pszDescribe,MB_ICONERROR);
@@ -349,7 +349,7 @@ bool CServerInfoManager::DeleteGameServer(DWORD wServerID)
 			PlatformDBAide.GetParameter(TEXT("@strErrorDescribe"),szDescribeString,CountArray(szDescribeString));
 
 			//错误提示
-			CTraceService::TraceString(szDescribeString,TraceLevel_Exception);
+			CLog::Log(szDescribeString,log_error);
 
 			//错误提示
 			AfxMessageBox(szDescribeString,MB_ICONERROR);
@@ -363,7 +363,7 @@ bool CServerInfoManager::DeleteGameServer(DWORD wServerID)
 	{
 		//错误信息
 		LPCTSTR pszDescribe=pIException->GetExceptionDescribe();
-		CTraceService::TraceString(pszDescribe,TraceLevel_Exception);
+		CLog::Log(pszDescribe,log_error);
 
 		//错误提示
 		AfxMessageBox(pszDescribe,MB_ICONERROR);
@@ -415,7 +415,7 @@ bool CServerInfoManager::InsertGameServer(tagGameServiceOption *pGameServerCreat
 			PlatformDBAide.GetParameter(TEXT("@strErrorDescribe"),szDescribeString,CountArray(szDescribeString));
 
 			//错误提示
-			CTraceService::TraceString(szDescribeString,TraceLevel_Exception);
+			CLog::Log(szDescribeString,log_error);
 
 			//错误提示
 			AfxMessageBox(szDescribeString,MB_ICONERROR);
@@ -428,7 +428,7 @@ bool CServerInfoManager::InsertGameServer(tagGameServiceOption *pGameServerCreat
 	{
 		//错误信息
 		LPCTSTR pszDescribe=pIException->GetExceptionDescribe();
-		CTraceService::TraceString(pszDescribe,TraceLevel_Exception);
+		CLog::Log(pszDescribe,log_error);
 
 		//错误提示
 		AfxMessageBox(pszDescribe,MB_ICONERROR);
@@ -504,7 +504,7 @@ bool CServerInfoManager::ModifyGameServer(tagSQL_In_InsertGameRoom * pGameServer
 			PlatformDBAide.GetParameter(TEXT("@strErrorDescribe"),szDescribeString,CountArray(szDescribeString));
 
 			//错误提示
-			CTraceService::TraceString(szDescribeString,TraceLevel_Exception);
+			CLog::Log(szDescribeString,log_error);
 
 			//错误提示
 			AfxMessageBox(szDescribeString,MB_ICONERROR);
@@ -521,7 +521,7 @@ bool CServerInfoManager::ModifyGameServer(tagSQL_In_InsertGameRoom * pGameServer
 	{
 		//错误信息
 		LPCTSTR pszDescribe=pIException->GetExceptionDescribe();
-		CTraceService::TraceString(pszDescribe,TraceLevel_Exception);
+		CLog::Log(pszDescribe,log_error);
 
 		//错误提示
 		AfxMessageBox(pszDescribe,MB_ICONERROR);

@@ -85,8 +85,6 @@ public:
 public:
 	//控制事件
 	virtual bool OnEventControl(WORD wIdentifier, VOID * pData, WORD wDataSize){return false;}
-	//自定事件
-    virtual bool OnEventAttemperData(WORD wRequestID, VOID * pData, WORD wDataSize){return false;}
 
 	//socket::client
 public:

@@ -139,33 +139,18 @@ bool CAttemperEngineSink::OnEventControl(WORD wIdentifier, VOID * pData, WORD wD
 
 			return true;
 		}
-	case CT_CONNECT_CORRESPOND:		//连接协调		//lee：加载列表的返回结果，会触发这个消息
+	case CT_CONNECT_CORRESPOND:		//连接协调
 		{
 			//发起连接
-			if(1 == _TEST)
-			{
-				m_pITCPSocketService->Connect(TEXT("127.0.0.1"), PORT_CENTER);
-			}
-			else
-			{
-				m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
-			}
+			m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
 
 			//构造提示
-			TCHAR szString[512]=TEXT("");
-			_sntprintf_s(szString,CountArray(szString),TEXT("正在连接协调服务器"));
-			CTraceService::TraceString(szString,TraceLevel_Normal);
+			CLog::Log(log_debug, TEXT("正在连接协调服务器"));
 
 			return true;
 		}
 	}
 
-	return false;
-}
-
-//调度事件
-bool CAttemperEngineSink::OnEventAttemperData(WORD wRequestID, VOID * pData, WORD wDataSize)
-{
 	return false;
 }
 
@@ -187,21 +172,15 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 		{
 			m_pITimerEngine->KillTimer(IDI_CONNECT_CORRESPOND);
 			//发起连接
-			if(1 == _TEST)
-			{
-				m_pITCPSocketService->Connect(TEXT("127.0.0.1"), PORT_CENTER);
-			}
-			else
-			{
-				m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
-			}
+			m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
+			
 
 			//构造提示
 			TCHAR szString[512]=TEXT("");
 			_sntprintf_s(szString,CountArray(szString),TEXT("正在连接协调服务器"));
 
 			//提示消息
-			CTraceService::TraceString(szString,TraceLevel_Normal);
+			CLog::Log(log_debug, szString);
 
 			return true;
 		}
@@ -256,7 +235,7 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 					_sntprintf_s(szString,CountArray(szString),TEXT("统计在线人数 溢出 IDI_COLLECT_ONLINE_INFO"));
 
 					//提示消息
-					CTraceService::TraceString(szString,TraceLevel_Warning);
+					CLog::Log(log_warn, szString);
 					break;
 				}
 
@@ -390,7 +369,7 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 				 m_pITimerEngine->SetTimer(IDI_PLAY_MARQUEE,wTimerTime*1000L,1,0);
 
 				 //发送数据
-				 m_pITCPNetworkEngine->SendDataBatch(MDM_SERVICE, CMD_LC_SERVICE_MARQUEE, &strMarquee, sizeof(strMarquee), 0L);
+				 m_pITCPNetworkEngine->SendDataBatch(MDM_SERVICE, CMD_LC_SERVICE_MARQUEE, &strMarquee, sizeof(strMarquee));
 				 break;
 			}
 
@@ -892,7 +871,7 @@ bool CAttemperEngineSink::OnEventTCPSocketShut(WORD wServiceID, BYTE cbShutReaso
 			_sntprintf_s(szDescribe,CountArray(szDescribe),TEXT("与协调服务器的连接关闭了，%ld 秒后将重新连接"),TIME_CONNECT);
 
 			//提示消息
-			CTraceService::TraceString(szDescribe,TraceLevel_Warning);
+			CLog::Log(log_warn, szDescribe);
 
 			//设置时间
 			ASSERT(m_pITimerEngine!=NULL);
@@ -948,7 +927,7 @@ int GetInternetIP( TCHAR *szInernet_ip)
 			TCHAR szDescribe[128]=TEXT("");
 			_sntprintf_s(szDescribe,CountArray(szDescribe),TEXT("外网IP: %s"),szInernet_ip);
 			//提示消息
-			CTraceService::TraceString(szDescribe,TraceLevel_Normal);
+			CLog::Log(log_debug, szDescribe);
 			//std::cout << iter->length() << ": " << iter->str() << std::endl;
 		}
 	}
@@ -971,39 +950,20 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		//错误判断
 		if (nErrorCode!=0)
 		{
-			//构造提示
-			TCHAR szDescribe[128]=TEXT("");
-			_sntprintf_s(szDescribe,CountArray(szDescribe),TEXT("协调服务器连接失败 [ %ld ]，%ld 秒后将重新连接"),
-				nErrorCode,TIME_CONNECT);
-
-			//提示消息
-			CTraceService::TraceString(szDescribe,TraceLevel_Warning);
-
 			//设置时间
-			ASSERT(m_pITimerEngine!=NULL);
 			m_pITimerEngine->SetTimer(IDI_CONNECT_CORRESPOND, TIME_CONNECT_CORRESPOND, 1, 0);
 
 			return false;
 		}
-
-		//提示消息
-		CTraceService::TraceString(TEXT("正在注册登录服务器..."),TraceLevel_Normal);
 
 		//变量定义
 		STR_CPR_LP_REGISTER_LOGON CPR;
 		ZeroMemory(&CPR,sizeof(CPR));
 
 		//设置变量
-		if(1 == _TEST)
-		{
-			lstrcpyn(CPR.szServerAddr,TEXT("127.0.0.1") ,CountArray(CPR.szServerAddr));
-		}
-		else
-		{
-			TCHAR szInernet_ip[32] = TEXT("0.0.0.0");
-			GetInternetIP(szInernet_ip);
-			lstrcpyn(CPR.szServerAddr,szInernet_ip ,CountArray(CPR.szServerAddr));
-		}
+		TCHAR szInernet_ip[32] = TEXT("0.0.0.0");
+		GetInternetIP(szInernet_ip);
+		lstrcpyn(CPR.szServerAddr,szInernet_ip ,CountArray(CPR.szServerAddr));
 
 		//发送数据
 		m_pITCPSocketService->SendData(MDM_REGISTER,CPR_LP_REGISTER_LOGON,&CPR,sizeof(CPR));
@@ -1164,7 +1124,7 @@ bool CAttemperEngineSink::OnDBPCGameListResult(DWORD dwContextID, VOID * pData, 
 		_sntprintf_s(szDescribe,CountArray(szDescribe),TEXT("服务器列表加载失败，%ld 秒后将重新加载"),TIME_RELOAD_LIST);
 
 		//提示消息
-		CTraceService::TraceString(szDescribe,TraceLevel_Warning);
+		CLog::Log(log_warn, szDescribe);
 
 		//设置时间
 		ASSERT(m_pITimerEngine!=NULL);
@@ -1261,10 +1221,6 @@ bool CAttemperEngineSink::OnTCPSocketMainRegister(WORD wSubCmdID, VOID * pData, 
 			m_bNeekCorrespond=false;
 			m_pITCPSocketService->CloseSocket();
 
-			//显示消息
-			LPCTSTR pszDescribeString=pRegisterFailure->szDescribeString;
-			if (lstrlen(pszDescribeString)>0) CTraceService::TraceString(pszDescribeString,TraceLevel_Exception);
-
 			//事件通知
 			CP_ControlResult ControlResult;
 			ControlResult.cbSuccess=ER_FAILURE;
@@ -1318,13 +1274,8 @@ bool CAttemperEngineSink::OnTCPSocketMainServiceInfo(WORD wSubCmdID, VOID * pDat
 			// 如果是新房间, 需要通知所有client
 			if(byRet == 2)
 			{
-				//提示消息
-				TCHAR szString[512]=TEXT("");
-				_sntprintf_s(szString,CountArray(szString),TEXT("【MDM_LIST】增加新的房间, 通知client  ServerID: %ld"), pGameServer->wServerID);
-				CTraceService::TraceString(szString,TraceLevel_Info);
-
 				pGameServer->byMask = 0;
-				m_pITCPNetworkEngine->SendDataBatch(MDM_LIST, CMD_LC_LIST_ROOM, pGameServer, sizeof(tagGameServer), 0L);
+				m_pITCPNetworkEngine->SendDataBatch(MDM_LIST, CMD_LC_LIST_ROOM, pGameServer, sizeof(tagGameServer));
 			}
 
 			return true;
@@ -1372,7 +1323,7 @@ bool CAttemperEngineSink::OnTCPSocketMainServiceInfo(WORD wSubCmdID, VOID * pDat
 			tagGameServer GameServer;
 			GameServer.wServerID = pServerRemove->dwServerID;
 			GameServer.byMask = 1; //删除标志
-			m_pITCPNetworkEngine->SendDataBatch(MDM_LIST, CMD_LC_LIST_ROOM, &GameServer, sizeof(tagGameServer), 0L);
+			m_pITCPNetworkEngine->SendDataBatch(MDM_LIST, CMD_LC_LIST_ROOM, &GameServer, sizeof(tagGameServer));
 
 			return true;
 		}
@@ -1387,18 +1338,6 @@ bool CAttemperEngineSink::OnTCPSocketMainServiceInfo(WORD wSubCmdID, VOID * pDat
 			OfflineUser.dwUserID = pOfflineUser->dwUserID;
 			OfflineUser.dwServerID = pOfflineUser->dwServerID;
 			OfflineUser.byMask = pOfflineUser->byMask;
-
-
-			CString strTrace;
-			strTrace.Format(TEXT("【断线重连】【接收到协调服消息】玩家 = %ld, GameID = %ld, Mask = %d"), 
-				OfflineUser.dwUserID , OfflineUser.dwServerID, OfflineUser.byMask);
-			CTraceService::TraceString(strTrace, TraceLevel_Debug);
-
-
-			strTrace.Format(TEXT("【断线重连】【接收到协调服消息】m_OfflineUserListManager 大小 = %d"), 
-				m_OfflineUserListManager.GetCount());
-			CTraceService::TraceString(strTrace, TraceLevel_Debug);
-
 
 			if(1 == OfflineUser.byMask)
 			{
@@ -1441,7 +1380,7 @@ bool CAttemperEngineSink::OnTCPSocketMainTransfer(WORD wSubCmdID, VOID * pData, 
 			if (wDataSize!=sizeof(STR_CMD_LC_CLUB_TABLE_LIST)) return true;
 
 			//发送通知 -- 全部客户端
-			m_pITCPNetworkEngine->SendDataBatch(MDM_CLUB,CMD_LC_CLUB_TABLE_LIST_TABLE,pData,wDataSize,0L);
+			m_pITCPNetworkEngine->SendDataBatch(MDM_CLUB,CMD_LC_CLUB_TABLE_LIST_TABLE,pData,wDataSize);
 			return true;
 		}
 	case CPO_PL_CLUB_PLAYER_INFO: //俱乐部玩家信息
@@ -1452,7 +1391,7 @@ bool CAttemperEngineSink::OnTCPSocketMainTransfer(WORD wSubCmdID, VOID * pData, 
 			if (wDataSize!=sizeof(STR_CMD_LC_CLUB_TABLE_USER_LIST)) return true;
 
 			//发送通知 -- 全部客户端
-			m_pITCPNetworkEngine->SendDataBatch(MDM_CLUB, CMD_LC_CLUB_TABLE_LIST_USER,pData,wDataSize,0L);
+			m_pITCPNetworkEngine->SendDataBatch(MDM_CLUB, CMD_LC_CLUB_TABLE_LIST_USER,pData,wDataSize);
 			return true;
 		}
 	case CPO_PL_CREATE_TABLE:	//创建桌子 查询可用的GameID
@@ -1507,7 +1446,7 @@ bool CAttemperEngineSink::OnTCPSocketMainWeb( WORD wSubCmdID, VOID * pData, WORD
 			memcpy(CMD.szUserNickName, TEXT("系统管理员"), sizeof(CMD.szUserNickName));
 			memcpy(CMD.szChat, pSub->szMessage, sizeof(CMD.szChat));
 
-			m_pITCPNetworkEngine->SendDataBatch(MDM_CLUB, CMD_LC_CLUB_CHAT_BDCAST, &CMD, sizeof(CMD), 0L);
+			m_pITCPNetworkEngine->SendDataBatch(MDM_CLUB, CMD_LC_CLUB_CHAT_BDCAST, &CMD, sizeof(CMD));
 			return true;
 		}
 	}
@@ -2040,10 +1979,6 @@ bool CAttemperEngineSink::On_CMD_LC_Logon_Platform(DWORD dwContextID, VOID * pDa
 		{
 			pCMDLogonPlatform.dwOffLineGameID = m_OfflineUserListManager.GetAt(i).dwServerID;
 			bIsExist = true;
-			CString strTrace;
-			strTrace.Format(TEXT("【平台登录】【断线重连】 UserID = %ld, GameID = %ld"), pCMDLogonPlatform.dwUserID, pCMDLogonPlatform.dwOffLineGameID);
-			CTraceService::TraceString(strTrace, TraceLevel_Debug);
-
 			break;
 		}
 	}
@@ -2120,7 +2055,7 @@ bool CAttemperEngineSink::On_CMD_LC_Logon_UpdateNotify(DWORD dwVersionCheck, DWO
 	//构造提示
 	TCHAR szString[512]=TEXT("");
 	_sntprintf_s(szString,CountArray(szString),TEXT("版本校验结果:%d  服务器版本:%ld  客户端版本:%ld"), ret, serverFrameVersion, clientFrameVersion);
-	CTraceService::TraceString(szString,TraceLevel_Normal);
+	CLog::Log(log_debug, szString);
 
 
 	//版本匹配, 则直接退出, 不需要发送消息
@@ -3472,7 +3407,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_JOIN_CLUB_BDCAST( DWORD dwContextID, VO
 	if( wDataSize != Size) return false;
 
 	//TODONOW 暂时是每个人都发送，后面改为 1.特定俱乐部的  2.会长和管理员发送
-	m_pITCPNetworkEngine->SendDataBatch(MDM_CLUB, CMD_LC_CLUB_JOIN_CLUB_BDCAST, pData, wDataSize, 0L);
+	m_pITCPNetworkEngine->SendDataBatch(MDM_CLUB, CMD_LC_CLUB_JOIN_CLUB_BDCAST, pData, wDataSize);
 	return true;
 }
 //申请加入牌友圈 通知客户端实时刷新
@@ -3771,7 +3706,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_CHAT_BDCAST( DWORD dwContextID, VOID * 
 		}
 	case 1: //世界聊天
 		{
-			m_pITCPNetworkEngine->SendDataBatch(MDM_CLUB, CMD_LC_CLUB_CHAT_BDCAST, pData, wDataSize, 0L);
+			m_pITCPNetworkEngine->SendDataBatch(MDM_CLUB, CMD_LC_CLUB_CHAT_BDCAST, pData, wDataSize);
 			break;
 		}
 	case 2: //系统聊天

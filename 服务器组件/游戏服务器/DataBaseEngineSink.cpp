@@ -137,7 +137,7 @@ bool CDataBaseEngineSink::OnDataBaseEngineStart(IUnknownEx * pIUnknownEx)
 			ASSERT(FALSE);
 
 			//输出信息
-			CTraceService::TraceString(TEXT("游戏数据库扩展钩子引擎对象配置失败"),TraceLevel_Exception);
+			CLog::Log(TEXT("游戏数据库扩展钩子引擎对象配置失败"),log_error);
 
 			return false;
 		}
@@ -149,7 +149,7 @@ bool CDataBaseEngineSink::OnDataBaseEngineStart(IUnknownEx * pIUnknownEx)
 	catch (IDataBaseException * pIException)
 	{
 		//错误信息
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 
 		return false;
 	}
@@ -460,7 +460,7 @@ bool CDataBaseEngineSink::On_DBR_Logon_UserID(DWORD dwContextID, VOID * pData, W
 	catch (IDataBaseException * pIException)
 	{
 		//错误信息
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 		return false;
 	}
 
@@ -489,7 +489,7 @@ bool CDataBaseEngineSink::On_DBR_GP_QUIT(DWORD dwContextID, VOID * pData, WORD w
 	catch(IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 		return false;
 	}
 
@@ -609,7 +609,7 @@ bool CDataBaseEngineSink::On_DBR_User_CreateGroupRoom(DWORD dwContextID, VOID *p
 	catch (IDataBaseException * pIException)
 	{
 		//错误信息
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 		return false;
 	}
 
@@ -681,7 +681,7 @@ bool CDataBaseEngineSink::On_DBR_User_JoinGroupRoom(DWORD dwContextID, VOID *pDa
 	catch (IDataBaseException * pIException)
 	{
 		//错误信息
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 		return false;
 	}
 
@@ -772,7 +772,7 @@ bool CDataBaseEngineSink::OnRequestWriteGameScore(DWORD dwContextID, VOID * pDat
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 
 		return false;
 	}
@@ -813,7 +813,7 @@ bool CDataBaseEngineSink::On_DBR_ModifyUserTreasure(DWORD dwContextID, void * pD
 			);
 
 		//提示消息
-		CTraceService::TraceString(szString,TraceLevel_Debug);
+		CLog::Log(szString,log_debug);
 
 		BYTE byWinOrLose = 0; //0平;  1赢;  2负
 
@@ -887,7 +887,7 @@ bool CDataBaseEngineSink::On_DBR_ModifyUserTreasure(DWORD dwContextID, void * pD
 				);
 
 			//提示消息
-			CTraceService::TraceString(szString,TraceLevel_Warning);
+			CLog::Log(szString,log_warn);
 		}
 #pragma endregion
 		return true;
@@ -895,7 +895,7 @@ bool CDataBaseEngineSink::On_DBR_ModifyUserTreasure(DWORD dwContextID, void * pD
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 
 		return false;
 	}
@@ -924,7 +924,7 @@ bool CDataBaseEngineSink::On_DBR_SaveGameRecord(DWORD dwContextID, void * pData,
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 
 		return false;
 	}
@@ -1014,7 +1014,7 @@ bool CDataBaseEngineSink::OnRequestLeaveGameServer(DWORD dwContextID, VOID * pDa
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 
 		return false;
 	}
@@ -1103,7 +1103,7 @@ bool CDataBaseEngineSink::OnRequestGameScoreRecord(DWORD dwContextID, VOID * pDa
 				m_GameDBAide.AddParameter(TEXT("@dwUserMedal"),pGameScoreRecord->GameScoreRecord[i].dwUserMemal);
 				m_GameDBAide.AddParameter(TEXT("@dwPlayTimeCount"),pGameScoreRecord->GameScoreRecord[i].dwPlayTimeCount);
 
-				CTraceService::TraceStringEx(TraceLevel_Debug,TEXT("GSP_GR_RecordDrawInfo UserID: %ld, lScore:%I64d, lRevenue: %I64d, lChoushui: %I64d"), 
+				CLog::TraceStringEx(log_debug,TEXT("GSP_GR_RecordDrawInfo UserID: %ld, lScore:%I64d, lRevenue: %I64d, lChoushui: %I64d"), 
 					pGameScoreRecord->GameScoreRecord[i].dwUserID,
 					pGameScoreRecord->GameScoreRecord[i].lScore,
 					pGameScoreRecord->GameScoreRecord[i].lRevenue,
@@ -1116,7 +1116,7 @@ bool CDataBaseEngineSink::OnRequestGameScoreRecord(DWORD dwContextID, VOID * pDa
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 
 		return false;
 	}
@@ -1183,7 +1183,7 @@ bool CDataBaseEngineSink::OnRequestLoadAndroidUser(DWORD dwContextID, VOID * pDa
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 
 		//变量定义
 		DBO_GR_GameAndroidInfo GameAndroidInfo;
@@ -1230,7 +1230,7 @@ bool CDataBaseEngineSink::On_DBR_GR_LOAD_OFFLINE(DWORD dwContextID, VOID * pData
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 	}
 
 	return false;
@@ -1285,7 +1285,7 @@ bool CDataBaseEngineSink::OnRequestMatchFee(DWORD dwContextID, VOID * pData, WOR
 	catch (IDataBaseException * pIException)
 	{
 		//错误信息
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 
 		return false;
 	}
@@ -1328,7 +1328,7 @@ bool CDataBaseEngineSink::OnRequestMatchStart(DWORD dwContextID, VOID * pData, W
 	catch (IDataBaseException * pIException)
 	{
 		//错误信息
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 
 		return false;
 	}
@@ -1391,7 +1391,7 @@ bool CDataBaseEngineSink::OnRequestMatchOver(DWORD dwContextID, VOID * pData, WO
 	catch (IDataBaseException * pIException)
 	{
 		//错误信息
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 
 		return false;
 	}
@@ -1444,7 +1444,7 @@ bool CDataBaseEngineSink::OnRequestMatchReward(DWORD dwContextID, VOID * pData, 
 	catch (IDataBaseException * pIException)
 	{
 		//错误信息
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 
 		return false;
 	}
@@ -1501,7 +1501,7 @@ bool CDataBaseEngineSink::OnRequestMatchQuit(DWORD dwContextID, VOID * pData, WO
 	catch (IDataBaseException * pIException)
 	{
 		//错误信息
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 
 		return false;
 	}
@@ -1542,7 +1542,7 @@ bool CDataBaseEngineSink::OnRequestRoomLevelModify(DWORD dwContextID, VOID * pDa
 	catch (IDataBaseException * pIException)
 	{
 		//错误信息
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 
 		return false;
 	}
@@ -1583,7 +1583,7 @@ bool CDataBaseEngineSink::OnRequestRoomControlValModify(DWORD dwContextID, VOID 
 	catch (IDataBaseException * pIException)
 	{
 		//错误信息
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 
 		return false;
 	}
@@ -1623,7 +1623,7 @@ bool CDataBaseEngineSink::OnWriteCurrentStock( DWORD dwContextID, VOID * pData, 
 	catch(IDataBaseException * pIException)
 	{
 		//错误信息
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 		return false;
 	}
 	return true;
@@ -1660,7 +1660,7 @@ bool CDataBaseEngineSink::OnRequestManageUserRight(DWORD dwContextID, VOID * pDa
 	catch (IDataBaseException * pIException)
 	{
 		//错误信息
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 
 		return false;
 	}
@@ -1758,7 +1758,7 @@ bool CDataBaseEngineSink::On_DBR_CLUB_ROOM_INFO(DWORD dwContextID, VOID * pData,
 	catch(IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 		return false;
 	}
 
@@ -1816,7 +1816,7 @@ bool CDataBaseEngineSink::On_DBR_CLUB_TABLE_INFO(DWORD dwContextID, VOID * pData
 	catch(IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 		return false;
 	}
 
@@ -1869,7 +1869,7 @@ bool CDataBaseEngineSink::On_DBR_CLUB_PLAYER_INFO(DWORD dwContextID, VOID * pDat
 	catch(IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 		return false;
 	}
 
@@ -1911,7 +1911,7 @@ bool CDataBaseEngineSink::On_DBR_HALL_GOLD_TABLE_INFO(DWORD dwContextID, VOID * 
 	catch(IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 		return false;
 	}
 
@@ -1947,7 +1947,7 @@ bool CDataBaseEngineSink::On_DBR_HALL_GOLD_PLAYER_INFO(DWORD dwContextID, VOID *
 	catch(IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 		return false;
 	}
 
@@ -2003,7 +2003,7 @@ bool CDataBaseEngineSink::OnRequestAddTableInfo(DWORD dwContextID, VOID * pData,
 	catch(IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 		return false;
 	}
 
@@ -2048,7 +2048,7 @@ bool CDataBaseEngineSink::OnRequestStartTable(DWORD dwContextID, VOID * pData, W
 	catch(IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 		return false;
 	}
 	return true;
@@ -2102,7 +2102,7 @@ bool CDataBaseEngineSink::OnRequestEndTable(DWORD dwContextID, VOID * pData, WOR
 	catch(IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 		return false;
 	}
 	return true;
@@ -2149,7 +2149,7 @@ bool CDataBaseEngineSink::OnRequestAddUserToTable(DWORD dwContextID, VOID * pDat
 	catch(IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 		return false;
 	}
 	return true;
@@ -2193,7 +2193,7 @@ bool CDataBaseEngineSink::OnRequestDeleteUserToTable(DWORD dwContextID, VOID * p
 	catch(IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(),TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(),log_error);
 		return false;
 	}
 
@@ -2350,7 +2350,7 @@ bool CDataBaseEngineSink::OnQueryLottery(DWORD dwContextID, void * pData, WORD w
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(), log_error);
 
 		return false;
 	}
@@ -2390,7 +2390,7 @@ bool CDataBaseEngineSink::On_Table_UpdateGameTaskStatus(DWORD dwContextID, void 
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(), log_error);
 
 		return false;
 	}
@@ -2550,7 +2550,7 @@ bool CDataBaseEngineSink::On_DBR_CG_CLUB_CREATE_TABLE(DWORD dwContextID, void *p
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(), log_error);
 
 		return false;
 	}
@@ -2618,7 +2618,7 @@ bool CDataBaseEngineSink::On_DBR_CG_USER_JOIN_TABLE_NO_PASS(DWORD dwContextID, v
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(), log_error);
 
 		return false;
 	}
@@ -2651,7 +2651,7 @@ bool CDataBaseEngineSink::On_DBR_CG_JOIN_TABLE(DWORD dwContextID, void *pData, W
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(), log_error);
 
 		return false;
 	}
@@ -2703,7 +2703,7 @@ bool CDataBaseEngineSink::On_DBR_CG_USER_JOIN_TABLE_HALL_GOLD(DWORD dwContextID,
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		CTraceService::TraceString(pIException->GetExceptionDescribe(), TraceLevel_Exception);
+		CLog::Log(pIException->GetExceptionDescribe(), log_error);
 
 		return false;
 	}

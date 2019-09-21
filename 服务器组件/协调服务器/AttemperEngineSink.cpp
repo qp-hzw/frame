@@ -606,7 +606,7 @@ bool CAttemperEngineSink::OnTCPNetworkMainManagerService(WORD wSubCmdID, VOID * 
 			STR_CPR_WP_WEB_SYSTEM_MESSAGE *pSub = (STR_CPR_WP_WEB_SYSTEM_MESSAGE*) pData;
 			
 			LPCTSTR pszDescribe=pSub->szMessage;
-			CTraceService::TraceString(TraceLevel_Normal, pszDescribe);
+			CLog::Log(log_debug, pszDescribe);
 
 			//发送通知到客户端(只发送给大厅)
 			SendDataToPlaza(INVALID_WORD, MDM_WEB, CPO_PL_WEB_SYSTEM_MESSAGE, pData, wDataSize);

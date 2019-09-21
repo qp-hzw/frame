@@ -137,8 +137,6 @@ protected:
 public:
 	//控制事件
 	virtual bool OnEventControl(WORD wIdentifier, VOID * pData, WORD wDataSize);
-	//自定义事件
-    virtual bool OnEventAttemperData(WORD wRequestID, VOID * pData, WORD wDataSize){return false;}
 
 	//内核事件
 public:

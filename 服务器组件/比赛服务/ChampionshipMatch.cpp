@@ -161,11 +161,11 @@ bool CChampionshipMatch::OnUserSignUp(IServerUserItem * pUserItem)
 				//错误判断
 				if (pTableEx==NULL)
 				{
-					CTraceService::TraceString(TEXT("pTableEx为空"),TraceLevel_Exception);
+					CLog::Log(TEXT("pTableEx为空"),log_error);
 				}
 				if (pIServerUserItem==NULL)
 				{
-					CTraceService::TraceString(TEXT("pIServerUserItem为空"),TraceLevel_Exception);
+					CLog::Log(TEXT("pIServerUserItem为空"),log_error);
 				}
 			}
 		}
@@ -324,7 +324,7 @@ BOOL CChampionshipMatch::OnUserQuitMatch(IServerUserItem *pUserItem,bool bByUser
 							{
 								CString str;
 								str.Format(TEXT("%s,%s,%d"),pszString,__FUNCTION__,__LINE__);
-								CTraceService::TraceString(str,TraceLevel_Exception);
+								CLog::Log(str,log_error);
 							}
 						}
 						else
@@ -450,7 +450,7 @@ bool CChampionshipMatch::StartMatch(ITableFramEx *pTableFrame)
 					{
 						CString str;
 						str.Format(TEXT("%d,%d"), m_enMatchStatus,__LINE__);
-						CTraceService::TraceString(str,TraceLevel_Info);
+						CLog::Log(str,log_debug);
 					}
 					if(pUserItem!=NULL)
 					{
@@ -462,7 +462,7 @@ bool CChampionshipMatch::StartMatch(ITableFramEx *pTableFrame)
 						{
 							CString str;
 							str.Format(TEXT("%s,%s,%d"),pszString,__FUNCTION__,__LINE__);
-							CTraceService::TraceString(str,TraceLevel_Exception);
+							CLog::Log(str,log_error);
 						}
 
 						pUserItem->SetUserStatus(US_READY,pUserItem->GetTableID(),pUserItem->GetChairID());
@@ -525,7 +525,7 @@ bool CChampionshipMatch::StartMatch(ITableFramEx *pTableFrame)
 					{
 						CString str;
 						str.Format(TEXT("%d,%d"), m_enMatchStatus,__LINE__);
-						CTraceService::TraceString(str,TraceLevel_Info);
+						CLog::Log(str,log_debug);
 					}
 					
 					if(pUserItem!=NULL)
@@ -538,7 +538,7 @@ bool CChampionshipMatch::StartMatch(ITableFramEx *pTableFrame)
 						{
 							CString str;
 							str.Format(TEXT("%s,%s,%d"),pszString,__FUNCTION__,__LINE__);
-							CTraceService::TraceString(str,TraceLevel_Exception);
+							CLog::Log(str,log_error);
 						}
 						pUserItem->SetUserStatus(US_READY,pUserItem->GetTableID(),pUserItem->GetChairID());
 					}
@@ -573,7 +573,7 @@ bool CChampionshipMatch::StartMatch(ITableFramEx *pTableFrame)
 								{
 									CString str;
 									str.Format(TEXT("%s,%s,%d"),pszString,__FUNCTION__,__LINE__);
-									CTraceService::TraceString(str,TraceLevel_Exception);
+									CLog::Log(str,log_error);
 								}
 							}
 						}
@@ -703,7 +703,7 @@ bool CChampionshipMatch::OnEventGameStart(ITableFrame *pITableFrame, WORD wChair
 			{
 				CString strTace;
 				strTace.Format(TEXT("起立失败（%d）"),__LINE__);
-				CTraceService::TraceString(strTace,TraceLevel_Exception);
+				CLog::Log(strTace,log_error);
 			}
 			m_UserSeatMap.RemoveKey(pUserItem);
 			pUserItem->SetUserStatus(US_OFFLINE,pITableFrame->GetTableID(),pUserItem->GetChairID());
@@ -851,7 +851,7 @@ bool CChampionshipMatch::OnTimeMessage(DWORD dwTimerID, WPARAM dwBindParameter)
 								{
 									CString strTace;
 									strTace.Format(TEXT("起立失败（%d）"),__LINE__);
-									CTraceService::TraceString(strTace,TraceLevel_Exception);
+									CLog::Log(strTace,log_error);
 								}
 
 								m_UserSeatMap.RemoveKey(pUserItem);
@@ -863,7 +863,7 @@ bool CChampionshipMatch::OnTimeMessage(DWORD dwTimerID, WPARAM dwBindParameter)
 								{
 									CString str;
 									str.Format(TEXT("%s,%s,%d"),pszString,__FUNCTION__,__LINE__);
-									CTraceService::TraceString(str,TraceLevel_Exception);
+									CLog::Log(str,log_error);
 								}
 								wReadyUserCount--;
 
@@ -932,7 +932,7 @@ bool CChampionshipMatch::OnTimeMessage(DWORD dwTimerID, WPARAM dwBindParameter)
 						{
 							CString str;
 							str.Format(TEXT("RearrangeUserSeat:%d"),__LINE__);
-							CTraceService::TraceString(str,TraceLevel_Exception);
+							CLog::Log(str,log_error);
 							SafeDeleteArray(pScore);
 						}
 					}
@@ -984,7 +984,7 @@ bool CChampionshipMatch::OnTimeMessage(DWORD dwTimerID, WPARAM dwBindParameter)
 					{
 						CString str;
 						str.Format(TEXT("RearrangeUserSeat:%d"),__LINE__);
-						CTraceService::TraceString(str,TraceLevel_Exception);
+						CLog::Log(str,log_error);
 					}
 					for (WORD i=0;i<m_pMatchRule->arrSecRoundUserCount[m_wCurRountSec-1];i++)
 					{
@@ -1006,7 +1006,7 @@ bool CChampionshipMatch::OnTimeMessage(DWORD dwTimerID, WPARAM dwBindParameter)
 				CString str;
 				str.Format(TEXT("比赛人数:%d,%d,m_enMatchStatus=%d,m_wCurRountSec=%d"),
 					m_OnMatchUserMap.GetCount(),m_pMatchRule->arrSecRoundUserCount[m_wCurRountSec-1],m_enMatchStatus,m_wCurRountSec);
-				CTraceService::TraceString(str,TraceLevel_Exception);
+				CLog::Log(str,log_error);
 			}
 			break;
 		}
@@ -1101,7 +1101,7 @@ void CChampionshipMatch::SelectPromotionUser()
 	{
 		CString str;
 		str.Format(TEXT("RearrangeUserSeat:%d"),__LINE__);
-		CTraceService::TraceString(str,TraceLevel_Exception);
+		CLog::Log(str,log_error);
 	}
 	m_enMatchStatus=MS_SECOND_ROUND;
 	m_wCurRountSec=1;	
@@ -1204,7 +1204,7 @@ void CChampionshipMatch::RearrangeUserSeat(tagMatchScore score[], INT_PTR nCount
 				ASSERT(pITableFrame->GetTableUserItem(pIServerUserItem->GetChairID())==pIServerUserItem);
 				if (pITableFrame->GetTableUserItem(pIServerUserItem->GetChairID())!=pIServerUserItem)
 				{
-					CTraceService::TraceString(TEXT("RearrangeUserSeat 用户对象所坐的位置与桌子对象绑定信息不一致"),TraceLevel_Exception);
+					CLog::Log(TEXT("RearrangeUserSeat 用户对象所坐的位置与桌子对象绑定信息不一致"),log_error);
 					continue;
 				}
 
@@ -1229,7 +1229,7 @@ void CChampionshipMatch::RearrangeUserSeat(tagMatchScore score[], INT_PTR nCount
 		//参数判断 
 		if (score[i].pUserItem==NULL)
 		{
-			CTraceService::TraceString(TEXT("不可能出现 pUserItem==NULL"),TraceLevel_Exception);
+			CLog::Log(TEXT("不可能出现 pUserItem==NULL"),log_error);
 			continue;
 		}
 
@@ -1276,14 +1276,14 @@ void CChampionshipMatch::RearrangeUserSeat(tagMatchScore score[], INT_PTR nCount
 		//错误判断
 		if ((pITableFramEx==NULL)||(pITableFramEx->pTableFrame->IsGameStarted()))
 		{
-			CTraceService::TraceString(TEXT("不可能出现 Table==NULL 或 Table->pTableFrame->IsGameStarted()"),TraceLevel_Exception);
+			CLog::Log(TEXT("不可能出现 Table==NULL 或 Table->pTableFrame->IsGameStarted()"),log_error);
 			continue;
 		}
 
 		//坐下位置
 		if (pITableFramEx->pTableFrame->PerformSitDownAction(wChairID,pIServerUserItem)==false)
 		{
-			CTraceService::TraceString(TEXT("不可能出现 Table==NULL 或 Table->pTableFrame->IsGameStarted()1"),TraceLevel_Exception);
+			CLog::Log(TEXT("不可能出现 Table==NULL 或 Table->pTableFrame->IsGameStarted()1"),log_error);
 			continue;
 		}
 
@@ -1296,7 +1296,7 @@ void CChampionshipMatch::RearrangeUserSeat(tagMatchScore score[], INT_PTR nCount
 			{
 				if (m_WaitStartTable[nIndex]==pITableFramEx)
 				{
-					CTraceService::TraceString(TEXT("不可能出现 m_WaitStartTable[k]==pITableFramEx"),TraceLevel_Exception);
+					CLog::Log(TEXT("不可能出现 m_WaitStartTable[k]==pITableFramEx"),log_error);
 					break;
 				}
 			}
@@ -1488,7 +1488,7 @@ bool CChampionshipMatch::OnTableFinishRound(ITableFramEx *pITableFrameEx)
 				{
 					CString str;
 					str.Format(TEXT("%d,%d"), m_enMatchStatus,__LINE__);
-					CTraceService::TraceString(str,TraceLevel_Info);
+					CLog::Log(str,log_debug);
 				}
 				if(pSeatUser!=NULL)
 				{
@@ -1671,7 +1671,7 @@ IServerUserItem * CChampionshipMatch::GetSeatUserItem(DWORD dwSeatID)
 				CString str;
 				str.Format(TEXT("获取座位上用户出错，用户(%s,%d桌%d椅,用户状态:%d)已经不在本场比赛中%d桌%d椅"),pIServerUserItem->GetNickName(),LOWORD(dwSeatID),HIWORD(dwSeatID),
 					pIServerUserItem->GetUserStatus(),pIServerUserItem->GetTableID(),pIServerUserItem->GetChairID());
-				CTraceService::TraceString(str,TraceLevel_Exception);
+				CLog::Log(str,log_error);
 				m_UserSeatMap.RemoveKey(pIServerUserItem);
 				WORD wTableID=pIServerUserItem->GetTableID();
 				if(wTableID!=NULL)
@@ -1710,7 +1710,7 @@ bool CChampionshipMatch::OnActionUserSitDown(WORD wTableID, WORD wChairID, IServ
 		}
 		if(i>=m_wTableCount)
 		{
-			CTraceService::TraceString(TEXT("用户坐下的桌子不在本场比赛中。"),TraceLevel_Exception);
+			CLog::Log(TEXT("用户坐下的桌子不在本场比赛中。"),log_error);
 			return false;
 		}
 		IServerUserItem *pUserItem=NULL;
@@ -1902,7 +1902,7 @@ void CChampionshipMatch::FirstRoundRuleScoreGameEnd(ITableFramEx *pITableFrameEx
 					{
 						CString strTace;
 						strTace.Format(TEXT("起立失败（%d）"),__LINE__);
-						CTraceService::TraceString(strTace,TraceLevel_Exception);
+						CLog::Log(strTace,log_error);
 					}
 					bOut=true;
 					pITableFrameEx->cbGameCount=0;

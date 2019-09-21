@@ -132,7 +132,7 @@ VOID CGameServerDlg::OnServiceUnitsStatus(enServiceStatus ServiceStatus)
 
 			//提示信息
 			LPCTSTR pszDescribe=TEXT("停止服务器中");
-			CTraceService::TraceString(pszDescribe,TraceLevel_Normal);
+			CLog::Log(pszDescribe,log_debug);
 
 			break;
 		}
@@ -151,7 +151,7 @@ VOID CGameServerDlg::OnServiceUnitsStatus(enServiceStatus ServiceStatus)
 
 			//提示信息
 			LPCTSTR pszDescribe=TEXT("服务停止成功");
-			CTraceService::TraceString(pszDescribe,TraceLevel_Normal);
+			CLog::Log(pszDescribe,log_debug);
 
 			if(m_bQuit)
 			{
@@ -175,7 +175,7 @@ VOID CGameServerDlg::OnServiceUnitsStatus(enServiceStatus ServiceStatus)
 
 			//提示信息
 			LPCTSTR pszDescribe=TEXT("正在初始化组件...");
-			CTraceService::TraceString(pszDescribe,TraceLevel_Normal);
+			CLog::Log(pszDescribe,log_debug);
 
 			break;
 		}
@@ -194,7 +194,7 @@ VOID CGameServerDlg::OnServiceUnitsStatus(enServiceStatus ServiceStatus)
 
 			//提示信息
 			LPCTSTR pszDescribe=TEXT("服务启动成功");
-			CTraceService::TraceString(pszDescribe,TraceLevel_Normal);
+			CLog::Log(pszDescribe,log_debug);
 
 			break;
 		}
@@ -304,7 +304,7 @@ VOID CGameServerDlg::UpdateParameterStatus(tagModuleInitParameter & ModuleInitPa
 	_sntprintf_s(szString,CountArray(szString),TEXT("[ %s ] 房间参数加载成功"),pszServerName);
 
 	//输出信息
-	CTraceService::TraceString(szString,TraceLevel_Normal);
+	CLog::Log(szString,log_debug);
 
 	return;
 }
@@ -374,7 +374,7 @@ BOOL CGameServerDlg::OnQueryEndSession()
 	//提示消息
 	if (m_ServiceUnits.GetServiceStatus()!=ServiceStatus_Stop)
 	{
-		CTraceService::TraceString(TEXT("服务正在运行中，系统要求注销回话请求失败"),TraceLevel_Warning);
+		CLog::Log(TEXT("服务正在运行中，系统要求注销回话请求失败"),log_warn);
 		return FALSE;
 	}
 

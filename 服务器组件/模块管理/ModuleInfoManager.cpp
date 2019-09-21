@@ -224,7 +224,7 @@ int GetInternetIP( TCHAR *szInernet_ip)
 			TCHAR szDescribe[128]=TEXT("");
 			_sntprintf_s(szDescribe,CountArray(szDescribe),TEXT("外网IP: %s"),szInernet_ip);
 			//提示消息
-			CTraceService::TraceString(szDescribe,TraceLevel_Normal);
+			CLog::Log(szDescribe,log_debug);
 			//std::cout << iter->length() << ": " << iter->str() << std::endl;
 		}
 	}
@@ -269,7 +269,7 @@ bool CModuleInfoManager::LoadGameModuleInfo(CGameItemMap & ModuleInfoBuffer)
 		PlatformDBAide.ResetParameter();
 		PlatformDBAide.AddParameter(TEXT("byMystery"), _MYSTERY);
 		PlatformDBAide.AddParameter(TEXT("IP"), szInernet_ip);
-		//CTraceService::TraceString(szInernet_ip, TraceLevel_Normal);
+		//CLog::Log(szInernet_ip, log_debug);
 		if (PlatformDBAide.ExecuteProcess(TEXT("GSP_GS_LoadGameGameItem"),true)==DB_SUCCESS)
 		{
 			//清空列表
@@ -310,7 +310,7 @@ bool CModuleInfoManager::LoadGameModuleInfo(CGameItemMap & ModuleInfoBuffer)
 	{
 		//错误信息
 		LPCTSTR pszDescribe=pIException->GetExceptionDescribe();
-		CTraceService::TraceString(pszDescribe,TraceLevel_Exception);
+		CLog::Log(pszDescribe,log_error);
 
 		//错误提示
 		AfxMessageBox(pszDescribe,MB_ICONERROR);

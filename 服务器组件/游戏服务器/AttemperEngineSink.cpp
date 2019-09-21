@@ -231,7 +231,7 @@ bool CAttemperEngineSink::OnEventControl(WORD wIdentifier, VOID * pData, WORD wD
 			_sntprintf_s(szString,CountArray(szString),TEXT("正在连接协调服务器"));
 
 			//提示消息
-			CTraceService::TraceString(szString,TraceLevel_Normal);
+			CLog::Log(szString,log_debug);
 
 			return true;
 		}
@@ -312,7 +312,7 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 				_sntprintf_s(szString,CountArray(szString),TEXT("正在连接协调服务器"));
 
 				//提示消息
-				CTraceService::TraceString(szString,TraceLevel_Normal);
+				CLog::Log(szString,log_debug);
 
 				return true;
 			}
@@ -500,7 +500,7 @@ bool CAttemperEngineSink::OnEventTCPSocketShut(WORD wServiceID, BYTE cbShutReaso
 			_sntprintf_s(szDescribe,CountArray(szDescribe),TEXT("与协调服务器的连接关闭了，%ld 秒后将重新连接"),TIME_CONNECT);
 
 			//提示消息
-			CTraceService::TraceString(szDescribe,TraceLevel_Warning);
+			CLog::Log(szDescribe,log_warn);
 
 			//设置时间
 			ASSERT(m_pITimerEngine!=NULL);
@@ -528,7 +528,7 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 				nErrorCode,TIME_CONNECT_CORRESPOND);
 
 			//提示消息
-			CTraceService::TraceString(szDescribe,TraceLevel_Warning);
+			CLog::Log(szDescribe,log_warn);
 
 			//设置时间
 			m_pITimerEngine->SetTimer(IDI_CONNECT_CORRESPOND, TIME_CONNECT_CORRESPOND, 1, 0);
@@ -537,7 +537,7 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		}
 
 		//提示消息
-		CTraceService::TraceString(TEXT("正在发送游戏房间注册信息..."),TraceLevel_Normal);
+		CLog::Log(TEXT("正在发送游戏房间注册信息..."),log_debug);
 
 		//变量定义
 		STR_CPR_GP_REGISTER_GAME RegisterServer;
@@ -1025,7 +1025,7 @@ bool CAttemperEngineSink::OnEventModifyUserTreasure(IServerUserItem *pIServerUse
 			pIServerUserItem->GetUserID(),
 			(pBindParameter == NULL)
 			);
-		CTraceService::TraceString(szString,TraceLevel_Normal);
+		CLog::Log(szString,log_debug);
 
 	if (NULL != pBindParameter)
 	{
@@ -1231,7 +1231,7 @@ bool CAttemperEngineSink::OnTCPSocketMainRegister(WORD wSubCmdID, VOID * pData, 
 			//显示消息
 			if (lstrlen(pRegisterFailure->szDescribeString)>0)
 			{
-				CTraceService::TraceString(pRegisterFailure->szDescribeString,TraceLevel_Exception);
+				CLog::Log(pRegisterFailure->szDescribeString,log_error);
 			}
 
 			//事件通知
@@ -1545,7 +1545,7 @@ bool CAttemperEngineSink::On_SUB_CG_Logon_UserID(VOID * pData, WORD wDataSize, D
 		_sntprintf_s(szString,CountArray(szString),
 			TEXT("【ID登录】【%ld重复登录1】"), 
 			pLogonUserID->dwUserID);
-		CTraceService::TraceString(szString,TraceLevel_Info);
+		CLog::Log(szString,log_debug);
 
 		return false;
 	}
@@ -1565,7 +1565,7 @@ bool CAttemperEngineSink::On_SUB_CG_Logon_UserID(VOID * pData, WORD wDataSize, D
 			_sntprintf_s(szString,CountArray(szString),
 				TEXT("【ID登录】【%ld登录失败】非正常登录, 不允许踢出"), 
 				pLogonUserID->dwUserID);
-			CTraceService::TraceString(szString,TraceLevel_Info);
+			CLog::Log(szString,log_debug);
 
 			return false;
 		}
@@ -1578,7 +1578,7 @@ bool CAttemperEngineSink::On_SUB_CG_Logon_UserID(VOID * pData, WORD wDataSize, D
 		_sntprintf_s(szString,CountArray(szString),
 			TEXT("【ID登录】【%ld重复登录】切换连接1"), 
 			pLogonUserID->dwUserID);
-		CTraceService::TraceString(szString,TraceLevel_Info);
+		CLog::Log(szString,log_debug);
 
 		return SwitchUserItemConnect(pIServerUserItem, pLogonUserID->szMachineID, 
 			wBindIndex,
@@ -1639,7 +1639,7 @@ bool CAttemperEngineSink::On_CMD_GC_Logon_UserID(DWORD dwContextID, VOID * pData
 		_sntprintf_s(szDescribe,CountArray(szDescribe),
 			TEXT("【ID登录】【%ld登录失败】无空闲socket"),
 			pDBOLogon->dwUserID);
-		CTraceService::TraceString(szDescribe,TraceLevel_Warning);
+		CLog::Log(szDescribe,log_warn);
 
 		return true;
 	}
@@ -1660,7 +1660,7 @@ bool CAttemperEngineSink::On_CMD_GC_Logon_UserID(DWORD dwContextID, VOID * pData
 		_sntprintf_s(szDescribe,CountArray(szDescribe),
 			TEXT("【ID登录】【%ld重复登录2】"),
 			pIServerUserItem->GetUserID());
-		CTraceService::TraceString(szDescribe,TraceLevel_Warning);
+		CLog::Log(szDescribe,log_warn);
 
 		return true;
 	}
@@ -1755,7 +1755,7 @@ void CAttemperEngineSink::ActiveUserItem(IServerUserItem **pIServerUserItem, DWO
 		_sntprintf_s(szDescribe,CountArray(szDescribe),
 			TEXT("【ID登录】【玩家%ld登录失败】 pIServerUserItem设置信息失败"),
 			UserInfo.dwUserID);
-		CTraceService::TraceString(szDescribe,TraceLevel_Warning);
+		CLog::Log(szDescribe,log_warn);
 
 		//断开用户
 		if (bAndroidUser==true)
@@ -1797,7 +1797,7 @@ VOID CAttemperEngineSink::OnEventUserLogon(IServerUserItem * pIServerUserItem, b
 	strTrace.Format(TEXT("【ID登录】【%ld断线重连】 GetOfflineGameID = %ld"),
 		(pIServerUserItem->GetUserInfo())->dwUserID, 
 		logon.dwOffLineGameID);
-	CTraceService::TraceString(strTrace, TraceLevel_Debug);
+	CLog::Log(strTrace, log_debug);
 
 	//发送数据
 	m_pITCPNetworkEngine->SendData(pBindParameter->dwSocketID, MDM_GR_LOGON, CMD_GC_LOGON_USERID, &logon, sizeof(STR_CMD_GC_LOGON_USERID));
@@ -2686,7 +2686,7 @@ bool CAttemperEngineSink::On_SUB_CG_USER_CREATE_ROOM(VOID * pData, WORD wDataSiz
 		_sntprintf_s(szString,CountArray(szString),
 			TEXT("【创建房间】不存在该类型的桌子"), 
 			pCfg->byClubCreate);
-		CTraceService::TraceString(szString,TraceLevel_Info);
+		CLog::Log(szString,log_debug);
 	}
 
 	return bRet;
@@ -3588,7 +3588,7 @@ bool CAttemperEngineSink::On_CMD_GC_USER_JOIN_TABLE_HALL_GOLD( DWORD dwContextID
 		pCfg->dwLevelGold,
 		pCfg->GameCount
 		);
-	CTraceService::TraceString(szString,TraceLevel_Normal);
+	CLog::Log(szString,log_debug);
 
 	/* 8. 判断桌子是否在游戏中 */
 	if(GAME_STATUS_FREE != pCurrTableFrame->GetGameStatus())
@@ -3716,7 +3716,7 @@ bool CAttemperEngineSink::On_SUB_User_ReconnectRoom(VOID * pData, WORD wDataSize
 		_sntprintf_s(szDescribe,CountArray(szDescribe),
 			TEXT("【断线重连】【%ld重连失败】玩家坐下失败"),
 			pIServerUserItem->GetUserID());
-		CTraceService::TraceString(szDescribe,TraceLevel_Warning);
+		CLog::Log(szDescribe,log_warn);
 
 		return true;
 	}

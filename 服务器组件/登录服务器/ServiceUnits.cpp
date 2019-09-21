@@ -18,14 +18,7 @@ END_MESSAGE_MAP()
 //构造函数
 CServiceUnits::CServiceUnits()
 {
-	//设置变量
-	m_ServiceStatus=ServiceStatus_Stop;
-
-	//设置接口
-	m_pIServiceUnitsSink=NULL;
-
 	//设置对象
-	ASSERT(g_pServiceUnits==NULL);
 	if (g_pServiceUnits==NULL) g_pServiceUnits=this;
 
 	return;
@@ -37,24 +30,70 @@ CServiceUnits::~CServiceUnits()
 	ConcludeService();
 }
 
+//配置组件
+int CServiceUnits::InitializeService()
+{
+	//设置服务器日志输出等级
+	CLog::EnableTrace(log_debug,log_debug, TEXT("logon.log"));
+
+	/***************************************************  各服务关联配置 *************************************************/
+	//创建组件
+	if ((m_TimerEngine.GetInterface()==NULL)&&(m_TimerEngine.CreateInstance()==false)) return 1;
+	if ((m_AttemperEngine.GetInterface()==NULL)&&(m_AttemperEngine.CreateInstance()==false)) return 2;
+	if ((m_DataBaseEngine.GetInterface()==NULL)&&(m_DataBaseEngine.CreateInstance()==false)) return 3;
+	if ((m_TCPNetworkEngine.GetInterface()==NULL)&&(m_TCPNetworkEngine.CreateInstance()==false)) return 4;
+	if ((m_TCPSocketService.GetInterface()==NULL)&&(m_TCPSocketService.CreateInstance()==false)) return 5;
+
+	//组件接口
+	IUnknownEx * pIAttemperEngine=m_AttemperEngine.GetInterface();
+	IUnknownEx * pITCPNetworkEngine=m_TCPNetworkEngine.GetInterface();
+	IUnknownEx * pIAttemperEngineSink=QUERY_OBJECT_INTERFACE(m_AttemperEngineSink,IUnknownEx);
+
+	//设置AttemperEngine回调
+	if (m_AttemperEngine->SetAttemperEngineSink(pIAttemperEngineSink)==false) return 6;
+
+	//各服务设置回调为AttemperEngine
+	if (m_TimerEngine->SetTimerEngineEvent(pIAttemperEngine)==false) return 7;
+	if (m_TCPNetworkEngine->SetTCPNetworkEngineEvent(pIAttemperEngine)==false) return 8;
+	if (m_TCPSocketService->SetTCPSocketEvent(pIAttemperEngine)==false) return 9;
+
+	//数据引擎
+	IUnknownEx * pIDataBaseEngineSink[CountArray(m_DataBaseEngineSink)];
+	for (WORD i=0;i<CountArray(pIDataBaseEngineSink);i++) pIDataBaseEngineSink[i]=QUERY_OBJECT_INTERFACE(m_DataBaseEngineSink[i],IUnknownEx);
+
+	//TODONOW ？？
+	if (m_DataBaseEngine->SetDataBaseEngineSink(pIDataBaseEngineSink,CountArray(pIDataBaseEngineSink))==false) return 10;
+
+	//数据库回调
+	for (INT i=0;i<CountArray(m_DataBaseEngineSink);i++)
+    {
+		m_DataBaseEngineSink[i].m_pIDataBaseEngineEvent=QUERY_OBJECT_PTR_INTERFACE(pIAttemperEngine,IDataBaseEngineEvent);
+	}
+
+	//AttemperEngine回调
+	m_AttemperEngineSink.m_pITimerEngine=m_TimerEngine.GetInterface();
+	m_AttemperEngineSink.m_pIDataBaseEngine=m_DataBaseEngine.GetInterface();
+	m_AttemperEngineSink.m_pITCPNetworkEngine=m_TCPNetworkEngine.GetInterface();
+	m_AttemperEngineSink.m_pITCPSocketService=m_TCPSocketService.GetInterface();
+
+	/***************************************************  服务配置信息 *************************************************/
+	//协调服务（协调服务器）
+	if (m_TCPSocketService->SetServiceID(NETWORK_CORRESPOND)==false) return 11;
+	if (m_TCPSocketService->SetEncrypt(TRUE)==false) return 12;
+
+	//配置网络
+	WORD wMaxConnect=MAX_CONTENT;
+	WORD wServicePort=PORT_LOGON;
+	if (m_TCPNetworkEngine->SetServiceParameter(wServicePort,wMaxConnect, TRUE)==false) return 13;
+
+	return 0;
+}
+
 //启动服务
 bool CServiceUnits::StartService()
 {
-	//效验状态
-	ASSERT(m_ServiceStatus==ServiceStatus_Stop);
-	if (m_ServiceStatus!=ServiceStatus_Stop) return false;
-
-	//设置状态
-	SetServiceStatus(ServiceStatus_Config);
-
-	//创建窗口
-	if (m_hWnd==NULL)
-	{
-		CRect rcCreate(0,0,0,0);
-		Create(NULL,NULL,WS_CHILD,rcCreate,AfxGetMainWnd(),100);
-	}
-
 	//内核版本判断
+	/*
 	CWHIniData InitData;
 	DWORD realKernel = InitData.Get_Code_Kernel_Version();
 	DWORD frameKernel = Get_Kernel_Version();
@@ -64,27 +103,36 @@ bool CServiceUnits::StartService()
 		_sntprintf_s(pszString2,CountArray(pszString2),TEXT("服务启动失败, 内核版本不匹配, realKernel: %ld; frameKernel: %ld\n"),
 					realKernel,
 					frameKernel);
-		CTraceService::TraceString(pszString2,TraceLevel_Exception);
+		CLog::Log(log_error, pszString2);
 
 		return false;
 	}
+	*/
 
-	//配置服务   //lee 1、读取内核中的setting.h  2、给组件类赋值（初始化）
-	if (InitializeService()==false)
+	
+	//配置服务
+	int iRet = InitializeService();
+	if (iRet != 0)
 	{
+		CLog::Log(log_error, TEXT("%s : %d"), TEXT("CServiceUnits::InitializeService"), iRet);
+		ConcludeService();
+		return false;
+	}
+	
+	//启动内核
+	iRet = StartKernelService();
+	if (iRet != 0)
+	{
+		CLog::Log(log_error, TEXT("%s : %d"), TEXT("CServiceUnits::StartKernelService"), iRet);
 		ConcludeService();
 		return false;
 	}
 
-	//启动内核	//lee 启动内核服务
-	if (StartKernelService()==false)
-	{
-		ConcludeService();
-		return false;
-	}
+	//连接协调
+	SendControlPacket(CT_CONNECT_CORRESPOND,NULL,0);
 
 	//获取列表
-	SendControlPacket(CT_LOAD_DB_GAME_LIST,NULL,0);
+	//SendControlPacket(CT_LOAD_DB_GAME_LIST,NULL,0);
 
 	return true;
 }
@@ -92,9 +140,6 @@ bool CServiceUnits::StartService()
 //停止服务
 bool CServiceUnits::ConcludeService()
 {
-	//设置变量
-	SetServiceStatus(ServiceStatus_Stop);
-
 	//停止服务
 	if (m_TimerEngine.GetInterface()!=NULL) m_TimerEngine->ConcludeService();
 	if (m_AttemperEngine.GetInterface()!=NULL) m_AttemperEngine->ConcludeService();
@@ -105,20 +150,54 @@ bool CServiceUnits::ConcludeService()
 	return true;
 }
 
-//设置接口
-bool CServiceUnits::SetServiceUnitsSink(IServiceUnitsSink * pIServiceUnitsSink)
+//启动内核
+int CServiceUnits::StartKernelService()
 {
-	//设置变量
-	m_pIServiceUnitsSink=pIServiceUnitsSink;
+	//时间引擎
+	if (m_TimerEngine->StartService()==false)
+	{
+		return 1;
+	}
+	
+	//调度引擎
+	if (m_AttemperEngine->StartService()==false)
+	{
+		return 2;
+	}
 
-	return true;
+	//协调引擎
+	if (m_TCPSocketService->StartService()==false)
+	{
+		return 3;
+	}
+	
+	/*
+	//数据引擎
+	if (m_DataBaseEngine->StartService()==false)
+	{
+		return 4;
+	}
+	*/
+
+	return 0;
+}
+
+//启动网络
+int CServiceUnits::StartNetworkService()
+{
+	//网络引擎
+	if (m_TCPNetworkEngine->StartService()==false)
+	{
+		return 1;
+	}
+
+	return 0;
 }
 
 //投递请求
 bool CServiceUnits::PostControlRequest(WORD wIdentifier, VOID * pData, WORD wDataSize)
 {
 	//状态判断
-	ASSERT(IsWindow(m_hWnd));
 	if (IsWindow(m_hWnd)==FALSE) return false;
 
 	//插入队列
@@ -131,140 +210,10 @@ bool CServiceUnits::PostControlRequest(WORD wIdentifier, VOID * pData, WORD wDat
 	return true;
 }
 
-//配置组件
-bool CServiceUnits::InitializeService()
-{
-	//创建组件
-	if ((m_TimerEngine.GetInterface()==NULL)&&(m_TimerEngine.CreateInstance()==false)) return false;
-	if ((m_AttemperEngine.GetInterface()==NULL)&&(m_AttemperEngine.CreateInstance()==false)) return false;
-	if ((m_DataBaseEngine.GetInterface()==NULL)&&(m_DataBaseEngine.CreateInstance()==false)) return false;
-	if ((m_TCPNetworkEngine.GetInterface()==NULL)&&(m_TCPNetworkEngine.CreateInstance()==false)) return false;
-	if ((m_TCPSocketService.GetInterface()==NULL)&&(m_TCPSocketService.CreateInstance()==false)) return false;
-
-	//组件接口
-	IUnknownEx * pIAttemperEngine=m_AttemperEngine.GetInterface();
-	IUnknownEx * pITCPNetworkEngine=m_TCPNetworkEngine.GetInterface();
-	IUnknownEx * pIAttemperEngineSink=QUERY_OBJECT_INTERFACE(m_AttemperEngineSink,IUnknownEx);
-
-	//数据引擎
-	IUnknownEx * pIDataBaseEngineSink[CountArray(m_DataBaseEngineSink)];
-	for (WORD i=0;i<CountArray(pIDataBaseEngineSink);i++) pIDataBaseEngineSink[i]=QUERY_OBJECT_INTERFACE(m_DataBaseEngineSink[i],IUnknownEx);
-
-	//内核组件		//下面两组代码只是将helper类与sink类关联
-	if (m_AttemperEngine->SetAttemperEngineSink(pIAttemperEngineSink)==false) return false;
-	if (m_TimerEngine->SetTimerEngineEvent(pIAttemperEngine)==false) return false;
-	if (m_AttemperEngine->SetNetworkEngine(pITCPNetworkEngine)==false) return false;
-	if (m_TCPNetworkEngine->SetTCPNetworkEngineEvent(pIAttemperEngine)==false) return false;
-	if (m_DataBaseEngine->SetDataBaseEngineSink(pIDataBaseEngineSink,CountArray(pIDataBaseEngineSink))==false) return false;
-
-	//协调服务（协调服务器）
-	if (m_TCPSocketService->SetServiceID(NETWORK_CORRESPOND)==false) return false;
-	if (m_TCPSocketService->SetTCPSocketEvent(pIAttemperEngine)==false) return false;
-	if (m_TCPSocketService->SetEncrypt(TRUE)==false) return false;
-
-	//调度回调
-	m_AttemperEngineSink.m_pITimerEngine=m_TimerEngine.GetInterface();
-	m_AttemperEngineSink.m_pIDataBaseEngine=m_DataBaseEngine.GetInterface();
-	m_AttemperEngineSink.m_pITCPNetworkEngine=m_TCPNetworkEngine.GetInterface();
-	m_AttemperEngineSink.m_pITCPSocketService=m_TCPSocketService.GetInterface();
-
-	//数据库回调
-	for (INT i=0;i<CountArray(m_DataBaseEngineSink);i++)
-    {
-		m_DataBaseEngineSink[i].m_pIDataBaseEngineEvent=QUERY_OBJECT_PTR_INTERFACE(pIAttemperEngine,IDataBaseEngineEvent);
-	}
-
-	//配置网络
-	WORD wMaxConnect=MAX_CONTENT;
-	WORD wServicePort=PORT_LOGON;
-	if (m_TCPNetworkEngine->SetServiceParameter(wServicePort,wMaxConnect, TRUE)==false) return false;
-
-	//log的配置信息
-	TCHAR szIniFile[MAX_PATH]=TEXT("");
-	_sntprintf_s(szIniFile,CountArray(szIniFile),TEXT("logon.log"));
-
-	//设置服务器日志输出等级
-	CTraceService::EnableTrace(TraceLevel_Info,TraceLevel_Debug,szIniFile);
-
-	return true;
-}
-
-//启动内核
-bool CServiceUnits::StartKernelService()
-{
-	//时间引擎
-	if (m_TimerEngine->StartService()==false)
-	{
-		ASSERT(FALSE);
-		return false;
-	}
-
-	//调度引擎
-	if (m_AttemperEngine->StartService()==false)
-	{
-		ASSERT(FALSE);
-		return false;
-	}
-
-	//数据引擎
-	if (m_DataBaseEngine->StartService()==false)
-	{
-		ASSERT(FALSE);
-		return false;
-	}
-
-	//协调引擎
-	if (m_TCPSocketService->StartService()==false)
-	{
-		ASSERT(FALSE);
-		return false;
-	}
-
-	return true;
-}
-
-//启动网络
-bool CServiceUnits::StartNetworkService()
-{
-	//网络引擎
-	if (m_TCPNetworkEngine->StartService()==false)
-	{
-		ASSERT(FALSE);
-		return false;
-	}
-
-	return true;
-}
-
-//设置状态
-bool CServiceUnits::SetServiceStatus(enServiceStatus ServiceStatus)
-{
-	//状态判断
-	if (m_ServiceStatus!=ServiceStatus)
-	{
-		//错误通知
-		if ((m_ServiceStatus!=ServiceStatus_Service)&&(ServiceStatus==ServiceStatus_Stop))
-		{
-			LPCTSTR pszString=TEXT("服务启动失败");
-			CTraceService::TraceString(pszString,TraceLevel_Exception);
-		}
-
-		//设置变量
-		m_ServiceStatus=ServiceStatus;
-
-		//状态通知
-		ASSERT(m_pIServiceUnitsSink!=NULL);
-		if (m_pIServiceUnitsSink!=NULL) m_pIServiceUnitsSink->OnServiceUnitsStatus(m_ServiceStatus);
-	}
-
-	return true;
-}
-
 //发送控制
 bool CServiceUnits::SendControlPacket(WORD wControlID, VOID * pData, WORD wDataSize)
 {
 	//状态效验
-	ASSERT(m_AttemperEngine.GetInterface()!=NULL);
 	if (m_AttemperEngine.GetInterface()==NULL) return false;
 
 	//发送控制
@@ -284,7 +233,6 @@ LRESULT CServiceUnits::OnUIControlRequest(WPARAM wParam, LPARAM lParam)
 	CWHDataLocker DataLocker(m_CriticalSection);
 	if (m_DataQueue.DistillData(DataHead,cbBuffer,sizeof(cbBuffer))==false)
 	{
-		ASSERT(FALSE);
 		return NULL;
 	}
 
@@ -294,24 +242,16 @@ LRESULT CServiceUnits::OnUIControlRequest(WPARAM wParam, LPARAM lParam)
 	case UI_LOAD_DB_LIST_RESULT:	//列表结果
 		{
 			//效验消息
-			ASSERT(DataHead.wDataSize==sizeof(CP_ControlResult));
 			if (DataHead.wDataSize!=sizeof(CP_ControlResult)) return 0;
 
 			//变量定义
 			CP_ControlResult * pControlResult=(CP_ControlResult *)cbBuffer;
 
 			//失败处理
-			if ((m_ServiceStatus!=ServiceStatus_Service)&&(pControlResult->cbSuccess==ER_FAILURE))
+			if (pControlResult->cbSuccess==ER_FAILURE)
 			{
 				ConcludeService();
 				return 0;
-			}
-
-			//成功处理
-			if ((m_ServiceStatus!=ServiceStatus_Service)&&(pControlResult->cbSuccess==ER_SUCCESS))
-			{
-				//连接协调
-				SendControlPacket(CT_CONNECT_CORRESPOND,NULL,0);
 			}
 
 			return 0;
@@ -319,21 +259,20 @@ LRESULT CServiceUnits::OnUIControlRequest(WPARAM wParam, LPARAM lParam)
 	case UI_CORRESPOND_RESULT:		//协调结果
 		{
 			//效验消息
-			ASSERT(DataHead.wDataSize==sizeof(CP_ControlResult));
 			if (DataHead.wDataSize!=sizeof(CP_ControlResult)) return 0;
 
 			//变量定义
 			CP_ControlResult * pControlResult=(CP_ControlResult *)cbBuffer;
 
 			//失败处理
-			if ((m_ServiceStatus!=ServiceStatus_Service)&&(pControlResult->cbSuccess==ER_FAILURE))
+			if (pControlResult->cbSuccess==ER_FAILURE)
 			{
 				ConcludeService();
 				return 0;
 			}
 
 			//成功处理
-			if ((m_ServiceStatus!=ServiceStatus_Service)&&(pControlResult->cbSuccess==ER_SUCCESS))
+			if (pControlResult->cbSuccess==ER_SUCCESS)
 			{
 				//启动网络
 				if (StartNetworkService()==false)
@@ -341,9 +280,6 @@ LRESULT CServiceUnits::OnUIControlRequest(WPARAM wParam, LPARAM lParam)
 					ConcludeService();
 					return 0;
 				}
-
-				//设置状态
-				SetServiceStatus(ServiceStatus_Service);
 			}
 
 			return 0;
@@ -352,5 +288,3 @@ LRESULT CServiceUnits::OnUIControlRequest(WPARAM wParam, LPARAM lParam)
 
 	return 0;
 }
-
-//////////////////////////////////////////////////////////////////////////////////
