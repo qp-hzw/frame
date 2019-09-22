@@ -25,7 +25,7 @@ bool CServiceUnits::StartService()
 	int iRet = InitializeService();
 	if (iRet != 0 )
 	{
-		CLog::Log(log_error, TEXT("%s : %d"), TEXT("CServiceUnits::InitializeService"), iRet);
+		CLog::Log(log_error, "CServiceUnits::InitializeService  %d", iRet);
 		ConcludeService();
 		return false;
 	}
@@ -34,12 +34,11 @@ bool CServiceUnits::StartService()
 	iRet = StartKernelService();
 	if (iRet != 0)
 	{
-		CLog::Log(log_error, TEXT("%s : %d"), TEXT("CServiceUnits::StartKernelService"), iRet);
+		CLog::Log(log_error,"CServiceUnits::StartKernelService  %d", iRet);
 		ConcludeService();
 		return false;
 	}
 
-	CLog::Log(log_error, TEXT("%s : %d"), TEXT("CServiceUnits::StartService"), iRet);
 	return true;
 }
 
@@ -57,7 +56,7 @@ bool CServiceUnits::ConcludeService()
 int CServiceUnits::InitializeService()
 {
 	//设置服务器日志输出等级
-	CLog::EnableTrace(log_debug,log_debug,TEXT("correspond.log"));
+	CLog::Init("correspond.log");
 
 	//创建组件
 	if ((m_AttemperEngine.GetInterface()==NULL)&&(m_AttemperEngine.CreateInstance()==false)) return 1;

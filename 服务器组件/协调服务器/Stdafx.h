@@ -36,6 +36,9 @@
 #include <AfxCmn.h>
 #endif
 
+//控制台
+#include "ConsoleAdapter.h"
+
 //////////////////////////////////////////////////////////////////////////////////
 //包含文件
 /***全局文件***/
@@ -75,11 +78,15 @@
 
 #include "../../../../share\依赖项\内核引擎\KernelEngineHead.h"
 #include "../../../../share\依赖项\内核引擎\DataBaseAide.h"
-#include "../../../../share\依赖项\内核引擎\TraceService.h"
+#include "../../../../share\依赖项\内核引擎\log.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 //链接代码
 #pragma comment (lib,"../../../../share/依赖项/链接库/ServiceCore.lib")
 #pragma comment (lib,"../../../../share/依赖项/链接库/KernelEngine.lib")
 
+
+//控制台
+//#include "ConsoleAdapter.h"
+//CConsoleAdapter g_ConsoleAdpter;
 //////////////////////////////////////////////////////////////////////////////////

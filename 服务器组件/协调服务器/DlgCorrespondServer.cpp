@@ -13,10 +13,3 @@ CCorrespondServerDlg::~CCorrespondServerDlg()
 {
 	m_ServiceUnits.ConcludeService();
 }
-
-//¿Ø¼þ°ó¶¨
-VOID CCorrespondServerDlg::DoDataExchange(CDataExchange * pDX)
-{
-	__super::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_TRACE_MESSAGE, m_TraceServiceControl);
-}

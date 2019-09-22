@@ -25,3 +25,7 @@ BOOL CLogonServerApp::InitInstance()
 
 	return FALSE;
 }
+
+
+//¿ØÖÆÌ¨
+CConsoleAdapter g_ConsoleAdpter;

@@ -69,8 +69,7 @@ bool CDataBaseEngineSink::OnDataBaseEngineStart(IUnknownEx * pIUnknownEx)
 	catch (IDataBaseException * pIException)
 	{
 		//错误信息
-		LPCTSTR pszDescribe=pIException->GetExceptionDescribe();
-		CLog::Log(log_error, pszDescribe);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		return false;
 	}
@@ -1529,14 +1528,6 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_XJ_RECORD_LIST(DWORD dwContextI
 			}
 			if (wPacketSize>0) m_pIDataBaseEngineEvent->OnEventDataBaseResult(DBO_LC_SERVICE_PURE_XJ_RECORD_LIST,dwContextID,cbBuffer,wPacketSize);
 		}
-		else
-		{
-			TCHAR szString[512]=TEXT("");
-			_sntprintf_s(szString,CountArray(szString),TEXT("lResultCode = %ld"), lResultCode);
-
-			//提示消息
-			CLog::Log(log_warn, szString);
-		}
 #pragma endregion
 
 #pragma region 小局上的玩家信息
@@ -1575,14 +1566,6 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_XJ_RECORD_LIST(DWORD dwContextI
 				m_TreasureDBModule->MoveToNext();
 			}
 			if (wPacketSize2>0) m_pIDataBaseEngineEvent->OnEventDataBaseResult(DBO_LC_SERVICE_PURE_XJ_RECORD_LIST_PINFO,dwContextID,cbBuffer2,wPacketSize2);
-		}
-		else
-		{
-			TCHAR szString[512]=TEXT("");
-			_sntprintf_s(szString,CountArray(szString),TEXT("lResultCode = %ld"), lResultCode2);
-
-			//提示消息
-			CLog::Log(log_warn, szString);
 		}
 #pragma endregion
 
@@ -2101,8 +2084,7 @@ bool CDataBaseEngineSink::OnRequestLoadGameList(DWORD dwContextID, VOID * pData,
 	catch (IDataBaseException * pIException)
 	{
 		//输出错误
-		LPCTSTR pszDescribe=pIException->GetExceptionDescribe();
-		CLog::Log(log_error, pszDescribe);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 
 		//变量定义
 		DBO_GP_GameListResult GameListResult;
@@ -4052,7 +4034,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_SETTING(DWORD dwContextID, VOID * 
 
 		if(lResultCode1 != DB_SUCCESS)
 		{
-			CLog::Log(log_warn, TEXT("GSP_CL_CLUB_ROOM_SETTING_QUERY_INFO Return 非0"));
 			return false ;
 		}
 

@@ -76,7 +76,7 @@
 
 #include "../../../../share\依赖项\内核引擎\KernelEngineHead.h"
 #include "../../../../share\依赖项\内核引擎\DataBaseAide.h"
-#include "../../../../share\依赖项\内核引擎\TraceService.h"
+#include "../../../../share\依赖项\内核引擎\log.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 //链接代码

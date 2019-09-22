@@ -22,12 +22,6 @@ DlgLogon::~DlgLogon()
 	m_ServiceUnits.ConcludeService();
 }
 
-void DlgLogon::DoDataExchange(CDataExchange* pDX)
-{
-	DDX_Control(pDX, IDC_TRACE_MESSAGE, m_TraceServiceControl);
-
-	CDialog::DoDataExchange(pDX);
-}
 
 
 BEGIN_MESSAGE_MAP(DlgLogon, CDialog)

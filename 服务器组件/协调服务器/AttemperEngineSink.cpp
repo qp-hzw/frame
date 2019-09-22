@@ -214,7 +214,7 @@ bool CAttemperEngineSink::OnTCPNetworkMainRegister(WORD wSubCmdID, VOID * pData,
 				m_pITCPNetworkEngine->SendData(dwSocketID,MDM_REGISTER,CPO_PGPL_REGISTER_FAILURE,&RegisterFailure,sizeof(RegisterFailure));
 
 				//中断网络
-				m_pITCPNetworkEngine->ShutDownSocket(dwSocketID);
+				m_pITCPNetworkEngine->CloseSocket(dwSocketID);
 
 				return true;
 			}
@@ -263,7 +263,7 @@ bool CAttemperEngineSink::OnTCPNetworkMainRegister(WORD wSubCmdID, VOID * pData,
 				m_pITCPNetworkEngine->SendData(dwSocketID,MDM_REGISTER,CPO_PGPL_REGISTER_FAILURE,&RegisterFailure,sizeof(RegisterFailure));
 
 				//中断网络
-				m_pITCPNetworkEngine->ShutDownSocket(dwSocketID);
+				m_pITCPNetworkEngine->CloseSocket(dwSocketID);
 
 				return true;
 			}
@@ -604,9 +604,6 @@ bool CAttemperEngineSink::OnTCPNetworkMainManagerService(WORD wSubCmdID, VOID * 
 
 			//校验数据
 			STR_CPR_WP_WEB_SYSTEM_MESSAGE *pSub = (STR_CPR_WP_WEB_SYSTEM_MESSAGE*) pData;
-			
-			LPCTSTR pszDescribe=pSub->szMessage;
-			CLog::Log(log_debug, pszDescribe);
 
 			//发送通知到客户端(只发送给大厅)
 			SendDataToPlaza(INVALID_WORD, MDM_WEB, CPO_PL_WEB_SYSTEM_MESSAGE, pData, wDataSize);

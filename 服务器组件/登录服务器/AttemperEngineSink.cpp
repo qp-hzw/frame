@@ -144,9 +144,6 @@ bool CAttemperEngineSink::OnEventControl(WORD wIdentifier, VOID * pData, WORD wD
 			//发起连接
 			m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
 
-			//构造提示
-			CLog::Log(log_debug, TEXT("正在连接协调服务器"));
-
 			return true;
 		}
 	}
@@ -173,14 +170,6 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 			m_pITimerEngine->KillTimer(IDI_CONNECT_CORRESPOND);
 			//发起连接
 			m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
-			
-
-			//构造提示
-			TCHAR szString[512]=TEXT("");
-			_sntprintf_s(szString,CountArray(szString),TEXT("正在连接协调服务器"));
-
-			//提示消息
-			CLog::Log(log_debug, szString);
 
 			return true;
 		}
@@ -231,11 +220,8 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 				//溢出判断
 				if (OnLineCountInfo.dwGameCount > CountArray(OnLineCountInfo.OnLineCountGame))
 				{
-					TCHAR szString[512]=TEXT("");
-					_sntprintf_s(szString,CountArray(szString),TEXT("统计在线人数 溢出 IDI_COLLECT_ONLINE_INFO"));
-
 					//提示消息
-					CLog::Log(log_warn, szString);
+					CLog::Log(log_warn, "统计在线人数 溢出 IDI_COLLECT_ONLINE_INFO");
 					break;
 				}
 
@@ -866,15 +852,7 @@ bool CAttemperEngineSink::OnEventTCPSocketShut(WORD wServiceID, BYTE cbShutReaso
 		//重连判断
 		if (m_bNeekCorrespond==true)
 		{
-			//构造提示
-			TCHAR szDescribe[128]=TEXT("");
-			_sntprintf_s(szDescribe,CountArray(szDescribe),TEXT("与协调服务器的连接关闭了，%ld 秒后将重新连接"),TIME_CONNECT);
-
-			//提示消息
-			CLog::Log(log_warn, szDescribe);
-
 			//设置时间
-			ASSERT(m_pITimerEngine!=NULL);
 			m_pITimerEngine->SetTimer(IDI_CONNECT_CORRESPOND, TIME_CONNECT_CORRESPOND, 1, 0);
 
 			return true;
@@ -923,12 +901,8 @@ int GetInternetIP( TCHAR *szInernet_ip)
 		{
 			MultiByteToWideChar(CP_ACP, 0,  &(iter->str())[0], -1, szInernet_ip, 32);
 
-			//构造提示
-			TCHAR szDescribe[128]=TEXT("");
-			_sntprintf_s(szDescribe,CountArray(szDescribe),TEXT("外网IP: %s"),szInernet_ip);
 			//提示消息
-			CLog::Log(log_debug, szDescribe);
-			//std::cout << iter->length() << ": " << iter->str() << std::endl;
+			CLog::Log(log_debug, "外网IP: %s", szInernet_ip);
 		}
 	}
 	else
@@ -941,7 +915,7 @@ int GetInternetIP( TCHAR *szInernet_ip)
 }
 
 
-//连接事件		//内核里面处理逻辑，连接协调服之后内核会发送这个消息给登陆服
+//连接事件
 bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 {
 	//协调连接
@@ -952,7 +926,6 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		{
 			//设置时间
 			m_pITimerEngine->SetTimer(IDI_CONNECT_CORRESPOND, TIME_CONNECT_CORRESPOND, 1, 0);
-
 			return false;
 		}
 
@@ -962,11 +935,13 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 
 		//设置变量
 		TCHAR szInernet_ip[32] = TEXT("0.0.0.0");
-		GetInternetIP(szInernet_ip);
-		lstrcpyn(CPR.szServerAddr,szInernet_ip ,CountArray(CPR.szServerAddr));
+		//GetInternetIP(szInernet_ip);
+		//lstrcpyn(CPR.szServerAddr,szInernet_ip ,CountArray(CPR.szServerAddr));
+
+		lstrcpyn(CPR.szServerAddr,TEXT("127.0.0.1"),CountArray(CPR.szServerAddr));
 
 		//发送数据
-		m_pITCPSocketService->SendData(MDM_REGISTER,CPR_LP_REGISTER_LOGON,&CPR,sizeof(CPR));
+		m_pITCPSocketService->SendData(MDM_REGISTER,CPR_LP_REGISTER_LOGON,&CPR,sizeof(CPR)*sizeof(TCHAR));
 
 		return true;
 	}
@@ -1119,12 +1094,8 @@ bool CAttemperEngineSink::OnDBPCGameListResult(DWORD dwContextID, VOID * pData, 
 	}
 	else
 	{
-		//构造提示
-		TCHAR szDescribe[128]=TEXT("");
-		_sntprintf_s(szDescribe,CountArray(szDescribe),TEXT("服务器列表加载失败，%ld 秒后将重新加载"),TIME_RELOAD_LIST);
-
 		//提示消息
-		CLog::Log(log_warn, szDescribe);
+		CLog::Log(log_warn, "服务器列表加载失败，%ld 秒后将重新加载", TIME_RELOAD_LIST);
 
 		//设置时间
 		ASSERT(m_pITimerEngine!=NULL);
@@ -1219,7 +1190,6 @@ bool CAttemperEngineSink::OnTCPSocketMainRegister(WORD wSubCmdID, VOID * pData, 
 	
 			//关闭处理
 			m_bNeekCorrespond=false;
-			m_pITCPSocketService->CloseSocket();
 
 			//事件通知
 			CP_ControlResult ControlResult;
@@ -2030,7 +2000,8 @@ bool CAttemperEngineSink::On_CMD_LC_Logon_RepeatLogon(DWORD UserID, DWORD dwCont
 			m_pITCPNetworkEngine->SendData(dwContextID, MDM_LOGON, CMD_LC_LOGON_REPEAT_LOGON, &pCMDLogonRepeatLogon, sizeof(STR_CMD_LC_LOGON_REPEAT_LOGON));
 
 			//关闭连接 --  关闭之前的连接
-			m_pITCPNetworkEngine->ShutDownSocket(p_tempBind->dwSocketID);
+			//m_pITCPNetworkEngine->ShutDownSocket(p_tempBind->dwSocketID);
+			m_pITCPNetworkEngine->CloseSocket(p_tempBind->dwSocketID);
 			
 			//清空数据
 			WORD wBindIndex = LOWORD(i);
@@ -2049,13 +2020,8 @@ bool CAttemperEngineSink::On_CMD_LC_Logon_UpdateNotify(DWORD dwVersionCheck, DWO
 	DWORD serverFrameVersion = Get_Framework_Version(PLATFORM_VERSION);  //服务端 frame 版本
 	DWORD clientFrameVersion = dwVersionCheck; //client  Hall 版本
 
-	
 	byte ret = Compate_Hall_LogonServer(clientFrameVersion, serverFrameVersion);
-
-	//构造提示
-	TCHAR szString[512]=TEXT("");
-	_sntprintf_s(szString,CountArray(szString),TEXT("版本校验结果:%d  服务器版本:%ld  客户端版本:%ld"), ret, serverFrameVersion, clientFrameVersion);
-	CLog::Log(log_debug, szString);
+	CLog::Log(log_debug, "版本校验结果:%d  服务器版本:%ld  客户端版本:%ld", ret, serverFrameVersion, clientFrameVersion);
 
 
 	//版本匹配, 则直接退出, 不需要发送消息

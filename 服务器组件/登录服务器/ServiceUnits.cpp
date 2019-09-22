@@ -34,7 +34,7 @@ CServiceUnits::~CServiceUnits()
 int CServiceUnits::InitializeService()
 {
 	//设置服务器日志输出等级
-	CLog::EnableTrace(log_debug,log_debug, TEXT("logon.log"));
+	bool bRet = CLog::Init("logon.log");
 
 	/***************************************************  各服务关联配置 *************************************************/
 	//创建组件
@@ -56,6 +56,7 @@ int CServiceUnits::InitializeService()
 	if (m_TimerEngine->SetTimerEngineEvent(pIAttemperEngine)==false) return 7;
 	if (m_TCPNetworkEngine->SetTCPNetworkEngineEvent(pIAttemperEngine)==false) return 8;
 	if (m_TCPSocketService->SetTCPSocketEvent(pIAttemperEngine)==false) return 9;
+
 
 	//数据引擎
 	IUnknownEx * pIDataBaseEngineSink[CountArray(m_DataBaseEngineSink)];
@@ -109,12 +110,12 @@ bool CServiceUnits::StartService()
 	}
 	*/
 
-	
 	//配置服务
 	int iRet = InitializeService();
+
 	if (iRet != 0)
 	{
-		CLog::Log(log_error, TEXT("%s : %d"), TEXT("CServiceUnits::InitializeService"), iRet);
+		CLog::Log(log_error, "CServiceUnits::InitializeService %d", iRet);
 		ConcludeService();
 		return false;
 	}
@@ -123,7 +124,7 @@ bool CServiceUnits::StartService()
 	iRet = StartKernelService();
 	if (iRet != 0)
 	{
-		CLog::Log(log_error, TEXT("%s : %d"), TEXT("CServiceUnits::StartKernelService"), iRet);
+		CLog::Log(log_error, "CServiceUnits::StartKernelService  %d", iRet);
 		ConcludeService();
 		return false;
 	}
@@ -263,7 +264,6 @@ LRESULT CServiceUnits::OnUIControlRequest(WPARAM wParam, LPARAM lParam)
 
 			//变量定义
 			CP_ControlResult * pControlResult=(CP_ControlResult *)cbBuffer;
-
 			//失败处理
 			if (pControlResult->cbSuccess==ER_FAILURE)
 			{
