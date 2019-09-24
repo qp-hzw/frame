@@ -14,7 +14,6 @@ class CGameServerDlg : public CDialog, public IServiceUnitsSink
 	//组件变量
 protected:
 	CServiceUnits					m_ServiceUnits;						//服务单元
-	CTraceServiceControl			m_TraceServiceControl;				//追踪窗口
 
 	//配置参数
 protected:
@@ -32,8 +31,6 @@ public:
 
 	//重载函数
 protected:
-	//控件绑定
-	virtual VOID DoDataExchange(CDataExchange * pDX);
 	//初始化函数
 	virtual BOOL OnInitDialog();
 	//确定消息

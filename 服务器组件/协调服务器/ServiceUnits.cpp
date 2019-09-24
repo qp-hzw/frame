@@ -1,18 +1,18 @@
 #include "StdAfx.h"
 #include "ServiceUnits.h"
 
-//Æô¶¯·þÎñ
+//å¯åŠ¨æœåŠ¡
 bool CServiceUnits::StartService()
 {
 	/*
-	//ÄÚºË°æ±¾ÅÐ¶Ï
+	//å†…æ ¸ç‰ˆæœ¬åˆ¤æ–­
 	CWHIniData InitData;
 	DWORD realKernel = InitData.Get_Code_Kernel_Version();
 	DWORD frameKernel = Get_Kernel_Version();
 	if(Compare_Kernek_Framework(realKernel, frameKernel) != 0)
 	{
 		TCHAR pszString2[512]=TEXT("");
-		_sntprintf_s(pszString2,CountArray(pszString2),TEXT("·þÎñÆô¶¯Ê§°Ü, ÄÚºË°æ±¾²»Æ¥Åä, realKernel: %ld; frameKernel: %ld\n"),
+		_sntprintf_s(pszString2,CountArray(pszString2),TEXT("æœåŠ¡å¯åŠ¨å¤±è´¥, å†…æ ¸ç‰ˆæœ¬ä¸åŒ¹é…, realKernel: %ld; frameKernel: %ld\n"),
 					realKernel,
 					frameKernel);
 		CLog::Log(log_error, pszString2);
@@ -21,7 +21,7 @@ bool CServiceUnits::StartService()
 	}
 	*/
 
-	//ÅäÖÃ·þÎñ
+	//é…ç½®æœåŠ¡
 	int iRet = InitializeService();
 	if (iRet != 0 )
 	{
@@ -30,7 +30,7 @@ bool CServiceUnits::StartService()
 		return false;
 	}
 
-	//Æô¶¯ÄÚºË
+	//å¯åŠ¨å†…æ ¸
 	iRet = StartKernelService();
 	if (iRet != 0)
 	{
@@ -42,57 +42,57 @@ bool CServiceUnits::StartService()
 	return true;
 }
 
-//Í£Ö¹·þÎñ
+//åœæ­¢æœåŠ¡
 bool CServiceUnits::ConcludeService()
 {
-	//Í£Ö¹·þÎñ
+	//åœæ­¢æœåŠ¡
 	if (m_AttemperEngine.GetInterface()!=NULL) m_AttemperEngine->ConcludeService();
 	if (m_TCPNetworkEngine.GetInterface()!=NULL) m_TCPNetworkEngine->ConcludeService();
 
 	return true;
 }
 
-//ÅäÖÃ×é¼þ
+//é…ç½®ç»„ä»¶
 int CServiceUnits::InitializeService()
 {
-	//ÉèÖÃ·þÎñÆ÷ÈÕÖ¾Êä³öµÈ¼¶
+	//è®¾ç½®æœåŠ¡å™¨æ—¥å¿—è¾“å‡ºç­‰çº§
 	CLog::Init("correspond.log");
 
-	//´´½¨×é¼þ
+	//åˆ›å»ºç»„ä»¶
 	if ((m_AttemperEngine.GetInterface()==NULL)&&(m_AttemperEngine.CreateInstance()==false)) return 1;
 	if ((m_TCPNetworkEngine.GetInterface()==NULL)&&(m_TCPNetworkEngine.CreateInstance()==false)) return 2;
 
-	//×é¼þ½Ó¿Ú
+	//ç»„ä»¶æŽ¥å£
 	IUnknownEx * pIAttemperEngine=m_AttemperEngine.GetInterface();
 	IUnknownEx * pIAttemperEngineSink=QUERY_OBJECT_INTERFACE(m_AttemperEngineSink,IUnknownEx);
 
-	//ÉèÖÃ¸÷·þÎñ»Øµ÷ÎªAttemperEngine
+	//è®¾ç½®å„æœåŠ¡å›žè°ƒä¸ºAttemperEngine
 	if (m_TCPNetworkEngine->SetTCPNetworkEngineEvent(pIAttemperEngine)==false) return 3;
 
-	//AttemperEngineÉèÖÃ»Øµ÷
+	//AttemperEngineè®¾ç½®å›žè°ƒ
 	if (m_AttemperEngine->SetAttemperEngineSink(pIAttemperEngineSink)==false) return 4;
 
-	//µ÷¶È»Øµ÷
+	//è°ƒåº¦å›žè°ƒ
 	m_AttemperEngineSink.m_pITCPNetworkEngine=m_TCPNetworkEngine.GetInterface();
 
-	//ÅäÖÃÍøÂç
+	//é…ç½®ç½‘ç»œ
 	WORD wMaxConnect=MAX_CONTENT;
 	WORD wServicePort=PORT_CENTER;
-	if (m_TCPNetworkEngine->SetServiceParameter(wServicePort,wMaxConnect, TRUE)==false) return 5;
+	if (m_TCPNetworkEngine->SetServiceParameter(wServicePort,wMaxConnect)==false) return 5;
 
 	return 0;
 }
 
-//Æô¶¯ÄÚºË
+//å¯åŠ¨å†…æ ¸
 int CServiceUnits::StartKernelService()
 {
-	//µ÷¶ÈÒýÇæ
+	//è°ƒåº¦å¼•æ“Ž
 	if (m_AttemperEngine->StartService()==false)
 	{
 		return 1;
 	}
 
-	//ÍøÂçÒýÇæ
+	//ç½‘ç»œå¼•æ“Ž
 	if (m_TCPNetworkEngine->StartService()==false)
 	{
 		return 2;

@@ -191,7 +191,6 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClCompile Include="DistributeManager.cpp" />
     <ClCompile Include="GameServer.cpp" />
     <ClCompile Include="DlgGameServer.cpp" />
-    <ClCompile Include="LogicTraceHelper.cpp" />
     <ClCompile Include="SensitiveWordsFilter.cpp" />
     <ClCompile Include="ServerListManager.cpp" />
     <ClCompile Include="ServiceUnits.cpp" />
@@ -214,7 +213,6 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClInclude Include="DistributeManager.h" />
     <ClInclude Include="GameServer.h" />
     <ClInclude Include="DlgGameServer.h" />
-    <ClInclude Include="LogicTraceHelper.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SensitiveWordsFilter.h" />
     <ClInclude Include="ServerListManager.h" />

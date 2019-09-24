@@ -120,11 +120,6 @@ bool CServiceUnits::StartService()
 		DWORD frameKernel = Get_Kernel_Version();
 		if(Compare_Kernek_Framework(realKernel, frameKernel) != 0)
 		{		
-			TCHAR pszString2[512]=TEXT("");
-			_sntprintf_s(pszString2,CountArray(pszString2),TEXT("服务启动失败, 内核版本不匹配, realKernel: %ld; frameKernel: %ld\n"),
-					realKernel,
-					frameKernel);
-			CLog::Log(pszString2,log_error);
 			bResult = false;
 			break;
 		}
@@ -141,7 +136,6 @@ bool CServiceUnits::StartService()
 
 	if(!bResult)
 	{
-		CLog::Log(szText,log_error);
 		ConcludeService();
 		return false;
 	}
@@ -217,49 +211,42 @@ bool CServiceUnits::CreateServiceDLL()
 	//时间引擎
 	if ((m_TimerEngine.GetInterface()==NULL)&&(m_TimerEngine.CreateInstance()==false))
 	{
-		CLog::Log(m_TimerEngine.GetErrorDescribe(),log_error);
 		return false;
 	}
 
 	//调度引擎
 	if ((m_AttemperEngine.GetInterface()==NULL)&&(m_AttemperEngine.CreateInstance()==false))
 	{
-		CLog::Log(m_AttemperEngine.GetErrorDescribe(),log_error);
 		return false;
 	}
 
 	//网络组件
 	if ((m_TCPSocketService.GetInterface()==NULL)&&(m_TCPSocketService.CreateInstance()==false))
 	{
-		CLog::Log(m_TCPSocketService.GetErrorDescribe(),log_error);
 		return false;
 	}
 
 	//网络引擎
 	if ((m_TCPNetworkEngine.GetInterface()==NULL)&&(m_TCPNetworkEngine.CreateInstance()==false))
 	{
-		CLog::Log(m_TCPNetworkEngine.GetErrorDescribe(),log_error);
 		return false;
 	}
 
 	//数据组件
 	if ((m_KernelDataBaseEngine.GetInterface()==NULL)&&(m_KernelDataBaseEngine.CreateInstance()==false))
 	{
-		CLog::Log(m_KernelDataBaseEngine.GetErrorDescribe(),log_error);
 		return false;
 	}
 
 	//数据组件
 	if ((m_RecordDataBaseEngine.GetInterface()==NULL)&&(m_RecordDataBaseEngine.CreateInstance()==false))
 	{
-		CLog::Log(m_RecordDataBaseEngine.GetErrorDescribe(),log_error);
 		return false;
 	}
 
 	//游戏模块
 	if ((m_GameServiceManager.GetInterface()==NULL)&&(m_GameServiceManager.CreateInstance()==false))
 	{
-		CLog::Log(m_GameServiceManager.GetErrorDescribe(),log_error);
 		return false;
 	}
 
@@ -268,7 +255,6 @@ bool CServiceUnits::CreateServiceDLL()
 	{
 		if ((m_GameMatchServiceManager.GetInterface()==NULL)&&(m_GameMatchServiceManager.CreateInstance()==false))
 		{
-			CLog::Log(m_GameMatchServiceManager.GetErrorDescribe(),log_error);
 			return false;
 		}
 	}
@@ -301,13 +287,11 @@ bool CServiceUnits::InitializeService()
 
 	//内核组件
 	if (m_TimerEngine->SetTimerEngineEvent(pIAttemperEngine)==false) return false;
-	if (m_AttemperEngine->SetNetworkEngine(pITCPNetworkEngine)==false) return false;
 	if (m_TCPNetworkEngine->SetTCPNetworkEngineEvent(pIAttemperEngine)==false) return false;
 
 	//协调服务
 	if (m_TCPSocketService->SetServiceID(NETWORK_CORRESPOND)==false) return false;
 	if (m_TCPSocketService->SetTCPSocketEvent(pIAttemperEngine)==false) return false;
-	if (m_TCPSocketService->SetEncrypt(TRUE)==false) return false;
 
 	//数据协调
 	m_DBCorrespondManager.InitDBCorrespondManager(m_KernelDataBaseEngine.GetInterface());
@@ -350,14 +334,11 @@ bool CServiceUnits::InitializeService()
 	}
 
 	//配置网络
-	m_TCPNetworkEngine->SetServiceParameter(m_GameServiceOption.wGameServerPort, MAX_TABLE,TRUE );
+	m_TCPNetworkEngine->SetServiceParameter(m_GameServiceOption.wGameServerPort, MAX_TABLE);
 
 	//考虑到游戏服到现在才能知道ServerID, 因此只能将log的配置信息写到这里
 	TCHAR szIniFile[MAX_PATH]=TEXT("");
 	_sntprintf_s(szIniFile,CountArray(szIniFile),TEXT("GameServer-%d.log"), m_GameServiceOption.dwServerID);
-
-	//设置服务器日志输出等级
-	CLog::EnableTrace(log_debug,log_debug,szIniFile);
 
 	return true;
 }
@@ -432,7 +413,6 @@ bool CServiceUnits::RectifyServiceParameter()
 	//调整参数
 	if (m_GameServiceManager->RectifyParameter(m_GameServiceOption)==false)
 	{
-		CLog::Log(TEXT("游戏模块调整配置参数失败"),log_error);
 		return false;
 	}
 
@@ -454,8 +434,6 @@ bool CServiceUnits::SetServiceStatus(enServiceStatus ServiceStatus)
 		//错误通知
 		if ((m_ServiceStatus!=ServiceStatus_Service)&&(ServiceStatus==ServiceStatus_Stopping))
 		{
-			LPCTSTR pszString=TEXT("服务启动失败");
-			CLog::Log(pszString,log_error);
 		}
 
 		//设置变量
@@ -567,7 +545,6 @@ LRESULT CServiceUnits::OnUIControlRequest(WPARAM wParam, LPARAM lParam)
 			//失败处理
 			if ((m_ServiceStatus!=ServiceStatus_Stopping)&&(pControlResult->cbSuccess==ER_FAILURE))
 			{
-				CLog::Log(TEXT("停止失败"),log_error);
 			}
 
 			StopServiceImmediate();

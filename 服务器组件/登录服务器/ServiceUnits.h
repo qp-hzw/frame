@@ -71,11 +71,6 @@ protected:
 	//启动网络 -- 协调服 返回成功才会启动
 	int StartNetworkService();
 
-	//内部函数
-private:
-	//发送控制
-	bool SendControlPacket(WORD wControlID, VOID * pData, WORD wDataSize);
-
 	//消息映射
 protected:
 	//控制消息

@@ -237,12 +237,7 @@ bool CTableFrame::DismissGame()
 	ASSERT(m_bTableStarted==true);
 	if (m_bTableStarted==false) return false;
 
-	CLog::TraceStringEx(log_debug, 
-		TEXT("DismissGame %d "),m_wTableID);
-
-
 	KillGameTimer(IDI_GAME_CHECK);
-
 
 	//m_pIMainServiceFrame->ConcludeTable(m_wTableID);
 
@@ -557,9 +552,6 @@ bool CTableFrame::ConcludeGame(BYTE cbGameStatus)
 	//效验状态
 	if (m_bGameStarted==false) return false;
 
-	CLog::TraceStringEx(log_debug, 
-		TEXT("ConcludeGame  %d %s!\n"),cbGameStatus, m_bGameStarted?TEXT("start"):TEXT("normal"));
-
 	//保存变量
 	bool bDrawStarted=m_bDrawStarted;
 
@@ -846,19 +838,12 @@ bool CTableFrame::XJGameTickets(BYTE byTableMode, BYTE byRound)
 bool CTableFrame::XJModifyUserTreasure(BYTE byTableMode, BYTE byRound, SCORE *lGameScore, tagTableRule *pCfg)
 {
 	bool bIsMoneyEmpty = false; //是否有人满足不继续游戏的条件
-	TCHAR szString[512]=TEXT("金币不足, 无法继续游戏 \n房间将在4秒后解散"); //不满足之后的提示信息
 
 	//遍历桌子所有用户
 	for (int i = 0; i < m_wChairCount; i++)
 	{
 		//获取用户
 		IServerUserItem * pIServerUserItem = GetTableUserItem(i);
-
-		//构造提示
-		TCHAR szString[512]=TEXT("");
-		_sntprintf_s(szString,CountArray(szString),TEXT("Step0 Round = %d"),
-			byRound);
-		CLog::Log(szString,log_debug);
 
 		//校验用户
 		if(pIServerUserItem == NULL || pIServerUserItem->IsVirtualUser())
@@ -874,11 +859,6 @@ bool CTableFrame::XJModifyUserTreasure(BYTE byTableMode, BYTE byRound, SCORE *lG
 			}
 		}
 
-		//构造提示
-		_sntprintf_s(szString,CountArray(szString),TEXT("Step1 Round = %d  UserID = %ld"),
-			byRound, 
-			pIServerUserItem->GetUserID());
-		CLog::Log(szString,log_debug);
 
 		//更改信息
 		pIServerUserItem->ModifyUserTreasure(GetPassword(), byTableMode, byRound, lGameScore[i], byWin);
@@ -893,9 +873,6 @@ bool CTableFrame::XJModifyUserTreasure(BYTE byTableMode, BYTE byRound, SCORE *lG
 		if (CheckUserLeave(byTableMode,  pIServerUserItem, pCfg))
 		{
 			bIsMoneyEmpty = true;
-
-			//构造提示			
-			_sntprintf_s(szString,CountArray(szString),TEXT("[%s] %s"),pIServerUserItem->GetNickName(), szString);
 
 			/*
 			//通知用户财富不足，无法继续游戏		
@@ -922,8 +899,8 @@ bool CTableFrame::XJModifyUserTreasure(BYTE byTableMode, BYTE byRound, SCORE *lG
 			if(pIServerUserItem == NULL || pIServerUserItem->IsVirtualUser())
 				continue;
 
-			//通知在座的人
-			SendRequestFailure(pIServerUserItem, szString, REQUEST_FAILURE_NORMAL);
+			//通知在座的人 暂时注释掉
+			//SendRequestFailure(pIServerUserItem, szString, REQUEST_FAILURE_NORMAL);
 
 			//设置自动响应定时器
 			SetGameTimer(IDI_CHECK_DISMISS_ROOM, TIME_CHECK_DISMISS_ROOM, 1, NULL);
@@ -1008,15 +985,6 @@ bool CTableFrame::WriteRecordInfo(WORD wXJCount,TCHAR strScore[], VOID* pData, D
 	if(dwDataSize>LEN_MAX_RECORD_SIZE)
 	{
 		dwDataSize = LEN_MAX_RECORD_SIZE;
-
-		//构造提示
-		TCHAR szString[512]=TEXT("");
-		_sntprintf_s(szString,CountArray(szString),TEXT("录像回放数据过大  dwTableID = %ld, byRound =%d"),
-			GetPassword(),
-			wXJCount);
-
-		//提示消息
-		CLog::Log(szString,log_warn);
 	}
 
 	memcpy_s(GameRecordInfo.szData, dwDataSize*sizeof(BYTE), pData, dwDataSize*sizeof(BYTE));
@@ -1409,11 +1377,6 @@ bool CTableFrame::OnEventUserOffLine(IServerUserItem * pIServerUserItem)
 		//校验用户
 		if (pIServerUserItem!=GetTableUserItem(wChairID)) return false;
 
-		//构造提示
-		TCHAR szString[512]=TEXT("");
-		_sntprintf_s(szString,CountArray(szString),TEXT("玩家掉线, 状态被设置为 US_OFFLINE"));
-		CLog::Log(szString,log_debug);
-
 		//用户设置
 		pIServerUserItem->SetClientReady(false);
 		pIServerUserItem->SetOldGameStatus(cbUserStatus);
@@ -1688,11 +1651,6 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 			//效验状态
 			if (cbUserStatus!=US_SIT) 
 			{
-				//构造提示
-			TCHAR szString[512]=TEXT("");
-			_sntprintf_s(szString,CountArray(szString),TEXT("cbUserStatus = %d"), cbUserStatus);
-			CLog::Log(szString,log_debug);
-
 				return true;
 			}
 
@@ -2330,23 +2288,14 @@ bool CTableFrame::PerformLookonAction(WORD wChairID, IServerUserItem * pIServerU
 //坐下动作
 bool CTableFrame::PerformSitDownAction(WORD wChairID, IServerUserItem * pIServerUserItem, LPCTSTR lpszPassword, bool bCheckUserGPS)
 {
-	CString strTrace;
-
-	strTrace.Format(TEXT("【用户坐下】***********START***********"));
-	CLog::Log(strTrace, log_debug);
-
 	/* 0. 效验参数 */
 	if (NULL == pIServerUserItem)
 	{
-		CLog::Log(TEXT("【用户坐下】【坐下失败】 用户指针为空"), log_debug);
 		return false;
 	}
 	
 	if(wChairID > m_wChairCount)
 	{
-		strTrace.Format(TEXT("【用户坐下】【%ld坐下失败】 传入的椅子号%d 大于最大椅子%d"), 
-			pIServerUserItem->GetUserID(), wChairID, m_wChairCount);
-		CLog::Log(strTrace, log_debug);
 		return false;
 	}
 
@@ -2367,10 +2316,6 @@ bool CTableFrame::PerformSitDownAction(WORD wChairID, IServerUserItem * pIServer
 
 		//发送信息
 		SendRequestFailure(pIServerUserItem,szDescribe,REQUEST_FAILURE_NORMAL);
-
-		strTrace.Format(TEXT("【用户坐下】【%ld坐下失败】 椅子已经被 [%ld] 捷足先登了"), 
-			pIServerUserItem->GetUserID(), pITableUserItem->GetUserID());
-		CLog::Log(strTrace, log_debug);
 		return false;
 	}
 
@@ -3042,9 +2987,6 @@ void CTableFrame::RecordGameScore(bool bDrawStarted, DWORD dwStartGameTime)
 					CopyMemory(&GameScoreRecord.GameScoreRecord[wIndex],pGameScoreRecord,sizeof(tagGameScoreRecord));
 				}
 			}
-
-			CLog::TraceStringEx(log_debug,TEXT("RecordGameScore  m_wTableID:%d,lRevenueCount:%I64d,lWasteCount:%I64d"),
-				m_wTableID, GameScoreRecord.lRevenueCount, GameScoreRecord.lWasteCount);
 
 			//投递数据
 			if(GameScoreRecord.wUserCount > 0)

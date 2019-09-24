@@ -219,13 +219,6 @@ int GetInternetIP( TCHAR *szInernet_ip)
 		for (auto iter = begin; iter != std::sregex_iterator(); iter++)
 		{
 			MultiByteToWideChar(CP_ACP, 0,  &(iter->str())[0], -1, szInernet_ip, 32);
-
-			//构造提示
-			TCHAR szDescribe[128]=TEXT("");
-			_sntprintf_s(szDescribe,CountArray(szDescribe),TEXT("外网IP: %s"),szInernet_ip);
-			//提示消息
-			CLog::Log(szDescribe,log_debug);
-			//std::cout << iter->length() << ": " << iter->str() << std::endl;
 		}
 	}
 	else
@@ -259,7 +252,7 @@ bool CModuleInfoManager::LoadGameModuleInfo(CGameItemMap & ModuleInfoBuffer)
 	try
 	{
 		//设置连接
-		PlatformDBModule->SetConnectionInfo(1, _TEST);
+		PlatformDBModule->SetConnectionInfo(1);
 
 		//发起连接
 		PlatformDBModule->OpenConnection();
@@ -309,11 +302,7 @@ bool CModuleInfoManager::LoadGameModuleInfo(CGameItemMap & ModuleInfoBuffer)
 	catch (IDataBaseException * pIException)
 	{
 		//错误信息
-		LPCTSTR pszDescribe=pIException->GetExceptionDescribe();
-		CLog::Log(pszDescribe,log_error);
-
-		//错误提示
-		AfxMessageBox(pszDescribe,MB_ICONERROR);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 	}
 
 	return false;

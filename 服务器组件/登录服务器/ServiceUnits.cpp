@@ -4,8 +4,8 @@
 
 //////////////////////////////////////////////////////////////////////////////////
 
-//¾²Ì¬±äÁ¿
-CServiceUnits *			CServiceUnits::g_pServiceUnits=NULL;			//¶ÔÏóÖ¸Õë
+//é™æ€å˜é‡
+CServiceUnits *			CServiceUnits::g_pServiceUnits=NULL;			//å¯¹è±¡æŒ‡é’ˆ
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -15,102 +15,84 @@ END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////////////////
 
-//¹¹Ôìº¯Êı
+//æ„é€ å‡½æ•°
 CServiceUnits::CServiceUnits()
 {
-	//ÉèÖÃ¶ÔÏó
+	//è®¾ç½®å¯¹è±¡
 	if (g_pServiceUnits==NULL) g_pServiceUnits=this;
 
 	return;
 }
 
-//Îö¹¹º¯Êı
+//ææ„å‡½æ•°
 CServiceUnits::~CServiceUnits()
 {
 	ConcludeService();
 }
 
-//ÅäÖÃ×é¼ş
+//é…ç½®ç»„ä»¶
 int CServiceUnits::InitializeService()
 {
-	//ÉèÖÃ·şÎñÆ÷ÈÕÖ¾Êä³öµÈ¼¶
+	//è®¾ç½®æœåŠ¡å™¨æ—¥å¿—è¾“å‡ºç­‰çº§
 	bool bRet = CLog::Init("logon.log");
 
-	/***************************************************  ¸÷·şÎñ¹ØÁªÅäÖÃ *************************************************/
-	//´´½¨×é¼ş
+	/***************************************************  å„æœåŠ¡å…³è”é…ç½® *************************************************/
+	//åˆ›å»ºç»„ä»¶
 	if ((m_TimerEngine.GetInterface()==NULL)&&(m_TimerEngine.CreateInstance()==false)) return 1;
 	if ((m_AttemperEngine.GetInterface()==NULL)&&(m_AttemperEngine.CreateInstance()==false)) return 2;
 	if ((m_DataBaseEngine.GetInterface()==NULL)&&(m_DataBaseEngine.CreateInstance()==false)) return 3;
 	if ((m_TCPNetworkEngine.GetInterface()==NULL)&&(m_TCPNetworkEngine.CreateInstance()==false)) return 4;
 	if ((m_TCPSocketService.GetInterface()==NULL)&&(m_TCPSocketService.CreateInstance()==false)) return 5;
 
-	//×é¼ş½Ó¿Ú
+	//ç»„ä»¶æ¥å£
 	IUnknownEx * pIAttemperEngine=m_AttemperEngine.GetInterface();
 	IUnknownEx * pITCPNetworkEngine=m_TCPNetworkEngine.GetInterface();
 	IUnknownEx * pIAttemperEngineSink=QUERY_OBJECT_INTERFACE(m_AttemperEngineSink,IUnknownEx);
 
-	//ÉèÖÃAttemperEngine»Øµ÷
+	//è®¾ç½®AttemperEngineå›è°ƒ
 	if (m_AttemperEngine->SetAttemperEngineSink(pIAttemperEngineSink)==false) return 6;
 
-	//¸÷·şÎñÉèÖÃ»Øµ÷ÎªAttemperEngine
+	//å„æœåŠ¡è®¾ç½®å›è°ƒä¸ºAttemperEngine
 	if (m_TimerEngine->SetTimerEngineEvent(pIAttemperEngine)==false) return 7;
 	if (m_TCPNetworkEngine->SetTCPNetworkEngineEvent(pIAttemperEngine)==false) return 8;
 	if (m_TCPSocketService->SetTCPSocketEvent(pIAttemperEngine)==false) return 9;
 
 
-	//Êı¾İÒıÇæ
+	//æ•°æ®å¼•æ“
 	IUnknownEx * pIDataBaseEngineSink[CountArray(m_DataBaseEngineSink)];
 	for (WORD i=0;i<CountArray(pIDataBaseEngineSink);i++) pIDataBaseEngineSink[i]=QUERY_OBJECT_INTERFACE(m_DataBaseEngineSink[i],IUnknownEx);
 
-	//TODONOW £¿£¿
+	//TODONOW ï¼Ÿï¼Ÿ
 	if (m_DataBaseEngine->SetDataBaseEngineSink(pIDataBaseEngineSink,CountArray(pIDataBaseEngineSink))==false) return 10;
 
-	//Êı¾İ¿â»Øµ÷
+	//æ•°æ®åº“å›è°ƒ
 	for (INT i=0;i<CountArray(m_DataBaseEngineSink);i++)
     {
 		m_DataBaseEngineSink[i].m_pIDataBaseEngineEvent=QUERY_OBJECT_PTR_INTERFACE(pIAttemperEngine,IDataBaseEngineEvent);
 	}
 
-	//AttemperEngine»Øµ÷
+	//AttemperEngineå›è°ƒ
 	m_AttemperEngineSink.m_pITimerEngine=m_TimerEngine.GetInterface();
 	m_AttemperEngineSink.m_pIDataBaseEngine=m_DataBaseEngine.GetInterface();
 	m_AttemperEngineSink.m_pITCPNetworkEngine=m_TCPNetworkEngine.GetInterface();
 	m_AttemperEngineSink.m_pITCPSocketService=m_TCPSocketService.GetInterface();
 
-	/***************************************************  ·şÎñÅäÖÃĞÅÏ¢ *************************************************/
-	//Ğ­µ÷·şÎñ£¨Ğ­µ÷·şÎñÆ÷£©
+	/***************************************************  æœåŠ¡é…ç½®ä¿¡æ¯ *************************************************/
+	//åè°ƒæœåŠ¡ï¼ˆåè°ƒæœåŠ¡å™¨ï¼‰
 	if (m_TCPSocketService->SetServiceID(NETWORK_CORRESPOND)==false) return 11;
-	if (m_TCPSocketService->SetEncrypt(TRUE)==false) return 12;
 
-	//ÅäÖÃÍøÂç
+	//é…ç½®ç½‘ç»œ
 	WORD wMaxConnect=MAX_CONTENT;
 	WORD wServicePort=PORT_LOGON;
-	if (m_TCPNetworkEngine->SetServiceParameter(wServicePort,wMaxConnect, TRUE)==false) return 13;
+	if (m_TCPNetworkEngine->SetServiceParameter(wServicePort,wMaxConnect)==false) return 12;
 
 	return 0;
 }
 
-//Æô¶¯·şÎñ
+//å¯åŠ¨æœåŠ¡
 bool CServiceUnits::StartService()
 {
-	//ÄÚºË°æ±¾ÅĞ¶Ï
-	/*
-	CWHIniData InitData;
-	DWORD realKernel = InitData.Get_Code_Kernel_Version();
-	DWORD frameKernel = Get_Kernel_Version();
-	if(Compare_Kernek_Framework(realKernel, frameKernel) != 0)
-	{
-		TCHAR pszString2[512]=TEXT("");
-		_sntprintf_s(pszString2,CountArray(pszString2),TEXT("·şÎñÆô¶¯Ê§°Ü, ÄÚºË°æ±¾²»Æ¥Åä, realKernel: %ld; frameKernel: %ld\n"),
-					realKernel,
-					frameKernel);
-		CLog::Log(log_error, pszString2);
-
-		return false;
-	}
-	*/
-
-	//ÅäÖÃ·şÎñ
+	//é…ç½®æœåŠ¡
 	int iRet = InitializeService();
 
 	if (iRet != 0)
@@ -120,7 +102,7 @@ bool CServiceUnits::StartService()
 		return false;
 	}
 	
-	//Æô¶¯ÄÚºË
+	//å¯åŠ¨å†…æ ¸
 	iRet = StartKernelService();
 	if (iRet != 0)
 	{
@@ -129,19 +111,19 @@ bool CServiceUnits::StartService()
 		return false;
 	}
 
-	//Á¬½ÓĞ­µ÷
-	SendControlPacket(CT_CONNECT_CORRESPOND,NULL,0);
+	//è¿æ¥åè°ƒ
+	m_AttemperEngine->OnEventControl(CT_CONNECT_CORRESPOND,NULL,0);
 
-	//»ñÈ¡ÁĞ±í
-	//SendControlPacket(CT_LOAD_DB_GAME_LIST,NULL,0);
+	//è·å–åˆ—è¡¨
+	//m_AttemperEngine->OnEventControl(CT_LOAD_DB_GAME_LIST,NULL,0);
 
 	return true;
 }
 
-//Í£Ö¹·şÎñ
+//åœæ­¢æœåŠ¡
 bool CServiceUnits::ConcludeService()
 {
-	//Í£Ö¹·şÎñ
+	//åœæ­¢æœåŠ¡
 	if (m_TimerEngine.GetInterface()!=NULL) m_TimerEngine->ConcludeService();
 	if (m_AttemperEngine.GetInterface()!=NULL) m_AttemperEngine->ConcludeService();
 	if (m_DataBaseEngine.GetInterface()!=NULL) m_DataBaseEngine->ConcludeService();
@@ -151,29 +133,29 @@ bool CServiceUnits::ConcludeService()
 	return true;
 }
 
-//Æô¶¯ÄÚºË
+//å¯åŠ¨å†…æ ¸
 int CServiceUnits::StartKernelService()
 {
-	//Ê±¼äÒıÇæ
+	//æ—¶é—´å¼•æ“
 	if (m_TimerEngine->StartService()==false)
 	{
 		return 1;
 	}
 	
-	//µ÷¶ÈÒıÇæ
+	//è°ƒåº¦å¼•æ“
 	if (m_AttemperEngine->StartService()==false)
 	{
 		return 2;
 	}
 
-	//Ğ­µ÷ÒıÇæ
+	//åè°ƒå¼•æ“
 	if (m_TCPSocketService->StartService()==false)
 	{
 		return 3;
 	}
 	
-	/*
-	//Êı¾İÒıÇæ
+	/* TODONOW
+	//æ•°æ®å¼•æ“
 	if (m_DataBaseEngine->StartService()==false)
 	{
 		return 4;
@@ -183,10 +165,10 @@ int CServiceUnits::StartKernelService()
 	return 0;
 }
 
-//Æô¶¯ÍøÂç
+//å¯åŠ¨ç½‘ç»œ
 int CServiceUnits::StartNetworkService()
 {
-	//ÍøÂçÒıÇæ
+	//ç½‘ç»œå¼•æ“
 	if (m_TCPNetworkEngine->StartService()==false)
 	{
 		return 1;
@@ -195,60 +177,49 @@ int CServiceUnits::StartNetworkService()
 	return 0;
 }
 
-//Í¶µİÇëÇó
+//æŠ•é€’è¯·æ±‚
 bool CServiceUnits::PostControlRequest(WORD wIdentifier, VOID * pData, WORD wDataSize)
 {
-	//×´Ì¬ÅĞ¶Ï
+	//çŠ¶æ€åˆ¤æ–­
 	if (IsWindow(m_hWnd)==FALSE) return false;
 
-	//²åÈë¶ÓÁĞ
+	//æ’å…¥é˜Ÿåˆ—
 	CWHDataLocker DataLocker(m_CriticalSection);
 	if (m_DataQueue.InsertData(wIdentifier,pData,wDataSize)==false) return false;
 
-	//·¢ËÍÏûÏ¢
+	//å‘é€æ¶ˆæ¯
 	PostMessage(WM_UICONTROL_REQUEST,wIdentifier,wDataSize);
 
 	return true;
 }
 
-//·¢ËÍ¿ØÖÆ
-bool CServiceUnits::SendControlPacket(WORD wControlID, VOID * pData, WORD wDataSize)
-{
-	//×´Ì¬Ğ§Ñé
-	if (m_AttemperEngine.GetInterface()==NULL) return false;
 
-	//·¢ËÍ¿ØÖÆ
-	m_AttemperEngine->OnEventControl(wControlID,pData,wDataSize);
-
-	return true;
-}
-
-//¿ØÖÆÏûÏ¢
+//æ§åˆ¶æ¶ˆæ¯
 LRESULT CServiceUnits::OnUIControlRequest(WPARAM wParam, LPARAM lParam)
 {
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	tagDataHead DataHead;
 	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
 
-	//ÌáÈ¡Êı¾İ
+	//æå–æ•°æ®
 	CWHDataLocker DataLocker(m_CriticalSection);
 	if (m_DataQueue.DistillData(DataHead,cbBuffer,sizeof(cbBuffer))==false)
 	{
 		return NULL;
 	}
 
-	//Êı¾İ´¦Àí
+	//æ•°æ®å¤„ç†
 	switch (DataHead.wIdentifier)
 	{
-	case UI_LOAD_DB_LIST_RESULT:	//ÁĞ±í½á¹û
+	case UI_LOAD_DB_LIST_RESULT:	//åˆ—è¡¨ç»“æœ
 		{
-			//Ğ§ÑéÏûÏ¢
+			//æ•ˆéªŒæ¶ˆæ¯
 			if (DataHead.wDataSize!=sizeof(CP_ControlResult)) return 0;
 
-			//±äÁ¿¶¨Òå
+			//å˜é‡å®šä¹‰
 			CP_ControlResult * pControlResult=(CP_ControlResult *)cbBuffer;
 
-			//Ê§°Ü´¦Àí
+			//å¤±è´¥å¤„ç†
 			if (pControlResult->cbSuccess==ER_FAILURE)
 			{
 				ConcludeService();
@@ -257,24 +228,24 @@ LRESULT CServiceUnits::OnUIControlRequest(WPARAM wParam, LPARAM lParam)
 
 			return 0;
 		}
-	case UI_CORRESPOND_RESULT:		//Ğ­µ÷½á¹û
+	case UI_CORRESPOND_RESULT:		//åè°ƒç»“æœ
 		{
-			//Ğ§ÑéÏûÏ¢
+			//æ•ˆéªŒæ¶ˆæ¯
 			if (DataHead.wDataSize!=sizeof(CP_ControlResult)) return 0;
 
-			//±äÁ¿¶¨Òå
+			//å˜é‡å®šä¹‰
 			CP_ControlResult * pControlResult=(CP_ControlResult *)cbBuffer;
-			//Ê§°Ü´¦Àí
+			//å¤±è´¥å¤„ç†
 			if (pControlResult->cbSuccess==ER_FAILURE)
 			{
 				ConcludeService();
 				return 0;
 			}
 
-			//³É¹¦´¦Àí
+			//æˆåŠŸå¤„ç†
 			if (pControlResult->cbSuccess==ER_SUCCESS)
 			{
-				//Æô¶¯ÍøÂç
+				//å¯åŠ¨ç½‘ç»œ
 				if (StartNetworkService()==false)
 				{
 					ConcludeService();

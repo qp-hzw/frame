@@ -1,7 +1,7 @@
 #ifndef STR_CMD_LONGON_HEAD_FILE
 #define STR_CMD_LONGON_HEAD_FILE
 
-#pragma pack(1)
+#include "Stdafx.h"
 
 #pragma region 辅助结构体
 ////桌子上的玩家信息

@@ -39,7 +39,7 @@
 /***全局文件***/
 //定义文件
 #include "../../../../share/依赖项/全局定义/Macro.h"
-#include "../../../../share/依赖项/全局定义/Define.h"
+#include "../../全局定义/Define.h"
 #include "../../全局定义/Define.h"
 
 //结构文件
@@ -68,7 +68,7 @@
 
 #include "../../../../share\依赖项\内核引擎\KernelEngineHead.h"
 #include "../../../../share\依赖项\内核引擎\DataBaseAide.h"
-#include "../../../../share\依赖项\内核引擎\TraceService.h"
+#include "../../../../share\依赖项\内核引擎\log.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 //链接代码

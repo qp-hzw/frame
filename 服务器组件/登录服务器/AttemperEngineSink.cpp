@@ -29,7 +29,7 @@ using namespace std;
 
 #pragma endregion
 
-#pragma region 基础接口
+#pragma region 事件接口
 //构造函数
 CAttemperEngineSink::CAttemperEngineSink()
 {
@@ -71,14 +71,12 @@ bool CAttemperEngineSink::OnAttemperEngineStart(IUnknownEx * pIUnknownEx)
 	m_pBindParameter=new tagBindParameter[MAX_CONTENT];
 	ZeroMemory(m_pBindParameter,sizeof(tagBindParameter)*MAX_CONTENT);
 
-	//设置时间
-	ASSERT(m_pITimerEngine!=NULL);
 	//更新在线人数 -- 通知database
-	m_pITimerEngine->SetTimer(IDI_COLLECT_ONLINE_INFO, TIME_COLLECT_ONLINE_INFO*1000L,TIMES_INFINITY,0);
+	//m_pITimerEngine->SetTimer(IDI_COLLECT_ONLINE_INFO, TIME_COLLECT_ONLINE_INFO*1000L,TIMES_INFINITY,0);
 	//更新在线人数 -- 通知client
-	m_pITimerEngine->SetTimer(IDI_UPDATA_ONLINE_COUNT,TIME_UPDATA_ONLINE_COUNT*1000L,TIMES_INFINITY, 0);
+	//m_pITimerEngine->SetTimer(IDI_UPDATA_ONLINE_COUNT,TIME_UPDATA_ONLINE_COUNT*1000L,TIMES_INFINITY, 0);
 	//加载跑马灯消息
-	m_pITimerEngine->SetTimer(IDI_UPDATA_MARQUEE,TIME_UPDATA_MARQUEE*1000L,1, 0);
+	//m_pITimerEngine->SetTimer(IDI_UPDATA_MARQUEE,TIME_UPDATA_MARQUEE*1000L,1, 0);
 
 	//获取目录
 	TCHAR szPath[MAX_PATH]=TEXT("");
@@ -173,6 +171,7 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 
 			return true;
 		}
+		/*
 	case IDI_COLLECT_ONLINE_INFO:		//统计在线 -- 发给数据库
 		{
 			//变量定义
@@ -232,13 +231,6 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 
 			return true;
 		}
-		/*
-	case  IDI_READ_VERSION:
-		{
-			m_pIDataBaseEngine->PostDataBaseRequest(DBR_GP_READ_VERSION_AND_URL,0,NULL,0);
-			return true;
-		}
-		*/
 	case  IDI_UPDATA_ONLINE_COUNT: //发送给客户端
 		{
 			//网络数据
@@ -371,6 +363,8 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 
 			return true;
 		}
+		*/
+
 	}
 
 	return false;

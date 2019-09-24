@@ -1,7 +1,7 @@
 #ifndef STRUCT_HEAD_FILE
 #define STRUCT_HEAD_FILE
 
-#pragma pack(1)
+#include "Define_base.h"
 
 #pragma region 游戏列表  -- 来源: 数据库
 //TypeItem

@@ -41,12 +41,6 @@ CGameServerDlg::~CGameServerDlg()
 {
 }
 
-//控件绑定
-VOID CGameServerDlg::DoDataExchange(CDataExchange * pDX)
-{
-	__super::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_TRACE_MESSAGE, m_TraceServiceControl);
-}
 
 //初始化函数
 BOOL CGameServerDlg::OnInitDialog()
@@ -130,10 +124,6 @@ VOID CGameServerDlg::OnServiceUnitsStatus(enServiceStatus ServiceStatus)
 			GetDlgItem(IDC_OPEN_SERVER)->EnableWindow(FALSE);
 			GetDlgItem(IDC_CREATE_SERVER)->EnableWindow(FALSE);
 
-			//提示信息
-			LPCTSTR pszDescribe=TEXT("停止服务器中");
-			CLog::Log(pszDescribe,log_debug);
-
 			break;
 		}
 	case ServiceStatus_Stop:	//停止状态
@@ -148,10 +138,6 @@ VOID CGameServerDlg::OnServiceUnitsStatus(enServiceStatus ServiceStatus)
 			//配置按钮
 			GetDlgItem(IDC_OPEN_SERVER)->EnableWindow(TRUE);
 			GetDlgItem(IDC_CREATE_SERVER)->EnableWindow(TRUE);
-
-			//提示信息
-			LPCTSTR pszDescribe=TEXT("服务停止成功");
-			CLog::Log(pszDescribe,log_debug);
 
 			if(m_bQuit)
 			{
@@ -173,10 +159,6 @@ VOID CGameServerDlg::OnServiceUnitsStatus(enServiceStatus ServiceStatus)
 			GetDlgItem(IDC_OPEN_SERVER)->EnableWindow(FALSE);
 			GetDlgItem(IDC_CREATE_SERVER)->EnableWindow(FALSE);
 
-			//提示信息
-			LPCTSTR pszDescribe=TEXT("正在初始化组件...");
-			CLog::Log(pszDescribe,log_debug);
-
 			break;
 		}
 	case ServiceStatus_Service:	//服务状态
@@ -191,10 +173,6 @@ VOID CGameServerDlg::OnServiceUnitsStatus(enServiceStatus ServiceStatus)
 			//配置按钮
 			GetDlgItem(IDC_OPEN_SERVER)->EnableWindow(FALSE);
 			GetDlgItem(IDC_CREATE_SERVER)->EnableWindow(FALSE);
-
-			//提示信息
-			LPCTSTR pszDescribe=TEXT("服务启动成功");
-			CLog::Log(pszDescribe,log_debug);
 
 			break;
 		}
@@ -297,15 +275,6 @@ VOID CGameServerDlg::UpdateParameterStatus(tagModuleInitParameter & ModuleInitPa
 
 	//设置模块
 	m_ServiceUnits.CollocateService(m_ModuleInitParameter.GameServiceAttrib.szDllName,m_ModuleInitParameter.GameServiceOption);
-
-	//构造提示
-	TCHAR szString[256]=TEXT("");
-	LPCTSTR pszServerName=m_ModuleInitParameter.GameServiceOption.szServerName;
-	_sntprintf_s(szString,CountArray(szString),TEXT("[ %s ] 房间参数加载成功"),pszServerName);
-
-	//输出信息
-	CLog::Log(szString,log_debug);
-
 	return;
 }
 
@@ -374,7 +343,6 @@ BOOL CGameServerDlg::OnQueryEndSession()
 	//提示消息
 	if (m_ServiceUnits.GetServiceStatus()!=ServiceStatus_Stop)
 	{
-		CLog::Log(TEXT("服务正在运行中，系统要求注销回话请求失败"),log_warn);
 		return FALSE;
 	}
 

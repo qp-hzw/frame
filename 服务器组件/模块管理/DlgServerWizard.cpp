@@ -780,11 +780,8 @@ VOID CDlgServerWizard::OnBnClickedFinish()
 	//插入房间（将从对话框界面上获取的数据写入数据库）
 	if (ServerInfoManager.InsertGameServer(&m_ModuleInitParameter.GameServiceOption)==false) 
 	{
-		CLog::Log(TEXT("创建房间失败"), log_debug);
 		return;
 	}
-	else
-		CLog::Log(TEXT("创建房间成功"), log_debug);
 
 	//关闭窗口
 	EndDialog(IDOK);

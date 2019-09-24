@@ -199,15 +199,6 @@ bool CServerInfoManager::LoadGameServerInfo(TCHAR szMachineID[LEN_MACHINE_ID], C
 		//读取列表
 		if (PlatformDBAide.ExecuteProcess(TEXT("GSP_GS_LoadGameRoomItem"),true)!=DB_SUCCESS)
 		{
-			//获取信息
-			PlatformDBAide.GetParameter(TEXT("@strErrorDescribe"),szDescribeString,CountArray(szDescribeString));
-
-			//错误提示
-			CLog::Log(szDescribeString,log_error);
-
-			//错误提示
-			AfxMessageBox(szDescribeString,MB_ICONERROR);
-
 			return false;
 		}
 
@@ -233,12 +224,7 @@ bool CServerInfoManager::LoadGameServerInfo(TCHAR szMachineID[LEN_MACHINE_ID], C
 	catch (IDataBaseException * pIException)
 	{
 		//错误信息
-		LPCTSTR pszDescribe=pIException->GetExceptionDescribe();
-		CLog::Log(pszDescribe,log_error);
-
-		//错误提示
-		AfxMessageBox(pszDescribe,MB_ICONERROR);
-
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 
@@ -277,15 +263,6 @@ bool CServerInfoManager::LoadGameServerInfo(TCHAR szMachineID[LEN_MACHINE_ID], D
 		//读取列表
 		if (PlatformDBAide.ExecuteProcess(TEXT("GSP_GS_LoadGameRoomItem"),true)!=DB_SUCCESS)
 		{
-			//获取信息
-			PlatformDBAide.GetParameter(TEXT("@strErrorDescribe"),szDescribeString,CountArray(szDescribeString));
-
-			//错误提示
-			CLog::Log(szDescribeString,log_error);
-
-			//错误提示
-			AfxMessageBox(szDescribeString,MB_ICONERROR);
-
 			return false;
 		}
 
@@ -301,12 +278,7 @@ bool CServerInfoManager::LoadGameServerInfo(TCHAR szMachineID[LEN_MACHINE_ID], D
 	catch (IDataBaseException * pIException)
 	{
 		//错误信息
-		LPCTSTR pszDescribe=pIException->GetExceptionDescribe();
-		CLog::Log(pszDescribe,log_error);
-
-		//错误提示
-		AfxMessageBox(pszDescribe,MB_ICONERROR);
-
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 
@@ -347,13 +319,6 @@ bool CServerInfoManager::DeleteGameServer(DWORD wServerID)
 		{
 			//获取信息
 			PlatformDBAide.GetParameter(TEXT("@strErrorDescribe"),szDescribeString,CountArray(szDescribeString));
-
-			//错误提示
-			CLog::Log(szDescribeString,log_error);
-
-			//错误提示
-			AfxMessageBox(szDescribeString,MB_ICONERROR);
-
 			return false;
 		}
 
@@ -362,11 +327,7 @@ bool CServerInfoManager::DeleteGameServer(DWORD wServerID)
 	catch (IDataBaseException * pIException)
 	{
 		//错误信息
-		LPCTSTR pszDescribe=pIException->GetExceptionDescribe();
-		CLog::Log(pszDescribe,log_error);
-
-		//错误提示
-		AfxMessageBox(pszDescribe,MB_ICONERROR);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 	}
 
 	return false;
@@ -415,9 +376,6 @@ bool CServerInfoManager::InsertGameServer(tagGameServiceOption *pGameServerCreat
 			PlatformDBAide.GetParameter(TEXT("@strErrorDescribe"),szDescribeString,CountArray(szDescribeString));
 
 			//错误提示
-			CLog::Log(szDescribeString,log_error);
-
-			//错误提示
 			AfxMessageBox(szDescribeString,MB_ICONERROR);
 			return false;
 		}
@@ -427,11 +385,7 @@ bool CServerInfoManager::InsertGameServer(tagGameServiceOption *pGameServerCreat
 	catch (IDataBaseException * pIException)
 	{
 		//错误信息
-		LPCTSTR pszDescribe=pIException->GetExceptionDescribe();
-		CLog::Log(pszDescribe,log_error);
-
-		//错误提示
-		AfxMessageBox(pszDescribe,MB_ICONERROR);
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 	}
 
 	return false;
@@ -504,9 +458,6 @@ bool CServerInfoManager::ModifyGameServer(tagSQL_In_InsertGameRoom * pGameServer
 			PlatformDBAide.GetParameter(TEXT("@strErrorDescribe"),szDescribeString,CountArray(szDescribeString));
 
 			//错误提示
-			CLog::Log(szDescribeString,log_error);
-
-			//错误提示
 			AfxMessageBox(szDescribeString,MB_ICONERROR);
 
 			return false;
@@ -520,12 +471,7 @@ bool CServerInfoManager::ModifyGameServer(tagSQL_In_InsertGameRoom * pGameServer
 	catch (IDataBaseException * pIException)
 	{
 		//错误信息
-		LPCTSTR pszDescribe=pIException->GetExceptionDescribe();
-		CLog::Log(pszDescribe,log_error);
-
-		//错误提示
-		AfxMessageBox(pszDescribe,MB_ICONERROR);
-
+		CLog::Log(log_error, pIException->GetExceptionDescribe());
 		return false;
 	}
 
@@ -543,7 +489,7 @@ bool CServerInfoManager::ConnectPlatformDB(CDataBaseHelper & PlatformDBModule)
 	}
 
 	//设置连接
-	PlatformDBModule->SetConnectionInfo(1, _TEST);
+	PlatformDBModule->SetConnectionInfo(1);
 
 	//发起连接
 	PlatformDBModule->OpenConnection();

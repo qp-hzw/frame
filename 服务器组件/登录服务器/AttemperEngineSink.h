@@ -1,8 +1,6 @@
 #ifndef ATTEMPER_ENGINE_SINK_HEAD_FILE
 #define ATTEMPER_ENGINE_SINK_HEAD_FILE
 
-#pragma once
-
 #include "Stdafx.h"
 #include "ServerListManager.h"
 #include "DataBasePacket.h"
@@ -51,8 +49,8 @@ protected:
 protected:
 	ITimerEngine *					m_pITimerEngine;					//时间引擎		//定时器通信
 	IDataBaseEngine *				m_pIDataBaseEngine;					//数据引擎		//数据库与登陆服通信
-	ITCPNetworkEngine *				m_pITCPNetworkEngine;				//网络引擎		//客户端与登陆服通信
-	ITCPSocketService *				m_pITCPSocketService;				//协调服务		//协调服与登陆服通信
+	ITCPNetworkEngine *				m_pITCPNetworkEngine;				//网络引擎		//socket::server
+	ITCPSocketService *				m_pITCPSocketService;				//协调服务		//socket::client
 
 #pragma region 构造析构
 	//函数定义
@@ -63,7 +61,7 @@ public:
 	virtual ~CAttemperEngineSink();
 #pragma endregion
 
-#pragma region 基础接口
+#pragma region 事件接口
 	//基础接口
 public:
 	//释放对象

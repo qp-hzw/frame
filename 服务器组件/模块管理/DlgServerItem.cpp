@@ -209,28 +209,12 @@ bool CDlgServerItem::GetModuleInitParameter(tagGameRoomItem * pGameServerInfo, b
 	//创建判断
 	if (pGameServerInfo->dwNativeVersion==0)
 	{
-		//构造提示
-		TCHAR szString[128]=TEXT("");
-		_sntprintf_s(szString,CountArray(szString),TEXT("[ %s ] 游戏服务器组件还没有安装，请先安装对应的游戏服务器"),pGameServerInfo->szServerName);
-
-		//提示消息
-		if (bAutoMode==true) CLog::Log(szString,log_error);
-		else AfxMessageBox(szString,MB_ICONERROR);
-
 		return false;
 	}
 
 	//加载模块
 	if (GameServiceManager.CreateInstance()==false)
 	{
-		//构造提示
-		TCHAR szString[128]=TEXT("");
-		_sntprintf_s(szString,CountArray(szString),TEXT("[ %s ] 服务组件不存在或者加载失败，请重新安装服务组件"),pGameServerInfo->szServerName);
-
-		//提示消息
-		if (bAutoMode==true) CLog::Log(szString,log_error);
-		else AfxMessageBox(szString,MB_ICONERROR);
-
 		return false;
 	}
 

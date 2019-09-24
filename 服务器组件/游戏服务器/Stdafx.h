@@ -42,7 +42,7 @@
 /***全局文件***/
 //定义文件
 #include "../../../../share/依赖项/全局定义/Macro.h"
-#include "../../../../share/依赖项/全局定义/Define.h"
+#include "../../全局定义/Define_base.h"
 #include "../../全局定义/Define.h"
 
 //结构文件
@@ -79,7 +79,7 @@
 
 #include "../../../../share\依赖项\内核引擎\KernelEngineHead.h"
 #include "../../../../share\依赖项\内核引擎\DataBaseAide.h"
-#include "../../../../share\依赖项\内核引擎\TraceService.h"
+#include "../../../../share\依赖项\内核引擎\log.h"
 
 #include "..\..\服务器组件\模块管理\ModuleManagerHead.h"
 
@@ -87,18 +87,11 @@
 
 //////////////////////////////////////////////////////////////////////////////////
 //链接代码
+#pragma comment (lib,"../../../../share/依赖项/链接库/ServiceCore.lib")
+#pragma comment (lib,"../../依赖项/链接库/GameService.lib")
+#pragma comment (lib,"../../../../share/依赖项/链接库/KernelEngine.lib")
+#pragma comment (lib,"../../依赖项/链接库/ModuleManager.lib")
 
-#ifndef _DEBUG
-	#pragma comment (lib,"../../../../share/依赖项/链接库/ServiceCore.lib")
-	#pragma comment (lib,"../../依赖项/链接库/GameService.lib")
-	#pragma comment (lib,"../../../../share/依赖项/链接库/KernelEngine.lib")
-	#pragma comment (lib,"../../依赖项/链接库/ModuleManager.lib")
-#else
-	#pragma comment (lib,"../../../../share/依赖项/链接库/ServiceCoreD.lib")
-	#pragma comment (lib,"../../依赖项/链接库/GameServiceD.lib")
-	#pragma comment (lib,"../../../../share/依赖项/链接库/KernelEngineD.lib")
-	#pragma comment (lib,"../../依赖项/链接库/ModuleManagerD.lib")
-#endif
 
 //控制台
 #include "ConsoleAdapter.h"

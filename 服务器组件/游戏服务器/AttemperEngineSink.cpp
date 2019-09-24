@@ -216,23 +216,7 @@ bool CAttemperEngineSink::OnEventControl(WORD wIdentifier, VOID * pData, WORD wD
 	{
 	case CT_CONNECT_CORRESPOND:		//连接协调
 		{
-			//发起连接
-			if(1 == _TEST)
-			{
-				m_pITCPSocketService->Connect(TEXT("127.0.0.1"), PORT_CENTER);
-			}
-			else
-			{
-				m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
-			}
-
-			//构造提示
-			TCHAR szString[512]=TEXT("");
-			_sntprintf_s(szString,CountArray(szString),TEXT("正在连接协调服务器"));
-
-			//提示消息
-			CLog::Log(szString,log_debug);
-
+			m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
 			return true;
 		}
 	case CT_LOAD_SERVICE_CONFIG:	//加载配置
@@ -297,23 +281,7 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 			}
 		case IDI_CONNECT_CORRESPOND:	//连接协调
 			{
-				//发起连接 TODONOWW
-				if(1 == _TEST)
-				{
-					m_pITCPSocketService->Connect(TEXT("127.0.0.1"), PORT_CENTER);
-				}
-				else
-				{
-					m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
-				}
- 
-				//构造提示
-				TCHAR szString[512]=TEXT("");
-				_sntprintf_s(szString,CountArray(szString),TEXT("正在连接协调服务器"));
-
-				//提示消息
-				CLog::Log(szString,log_debug);
-
+				m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
 				return true;
 			}
 		case IDI_GAME_SERVICE_PULSE:	//服务维护
@@ -495,13 +463,6 @@ bool CAttemperEngineSink::OnEventTCPSocketShut(WORD wServiceID, BYTE cbShutReaso
 		//重连判断
 		if (m_bNeekCorrespond==true)
 		{
-			//构造提示
-			TCHAR szDescribe[128]=TEXT("");
-			_sntprintf_s(szDescribe,CountArray(szDescribe),TEXT("与协调服务器的连接关闭了，%ld 秒后将重新连接"),TIME_CONNECT);
-
-			//提示消息
-			CLog::Log(szDescribe,log_warn);
-
 			//设置时间
 			ASSERT(m_pITimerEngine!=NULL);
 			m_pITimerEngine->SetTimer(IDI_CONNECT_CORRESPOND, TIME_CONNECT_CORRESPOND, 1, 0);
@@ -522,22 +483,11 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		//错误判断
 		if (nErrorCode!=0)
 		{
-			//构造提示
-			TCHAR szDescribe[128]=TEXT("");
-			_sntprintf_s(szDescribe,CountArray(szDescribe),TEXT("协调服务器连接失败 [ %ld ]，%ld 秒后将重新连接"),
-				nErrorCode,TIME_CONNECT_CORRESPOND);
-
-			//提示消息
-			CLog::Log(szDescribe,log_warn);
-
 			//设置时间
 			m_pITimerEngine->SetTimer(IDI_CONNECT_CORRESPOND, TIME_CONNECT_CORRESPOND, 1, 0);
 
 			return false;
 		}
-
-		//提示消息
-		CLog::Log(TEXT("正在发送游戏房间注册信息..."),log_debug);
 
 		//变量定义
 		STR_CPR_GP_REGISTER_GAME RegisterServer;
@@ -746,7 +696,7 @@ bool CAttemperEngineSink::SendRoomMessage(LPCTSTR lpszMessage, WORD wType)
 
 	//发送数据
 	m_AndroidUserManager.SendDataToClient(MDM_CM_SYSTEM,SUB_CM_SYSTEM_MESSAGE,&SystemMessage,wSendSize);
-	m_pITCPNetworkEngine->SendDataBatch(MDM_CM_SYSTEM,SUB_CM_SYSTEM_MESSAGE,&SystemMessage,wSendSize,BG_COMPUTER);
+	m_pITCPNetworkEngine->SendDataBatch(MDM_CM_SYSTEM,SUB_CM_SYSTEM_MESSAGE,&SystemMessage,wSendSize);
 
 	return true;
 }
@@ -769,7 +719,7 @@ bool CAttemperEngineSink::SendGameMessage(LPCTSTR lpszMessage, WORD wType)
 
 	//发送数据
 	m_AndroidUserManager.SendDataToClient(MDM_G_FRAME,CMD_GF_SYSTEM_MESSAGE,&SystemMessage,wSendSize);
-	m_pITCPNetworkEngine->SendDataBatch(MDM_G_FRAME,CMD_GF_SYSTEM_MESSAGE,&SystemMessage,wSendSize,BG_COMPUTER);
+	m_pITCPNetworkEngine->SendDataBatch(MDM_G_FRAME,CMD_GF_SYSTEM_MESSAGE,&SystemMessage,wSendSize);
 
 	return true;
 }
@@ -937,7 +887,7 @@ bool CAttemperEngineSink::SendData(BYTE cbSendMask, WORD wMainCmdID, WORD wSubCm
 	}
 
 	//用户数据
-	m_pITCPNetworkEngine->SendDataBatch(wMainCmdID,wSubCmdID,pData,wDataSize,cbSendMask);
+	m_pITCPNetworkEngine->SendDataBatch(wMainCmdID,wSubCmdID,pData,wDataSize);
 
 	return true;
 }
@@ -1017,15 +967,6 @@ bool CAttemperEngineSink::OnEventModifyUserTreasure(IServerUserItem *pIServerUse
 	//发送数据
 	DWORD dwBindIndex = pIServerUserItem->GetBindIndex();
 	tagBindParameter *pBindParameter = GetBindParameter(static_cast<WORD>(dwBindIndex));
-	 
-	//构造提示
-		TCHAR szString[512]=TEXT("");
-		_sntprintf_s(szString,CountArray(szString),TEXT("Step2 Round = %d, UserID = %ld, pBindParameter = %d"),
-			byRound,
-			pIServerUserItem->GetUserID(),
-			(pBindParameter == NULL)
-			);
-		CLog::Log(szString,log_debug);
 
 	if (NULL != pBindParameter)
 	{
@@ -1087,7 +1028,7 @@ bool CAttemperEngineSink::OnEventUserItemStatus(IServerUserItem * pIServerUserIt
 				}
 				else
 				{
-					m_pITCPNetworkEngine->ShutDownSocket(pBindParameter->dwSocketID);
+					m_pITCPNetworkEngine->CloseSocket(pBindParameter->dwSocketID);
 				}
 			}
 		}
@@ -1226,12 +1167,11 @@ bool CAttemperEngineSink::OnTCPSocketMainRegister(WORD wSubCmdID, VOID * pData, 
 
 			//关闭处理
 			m_bNeekCorrespond=false;
-			m_pITCPSocketService->CloseSocket();
 
 			//显示消息
 			if (lstrlen(pRegisterFailure->szDescribeString)>0)
 			{
-				CLog::Log(pRegisterFailure->szDescribeString,log_error);
+				//CLog::Log(log_error, pRegisterFailure->szDescribeString);
 			}
 
 			//事件通知
@@ -1533,20 +1473,12 @@ bool CAttemperEngineSink::On_SUB_CG_Logon_UserID(VOID * pData, WORD wDataSize, D
 		//printf("\n【客户端】：USERID登录，版本不匹配\n");
 	}
 
-	//提示消息
-	TCHAR szString[512]=TEXT("");
-
 	//重复判断
 	WORD wBindIndex = LOWORD(dwSocketID);
 	tagBindParameter *pBindParameter = GetBindParameter(wBindIndex); //有空闲socket
 	IServerUserItem *pIBindUserItem = GetBindUserItem(wBindIndex);   //该空闲socket没有绑定用户
 	if ((pBindParameter==NULL)||(pIBindUserItem!=NULL))
 	{ 
-		_sntprintf_s(szString,CountArray(szString),
-			TEXT("【ID登录】【%ld重复登录1】"), 
-			pLogonUserID->dwUserID);
-		CLog::Log(szString,log_debug);
-
 		return false;
 	}
 
@@ -1562,11 +1494,6 @@ bool CAttemperEngineSink::On_SUB_CG_Logon_UserID(VOID * pData, WORD wDataSize, D
 		if((pIServerUserItem->IsAndroidUser() && (pBindParameter->dwClientAddr!=0L))
 			|| (!pIServerUserItem->IsAndroidUser() && (pBindParameter->dwClientAddr==0L)))
 		{
-			_sntprintf_s(szString,CountArray(szString),
-				TEXT("【ID登录】【%ld登录失败】非正常登录, 不允许踢出"), 
-				pLogonUserID->dwUserID);
-			CLog::Log(szString,log_debug);
-
 			return false;
 		}
 	}
@@ -1575,11 +1502,6 @@ bool CAttemperEngineSink::On_SUB_CG_Logon_UserID(VOID * pData, WORD wDataSize, D
 	//切换判断 TODONOW 重点查看
 	if( NULL != pIServerUserItem )
 	{
-		_sntprintf_s(szString,CountArray(szString),
-			TEXT("【ID登录】【%ld重复登录】切换连接1"), 
-			pLogonUserID->dwUserID);
-		CLog::Log(szString,log_debug);
-
 		return SwitchUserItemConnect(pIServerUserItem, pLogonUserID->szMachineID, 
 			wBindIndex,
 			pLogonUserID->dLongitude, pLogonUserID->dLatitude);
@@ -1634,13 +1556,6 @@ bool CAttemperEngineSink::On_CMD_GC_Logon_UserID(DWORD dwContextID, VOID * pData
 	if ( (NULL != pBindParameter->pIServerUserItem)||
 		 (pBindParameter->dwSocketID != dwContextID) )
 	{
-		//提示消息
-		TCHAR szDescribe[128]=TEXT("");
-		_sntprintf_s(szDescribe,CountArray(szDescribe),
-			TEXT("【ID登录】【%ld登录失败】无空闲socket"),
-			pDBOLogon->dwUserID);
-		CLog::Log(szDescribe,log_warn);
-
 		return true;
 	}
 
@@ -1751,12 +1666,6 @@ void CAttemperEngineSink::ActiveUserItem(IServerUserItem **pIServerUserItem, DWO
 	//错误判断 -- 设置用户pIServerUserItem信息失败
 	if (pIServerUserItem == NULL)
 	{
-		TCHAR szDescribe[128]=TEXT("");
-		_sntprintf_s(szDescribe,CountArray(szDescribe),
-			TEXT("【ID登录】【玩家%ld登录失败】 pIServerUserItem设置信息失败"),
-			UserInfo.dwUserID);
-		CLog::Log(szDescribe,log_warn);
-
 		//断开用户
 		if (bAndroidUser==true)
 		{
@@ -1764,7 +1673,7 @@ void CAttemperEngineSink::ActiveUserItem(IServerUserItem **pIServerUserItem, DWO
 		}
 		else
 		{
-			m_pITCPNetworkEngine->ShutDownSocket(dwContextID);
+			m_pITCPNetworkEngine->CloseSocket(dwContextID);
 		}
 		return;
 	}
@@ -1792,12 +1701,6 @@ VOID CAttemperEngineSink::OnEventUserLogon(IServerUserItem * pIServerUserItem, b
 	
 	//TODONOW
 	logon.dwOffLineGameID = pIServerUserItem -> GetOfflineGameID();
-
-	CString strTrace;
-	strTrace.Format(TEXT("【ID登录】【%ld断线重连】 GetOfflineGameID = %ld"),
-		(pIServerUserItem->GetUserInfo())->dwUserID, 
-		logon.dwOffLineGameID);
-	CLog::Log(strTrace, log_debug);
 
 	//发送数据
 	m_pITCPNetworkEngine->SendData(pBindParameter->dwSocketID, MDM_GR_LOGON, CMD_GC_LOGON_USERID, &logon, sizeof(STR_CMD_GC_LOGON_USERID));
@@ -1840,12 +1743,6 @@ VOID CAttemperEngineSink::OnEventUserLogon(IServerUserItem * pIServerUserItem, b
 		SendUserInfoPacket(pIServerUserItem,INVALID_DWORD);
 	}
 
-	/* 6. 非机器人 */
-	if (!bAndroidUser)
-	{
-		//设置允许群发
-		m_pITCPNetworkEngine->AllowBatchSend(pBindParameter->dwSocketID, true, BG_COMPUTER);
-	}
 
 	/* 7. 广播在线人数		TODONOW 客户端没用到该消息号 */
 	CMD_GF_OnlinePlayers OnlinePlayers;
@@ -1910,7 +1807,7 @@ bool CAttemperEngineSink::SwitchUserItemConnect(IServerUserItem * pIServerUserIt
 		}
 		else
 		{
-			m_pITCPNetworkEngine->ShutDownSocket(pSourceParameter->dwSocketID);
+			m_pITCPNetworkEngine->CloseSocket(pSourceParameter->dwSocketID);
 		}
 	}
 
@@ -2679,14 +2576,6 @@ bool CAttemperEngineSink::On_SUB_CG_USER_CREATE_ROOM(VOID * pData, WORD wDataSiz
 	else if(1 == pCfg->byClubCreate || 2 == pCfg->byClubCreate)//创建牌友圈房间
 	{
 		bRet = CreateRoomClub(pCfg, pIServerUserItem, pCreateRoom);
-	}
-	else
-	{
-		TCHAR szString[512]=TEXT("");
-		_sntprintf_s(szString,CountArray(szString),
-			TEXT("【创建房间】不存在该类型的桌子"), 
-			pCfg->byClubCreate);
-		CLog::Log(szString,log_debug);
 	}
 
 	return bRet;
@@ -3581,14 +3470,6 @@ bool CAttemperEngineSink::On_CMD_GC_USER_JOIN_TABLE_HALL_GOLD( DWORD dwContextID
 		SendRequestFailure(pIServerUserItem, TEXT("加入失败, 房间规则不存在!"), REQUEST_FAILURE_NORMAL);
 		return false;
 	}
-	//构造提示 TODONOW
-	TCHAR szString[512]=TEXT("");
-	_sntprintf_s(szString,CountArray(szString),TEXT("加入 房间号: %ld, 进场金币：%ld, 局数: %d"), 
-		dwPassword,
-		pCfg->dwLevelGold,
-		pCfg->GameCount
-		);
-	CLog::Log(szString,log_debug);
 
 	/* 8. 判断桌子是否在游戏中 */
 	if(GAME_STATUS_FREE != pCurrTableFrame->GetGameStatus())
@@ -3712,12 +3593,6 @@ bool CAttemperEngineSink::On_SUB_User_ReconnectRoom(VOID * pData, WORD wDataSize
 	}
 	else
 	{
-		TCHAR szDescribe[128]=TEXT("");
-		_sntprintf_s(szDescribe,CountArray(szDescribe),
-			TEXT("【断线重连】【%ld重连失败】玩家坐下失败"),
-			pIServerUserItem->GetUserID());
-		CLog::Log(szDescribe,log_warn);
-
 		return true;
 	}
 
