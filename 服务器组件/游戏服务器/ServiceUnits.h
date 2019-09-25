@@ -16,30 +16,6 @@
 //消息定义
 #define WM_UICONTROL_REQUEST		(WM_USER+100)						//控制请求
 
-//////////////////////////////////////////////////////////////////////////////////
-//枚举定义
-
-//服务状态
-enum enServiceStatus
-{
-	ServiceStatus_Stop,				//停止状态
-	ServiceStatus_Config,			//配置状态
-	ServiceStatus_Service,			//服务状态
-	ServiceStatus_Stopping,			//停止中状态
-};
-
-//////////////////////////////////////////////////////////////////////////////////
-
-//状态接口
-interface IServiceUnitsSink
-{
-	//接口定义
-public:
-	//服务状态
-	virtual VOID OnServiceUnitsStatus(enServiceStatus ServiceStatus)=NULL;
-};
-
-//////////////////////////////////////////////////////////////////////////////////
 
 //服务单元
 class CServiceUnits : public CWnd
@@ -48,9 +24,6 @@ class CServiceUnits : public CWnd
 	friend class CAttemperEngineSink;
 	friend class CDataBaseEngineSink;
 
-	//状态变量
-public:
-	enServiceStatus					m_ServiceStatus;					//运行状态
 
 	//组件配置
 protected:
@@ -84,10 +57,6 @@ public:
 	CGameServiceManagerHelper		m_GameServiceManager;				//游戏模块
 	CGameMatchServiceManagerHelper	m_GameMatchServiceManager;			//比赛管理
 
-	//接口变量
-protected:
-	IServiceUnitsSink *				m_pIServiceUnitsSink;				//状态接口
-
 	//静态变量
 public:
 	static CServiceUnits *			g_pServiceUnits;					//对象指针
@@ -99,15 +68,9 @@ public:
 	//析构函数
 	virtual ~CServiceUnits();
 
-	//信息函数
-public:
-	//获取状态
-	enServiceStatus GetServiceStatus() { return m_ServiceStatus; }
 
 	//请求控制
 public:
-	//设置接口
-	bool SetServiceUnitsSink(IServiceUnitsSink * pIServiceUnitsSink);
 	//投递请求
 	bool PostControlRequest(WORD wIdentifier, VOID * pData, WORD wDataSize);
 
@@ -117,7 +80,6 @@ public:
 	bool StartService();
 	//停止服务
 	bool ConcludeService();
-	bool StopServiceImmediate();
 	//游戏配置
 	bool CollocateService(LPCTSTR pszGameModule, tagGameServiceOption & GameServiceOption);
 
@@ -133,13 +95,6 @@ protected:
 	bool StartNetworkService();
 	//调整参数
 	bool RectifyServiceParameter();
-
-	//内部函数
-private:
-	//设置状态
-	bool SetServiceStatus(enServiceStatus ServiceStatus);
-	//发送控制
-	bool SendControlPacket(WORD wControlID, VOID * pData, WORD wDataSize);
 
 	//消息映射
 protected:

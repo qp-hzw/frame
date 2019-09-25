@@ -10,7 +10,7 @@ class CGameServerApp : public CWinApp
 	//函数定义
 public:
 	//构造函数 
-	CGameServerApp();
+	CGameServerApp(){}
 
 	//重载函数
 public:

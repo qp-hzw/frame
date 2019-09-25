@@ -25,9 +25,6 @@
     <ClCompile Include="ServiceUnits.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Stdafx.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="StockManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>

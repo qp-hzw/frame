@@ -18,12 +18,6 @@ END_MESSAGE_MAP()
 //构造函数
 CServiceUnits::CServiceUnits()
 {
-	//服务参数
-	m_ServiceStatus=ServiceStatus_Stop;
-
-	//设置接口
-	m_pIServiceUnitsSink=NULL;
-
 	//设置对象
 	ASSERT(g_pServiceUnits==NULL);
 	if (g_pServiceUnits==NULL) g_pServiceUnits=this;
@@ -43,14 +37,6 @@ CServiceUnits::~CServiceUnits()
 {
 }
 
-//设置接口
-bool CServiceUnits::SetServiceUnitsSink(IServiceUnitsSink * pIServiceUnitsSink)
-{
-	//设置变量
-	m_pIServiceUnitsSink=pIServiceUnitsSink;
-
-	return true;
-}
 
 //投递请求
 bool CServiceUnits::PostControlRequest(WORD wIdentifier, VOID * pData, WORD wDataSize)
@@ -72,17 +58,8 @@ bool CServiceUnits::PostControlRequest(WORD wIdentifier, VOID * pData, WORD wDat
 //启动服务
 bool CServiceUnits::StartService()
 {
-	//效验状态
-	ASSERT(m_ServiceStatus==ServiceStatus_Stop);
-	if (m_ServiceStatus!=ServiceStatus_Stop) return false;
-
-	TCHAR szText[50];
 	bool bResult = true;
 
-	do 
-	{
-		//设置状态
-		SetServiceStatus(ServiceStatus_Config);
 
 		//创建窗口
 		if (m_hWnd==NULL)
@@ -94,26 +71,21 @@ bool CServiceUnits::StartService()
 		//创建模块
 		if (CreateServiceDLL()==false)
 		{
-			lstrcpy(szText, TEXT("创建模块失败"));
 			bResult = false;
-			break;
 		}
 		//调整参数
 		if (RectifyServiceParameter()==false)
 		{
-			lstrcpy(szText, TEXT("调整参数失败"));
 			bResult = false;
-			break;
 		}
 
 		//配置服务
 		if (InitializeService()==false)
 		{
-			lstrcpy(szText, TEXT("配置服务失败"));
 			bResult = false;
-			break;
 		}
 
+		/*
 		//内核版本判断
 		CWHIniData InitData;
 		DWORD realKernel = InitData.Get_Code_Kernel_Version();
@@ -121,18 +93,14 @@ bool CServiceUnits::StartService()
 		if(Compare_Kernek_Framework(realKernel, frameKernel) != 0)
 		{		
 			bResult = false;
-			break;
 		}
+		*/
 
 		//启动内核
 		if (StartKernelService()==false)
 		{
-			lstrcpy(szText, TEXT("启动内核失败"));
 			bResult = false;
-			break;
 		}
-
-	} while (false);
 
 	if(!bResult)
 	{
@@ -141,7 +109,7 @@ bool CServiceUnits::StartService()
 	}
 
 	//加载配置
-	SendControlPacket(CT_LOAD_SERVICE_CONFIG,NULL,0);
+	m_AttemperEngine->OnEventControl(CT_LOAD_SERVICE_CONFIG,NULL,0);
 
 	//启动比赛
 	if (m_GameMatchServiceManager.GetInterface()!=NULL && m_GameMatchServiceManager->StartService()==false) return false;
@@ -152,27 +120,8 @@ bool CServiceUnits::StartService()
 //停止服务
 bool CServiceUnits::ConcludeService()
 {
-	if(m_ServiceStatus == ServiceStatus_Service)
-	{
-		//设置变量
-		SetServiceStatus(ServiceStatus_Stopping);
 
-		SendControlPacket(CT_TRY_TO_STOP_SERVICE,NULL,0);
-	}
-	else
-	{
-		StopServiceImmediate();
-	}
-
-	return true;
-}
-
-
-bool CServiceUnits::StopServiceImmediate()
-{
-	SetServiceStatus(ServiceStatus_Stop);
-
-	//内核组件
+		//内核组件
 	if (m_TimerEngine.GetInterface()!=NULL) m_TimerEngine->ConcludeService();
 	if (m_AttemperEngine.GetInterface()!=NULL) m_AttemperEngine->ConcludeService();
 	if (m_TCPSocketService.GetInterface()!=NULL) m_TCPSocketService->ConcludeService();
@@ -190,13 +139,10 @@ bool CServiceUnits::StopServiceImmediate()
 	return true;
 }
 
+
 //游戏配置
 bool CServiceUnits::CollocateService(LPCTSTR pszGameModule, tagGameServiceOption & GameServiceOption)
 {
-	//效验状态
-	ASSERT(m_ServiceStatus==ServiceStatus_Stop);
-	if (m_ServiceStatus!=ServiceStatus_Stop) return false;
-
 	//配置模块(给服务单元赋值)
 	m_GameServiceOption = GameServiceOption;
 
@@ -425,40 +371,6 @@ bool CServiceUnits::RectifyServiceParameter()
 	return true;
 }
 
-//设置状态
-bool CServiceUnits::SetServiceStatus(enServiceStatus ServiceStatus)
-{
-	//状态判断
-	if (m_ServiceStatus!=ServiceStatus)
-	{
-		//错误通知
-		if ((m_ServiceStatus!=ServiceStatus_Service)&&(ServiceStatus==ServiceStatus_Stopping))
-		{
-		}
-
-		//设置变量
-		m_ServiceStatus=ServiceStatus;
-
-		//状态通知
-		ASSERT(m_pIServiceUnitsSink!=NULL);
-		if (m_pIServiceUnitsSink!=NULL) m_pIServiceUnitsSink->OnServiceUnitsStatus(m_ServiceStatus);
-	}
-
-	return true;
-}
-
-//发送控制
-bool CServiceUnits::SendControlPacket(WORD wControlID, VOID * pData, WORD wDataSize)
-{
-	//状态效验
-	if (m_AttemperEngine.GetInterface()==NULL) return false;
-
-	//发送控制
-	m_AttemperEngine->OnEventControl(wControlID,pData,wDataSize);
-
-	return true;
-}
-
 //控制消息
 LRESULT CServiceUnits::OnUIControlRequest(WPARAM wParam, LPARAM lParam)
 {
@@ -486,17 +398,15 @@ LRESULT CServiceUnits::OnUIControlRequest(WPARAM wParam, LPARAM lParam)
 			CP_ControlResult * pControlResult=(CP_ControlResult *)cbBuffer;
 
 			//失败处理
-			if ((m_ServiceStatus!=ServiceStatus_Service)&&(pControlResult->cbSuccess==ER_FAILURE))
+			if (pControlResult->cbSuccess==ER_FAILURE)
 			{
 				ConcludeService();
 				return 0;
 			}
 
 			//成功处理
-			if ((m_ServiceStatus!=ServiceStatus_Service)&&(pControlResult->cbSuccess==ER_SUCCESS))
+			if (pControlResult->cbSuccess==ER_SUCCESS)
 			{
-				//设置状态
-				SetServiceStatus(ServiceStatus_Service);
 			}
 
 			return 0;
@@ -511,14 +421,14 @@ LRESULT CServiceUnits::OnUIControlRequest(WPARAM wParam, LPARAM lParam)
 			CP_ControlResult * pControlResult=(CP_ControlResult *)cbBuffer;
 
 			//失败处理
-			if ((m_ServiceStatus!=ServiceStatus_Service)&&(pControlResult->cbSuccess==ER_FAILURE))
+			if (pControlResult->cbSuccess==ER_FAILURE)
 			{
 				ConcludeService();
 				return 0;
 			}
 
 			//成功处理
-			if ((m_ServiceStatus!=ServiceStatus_Service)&&(pControlResult->cbSuccess==ER_SUCCESS))
+			if (pControlResult->cbSuccess==ER_SUCCESS)
 			{
 				//启动网络
 				if (StartNetworkService()==false)
@@ -528,7 +438,7 @@ LRESULT CServiceUnits::OnUIControlRequest(WPARAM wParam, LPARAM lParam)
 				}
 
 				//连接协调
-				SendControlPacket(CT_CONNECT_CORRESPOND,NULL,0);
+				m_AttemperEngine->OnEventControl(CT_CONNECT_CORRESPOND,NULL,0);
 			}
 
 			return 0;
@@ -543,11 +453,11 @@ LRESULT CServiceUnits::OnUIControlRequest(WPARAM wParam, LPARAM lParam)
 			CP_ControlResult * pControlResult=(CP_ControlResult *)cbBuffer;
 
 			//失败处理
-			if ((m_ServiceStatus!=ServiceStatus_Stopping)&&(pControlResult->cbSuccess==ER_FAILURE))
+			if (pControlResult->cbSuccess==ER_FAILURE)
 			{
 			}
 
-			StopServiceImmediate();
+			ConcludeService();
 		}
 	}
 

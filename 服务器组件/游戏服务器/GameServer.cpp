@@ -11,24 +11,9 @@ CGameServerApp theApp;
 BEGIN_MESSAGE_MAP(CGameServerApp, CWinApp)
 END_MESSAGE_MAP()
 
-//////////////////////////////////////////////////////////////////////////////////
-
-//构造函数
-CGameServerApp::CGameServerApp()
-{
-}
-
-
 //启动函数
 BOOL CGameServerApp::InitInstance()
 {
-//#ifndef _DEBUG
-//	if(InstallCrashRpt() != TRUE)
-//	{
-//		return FALSE;
-//	}
-//#endif // !DEBUG
-
 	__super::InitInstance();
 	
 	//设置组件
@@ -36,14 +21,11 @@ BOOL CGameServerApp::InitInstance()
 	InitCommonControls();
 	AfxEnableControlContainer();
 
-	//设置注册表
-	//SetRegistryKey(szProduct);
 
 	//显示窗口
 	CGameServerDlg GameServerDlg;
 	m_pMainWnd=&GameServerDlg;
 	GameServerDlg.DoModal();
-
 
 	return FALSE;
 }
@@ -65,5 +47,8 @@ LRESULT CGameServerApp::ProcessWndProcException( CException* e, const MSG* pMsg 
 	THROW_LAST();
 	return 0;
 }
+
+//控制台
+CConsoleAdapter g_ConsoleAdpter;
 
 //////////////////////////////////////////////////////////////////////////////////
