@@ -67,7 +67,7 @@ int CServiceUnits::InitializeService()
 	IUnknownEx * pIAttemperEngineSink=QUERY_OBJECT_INTERFACE(m_AttemperEngineSink,IUnknownEx);
 
 	//设置各服务回调为AttemperEngine
-	if (m_TCPNetworkEngine->SetTCPNetworkEngineEvent(pIAttemperEngine)==false) return 3;
+	if (m_TCPNetworkEngine->SetTCPNetworkEngineSink(pIAttemperEngine)==false) return 3;
 
 	//AttemperEngine设置回调
 	if (m_AttemperEngine->SetAttemperEngineSink(pIAttemperEngineSink)==false) return 4;

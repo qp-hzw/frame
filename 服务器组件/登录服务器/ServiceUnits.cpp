@@ -53,9 +53,9 @@ int CServiceUnits::InitializeService()
 	if (m_AttemperEngine->SetAttemperEngineSink(pIAttemperEngineSink)==false) return 6;
 
 	//各服务设置回调为AttemperEngine
-	if (m_TimerEngine->SetTimerEngineEvent(pIAttemperEngine)==false) return 7;
-	if (m_TCPNetworkEngine->SetTCPNetworkEngineEvent(pIAttemperEngine)==false) return 8;
-	if (m_TCPSocketService->SetTCPSocketEvent(pIAttemperEngine)==false) return 9;
+	if (m_TimerEngine->SetTimerEngineSink(pIAttemperEngine)==false) return 7;
+	if (m_TCPNetworkEngine->SetTCPNetworkEngineSink(pIAttemperEngine)==false) return 8;
+	if (m_TCPSocketService->SetTCPSocketSink(pIAttemperEngine)==false) return 9;
 
 
 	//数据引擎
