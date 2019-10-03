@@ -1,8 +1,6 @@
 #ifndef STR_CMD_CORRESPOND_HEAD_FILE
 #define STR_CMD_CORRESPOND_HEAD_FILE
 
-#pragma pack(1)
-
 #pragma region  MDM_REGISTER ×¢²áÄ£¿é
 //×¢²áµÇÂ¼·þ
 struct STR_CPR_LP_REGISTER_LOGON

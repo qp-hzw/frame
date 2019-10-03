@@ -5,7 +5,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 //静态变量
-CServiceUnits *			CServiceUnits::g_pServiceUnits=NULL;			//对象指针
+CServiceUnits *			g_pServiceUnits=NULL;			//对象指针
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -46,17 +46,10 @@ int CServiceUnits::InitializeService()
 
 	//组件接口
 	IUnknownEx * pIAttemperEngine=m_AttemperEngine.GetInterface();
-	IUnknownEx * pITCPNetworkEngine=m_TCPNetworkEngine.GetInterface();
 	IUnknownEx * pIAttemperEngineSink=QUERY_OBJECT_INTERFACE(m_AttemperEngineSink,IUnknownEx);
 
 	//设置AttemperEngine回调
 	if (m_AttemperEngine->SetAttemperEngineSink(pIAttemperEngineSink)==false) return 6;
-
-	//各服务设置回调为AttemperEngine
-	if (m_TimerEngine->SetTimerEngineSink(pIAttemperEngine)==false) return 7;
-	if (m_TCPNetworkEngine->SetTCPNetworkEngineSink(pIAttemperEngine)==false) return 8;
-	if (m_TCPSocketEngine->SetTCPSocketEngineSink(pIAttemperEngine)==false) return 9;
-
 
 	//数据库回调
 	IUnknownEx * pIDataBaseEngineSink[CountArray(m_DataBaseEngineSink)];
@@ -214,33 +207,6 @@ LRESULT CServiceUnits::OnUIControlRequest(WPARAM wParam, LPARAM lParam)
 			{
 				ConcludeService();
 				return 0;
-			}
-
-			return 0;
-		}
-	case UI_CORRESPOND_RESULT:		//协调结果
-		{
-			//效验消息
-			if (DataHead.wDataSize!=sizeof(CP_ControlResult)) return 0;
-
-			//变量定义
-			CP_ControlResult * pControlResult=(CP_ControlResult *)cbBuffer;
-			//失败处理
-			if (pControlResult->cbSuccess==ER_FAILURE)
-			{
-				ConcludeService();
-				return 0;
-			}
-
-			//成功处理
-			if (pControlResult->cbSuccess==ER_SUCCESS)
-			{
-				//启动网络
-				if (StartNetworkService()==false)
-				{
-					ConcludeService();
-					return 0;
-				}
 			}
 
 			return 0;

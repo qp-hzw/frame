@@ -42,10 +42,6 @@ protected:
 	CTCPNetworkEngineHelper			m_TCPNetworkEngine;					//网络引擎
 	CTCPSocketEngineHelper			m_TCPSocketEngine;					//协调服务 -- 目标服务器为 协调服
 
-	//静态变量
-public:
-	static CServiceUnits *			g_pServiceUnits;					//对象指针 -- 谁在调用???
-
 	//函数定义
 public:
 	//构造函数
@@ -78,6 +74,8 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 };
+
+extern CServiceUnits *			g_pServiceUnits;					//对象指针
 
 //////////////////////////////////////////////////////////////////////////////////
 

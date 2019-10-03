@@ -3,6 +3,7 @@
 #include "ControlPacket.h"
 #include "AttemperEngineSink.h"
 #include "RankManager.h"
+#include "ServiceUnits.h"
 
 #include <WinSock2.h>
 #include <iostream>
@@ -841,24 +842,6 @@ bool CAttemperEngineSink::OnEventTCPNetworkRead(TCP_Command Command, VOID * pDat
 }
 
 
-//关闭事件
-bool CAttemperEngineSink::OnEventTCPSocketShut(WORD wServiceID, BYTE cbShutReason)
-{
-	//协调连接
-	if (wServiceID==NETWORK_CORRESPOND)
-	{
-		//重连判断
-		if (m_bNeekCorrespond==true)
-		{
-			//设置时间
-			m_pITimerEngine->SetTimer(IDI_CONNECT_CORRESPOND, TIME_CONNECT_CORRESPOND, 1, 0);
-
-			return true;
-		}
-	}
-
-	return false;
-}
 
 //获取外网ip
 int GetInternetIP( TCHAR *szInernet_ip)
@@ -912,6 +895,24 @@ int GetInternetIP( TCHAR *szInernet_ip)
 	return 5;
 }
 
+//关闭事件
+bool CAttemperEngineSink::OnEventTCPSocketShut(WORD wServiceID, BYTE cbShutReason)
+{
+	//协调连接
+	if (wServiceID==NETWORK_CORRESPOND)
+	{
+		//重连判断
+		if (m_bNeekCorrespond==true)
+		{
+			//设置时间
+			m_pITimerEngine->SetTimer(IDI_CONNECT_CORRESPOND, TIME_CONNECT_CORRESPOND, 1, 0);
+
+			return true;
+		}
+	}
+
+	return false;
+}
 
 //连接事件
 bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
@@ -939,7 +940,7 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		lstrcpyn(CPR.szServerAddr,TEXT("127.0.0.1"),CountArray(CPR.szServerAddr));
 
 		//发送数据
-		m_pITCPSocketEngine->SendData(MDM_REGISTER,CPR_LP_REGISTER_LOGON,&CPR,sizeof(CPR)*sizeof(TCHAR));
+		m_pITCPSocketEngine->SendData(MDM_REGISTER,CPR_LP_REGISTER_LOGON,&CPR,sizeof(CPR));
 
 		return true;
 	}
@@ -1107,8 +1108,8 @@ bool CAttemperEngineSink::OnDBPCGameListResult(DWORD dwContextID, VOID * pData, 
 bool CAttemperEngineSink::SendUIControlPacket(WORD wRequestID, VOID * pData, WORD wDataSize)
 {
 	//发送数据
-	CServiceUnits * pServiceUnits=CServiceUnits::g_pServiceUnits;
-	pServiceUnits->PostControlRequest(wRequestID,pData,wDataSize);
+	//CServiceUnits * pServiceUnits=CServiceUnits::g_pServiceUnits;
+	g_pServiceUnits->PostControlRequest(wRequestID,pData,wDataSize);
 
 	return true;
 }
@@ -1162,13 +1163,15 @@ bool CAttemperEngineSink::OnTCPSocketMainRegister(WORD wSubCmdID, VOID * pData, 
 	{
 	case CPO_PGPL_REGISTER_SUCESS:	//注册成功
 		{
-			//清理列表
-			m_ServerListManager.CleanServerItem();
+			//开启socket::server服务
+			if(g_pServiceUnits->StartNetworkService() != 0)
+			{
+				g_pServiceUnits->ConcludeService();
+				return true;
+			}
 
-			//事件处理
-			CP_ControlResult ControlResult;
-			ControlResult.cbSuccess=ER_SUCCESS;
-			SendUIControlPacket(UI_CORRESPOND_RESULT,&ControlResult,sizeof(ControlResult));
+			//读取数据库信息
+
 
 			//注册完成，在这里初始化排行榜
 			if(NULL == m_pRankManager)
@@ -1180,7 +1183,6 @@ bool CAttemperEngineSink::OnTCPSocketMainRegister(WORD wSubCmdID, VOID * pData, 
 	case CPO_PGPL_REGISTER_FAILURE:		//注册失败
 		{
 			//效验参数
-			ASSERT(wDataSize ! = sizeof(STR_CPO_PGPL_REGISTER_FAILURE));
 			if (wDataSize != sizeof(STR_CPO_PGPL_REGISTER_FAILURE)) return false;
 
 			//变量定义

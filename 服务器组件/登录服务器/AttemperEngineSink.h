@@ -88,10 +88,7 @@ public:
 	//数据库事件
 	virtual bool OnEventDataBaseResult(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize);
 
-#pragma endregion
-
-#pragma region Socket事件
-	//连接事件 （与协调服连接）
+	//socket::client （与协调服连接）
 public:
 	//连接事件
 	virtual bool OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode);
@@ -100,7 +97,7 @@ public:
 	//读取事件
 	virtual bool OnEventTCPSocketRead(WORD wServiceID, TCP_Command Command, VOID * pData, WORD wDataSize);
 
-	//网络事件 （与client连接）
+	//socket::server （与client连接）
 public:
 	//应答事件
 	virtual bool OnEventTCPNetworkBind(DWORD dwClientAddr, DWORD dwSocketID);
