@@ -252,10 +252,9 @@ bool CModuleInfoManager::LoadGameModuleInfo(CGameItemMap & ModuleInfoBuffer)
 	try
 	{
 		//设置连接
-		PlatformDBModule->SetConnectionInfo(1);
+		PlatformDBModule->Connect(1);
 
 		//发起连接
-		PlatformDBModule->OpenConnection();
 		PlatformDBAide.SetDataBase(PlatformDBModule.GetInterface());
 
 		//读取列表

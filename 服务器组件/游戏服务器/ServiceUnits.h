@@ -53,7 +53,7 @@ public:
 	CTimerEngineHelper				m_TimerEngine;						//时间引擎
 	CAttemperEngineHelper			m_AttemperEngine;					//调度引擎
 	CTCPNetworkEngineHelper			m_TCPNetworkEngine;					//网络引擎
-	CTCPSocketServiceHelper			m_TCPSocketService;					//网络服务
+	CTCPSocketEngineHelper			m_TCPSocketEngine;					//网络服务
 	CGameServiceManagerHelper		m_GameServiceManager;				//游戏模块
 	CGameMatchServiceManagerHelper	m_GameMatchServiceManager;			//比赛管理
 

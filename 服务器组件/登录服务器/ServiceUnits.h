@@ -40,7 +40,7 @@ protected:
 	CAttemperEngineHelper			m_AttemperEngine;					//调度引擎
 	CDataBaseEngineHelper			m_DataBaseEngine;					//数据引擎
 	CTCPNetworkEngineHelper			m_TCPNetworkEngine;					//网络引擎
-	CTCPSocketServiceHelper			m_TCPSocketService;					//协调服务 -- 目标服务器为 协调服
+	CTCPSocketEngineHelper			m_TCPSocketEngine;					//协调服务 -- 目标服务器为 协调服
 
 	//静态变量
 public:

@@ -124,7 +124,7 @@ bool CServiceUnits::ConcludeService()
 		//内核组件
 	if (m_TimerEngine.GetInterface()!=NULL) m_TimerEngine->ConcludeService();
 	if (m_AttemperEngine.GetInterface()!=NULL) m_AttemperEngine->ConcludeService();
-	if (m_TCPSocketService.GetInterface()!=NULL) m_TCPSocketService->ConcludeService();
+	if (m_TCPSocketEngine.GetInterface()!=NULL) m_TCPSocketEngine->ConcludeService();
 	if (m_TCPNetworkEngine.GetInterface()!=NULL) m_TCPNetworkEngine->ConcludeService();
 
 	//数据引擎
@@ -167,7 +167,7 @@ bool CServiceUnits::CreateServiceDLL()
 	}
 
 	//网络组件
-	if ((m_TCPSocketService.GetInterface()==NULL)&&(m_TCPSocketService.CreateInstance()==false))
+	if ((m_TCPSocketEngine.GetInterface()==NULL)&&(m_TCPSocketEngine.CreateInstance()==false))
 	{
 		return false;
 	}
@@ -236,8 +236,8 @@ bool CServiceUnits::InitializeService()
 	if (m_TCPNetworkEngine->SetTCPNetworkEngineEvent(pIAttemperEngine)==false) return false;
 
 	//协调服务
-	if (m_TCPSocketService->SetServiceID(NETWORK_CORRESPOND)==false) return false;
-	if (m_TCPSocketService->SetTCPSocketEvent(pIAttemperEngine)==false) return false;
+	if (m_TCPSocketEngine->SetServiceID(NETWORK_CORRESPOND)==false) return false;
+	if (m_TCPSocketEngine->SetTCPSocketEvent(pIAttemperEngine)==false) return false;
 
 	//数据协调
 	m_DBCorrespondManager.InitDBCorrespondManager(m_KernelDataBaseEngine.GetInterface());
@@ -250,7 +250,7 @@ bool CServiceUnits::InitializeService()
 	//调度回调
 	m_AttemperEngineSink.m_pITimerEngine=m_TimerEngine.GetInterface();
 	m_AttemperEngineSink.m_pIAttemperEngine=m_AttemperEngine.GetInterface();
-	m_AttemperEngineSink.m_pITCPSocketService=m_TCPSocketService.GetInterface();
+	m_AttemperEngineSink.m_pITCPSocketEngine=m_TCPSocketEngine.GetInterface();
 	m_AttemperEngineSink.m_pITCPNetworkEngine=m_TCPNetworkEngine.GetInterface();
 	m_AttemperEngineSink.m_pIGameServiceManager=m_GameServiceManager.GetInterface();
 	m_AttemperEngineSink.m_pIRecordDataBaseEngine=m_RecordDataBaseEngine.GetInterface();
@@ -265,7 +265,7 @@ bool CServiceUnits::InitializeService()
 		m_RecordDataBaseSink[i].m_pGameServiceAttrib=&m_GameServiceAttrib;
 		m_RecordDataBaseSink[i].m_pGameServiceOption=&m_GameServiceOption;
 		m_RecordDataBaseSink[i].m_pIGameServiceManager=m_GameServiceManager.GetInterface();
-		m_RecordDataBaseSink[i].m_pIDataBaseEngineEvent=QUERY_OBJECT_PTR_INTERFACE(pIAttemperEngine,IDataBaseEngineEvent);
+		m_RecordDataBaseSink[i].g_AttemperEngineSink=QUERY_OBJECT_PTR_INTERFACE(pIAttemperEngine,IDataBaseEngineEvent);
 	}
 
 	//数据回调
@@ -275,7 +275,7 @@ bool CServiceUnits::InitializeService()
 		m_KernelDataBaseSink[i].m_pGameServiceAttrib=&m_GameServiceAttrib;
 		m_KernelDataBaseSink[i].m_pGameServiceOption=&m_GameServiceOption;
 		m_KernelDataBaseSink[i].m_pIGameServiceManager=m_GameServiceManager.GetInterface();
-		m_KernelDataBaseSink[i].m_pIDataBaseEngineEvent=QUERY_OBJECT_PTR_INTERFACE(pIAttemperEngine,IDataBaseEngineEvent);
+		m_KernelDataBaseSink[i].g_AttemperEngineSink=QUERY_OBJECT_PTR_INTERFACE(pIAttemperEngine,IDataBaseEngineEvent);
 		m_KernelDataBaseSink[i].m_pIDBCorrespondManager=(IDBCorrespondManager*)m_DBCorrespondManager.QueryInterface(IID_IDBCorrespondManager,VER_IDBCorrespondManager);
 	}
 
@@ -307,7 +307,7 @@ bool CServiceUnits::StartKernelService()
 	}
 
 	//协调引擎
-	if (m_TCPSocketService->StartService()==false)
+	if (m_TCPSocketEngine->StartService()==false)
 	{
 		ASSERT(FALSE);
 		return false;

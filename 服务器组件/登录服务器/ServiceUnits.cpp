@@ -42,7 +42,7 @@ int CServiceUnits::InitializeService()
 	if ((m_AttemperEngine.GetInterface()==NULL)&&(m_AttemperEngine.CreateInstance()==false)) return 2;
 	if ((m_DataBaseEngine.GetInterface()==NULL)&&(m_DataBaseEngine.CreateInstance()==false)) return 3;
 	if ((m_TCPNetworkEngine.GetInterface()==NULL)&&(m_TCPNetworkEngine.CreateInstance()==false)) return 4;
-	if ((m_TCPSocketService.GetInterface()==NULL)&&(m_TCPSocketService.CreateInstance()==false)) return 5;
+	if ((m_TCPSocketEngine.GetInterface()==NULL)&&(m_TCPSocketEngine.CreateInstance()==false)) return 5;
 
 	//组件接口
 	IUnknownEx * pIAttemperEngine=m_AttemperEngine.GetInterface();
@@ -55,31 +55,23 @@ int CServiceUnits::InitializeService()
 	//各服务设置回调为AttemperEngine
 	if (m_TimerEngine->SetTimerEngineSink(pIAttemperEngine)==false) return 7;
 	if (m_TCPNetworkEngine->SetTCPNetworkEngineSink(pIAttemperEngine)==false) return 8;
-	if (m_TCPSocketService->SetTCPSocketSink(pIAttemperEngine)==false) return 9;
+	if (m_TCPSocketEngine->SetTCPSocketEngineSink(pIAttemperEngine)==false) return 9;
 
-
-	//数据引擎
-	IUnknownEx * pIDataBaseEngineSink[CountArray(m_DataBaseEngineSink)];
-	for (WORD i=0;i<CountArray(pIDataBaseEngineSink);i++) pIDataBaseEngineSink[i]=QUERY_OBJECT_INTERFACE(m_DataBaseEngineSink[i],IUnknownEx);
-
-	//TODONOW ？？
-	if (m_DataBaseEngine->SetDataBaseEngineSink(pIDataBaseEngineSink,CountArray(pIDataBaseEngineSink))==false) return 10;
 
 	//数据库回调
-	for (INT i=0;i<CountArray(m_DataBaseEngineSink);i++)
-    {
-		m_DataBaseEngineSink[i].m_pIDataBaseEngineEvent=QUERY_OBJECT_PTR_INTERFACE(pIAttemperEngine,IDataBaseEngineEvent);
-	}
+	IUnknownEx * pIDataBaseEngineSink[CountArray(m_DataBaseEngineSink)];
+	for (WORD i=0;i<CountArray(pIDataBaseEngineSink);i++) pIDataBaseEngineSink[i]=QUERY_OBJECT_INTERFACE(m_DataBaseEngineSink[i],IUnknownEx);
+	if (m_DataBaseEngine->SetDataBaseEngineSink(pIDataBaseEngineSink,CountArray(pIDataBaseEngineSink))==false) return 10;
 
-	//AttemperEngine回调
+	//AttemperEngine
 	m_AttemperEngineSink.m_pITimerEngine=m_TimerEngine.GetInterface();
 	m_AttemperEngineSink.m_pIDataBaseEngine=m_DataBaseEngine.GetInterface();
 	m_AttemperEngineSink.m_pITCPNetworkEngine=m_TCPNetworkEngine.GetInterface();
-	m_AttemperEngineSink.m_pITCPSocketService=m_TCPSocketService.GetInterface();
+	m_AttemperEngineSink.m_pITCPSocketEngine=m_TCPSocketEngine.GetInterface();
 
 	/***************************************************  服务配置信息 *************************************************/
 	//协调服务（协调服务器）
-	if (m_TCPSocketService->SetServiceID(NETWORK_CORRESPOND)==false) return 11;
+	if (m_TCPSocketEngine->SetServiceID(NETWORK_CORRESPOND)==false) return 11;
 
 	//配置网络
 	WORD wMaxConnect=MAX_CONTENT;
@@ -128,7 +120,7 @@ bool CServiceUnits::ConcludeService()
 	if (m_AttemperEngine.GetInterface()!=NULL) m_AttemperEngine->ConcludeService();
 	if (m_DataBaseEngine.GetInterface()!=NULL) m_DataBaseEngine->ConcludeService();
 	if (m_TCPNetworkEngine.GetInterface()!=NULL) m_TCPNetworkEngine->ConcludeService();
-	if (m_TCPSocketService.GetInterface()!=NULL) m_TCPSocketService->ConcludeService();
+	if (m_TCPSocketEngine.GetInterface()!=NULL) m_TCPSocketEngine->ConcludeService();
 	
 	return true;
 }
@@ -149,18 +141,16 @@ int CServiceUnits::StartKernelService()
 	}
 
 	//协调引擎
-	if (m_TCPSocketService->StartService()==false)
+	if (m_TCPSocketEngine->StartService()==false)
 	{
 		return 3;
 	}
 	
-	/* TODONOW
 	//数据引擎
 	if (m_DataBaseEngine->StartService()==false)
 	{
 		return 4;
 	}
-	*/
 
 	return 0;
 }

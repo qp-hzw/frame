@@ -227,7 +227,7 @@ struct tagTableFrameParameter
 	IDataBaseEngine *				pIKernelDataBaseEngine;				//数据引擎
 
 	//组件接口
-	ITCPSocketService *				PITCPSocketService;					//网络服务
+	ITCPSocketEngine *				PITCPSocketEngine;					//网络服务
 
 	//服务组件
 	IMainServiceFrame *				pIMainServiceFrame;					//服务框架

@@ -109,7 +109,7 @@ public:
 	//定时器事件
 	virtual bool OnEventTimer(DWORD dwTimerID, WPARAM wBindParam){return false;}
 	//数据库事件
-	virtual bool OnEventDataBase(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize){return false;}
+	virtual bool OnEventDataBaseResult(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize){return false;}
 #pragma endregion
 
 #pragma region Socket系统函数

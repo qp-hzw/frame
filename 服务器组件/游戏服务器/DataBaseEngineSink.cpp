@@ -15,7 +15,7 @@ CDataBaseEngineSink::CDataBaseEngineSink()
 	//组件变量
 	m_pIDataBaseEngine=NULL;
 	m_pIGameServiceManager=NULL;
-	m_pIDataBaseEngineEvent=NULL;
+	g_AttemperEngineSink=NULL;
 	m_pIGameDataBaseEngineSink=NULL;
 	m_pIDBCorrespondManager=NULL;
 
@@ -106,23 +106,20 @@ bool CDataBaseEngineSink::OnDataBaseEngineStart(IUnknownEx * pIUnknownEx)
 	{
 		//一个GameID对应一个服务器, 一个服务器只会开启一个进程, 所以这边只会有一个
 		//设置连接
-		m_PlatformDBModule->SetConnectionInfo(1);
+		m_PlatformDBModule->Connect(1);
 		//设置连接
-		m_GameDBModule->SetConnectionInfo(3);
+		m_GameDBModule->Connect(3);
 		//设置连接
-		m_TreasureDBModule->SetConnectionInfo(3);
+		m_TreasureDBModule->Connect(3);
 		
 
 		//发起连接
-		m_GameDBModule->OpenConnection();
 		m_GameDBAide.SetDataBase(m_GameDBModule.GetInterface());
 
 		//发起连接
-		m_TreasureDBModule->OpenConnection();
 		m_TreasureDBAide.SetDataBase(m_TreasureDBModule.GetInterface());
 
 		//平台数据库
-		m_PlatformDBModule->OpenConnection();
 		m_PlatformDBAide.SetDataBase(m_PlatformDBModule.GetInterface());
 
 		//数据钩子
@@ -160,7 +157,7 @@ bool CDataBaseEngineSink::OnDataBaseEngineConclude(IUnknownEx * pIUnknownEx)
 
 	//组件变量
 	m_pIGameServiceManager=NULL;
-	m_pIDataBaseEngineEvent=NULL;
+	g_AttemperEngineSink=NULL;
 
 	//设置对象
 	m_GameDBAide.SetDataBase(NULL);
@@ -550,7 +547,7 @@ bool CDataBaseEngineSink::On_DBO_Logon_UserID(DWORD dwContextID, const double &d
 	}
 
 	//发送数据
-	m_pIDataBaseEngineEvent->OnEventDataBaseResult(DBO_CG_LOGON_USERID, dwContextID, &LogonUserID, sizeof(STR_DBO_CG_LOGON_USERID));
+	g_AttemperEngineSink->OnEventDataBaseResult(DBO_CG_LOGON_USERID, dwContextID, &LogonUserID, sizeof(STR_DBO_CG_LOGON_USERID));
 	return true;
 }
 
@@ -625,7 +622,7 @@ VOID CDataBaseEngineSink::On_DBO_User_CreateGroupRoom(DWORD dwContextID, BYTE RU
 	}
 
 	//发送数据
-	m_pIDataBaseEngineEvent->OnEventDataBaseResult(DBO_CG_USER_CREATE_GROUP_ROOM, dwContextID, &CreateGroupRoom, sizeof(STR_DBO_CG_USER_CREATE_GROUP_ROOM));
+	g_AttemperEngineSink->OnEventDataBaseResult(DBO_CG_USER_CREATE_GROUP_ROOM, dwContextID, &CreateGroupRoom, sizeof(STR_DBO_CG_USER_CREATE_GROUP_ROOM));
 }
 
 //加入牌友圈房间
@@ -689,7 +686,7 @@ VOID CDataBaseEngineSink::On_DBO_User_JoinGroupRoom(DWORD dwContextID,  DWORD dw
 	}
 
 	//发送数据
-	m_pIDataBaseEngineEvent->OnEventDataBaseResult(DBO_CG_USER_JOIN_GROUP_ROOM, dwContextID, &JoinGroupRoom, sizeof(STR_DBO_CG_USER_JOIN_GROUP_ROOM));
+	g_AttemperEngineSink->OnEventDataBaseResult(DBO_CG_USER_JOIN_GROUP_ROOM, dwContextID, &JoinGroupRoom, sizeof(STR_DBO_CG_USER_JOIN_GROUP_ROOM));
 }
 
 
@@ -830,7 +827,7 @@ bool CDataBaseEngineSink::On_DBR_ModifyUserTreasure(DWORD dwContextID, void * pD
 			ModifyTreasure.lOpenRoomCard = m_TreasureDBAide.GetValue_LONGLONG(TEXT("OpenRoomCard"));
 
 			//发送数据
-			m_pIDataBaseEngineEvent->OnEventDataBaseResult(DBO_SG_MODIFY_USER_TREASURE, dwContextID, &ModifyTreasure, sizeof(STR_DBO_GR_MODIFY_USER_TREASURE));
+			g_AttemperEngineSink->OnEventDataBaseResult(DBO_SG_MODIFY_USER_TREASURE, dwContextID, &ModifyTreasure, sizeof(STR_DBO_GR_MODIFY_USER_TREASURE));
 		}
 		return true;
 	}
@@ -1100,7 +1097,7 @@ bool CDataBaseEngineSink::OnRequestLoadAndroidUser(DWORD dwContextID, VOID * pDa
 		//发送信息
 		WORD wHeadSize=sizeof(GameAndroidInfo)-sizeof(GameAndroidInfo.AndroidParameter);
 		WORD wDataSize=GameAndroidInfo.wAndroidCount*sizeof(GameAndroidInfo.AndroidParameter[0]);
-		m_pIDataBaseEngineEvent->OnEventDataBaseResult(DBR_GR_GAME_ANDROID_INFO,dwContextID,&GameAndroidInfo,wHeadSize+wDataSize);
+		g_AttemperEngineSink->OnEventDataBaseResult(DBR_GR_GAME_ANDROID_INFO,dwContextID,&GameAndroidInfo,wHeadSize+wDataSize);
 
 		return true;
 	}
@@ -1119,7 +1116,7 @@ bool CDataBaseEngineSink::OnRequestLoadAndroidUser(DWORD dwContextID, VOID * pDa
 
 		//发送信息
 		WORD wHeadSize=sizeof(GameAndroidInfo)-sizeof(GameAndroidInfo.AndroidParameter);
-		m_pIDataBaseEngineEvent->OnEventDataBaseResult(DBR_GR_GAME_ANDROID_INFO,dwContextID,&GameAndroidInfo,wHeadSize);
+		g_AttemperEngineSink->OnEventDataBaseResult(DBR_GR_GAME_ANDROID_INFO,dwContextID,&GameAndroidInfo,wHeadSize);
 	}
 
 	return false;
@@ -1145,7 +1142,7 @@ bool CDataBaseEngineSink::On_DBR_GR_LOAD_OFFLINE(DWORD dwContextID, VOID * pData
 		if(DB_SUCCESS == lResultCode)
 		{
 			BYTE GameProgress = m_PlatformDBAide.GetValue_BYTE(TEXT("GameProgress"));
-			m_pIDataBaseEngineEvent->OnEventDataBaseResult(DBO_GR_LOAD_OFFLINE,dwContextID,&GameProgress,sizeof(GameProgress));
+			g_AttemperEngineSink->OnEventDataBaseResult(DBO_GR_LOAD_OFFLINE,dwContextID,&GameProgress,sizeof(GameProgress));
 		}
 
 		return true;
@@ -1198,7 +1195,7 @@ bool CDataBaseEngineSink::OnRequestMatchFee(DWORD dwContextID, VOID * pData, WOR
 		LONG lReturnValue=m_GameDBAide.ExecuteProcess(TEXT("GSP_GR_UserMatchFee"),true);
 
 		//发送结果
-		m_pIDataBaseEngineEvent->OnEventDataBaseResult(DBO_GR_MATCH_FEE_RESULT,dwContextID,&lReturnValue,sizeof(lReturnValue));
+		g_AttemperEngineSink->OnEventDataBaseResult(DBO_GR_MATCH_FEE_RESULT,dwContextID,&lReturnValue,sizeof(lReturnValue));
 
 		return true;
 	}
@@ -1287,7 +1284,7 @@ bool CDataBaseEngineSink::OnRequestMatchOver(DWORD dwContextID, VOID * pData, WO
 				m_GameDBModule->MoveToNext();
 				if(m_GameDBModule->IsRecordsetEnd()) break;
 			}
-			m_pIDataBaseEngineEvent->OnEventDataBaseResult(DBO_GR_MATCH_RANK,dwContextID,pMatchRank,(WORD)(sizeof(DBO_GR_MatchRank)*lCount));
+			g_AttemperEngineSink->OnEventDataBaseResult(DBO_GR_MATCH_RANK,dwContextID,pMatchRank,(WORD)(sizeof(DBO_GR_MatchRank)*lCount));
 			if(pMatchRank!=NULL)
 				SafeDeleteArray(pMatchRank);
 		}
@@ -1395,7 +1392,7 @@ bool CDataBaseEngineSink::OnRequestMatchQuit(DWORD dwContextID, VOID * pData, WO
 		LONG lReturnValue=m_GameDBAide.ExecuteProcess(TEXT("GSP_GR_UserMatchQuit"),true);
 
 		//发送结果
-		m_pIDataBaseEngineEvent->OnEventDataBaseResult(DBO_GR_MATCH_QUIT_RESULT,dwContextID,&lReturnValue,sizeof(lReturnValue));
+		g_AttemperEngineSink->OnEventDataBaseResult(DBO_GR_MATCH_QUIT_RESULT,dwContextID,&lReturnValue,sizeof(lReturnValue));
 
 		return true;
 	}
@@ -1432,7 +1429,7 @@ bool CDataBaseEngineSink::OnRequestRoomLevelModify(DWORD dwContextID, VOID * pDa
 		//发送结果
 		if (lReturnValue == DB_SUCCESS)
 		{
-			m_pIDataBaseEngineEvent->OnEventDataBaseResult(DBO_GR_ROOMLEVELMODIFY,dwContextID,pRoomLevelModify,wDataSize);
+			g_AttemperEngineSink->OnEventDataBaseResult(DBO_GR_ROOMLEVELMODIFY,dwContextID,pRoomLevelModify,wDataSize);
 		}
 
 		return true;
@@ -1469,7 +1466,7 @@ bool CDataBaseEngineSink::OnRequestRoomControlValModify(DWORD dwContextID, VOID 
 
 		if ( lReturnValue == DB_SUCCESS)
 		{
-			m_pIDataBaseEngineEvent->OnEventDataBaseResult(DBO_GR_ROOMCONTROLVALMODIFY,dwContextID,pRoomControlVal,wDataSize);
+			g_AttemperEngineSink->OnEventDataBaseResult(DBO_GR_ROOMCONTROLVALMODIFY,dwContextID,pRoomControlVal,wDataSize);
 		}
 
 
@@ -1689,7 +1686,7 @@ bool CDataBaseEngineSink::On_DBR_CLUB_TABLE_INFO(DWORD dwContextID, VOID * pData
 		CMD.byDel = (pTableInfo->byMask == 3) ? 1 : 0;
 
 		//发送结果
-		m_pIDataBaseEngineEvent->OnEventDataBaseResult(DBO_GC_CLUB_UPDATE_TABLE_INFO,dwContextID,&CMD,sizeof(CMD));
+		g_AttemperEngineSink->OnEventDataBaseResult(DBO_GC_CLUB_UPDATE_TABLE_INFO,dwContextID,&CMD,sizeof(CMD));
 
 		return true;
 	}
@@ -1741,7 +1738,7 @@ bool CDataBaseEngineSink::On_DBR_CLUB_PLAYER_INFO(DWORD dwContextID, VOID * pDat
 		CMD.byDel = (pTableInfo->byMask == 1) ? 0 : 1;
 
 		//发送结果
-		m_pIDataBaseEngineEvent->OnEventDataBaseResult(DBO_GC_CLUB_UPDATE_PLAYER_INFO,dwContextID,&CMD,sizeof(CMD));
+		g_AttemperEngineSink->OnEventDataBaseResult(DBO_GC_CLUB_UPDATE_PLAYER_INFO,dwContextID,&CMD,sizeof(CMD));
 
 	}
 	catch(IDataBaseException * pIException)
@@ -2107,7 +2104,7 @@ bool CDataBaseEngineSink::OnUpdateTableInfo(DWORD dwTableID)
 
 		m_TreasureDBAide.GetValue_String(TEXT("CreateTime"),TableInfo.szTime,CountArray(TableInfo.szTime));	
 
-		//m_pIDataBaseEngineEvent->OnEventDataBaseResult(DBO_GP_TABLE_INFO_RESULT,dwContextID,&TableInfo,sizeof(DBO_GP_TableInfo));
+		//g_AttemperEngineSink->OnEventDataBaseResult(DBO_GP_TABLE_INFO_RESULT,dwContextID,&TableInfo,sizeof(DBO_GP_TableInfo));
 	}
 
 
@@ -2169,7 +2166,7 @@ bool CDataBaseEngineSink::OnQueryLottery(DWORD dwContextID, void * pData, WORD w
 			lstrcpyn(LotteryResult.szDescribe,CW2CT(DBVarValue.bstrVal),CountArray(LotteryResult.szDescribe));
 
 			//通知抽奖结果
-			m_pIDataBaseEngineEvent->OnEventDataBaseResult(DBO_GR_LOTTERY_RESULT,dwContextID,&LotteryResult,sizeof(DBO_GR_LotteryResult));
+			g_AttemperEngineSink->OnEventDataBaseResult(DBO_GR_LOTTERY_RESULT,dwContextID,&LotteryResult,sizeof(DBO_GR_LotteryResult));
 
 			//if(LotteryResult.byType != 0)
 			//{
@@ -2185,7 +2182,7 @@ bool CDataBaseEngineSink::OnQueryLottery(DWORD dwContextID, void * pData, WORD w
 			//	UserScoreInfo.lScore = m_GameDBAide.GetValue_LONG(TEXT("Score"));
 
 			//	//发送财富变更消息
-			//	m_pIDataBaseEngineEvent->OnEventDataBaseResult(DBO_QUERY_SCOREINFO,dwContextID,&UserScoreInfo,sizeof(DBO_GP_ScoreInfo));
+			//	g_AttemperEngineSink->OnEventDataBaseResult(DBO_QUERY_SCOREINFO,dwContextID,&UserScoreInfo,sizeof(DBO_GP_ScoreInfo));
 			//}
 		}else
 		{
@@ -2201,7 +2198,7 @@ bool CDataBaseEngineSink::OnQueryLottery(DWORD dwContextID, void * pData, WORD w
 			lstrcpyn(LotteryResult.szDescribe,TEXT("人品就差一点点，请再接再厉吧！"),CountArray(LotteryResult.szDescribe));
 
 			//通知抽奖结果
-			m_pIDataBaseEngineEvent->OnEventDataBaseResult(DBO_GR_LOTTERY_RESULT,dwContextID,&LotteryResult,sizeof(DBO_GR_LotteryResult));
+			g_AttemperEngineSink->OnEventDataBaseResult(DBO_GR_LOTTERY_RESULT,dwContextID,&LotteryResult,sizeof(DBO_GR_LotteryResult));
 		}
 
 	}
@@ -2397,7 +2394,7 @@ bool CDataBaseEngineSink::On_DBR_CG_CLUB_CREATE_TABLE(DWORD dwContextID, void *p
 		//执行查询
 		lResultCode = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_INFO_COST"), false);
 		Dbo.lResultCode = lResultCode;
-		return m_pIDataBaseEngineEvent->OnEventDataBaseResult(DBO_GC_CLUB_CREATE_TABLE,dwContextID,&Dbo,sizeof(Dbo));
+		return g_AttemperEngineSink->OnEventDataBaseResult(DBO_GC_CLUB_CREATE_TABLE,dwContextID,&Dbo,sizeof(Dbo));
 	}
 	catch (IDataBaseException * pIException)
 	{
@@ -2461,7 +2458,7 @@ bool CDataBaseEngineSink::On_DBR_CG_USER_JOIN_TABLE_NO_PASS(DWORD dwContextID, v
 			Dbo.lResultCode2 = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_INFO_COST"), false);
 		}
 
-		return m_pIDataBaseEngineEvent->OnEventDataBaseResult(DBO_GC_USER_JOIN_TABLE_NO_PASS,dwContextID,&Dbo,sizeof(Dbo));
+		return g_AttemperEngineSink->OnEventDataBaseResult(DBO_GC_USER_JOIN_TABLE_NO_PASS,dwContextID,&Dbo,sizeof(Dbo));
 	}
 	catch (IDataBaseException * pIException)
 	{
@@ -2492,7 +2489,7 @@ bool CDataBaseEngineSink::On_DBR_CG_JOIN_TABLE(DWORD dwContextID, void *pData, W
 		LONG lResultCode = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CG_USER_JOIN_TABLE"), false);
 		pDbReq->lResultCode = lResultCode;
 
-		return m_pIDataBaseEngineEvent->OnEventDataBaseResult(DBO_GC_JOIN_TABLE,dwContextID, pDbReq, wDataSize);
+		return g_AttemperEngineSink->OnEventDataBaseResult(DBO_GC_JOIN_TABLE,dwContextID, pDbReq, wDataSize);
 	}
 	catch (IDataBaseException * pIException)
 	{
@@ -2542,7 +2539,7 @@ bool CDataBaseEngineSink::On_DBR_CG_USER_JOIN_TABLE_HALL_GOLD(DWORD dwContextID,
 			Dbo.dwPassword = m_TreasureDBAide.GetValue_DWORD(TEXT("TableID"));
 		}
 
-		m_pIDataBaseEngineEvent->OnEventDataBaseResult(DBO_GC_USER_JOIN_TABLE_HALL_GOLD,dwContextID,&Dbo,sizeof(Dbo));
+		g_AttemperEngineSink->OnEventDataBaseResult(DBO_GC_USER_JOIN_TABLE_HALL_GOLD,dwContextID,&Dbo,sizeof(Dbo));
 	}
 	catch (IDataBaseException * pIException)
 	{

@@ -91,7 +91,7 @@ protected:
 	ITableUserRequest *				m_pITableUserRequest;				//请求接口
 	ITableUserAction *				m_pIMatchTableAction;				//动作接口(比赛用)
 
-	ITCPSocketService *				m_pITCPSocketService;				//网络服务
+	ITCPSocketEngine *				m_pITCPSocketEngine;				//网络服务
 
 
 	//数据接口

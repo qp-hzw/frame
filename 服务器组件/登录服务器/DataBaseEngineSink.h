@@ -1,8 +1,5 @@
 #ifndef DATABASE_ENGINE_SINK_HEAD_FILE
 #define DATABASE_ENGINE_SINK_HEAD_FILE
-
-#pragma once
-
 #include "Stdafx.h"
 #include "DataBasePacket.h"
 
@@ -33,10 +30,6 @@ protected:
 	CDataBaseAide					m_PlatformDBAide;					//平台数据库
 	CDataBaseHelper					m_PlatformDBModule;					//平台数据库
 
-	//组件变量
-protected:
-	IDataBaseEngineEvent *			m_pIDataBaseEngineEvent;			//数据事件
-
 	//函数定义
 public:
 	//构造函数
@@ -60,10 +53,6 @@ public:
 
 	//内核事件
 public:
-	//时间事件
-	virtual bool OnDataBaseEngineTimer(DWORD dwTimerID, WPARAM dwBindParameter){return false;};
-	//控制事件
-	virtual bool OnDataBaseEngineControl(WORD wControlID, VOID * pData, WORD wDataSize){return false;};
 	//请求事件
 	virtual bool OnDataBaseEngineRequest(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize);
 

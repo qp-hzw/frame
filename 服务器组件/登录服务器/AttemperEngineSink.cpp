@@ -9,6 +9,7 @@
 #include <regex> 
 using namespace std;
 
+CAttemperEngineSink* g_AttemperEngineSink = NULL;
 //////////////////////////////////////////////////////////////////////////////////
 # pragma region 定时器
 //时间标识
@@ -44,9 +45,12 @@ CAttemperEngineSink::CAttemperEngineSink()
 	m_pITimerEngine=NULL;
 	m_pIDataBaseEngine=NULL;
 	m_pITCPNetworkEngine=NULL;
-	m_pITCPSocketService=NULL;
+	m_pITCPSocketEngine=NULL;
 
 	m_pRankManager = NULL;
+
+	if(!g_AttemperEngineSink)
+		g_AttemperEngineSink = this;
 
 	return;
 }
@@ -107,7 +111,7 @@ bool CAttemperEngineSink::OnAttemperEngineConclude(IUnknownEx * pIUnknownEx)
 	m_pITimerEngine=NULL;
 	m_pIDataBaseEngine=NULL;
 	m_pITCPNetworkEngine=NULL;
-	m_pITCPSocketService=NULL;
+	m_pITCPSocketEngine=NULL;
 
 	//删除数据
 	SafeDeleteArray(m_pBindParameter);
@@ -140,7 +144,7 @@ bool CAttemperEngineSink::OnEventControl(WORD wIdentifier, VOID * pData, WORD wD
 	case CT_CONNECT_CORRESPOND:		//连接协调
 		{
 			//发起连接
-			m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
+			m_pITCPSocketEngine->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
 
 			return true;
 		}
@@ -167,7 +171,7 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 		{
 			m_pITimerEngine->KillTimer(IDI_CONNECT_CORRESPOND);
 			//发起连接
-			m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
+			m_pITCPSocketEngine->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
 
 			return true;
 		}
@@ -371,7 +375,7 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 }
 
 //数据库事件
-bool CAttemperEngineSink::OnEventDataBase(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize)
+bool CAttemperEngineSink::OnEventDataBaseResult(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
 	switch (wRequestID)
 	{
@@ -935,7 +939,7 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		lstrcpyn(CPR.szServerAddr,TEXT("127.0.0.1"),CountArray(CPR.szServerAddr));
 
 		//发送数据
-		m_pITCPSocketService->SendData(MDM_REGISTER,CPR_LP_REGISTER_LOGON,&CPR,sizeof(CPR)*sizeof(TCHAR));
+		m_pITCPSocketEngine->SendData(MDM_REGISTER,CPR_LP_REGISTER_LOGON,&CPR,sizeof(CPR)*sizeof(TCHAR));
 
 		return true;
 	}
@@ -1713,7 +1717,7 @@ bool CAttemperEngineSink::On_MDM_GAME(WORD wSubCmdID, VOID * pData, WORD wDataSi
 			CPR.dwKindID = pSub->dwKindID;
 			CPR.dwSocketID = dwSocketID;
 
-			m_pITCPSocketService->SendData(MDM_TRANSFER, CPR_LP_CREATE_TABLE, &CPR, sizeof(CPR));
+			m_pITCPSocketEngine->SendData(MDM_TRANSFER, CPR_LP_CREATE_TABLE, &CPR, sizeof(CPR));
 
 			return true;
 		}
@@ -3555,7 +3559,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_TABLE_DISSOLVE( DWORD dwContextID, VOID
 		CPR.dwGameID = pCmd->dwGameID;
 		CPR.dwTableID = pCmd->dwTableID;
 
-		m_pITCPSocketService->SendData(MDM_TRANSFER, CPR_LP_CLUB_TABLE_DISSOLVE, &CPR, sizeof(STR_CPR_LP_CLUB_TABLE_DISSOLVE));
+		m_pITCPSocketEngine->SendData(MDM_TRANSFER, CPR_LP_CLUB_TABLE_DISSOLVE, &CPR, sizeof(STR_CPR_LP_CLUB_TABLE_DISSOLVE));
 	}
 	return true;
 }

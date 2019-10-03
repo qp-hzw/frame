@@ -77,7 +77,7 @@ protected:
 protected:
 	ITimerEngine *					m_pITimerEngine;					//时间引擎
 	IAttemperEngine *				m_pIAttemperEngine;					//调度引擎
-	ITCPSocketService *				m_pITCPSocketService;				//网络服务 协调服务
+	ITCPSocketEngine *				m_pITCPSocketEngine;				//网络服务 协调服务
 	ITCPNetworkEngine *				m_pITCPNetworkEngine;				//网络引擎
 	IGameServiceManager *			m_pIGameServiceManager;				//服务管理
 

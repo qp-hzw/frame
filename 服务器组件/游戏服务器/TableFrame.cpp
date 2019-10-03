@@ -526,7 +526,7 @@ bool CTableFrame::ConcludeGame(BYTE cbGameStatus)
 					data.byMask = 2; //表示删除断线用户
 
 					//发送给协调服务器
-					m_pITCPSocketService->SendData(MDM_CS_USER_COLLECT,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
+					m_pITCPSocketEngine->SendData(MDM_CS_USER_COLLECT,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
 				}
 
 				//2. 用户站起
@@ -1986,7 +1986,7 @@ bool CTableFrame::InitializationFrame(WORD wTableID, tagTableFrameParameter & Ta
 	m_pIAndroidUserManager=TableFrameParameter.pIAndroidUserManager;
 	m_pIKernelDataBaseEngine=TableFrameParameter.pIKernelDataBaseEngine;
 	m_pIRecordDataBaseEngine=TableFrameParameter.pIRecordDataBaseEngine;
-	m_pITCPSocketService = TableFrameParameter.PITCPSocketService;
+	m_pITCPSocketEngine = TableFrameParameter.PITCPSocketEngine;
 
 	//创建桌子
 	IGameServiceManager * pIGameServiceManager=TableFrameParameter.pIGameServiceManager;

@@ -63,7 +63,7 @@ CAttemperEngineSink::CAttemperEngineSink()
 	//组件变量
 	m_pITimerEngine=NULL;
 	m_pIAttemperEngine=NULL;
-	m_pITCPSocketService=NULL;
+	m_pITCPSocketEngine=NULL;
 	m_pITCPNetworkEngine=NULL;
 	m_pIGameServiceManager=NULL;
 	m_WaitDistributeList.RemoveAll();
@@ -178,7 +178,7 @@ bool CAttemperEngineSink::OnAttemperEngineConclude(IUnknownEx * pIUnknownEx)
 
 	//组件变量
 	m_pITimerEngine=NULL;
-	m_pITCPSocketService=NULL;
+	m_pITCPSocketEngine=NULL;
 	m_pITCPNetworkEngine=NULL;
 
 	//数据引擎
@@ -216,7 +216,7 @@ bool CAttemperEngineSink::OnEventControl(WORD wIdentifier, VOID * pData, WORD wD
 	{
 	case CT_CONNECT_CORRESPOND:		//连接协调
 		{
-			m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
+			m_pITCPSocketEngine->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
 			return true;
 		}
 	case CT_LOAD_SERVICE_CONFIG:	//加载配置
@@ -276,12 +276,12 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 				ServerOnLine.dwOnLineCount=m_ServerUserManager.GetUserItemCount();
 
 				//发送数据
-				m_pITCPSocketService->SendData(MDM_CPD_LIST,CPR_GP_LIST_GAME_ONLINE,&ServerOnLine,sizeof(ServerOnLine));
+				m_pITCPSocketEngine->SendData(MDM_CPD_LIST,CPR_GP_LIST_GAME_ONLINE,&ServerOnLine,sizeof(ServerOnLine));
 				return true;
 			}
 		case IDI_CONNECT_CORRESPOND:	//连接协调
 			{
-				m_pITCPSocketService->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
+				m_pITCPSocketEngine->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
 				return true;
 			}
 		case IDI_GAME_SERVICE_PULSE:	//服务维护
@@ -406,13 +406,13 @@ bool CAttemperEngineSink::OnEventDataBase(WORD wRequestID, DWORD dwContextID, VO
 	case DBO_GC_CLUB_UPDATE_TABLE_INFO:// 更新桌子信息
 		{
 			if(sizeof(STR_CMD_LC_CLUB_TABLE_LIST) != wDataSize) return false;
-			m_pITCPSocketService->SendData(MDM_TRANSFER, CPR_GP_CLUB_TABLE_INFO, pData, wDataSize);
+			m_pITCPSocketEngine->SendData(MDM_TRANSFER, CPR_GP_CLUB_TABLE_INFO, pData, wDataSize);
 			return true;;
 		}
 	case DBO_GC_CLUB_UPDATE_PLAYER_INFO://更新玩家信息
 		{
 			if(sizeof(STR_CMD_LC_CLUB_TABLE_USER_LIST) != wDataSize) return false;
-			m_pITCPSocketService->SendData(MDM_TRANSFER, CPR_GP_CLUB_PLAYER_INFO, pData, wDataSize);
+			m_pITCPSocketEngine->SendData(MDM_TRANSFER, CPR_GP_CLUB_PLAYER_INFO, pData, wDataSize);
 			return true;
 		}
 	case DBO_GC_JOIN_TABLE://加入桌子 数据库校验
@@ -501,7 +501,7 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		RegisterServer.dwSubGameVersion = m_pGameServiceAttrib->dwSubGameVersion;
 
 		//发送数据
-		m_pITCPSocketService->SendData(MDM_REGISTER,CPR_GP_REGISTER_GAME,&RegisterServer,sizeof(RegisterServer));
+		m_pITCPSocketEngine->SendData(MDM_REGISTER,CPR_GP_REGISTER_GAME,&RegisterServer,sizeof(RegisterServer));
 
 		//设置时间
 		m_pITimerEngine->SetTimer(IDI_REPORT_SERVER_INFO,TIME_REPORT_SERVER_INFO*1000L,TIMES_INFINITY,0);
@@ -611,7 +611,7 @@ bool CAttemperEngineSink::OnEventTCPNetworkShut(DWORD dwClientAddr, DWORD dwActi
 				data.dwUserID = pIServerUserItem->GetUserID();
 				data.dwServerID = dwServerID;
 				data.byMask = 1; //表示增加断线用户
-				m_pITCPSocketService->SendData(MDM_CS_USER_COLLECT,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
+				m_pITCPSocketEngine->SendData(MDM_CS_USER_COLLECT,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
 
 				bIsExsit = true;
 			}
@@ -872,7 +872,7 @@ bool CAttemperEngineSink::SendMessageLobbyAndAllGame( LPCTSTR lpszMessage, WORD 
 	pSendLobbyMessage.MsgType=wType;
 	pSendLobbyMessage.MsgID = MsgID;
 	//发送给协调服务器
-	m_pITCPSocketService->SendData(MDM_WEB,CPR_WP_WEB_MARQUEE,&pSendLobbyMessage,sizeof(CMD_CS_C_SendMarquee));
+	m_pITCPSocketEngine->SendData(MDM_WEB,CPR_WP_WEB_MARQUEE,&pSendLobbyMessage,sizeof(CMD_CS_C_SendMarquee));
 	*/
 	return true;
 }
@@ -1281,12 +1281,12 @@ bool CAttemperEngineSink::OnTCPSocketMainUserCollect(WORD wSubCmdID, VOID * pDat
 				UserEnter.cbMasterOrder=pIServerUserItem->GetMasterOrder();
 
 				//发送数据
-				m_pITCPSocketService->SendData(MDM_CS_USER_COLLECT,SUB_CS_C_USER_ENTER,&UserEnter,sizeof(UserEnter));
+				m_pITCPSocketEngine->SendData(MDM_CS_USER_COLLECT,SUB_CS_C_USER_ENTER,&UserEnter,sizeof(UserEnter));
 			} while (true);
 
 			//汇报完成
 			m_bCollectUser=true;
-			m_pITCPSocketService->SendData(MDM_CS_USER_COLLECT,SUB_CS_C_USER_FINISH);
+			m_pITCPSocketEngine->SendData(MDM_CS_USER_COLLECT,SUB_CS_C_USER_FINISH);
 
 			return true;
 		}
@@ -3610,7 +3610,7 @@ bool CAttemperEngineSink::On_SUB_User_ReconnectRoom(VOID * pData, WORD wDataSize
 		data.dwUserID = pIServerUserItem->GetUserID();
 		//data.dwGameID = m_pGameServiceAttrib->dwGameID; 删除的时候不需要改字段
 		data.byMask = 2; //表示删除断线用户
-		m_pITCPSocketService->SendData(MDM_CS_USER_COLLECT,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
+		m_pITCPSocketEngine->SendData(MDM_CS_USER_COLLECT,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
 	}
 	return true;
 }
@@ -4113,7 +4113,7 @@ VOID CAttemperEngineSink::OnEventUserLogout(IServerUserItem * pIServerUserItem, 
 		UserLeave.dwUserID=pIServerUserItem->GetUserID();
 
 		//发送消息
-		m_pITCPSocketService->SendData(MDM_CS_USER_COLLECT,SUB_CS_C_USER_LEAVE,&UserLeave,sizeof(UserLeave));
+		m_pITCPSocketEngine->SendData(MDM_CS_USER_COLLECT,SUB_CS_C_USER_LEAVE,&UserLeave,sizeof(UserLeave));
 	}
 
 	//知道比赛服务退出游戏
@@ -4379,7 +4379,7 @@ bool CAttemperEngineSink::InitTableFrameArray()
 	TableFrameParameter.pIGameServiceManager=m_pIGameServiceManager;
 
 	//组件接口
-	TableFrameParameter.PITCPSocketService = m_pITCPSocketService;
+	TableFrameParameter.PITCPSocketEngine = m_pITCPSocketEngine;
 
 	//配置参数
 	TableFrameParameter.pGameParameter=m_pGameParameter;

@@ -489,10 +489,7 @@ bool CServerInfoManager::ConnectPlatformDB(CDataBaseHelper & PlatformDBModule)
 	}
 
 	//设置连接
-	PlatformDBModule->SetConnectionInfo(1);
-
-	//发起连接
-	PlatformDBModule->OpenConnection();
+	PlatformDBModule->Connect(1);
 
 	return true;
 }

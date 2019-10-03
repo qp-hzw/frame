@@ -50,7 +50,7 @@ protected:
 	ITimerEngine *					m_pITimerEngine;					//时间引擎		//定时器通信
 	IDataBaseEngine *				m_pIDataBaseEngine;					//数据引擎		//数据库与登陆服通信
 	ITCPNetworkEngine *				m_pITCPNetworkEngine;				//网络引擎		//socket::server
-	ITCPSocketService *				m_pITCPSocketService;				//协调服务		//socket::client
+	ITCPSocketEngine *				m_pITCPSocketEngine;				//协调服务		//socket::client
 
 #pragma region 构造析构
 	//函数定义
@@ -86,7 +86,7 @@ public:
 	//时间事件
 	virtual bool OnEventTimer(DWORD dwTimerID, WPARAM wBindParam);
 	//数据库事件
-	virtual bool OnEventDataBase(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize);
+	virtual bool OnEventDataBaseResult(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize);
 
 #pragma endregion
 
@@ -544,6 +544,9 @@ protected:
 #pragma endregion
 
 };
+
+
+extern CAttemperEngineSink* g_AttemperEngineSink;
 
 //////////////////////////////////////////////////////////////////////////////////
 
