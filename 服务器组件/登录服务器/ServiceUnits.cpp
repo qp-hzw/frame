@@ -62,9 +62,8 @@ int CServiceUnits::InitializeService()
 	if (m_TCPSocketEngine->SetServiceID(NETWORK_CORRESPOND)==false) return 11;
 
 	//配置网络
-	WORD wMaxConnect=MAX_CONTENT;
 	WORD wServicePort=PORT_LOGON;
-	if (m_TCPNetworkEngine->SetServiceParameter(wServicePort,wMaxConnect)==false) return 12;
+	if (m_TCPNetworkEngine->SetServiceParameter(wServicePort)==false) return 12;
 
 	return 0;
 }

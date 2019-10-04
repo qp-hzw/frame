@@ -73,9 +73,8 @@ int CServiceUnits::InitializeService()
 	m_AttemperEngineSink.m_pITCPNetworkEngine=m_TCPNetworkEngine.GetInterface();
 
 	//配置网络
-	WORD wMaxConnect=MAX_CONTENT;
 	WORD wServicePort=PORT_CENTER;
-	if (m_TCPNetworkEngine->SetServiceParameter(wServicePort,wMaxConnect)==false) return 5;
+	if (m_TCPNetworkEngine->SetServiceParameter(wServicePort)==false) return 5;
 
 	return 0;
 }
