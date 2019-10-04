@@ -55,8 +55,6 @@ public:
 	bool StartService();
 	//停止服务
 	bool ConcludeService();
-	//投递请求
-	bool PostControlRequest(WORD wIdentifier, VOID * pData, WORD wDataSize);
 
 	//辅助函数
 protected:
@@ -67,12 +65,7 @@ protected:
 	//启动网络 -- 协调服 返回成功才会启动
 	int StartNetworkService();
 
-	//消息映射
-protected:
-	//控制消息
-	LRESULT OnUIControlRequest(WPARAM wParam, LPARAM lParam);
-
-	DECLARE_MESSAGE_MAP()
+	//DECLARE_MESSAGE_MAP()
 };
 
 extern CServiceUnits *			g_pServiceUnits;					//对象指针

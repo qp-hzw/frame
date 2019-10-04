@@ -238,6 +238,9 @@ bool CAttemperEngineSink::OnTCPNetworkMainRegister(WORD wSubCmdID, VOID * pData,
 			//发送列表
 			SendServerListItem(dwSocketID);
 
+			//发送 注册完成
+			m_pITCPNetworkEngine->SendData(dwSocketID,MDM_REGISTER,CPO_PGPL_REGISTER_SUCESS);
+
 			return true;
 		}
 	case CPR_GP_REGISTER_GAME:	//注册游戏服
@@ -652,9 +655,6 @@ bool CAttemperEngineSink::SendServerListItem(DWORD dwSocketID)
 	//发送数据
 	if (wPacketSize>0) 
 		m_pITCPNetworkEngine->SendData(dwSocketID,MDM_CPD_LIST,CPO_PL_LIST_INSERT_GAME_LIST,cbBuffer,wPacketSize);
-
-	//发送完成
-	m_pITCPNetworkEngine->SendData(dwSocketID,MDM_REGISTER,CPO_PGPL_REGISTER_SUCESS);
 
 	return true;
 }

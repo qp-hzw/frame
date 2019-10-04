@@ -7,11 +7,6 @@
 //静态变量
 CServiceUnits *			g_pServiceUnits=NULL;			//对象指针
 
-//////////////////////////////////////////////////////////////////////////////////
-
-BEGIN_MESSAGE_MAP(CServiceUnits, CWnd)
-	ON_MESSAGE(WM_UICONTROL_REQUEST,OnUIControlRequest)
-END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -97,11 +92,11 @@ bool CServiceUnits::StartService()
 	}
 
 	//连接协调
-	m_AttemperEngine->OnEventControl(CT_CONNECT_CORRESPOND,NULL,0);
-
-	//获取列表
-	//m_AttemperEngine->OnEventControl(CT_LOAD_DB_GAME_LIST,NULL,0);
-
+	if (m_TCPSocketEngine.GetInterface()!=NULL)
+	{
+		m_TCPSocketEngine.GetInterface()->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
+	}
+	
 	return true;
 }
 
@@ -155,62 +150,6 @@ int CServiceUnits::StartNetworkService()
 	if (m_TCPNetworkEngine->StartService()==false)
 	{
 		return 1;
-	}
-
-	return 0;
-}
-
-//投递请求
-bool CServiceUnits::PostControlRequest(WORD wIdentifier, VOID * pData, WORD wDataSize)
-{
-	//状态判断
-	if (IsWindow(m_hWnd)==FALSE) return false;
-
-	//插入队列
-	CWHDataLocker DataLocker(m_CriticalSection);
-	if (m_DataQueue.InsertData(wIdentifier,pData,wDataSize)==false) return false;
-
-	//发送消息
-	PostMessage(WM_UICONTROL_REQUEST,wIdentifier,wDataSize);
-
-	return true;
-}
-
-
-//控制消息
-LRESULT CServiceUnits::OnUIControlRequest(WPARAM wParam, LPARAM lParam)
-{
-	//变量定义
-	tagDataHead DataHead;
-	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
-
-	//提取数据
-	CWHDataLocker DataLocker(m_CriticalSection);
-	if (m_DataQueue.DistillData(DataHead,cbBuffer,sizeof(cbBuffer))==false)
-	{
-		return NULL;
-	}
-
-	//数据处理
-	switch (DataHead.wIdentifier)
-	{
-	case UI_LOAD_DB_LIST_RESULT:	//列表结果
-		{
-			//效验消息
-			if (DataHead.wDataSize!=sizeof(CP_ControlResult)) return 0;
-
-			//变量定义
-			CP_ControlResult * pControlResult=(CP_ControlResult *)cbBuffer;
-
-			//失败处理
-			if (pControlResult->cbSuccess==ER_FAILURE)
-			{
-				ConcludeService();
-				return 0;
-			}
-
-			return 0;
-		}
 	}
 
 	return 0;

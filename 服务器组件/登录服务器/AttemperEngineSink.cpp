@@ -36,7 +36,6 @@ CAttemperEngineSink* g_AttemperEngineSink = NULL;
 CAttemperEngineSink::CAttemperEngineSink()
 {
 	//状态变量
-	m_bNeekCorrespond=true;
 	m_bShowServerStatus=false;
 
 	//状态变量
@@ -105,9 +104,6 @@ bool CAttemperEngineSink::OnAttemperEngineStart(IUnknownEx * pIUnknownEx)
 //停止事件
 bool CAttemperEngineSink::OnAttemperEngineConclude(IUnknownEx * pIUnknownEx)
 {
-	//状态变量
-	m_bNeekCorrespond=true;
-
 	//组件变量
 	m_pITimerEngine=NULL;
 	m_pIDataBaseEngine=NULL;
@@ -134,21 +130,6 @@ bool CAttemperEngineSink::OnEventControl(WORD wIdentifier, VOID * pData, WORD wD
 {
 	switch (wIdentifier)
 	{
-	case CT_LOAD_DB_GAME_LIST:		//加载列表
-		{
-			//加载列表
-			m_ServerListManager.DisuseKernelItem();
-			m_pIDataBaseEngine->PostDataBaseRequest(DBR_GP_LOAD_GAME_LIST,0,NULL,0);
-
-			return true;
-		}
-	case CT_CONNECT_CORRESPOND:		//连接协调
-		{
-			//发起连接
-			m_pITCPSocketEngine->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
-
-			return true;
-		}
 	}
 
 	return false;
@@ -901,14 +882,9 @@ bool CAttemperEngineSink::OnEventTCPSocketShut(WORD wServiceID, BYTE cbShutReaso
 	//协调连接
 	if (wServiceID==NETWORK_CORRESPOND)
 	{
-		//重连判断
-		if (m_bNeekCorrespond==true)
-		{
-			//设置时间
-			m_pITimerEngine->SetTimer(IDI_CONNECT_CORRESPOND, TIME_CONNECT_CORRESPOND, 1, 0);
-
-			return true;
-		}
+		//设置时间
+		m_pITimerEngine->SetTimer(IDI_CONNECT_CORRESPOND, TIME_CONNECT_CORRESPOND, 1, 0);
+		return true;
 	}
 
 	return false;
@@ -1084,12 +1060,12 @@ bool CAttemperEngineSink::OnDBPCGameListResult(DWORD dwContextID, VOID * pData, 
 	if (pGameListResult->cbSuccess==TRUE)
 	{
 		//清理列表
-		m_ServerListManager.CleanKernelItem();
+		//m_ServerListManager.CleanKernelItem();
 
 		//事件通知
 		CP_ControlResult ControlResult;
 		ControlResult.cbSuccess=ER_SUCCESS;
-		SendUIControlPacket(UI_LOAD_DB_LIST_RESULT,&ControlResult,sizeof(ControlResult));
+
 	}
 	else
 	{
@@ -1097,19 +1073,8 @@ bool CAttemperEngineSink::OnDBPCGameListResult(DWORD dwContextID, VOID * pData, 
 		CLog::Log(log_warn, "服务器列表加载失败，%ld 秒后将重新加载", TIME_RELOAD_LIST);
 
 		//设置时间
-		ASSERT(m_pITimerEngine!=NULL);
 		m_pITimerEngine->SetTimer(IDI_LOAD_GAME_LIST,TIME_RELOAD_LIST*1000L,1,0);
 	}
-
-	return true;
-}
-
-//发送请求
-bool CAttemperEngineSink::SendUIControlPacket(WORD wRequestID, VOID * pData, WORD wDataSize)
-{
-	//发送数据
-	//CServiceUnits * pServiceUnits=CServiceUnits::g_pServiceUnits;
-	g_pServiceUnits->PostControlRequest(wRequestID,pData,wDataSize);
 
 	return true;
 }
@@ -1170,8 +1135,9 @@ bool CAttemperEngineSink::OnTCPSocketMainRegister(WORD wSubCmdID, VOID * pData, 
 				return true;
 			}
 
-			//读取数据库信息
-
+			//读取数据库 加载列表
+			m_ServerListManager.DisuseKernelItem();
+			m_pIDataBaseEngine->PostDataBaseRequest(DBR_GP_LOAD_GAME_LIST,0,NULL,0);
 
 			//注册完成，在这里初始化排行榜
 			if(NULL == m_pRankManager)
@@ -1182,20 +1148,8 @@ bool CAttemperEngineSink::OnTCPSocketMainRegister(WORD wSubCmdID, VOID * pData, 
 
 	case CPO_PGPL_REGISTER_FAILURE:		//注册失败
 		{
-			//效验参数
-			if (wDataSize != sizeof(STR_CPO_PGPL_REGISTER_FAILURE)) return false;
-
-			//变量定义
-			STR_CPO_PGPL_REGISTER_FAILURE * pRegisterFailure=(STR_CPO_PGPL_REGISTER_FAILURE *)pData;
-	
-			//关闭处理
-			m_bNeekCorrespond=false;
-
-			//事件通知
-			CP_ControlResult ControlResult;
-			ControlResult.cbSuccess=ER_FAILURE;
-			SendUIControlPacket(UI_CORRESPOND_RESULT,&ControlResult,sizeof(ControlResult));
-
+			//事件通知 
+			g_pServiceUnits ->ConcludeService();
 			return true;
 		}
 	}

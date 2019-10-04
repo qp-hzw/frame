@@ -29,7 +29,6 @@ class CAttemperEngineSink : public IAttemperEngineSink
 
 	//状态变量
 protected:
-	bool							m_bNeekCorrespond;					//协调标志
 	bool                            m_bShowServerStatus;                //显示服务器状态
 
 	//变量定义
