@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Resource.h"		// 主符号
 #include "Stdafx.h"
 
 //程序对象

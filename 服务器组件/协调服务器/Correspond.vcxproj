@@ -187,22 +187,12 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\消息定义\CMD_Correspond.h" />
-    <ClInclude Include="..\..\消息定义\STR_CMD_Correspond.h" />
+    <ClInclude Include="..\..\消息定义\CMD_STR_Correspond.h" />
     <ClInclude Include="AttemperEngineSink.h" />
     <ClInclude Include="CorrespondServer.h" />
     <ClInclude Include="GlobalInfoManager.h" />
-    <ClInclude Include="Resource.h" />
     <ClInclude Include="ServiceUnits.h" />
     <ClInclude Include="Stdafx.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="res\Correspond.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="Correspond.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="res\Correspond.rc2" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

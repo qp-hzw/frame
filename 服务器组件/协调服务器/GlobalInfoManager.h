@@ -1,8 +1,5 @@
 #ifndef GLOBAL_USER_MANAGER_HEAD_FILE
 #define GLOBAL_USER_MANAGER_HEAD_FILE
-
-#pragma once
-
 #include "Stdafx.h"
 #include "AfxTempl.h"
 

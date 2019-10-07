@@ -1,14 +1,13 @@
 #ifndef CMD_CORRESPOND_HEAD_FILE
 #define CMD_CORRESPOND_HEAD_FILE
 
-#include "STR_CMD_Correspond.h"
-#pragma pack(1)
+#include "CMD_STR_Correspond.h"
 
 /*
 ** 简要描述:  协调服 与 其他进程(登录服, 游戏服, web后台) 消息
 ** 详细描述:  1. 消息号(主 + 子)     2. 结构体
 ** 备注说明:  子消息号的含义: 
-**            1. 第一个字段: 归属标志,        
+**            1. 第一个字段: 归属标志,
 **				 CPR(其他进程->协调服的消息)， CPO(协调服->其他进程的消息), 
 **            2. 第二个字段: 消息流向         
 **				 L: logon;  G:gameserver; W:web;  P:协调服
