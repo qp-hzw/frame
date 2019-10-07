@@ -60,59 +60,31 @@ bool CServiceUnits::StartService()
 {
 	bool bResult = true;
 
-
-		//创建窗口
-		if (m_hWnd==NULL)
-		{
-			CRect rcCreate(0,0,0,0);
-			Create(NULL,NULL,WS_CHILD,rcCreate,AfxGetMainWnd(),100);
-		}
-
-		//创建模块
-		if (CreateServiceDLL()==false)
-		{
-			bResult = false;
-		}
-		//调整参数
-		if (RectifyServiceParameter()==false)
-		{
-			bResult = false;
-		}
-
-		//配置服务
-		if (InitializeService()==false)
-		{
-			bResult = false;
-		}
-
-		/*
-		//内核版本判断
-		CWHIniData InitData;
-		DWORD realKernel = InitData.Get_Code_Kernel_Version();
-		DWORD frameKernel = Get_Kernel_Version();
-		if(Compare_Kernek_Framework(realKernel, frameKernel) != 0)
-		{		
-			bResult = false;
-		}
-		*/
-
-		//启动内核
-		if (StartKernelService()==false)
-		{
-			bResult = false;
-		}
-
-	if(!bResult)
+	//创建模块
+	if (CreateServiceDLL()==false)
 	{
-		ConcludeService();
-		return false;
+		bResult = false;
+	}
+	//调整参数
+	if (RectifyServiceParameter()==false)
+	{
+		bResult = false;
+	}
+
+	//配置服务
+	if (InitializeService()==false)
+	{
+		bResult = false;
+	}
+
+	//启动内核
+	if (StartKernelService()==false)
+	{
+		bResult = false;
 	}
 
 	//加载配置
 	m_AttemperEngine->OnEventControl(CT_LOAD_SERVICE_CONFIG,NULL,0);
-
-	//启动比赛
-	if (m_GameMatchServiceManager.GetInterface()!=NULL && m_GameMatchServiceManager->StartService()==false) return false;
 
 	return true;
 }
@@ -121,7 +93,7 @@ bool CServiceUnits::StartService()
 bool CServiceUnits::ConcludeService()
 {
 
-		//内核组件
+	//内核组件
 	if (m_TimerEngine.GetInterface()!=NULL) m_TimerEngine->ConcludeService();
 	if (m_AttemperEngine.GetInterface()!=NULL) m_AttemperEngine->ConcludeService();
 	if (m_TCPSocketEngine.GetInterface()!=NULL) m_TCPSocketEngine->ConcludeService();
@@ -154,7 +126,7 @@ bool CServiceUnits::CollocateService(LPCTSTR pszGameModule, tagGameServiceOption
 //创建模块
 bool CServiceUnits::CreateServiceDLL()
 {
-	//时间引擎
+	//定时器引擎
 	if ((m_TimerEngine.GetInterface()==NULL)&&(m_TimerEngine.CreateInstance()==false))
 	{
 		return false;
@@ -166,19 +138,19 @@ bool CServiceUnits::CreateServiceDLL()
 		return false;
 	}
 
-	//网络组件
+	//socket::client
 	if ((m_TCPSocketEngine.GetInterface()==NULL)&&(m_TCPSocketEngine.CreateInstance()==false))
 	{
 		return false;
 	}
 
-	//网络引擎
+	//socket::server
 	if ((m_TCPNetworkEngine.GetInterface()==NULL)&&(m_TCPNetworkEngine.CreateInstance()==false))
 	{
 		return false;
 	}
 
-	//数据组件
+	//database
 	if ((m_KernelDataBaseEngine.GetInterface()==NULL)&&(m_KernelDataBaseEngine.CreateInstance()==false))
 	{
 		return false;
@@ -194,15 +166,6 @@ bool CServiceUnits::CreateServiceDLL()
 	if ((m_GameServiceManager.GetInterface()==NULL)&&(m_GameServiceManager.CreateInstance()==false))
 	{
 		return false;
-	}
-
-	//if ((m_GameServiceOption.wServerType&GAME_GENRE_MATCH)!=0 )
-	if(false)
-	{
-		if ((m_GameMatchServiceManager.GetInterface()==NULL)&&(m_GameMatchServiceManager.CreateInstance()==false))
-		{
-			return false;
-		}
 	}
 
 	return true;
@@ -350,26 +313,6 @@ bool CServiceUnits::StartNetworkService()
 	return true;
 }
 
-//调整参数
-bool CServiceUnits::RectifyServiceParameter()
-{
-	//读取属性
-	m_GameServiceManager->GetServiceAttrib(m_GameServiceAttrib);
-
-	//调整参数
-	if (m_GameServiceManager->RectifyParameter(m_GameServiceOption)==false)
-	{
-		return false;
-	}
-
-	//比赛调整
-	if (m_GameMatchServiceManager.GetInterface()!=NULL)
-	{
-		m_GameMatchServiceManager->RectifyServiceOption(&m_GameServiceOption,&m_GameServiceAttrib);
-	}
-
-	return true;
-}
 
 //控制消息
 LRESULT CServiceUnits::OnUIControlRequest(WPARAM wParam, LPARAM lParam)

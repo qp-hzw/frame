@@ -42,41 +42,7 @@ CGameServerDlg::~CGameServerDlg()
 VOID CGameServerDlg::UpdateParameterStatus(tagModuleInitParameter & ModuleInitParameter)
 {
 	//设置变量
-	m_ModuleInitParameter=ModuleInitParameter;
-
-	//设置按钮
-	GetDlgItem(IDC_START_SERVICE)->EnableWindow(TRUE);
-
-	//监听端口
-	if (m_ModuleInitParameter.GameServiceOption.wGameServerPort==0)
-	{
-		SetDlgItemText(IDC_SERVER_PORT,TEXT("端口不存在"));
-	}
-	else
-	{
-		SetDlgItemInt(IDC_SERVER_PORT,m_ModuleInitParameter.GameServiceOption.wGameServerPort);
-	}
-
-	//房间ID
-	if (m_ModuleInitParameter.GameServiceOption.dwServerID == 0)
-	{
-		SetDlgItemText(IDC_GAME_NAME,TEXT("房间ID不存在"));
-	}
-	else
-	{
-		SetDlgItemInt(IDC_GAME_NAME, m_ModuleInitParameter.GameServiceOption.dwServerID);
-	}
-
-	//房间名称
-	if (_T('0') == m_ModuleInitParameter.GameServiceOption.szServerName[0])
-	{
-		SetDlgItemText(IDC_SERVER_NAME,TEXT("房间名字不存在"));
-	}
-	else
-	{
-		SetDlgItemText(IDC_SERVER_NAME, m_ModuleInitParameter.GameServiceOption.szServerName);
-	}
-	
+	m_ModuleInitParameter=ModuleInitParameter;	
 
 	//设置模块
 	m_ServiceUnits.CollocateService(m_ModuleInitParameter.GameServiceAttrib.szDllName,m_ModuleInitParameter.GameServiceOption);
@@ -92,19 +58,6 @@ VOID CGameServerDlg::OnBnClickedOpenServer()
 
 	//更新状态
 	UpdateParameterStatus(DlgServerItem.m_ModuleInitParameter);
-
-	return;
-}
-
-//创建房间
-VOID CGameServerDlg::OnBnClickedCreateServer()
-{
-	//创建房间
-	CDlgServerWizard DlgServerWizard;
-	if (DlgServerWizard.CreateGameServer()==false) return;
-
-	//更新状态（将子对话框的信息赋值给游戏服对话框）
-	UpdateParameterStatus(DlgServerWizard.m_ModuleInitParameter);
 
 	return;
 }

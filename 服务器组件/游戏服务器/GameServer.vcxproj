@@ -205,15 +205,12 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClInclude Include="DataBaseEngineSink.h" />
     <ClInclude Include="DataBasePacket.h" />
     <ClInclude Include="DBCorrespondManager.h" />
-    <ClInclude Include="DistributeManager.h" />
     <ClInclude Include="GameServer.h" />
     <ClInclude Include="DlgGameServer.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="SensitiveWordsFilter.h" />
     <ClInclude Include="ServerListManager.h" />
     <ClInclude Include="ServiceUnits.h" />
     <ClInclude Include="Stdafx.h" />
-    <ClInclude Include="StockManager.h" />
     <ClInclude Include="TableFrame.h" />
   </ItemGroup>
   <ItemGroup>

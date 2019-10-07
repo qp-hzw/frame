@@ -4,17 +4,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LogonServer", "·þÎñÆ÷×é¼þ\µ
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Correspond", "·þÎñÆ÷×é¼þ\Ð­µ÷·þÎñÆ÷\Correspond.vcxproj", "{0167D883-34DA-47FC-A903-6BE341FD8DC5}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameService", "·þÎñÆ÷×é¼þ\ÓÎÏ··þÎñ\GameService.vcxproj", "{07F0CF5A-4D5D-4DBB-A723-4DF612C3AB33}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameServer", "·þÎñÆ÷×é¼þ\ÓÎÏ··þÎñÆ÷\GameServer.vcxproj", "{267C213B-3F02-4627-8734-E361A61C83F9}"
-	ProjectSection(ProjectDependencies) = postProject
-		{07F0CF5A-4D5D-4DBB-A723-4DF612C3AB33} = {07F0CF5A-4D5D-4DBB-A723-4DF612C3AB33}
-		{ED28DEC3-BBC7-43FA-998B-11DCFAA69CEF} = {ED28DEC3-BBC7-43FA-998B-11DCFAA69CEF}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ModuleManager", "·þÎñÆ÷×é¼þ\Ä£¿é¹ÜÀí\ModuleManager.vcxproj", "{ED28DEC3-BBC7-43FA-998B-11DCFAA69CEF}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MatchService", "·þÎñÆ÷×é¼þ\±ÈÈü·þÎñ\GameMatchServer.vcxproj", "{CA071FF5-97BF-42C3-99AF-FE8F8A0F0AF2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,30 +25,12 @@ Global
 		{0167D883-34DA-47FC-A903-6BE341FD8DC5}.Release_Unicode_License|Win32.Build.0 = Release_Unicode_License|Win32
 		{0167D883-34DA-47FC-A903-6BE341FD8DC5}.Release_Unicode|Win32.ActiveCfg = Release_Unicode|Win32
 		{0167D883-34DA-47FC-A903-6BE341FD8DC5}.Release_Unicode|Win32.Build.0 = Release_Unicode|Win32
-		{07F0CF5A-4D5D-4DBB-A723-4DF612C3AB33}.Debug_Unicode|Win32.ActiveCfg = Debug_Unicode|Win32
-		{07F0CF5A-4D5D-4DBB-A723-4DF612C3AB33}.Debug_Unicode|Win32.Build.0 = Debug_Unicode|Win32
-		{07F0CF5A-4D5D-4DBB-A723-4DF612C3AB33}.Release_Unicode_License|Win32.ActiveCfg = Release_Unicode_License|Win32
-		{07F0CF5A-4D5D-4DBB-A723-4DF612C3AB33}.Release_Unicode_License|Win32.Build.0 = Release_Unicode_License|Win32
-		{07F0CF5A-4D5D-4DBB-A723-4DF612C3AB33}.Release_Unicode|Win32.ActiveCfg = Release_Unicode|Win32
-		{07F0CF5A-4D5D-4DBB-A723-4DF612C3AB33}.Release_Unicode|Win32.Build.0 = Release_Unicode|Win32
 		{267C213B-3F02-4627-8734-E361A61C83F9}.Debug_Unicode|Win32.ActiveCfg = Debug_Unicode|Win32
 		{267C213B-3F02-4627-8734-E361A61C83F9}.Debug_Unicode|Win32.Build.0 = Debug_Unicode|Win32
 		{267C213B-3F02-4627-8734-E361A61C83F9}.Release_Unicode_License|Win32.ActiveCfg = Release_Unicode_License|Win32
 		{267C213B-3F02-4627-8734-E361A61C83F9}.Release_Unicode_License|Win32.Build.0 = Release_Unicode_License|Win32
 		{267C213B-3F02-4627-8734-E361A61C83F9}.Release_Unicode|Win32.ActiveCfg = Release_Unicode|Win32
 		{267C213B-3F02-4627-8734-E361A61C83F9}.Release_Unicode|Win32.Build.0 = Release_Unicode|Win32
-		{ED28DEC3-BBC7-43FA-998B-11DCFAA69CEF}.Debug_Unicode|Win32.ActiveCfg = Debug_Unicode|Win32
-		{ED28DEC3-BBC7-43FA-998B-11DCFAA69CEF}.Debug_Unicode|Win32.Build.0 = Debug_Unicode|Win32
-		{ED28DEC3-BBC7-43FA-998B-11DCFAA69CEF}.Release_Unicode_License|Win32.ActiveCfg = Release_Unicode_License|Win32
-		{ED28DEC3-BBC7-43FA-998B-11DCFAA69CEF}.Release_Unicode_License|Win32.Build.0 = Release_Unicode_License|Win32
-		{ED28DEC3-BBC7-43FA-998B-11DCFAA69CEF}.Release_Unicode|Win32.ActiveCfg = Release_Unicode|Win32
-		{ED28DEC3-BBC7-43FA-998B-11DCFAA69CEF}.Release_Unicode|Win32.Build.0 = Release_Unicode|Win32
-		{CA071FF5-97BF-42C3-99AF-FE8F8A0F0AF2}.Debug_Unicode|Win32.ActiveCfg = Debug_Unicode|Win32
-		{CA071FF5-97BF-42C3-99AF-FE8F8A0F0AF2}.Debug_Unicode|Win32.Build.0 = Debug_Unicode|Win32
-		{CA071FF5-97BF-42C3-99AF-FE8F8A0F0AF2}.Release_Unicode_License|Win32.ActiveCfg = Release_Unicode_License|Win32
-		{CA071FF5-97BF-42C3-99AF-FE8F8A0F0AF2}.Release_Unicode_License|Win32.Build.0 = Release_Unicode_License|Win32
-		{CA071FF5-97BF-42C3-99AF-FE8F8A0F0AF2}.Release_Unicode|Win32.ActiveCfg = Release_Unicode|Win32
-		{CA071FF5-97BF-42C3-99AF-FE8F8A0F0AF2}.Release_Unicode|Win32.Build.0 = Release_Unicode|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

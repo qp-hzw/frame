@@ -48,16 +48,10 @@
     <ClInclude Include="DBCorrespondManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DistributeManager.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="GameServer.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Resource.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="SensitiveWordsFilter.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ServerListManager.h">
@@ -67,9 +61,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Stdafx.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="StockManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="TableFrame.h">

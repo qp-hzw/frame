@@ -1,6 +1,5 @@
 #include "ServiceUnits.h"
 #include "CorrespondServer.h"
-#include "DlgCorrespondServer.h"
 
 //程序对象
 CCorrespondServerApp theApp;
@@ -18,10 +17,10 @@ BOOL CCorrespondServerApp::InitInstance()
 	InitCommonControls();
 	AfxEnableControlContainer();
 
-	//显示窗口
-	CCorrespondServerDlg CorrespondServerDlg;
-	m_pMainWnd=&CorrespondServerDlg;
-	CorrespondServerDlg.DoModal();
+
+	//启动服务
+	CServiceUnits m_ServiceUnits;
+	m_ServiceUnits.StartService();
 
 	return FALSE;
 }

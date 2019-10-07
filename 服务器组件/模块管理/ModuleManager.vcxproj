@@ -191,7 +191,6 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClCompile Include="ModuleInfoManager.cpp" />
     <ClCompile Include="ModuleListControl.cpp" />
     <ClCompile Include="ModuleManager.cpp" />
-    <ClCompile Include="ServerCustomRule.cpp" />
     <ClCompile Include="ServerInfoManager.cpp" />
     <ClCompile Include="ServerListControl.cpp" />
     <ClCompile Include="Stdafx.cpp">
@@ -208,7 +207,6 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClInclude Include="ModuleListControl.h" />
     <ClInclude Include="ModuleManagerHead.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="ServerCustomRule.h" />
     <ClInclude Include="ServerInfoManager.h" />
     <ClInclude Include="ServerListControl.h" />
     <ClInclude Include="Stdafx.h" />

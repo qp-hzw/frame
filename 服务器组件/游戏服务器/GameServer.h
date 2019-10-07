@@ -16,8 +16,6 @@ public:
 public:
 	//Æô¶¯º¯Êý
 	virtual BOOL InitInstance();
-	virtual int Run();
-	virtual LRESULT ProcessWndProcException(CException* e, const MSG* pMsg);
 
 	DECLARE_MESSAGE_MAP()
 };

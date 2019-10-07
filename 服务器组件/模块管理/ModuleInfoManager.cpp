@@ -261,7 +261,7 @@ bool CModuleInfoManager::LoadGameModuleInfo(CGameItemMap & ModuleInfoBuffer)
 		PlatformDBAide.ResetParameter();
 		PlatformDBAide.AddParameter(TEXT("byMystery"), _MYSTERY);
 		PlatformDBAide.AddParameter(TEXT("IP"), szInernet_ip);
-		//CLog::Log(szInernet_ip, log_debug);
+
 		if (PlatformDBAide.ExecuteProcess(TEXT("GSP_GS_LoadGameGameItem"),true)==DB_SUCCESS)
 		{
 			//清空列表

@@ -30,23 +30,6 @@ BOOL CGameServerApp::InitInstance()
 	return FALSE;
 }
 
-int CGameServerApp::Run()
-{
-	BOOL bRun = TRUE;
-	BOOL bExit=FALSE;
-	while(!bExit)
-	{
-		bRun= CWinApp::Run();
-		bExit=TRUE;
-	}
-	return bRun;
-}
-
-LRESULT CGameServerApp::ProcessWndProcException( CException* e, const MSG* pMsg )
-{
-	THROW_LAST();
-	return 0;
-}
 
 //¿ØÖÆÌ¨
 CConsoleAdapter g_ConsoleAdpter;

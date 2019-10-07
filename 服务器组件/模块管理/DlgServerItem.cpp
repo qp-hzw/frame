@@ -199,7 +199,6 @@ bool CDlgServerItem::UpdateControlStatus()
 bool CDlgServerItem::GetModuleInitParameter(tagGameRoomItem * pGameServerInfo, bool bAutoMode)
 {
 	//效验参数
-	ASSERT(pGameServerInfo!=NULL);
 	if (pGameServerInfo==NULL) return false;
 
 	//游戏模块
@@ -226,8 +225,7 @@ bool CDlgServerItem::GetModuleInitParameter(tagGameRoomItem * pGameServerInfo, b
 	lstrcpyn(m_ModuleInitParameter.GameServiceOption.szServerName,pGameServerInfo->szServerName,LEN_SERVER);
 	//游戏服端口
 	m_ModuleInitParameter.GameServiceOption.wGameServerPort=pGameServerInfo->wGameServerPort;
-	//TODONOW
-	//lstrcpyn(m_ModuleInitParameter.GameServiceOption.szDll,pGameServerInfo->szServerName,LEN_SERVER);
+
 	//游戏服地址
 	lstrcpyn(m_ModuleInitParameter.GameServiceOption.szGameServerAddr,pGameServerInfo->szGameServerAddr,LEN_DB_ADDR);
 
