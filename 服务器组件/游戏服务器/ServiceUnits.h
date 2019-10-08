@@ -1,8 +1,6 @@
 #ifndef SERVICE_UNITS_HEAD_FILE
 #define SERVICE_UNITS_HEAD_FILE
 
-#pragma once
-
 #include "Stdafx.h"
 #include "AttemperEngineSink.h"
 #include "DataBaseEngineSink.h"
@@ -13,21 +11,13 @@
 //网络标示
 #define NETWORK_CORRESPOND			1									//协调连接
 
-//消息定义
-#define WM_UICONTROL_REQUEST		(WM_USER+100)						//控制请求
 
 
 //服务单元
 class CServiceUnits : public CWnd
 {
-	//友元定义
-	friend class CAttemperEngineSink;
-	friend class CDataBaseEngineSink;
-
-
 	//组件配置
 protected:
-	tagGameParameter				m_GameParameter;					//配置参数
 	tagGameServiceAttrib			m_GameServiceAttrib;				//服务属性
 	tagGameServiceOption			m_GameServiceOption;				//服务配置
 
@@ -52,14 +42,9 @@ public:
 public:
 	CTimerEngineHelper				m_TimerEngine;						//时间引擎
 	CAttemperEngineHelper			m_AttemperEngine;					//调度引擎
-	CTCPNetworkEngineHelper			m_TCPNetworkEngine;					//网络引擎
-	CTCPSocketEngineHelper			m_TCPSocketEngine;					//网络服务
-	CGameServiceManagerHelper		m_GameServiceManager;				//游戏模块
-	CGameMatchServiceManagerHelper	m_GameMatchServiceManager;			//比赛管理
-
-	//静态变量
-public:
-	static CServiceUnits *			g_pServiceUnits;					//对象指针
+	CTCPNetworkEngineHelper			m_TCPNetworkEngine;					//socket::server
+	CTCPSocketEngineHelper			m_TCPSocketEngine;					//socket::client -> 目标服务器 协调服
+	CGameServiceManagerHelper		m_GameServiceManager;				//子游戏模块 加载
 
 	//函数定义
 public:
@@ -69,41 +54,28 @@ public:
 	virtual ~CServiceUnits();
 
 
-	//请求控制
-public:
-	//投递请求
-	bool PostControlRequest(WORD wIdentifier, VOID * pData, WORD wDataSize);
-
 	//服务控制
 public:
 	//启动服务
 	bool StartService();
 	//停止服务
 	bool ConcludeService();
-	//游戏配置
-	bool CollocateService(LPCTSTR pszGameModule, tagGameServiceOption & GameServiceOption);
+
+public:
+	//启动socket::server
+	bool StartNetworkService();
 
 	//辅助函数
 protected:
 	//创建模块
-	bool CreateServiceDLL();
+	int CreateServiceDLL();
 	//配置组件
-	bool InitializeService();
+	int InitializeService();
 	//启动内核
-	bool StartKernelService();
-	//启动网络
-	bool StartNetworkService();
-	//调整参数
-	bool RectifyServiceParameter();
+	int StartKernelService();
 
-	//消息映射
-protected:
-	//控制消息
-	LRESULT OnUIControlRequest(WPARAM wParam, LPARAM lParam);
-
-	DECLARE_MESSAGE_MAP()
 };
 
-//////////////////////////////////////////////////////////////////////////////////
+extern   CServiceUnits *			g_pServiceUnits;					//对象指针
 
 #endif

@@ -73,7 +73,6 @@ bool CServiceUnits::StartService()
 {
 	//配置服务
 	int iRet = InitializeService();
-
 	if (iRet != 0)
 	{
 		CLog::Log(log_error, "CServiceUnits::InitializeService %d", iRet);

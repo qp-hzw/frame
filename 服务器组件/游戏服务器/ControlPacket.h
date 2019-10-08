@@ -7,12 +7,6 @@
 #define ER_FAILURE					0									//失败标志
 #define ER_SUCCESS					1									//成功标志
 
-//////////////////////////////////////////////////////////////////////////////////
-//界面数据包
-
-#define UI_CORRESPOND_RESULT		1									//协调结果
-#define UI_SERVICE_CONFIG_RESULT	2									//配置结果
-#define UI_SERVICE_STOP_SERVICE_FINISH		3							//停止服务结果
 
 //////////////////////////////////////////////////////////////////////////////////
 //控制数据包

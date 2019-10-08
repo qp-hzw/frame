@@ -32,7 +32,7 @@ protected:
 	ITimerEngine *					m_pITimerEngine;					//时间引擎
 	IServerUserManager *			m_pIServerUserManager;				//用户管理
 	IGameServiceManager *			m_pIGameServiceManager;				//服务管理
-	ITCPNetworkEngineEvent *		m_pITCPNetworkEngineEvent;			//事件接口
+	//ITCPNetworkEngineEvent *		m_pITCPNetworkEngineEvent;			//事件接口
 
 	//系统配置
 protected:

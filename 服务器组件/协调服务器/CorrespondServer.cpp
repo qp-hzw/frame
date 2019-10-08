@@ -17,10 +17,14 @@ BOOL CCorrespondServerApp::InitInstance()
 	InitCommonControls();
 	AfxEnableControlContainer();
 
-
-	//启动服务
 	CServiceUnits m_ServiceUnits;
 	m_ServiceUnits.StartService();
+
+	//启动服务
+	while(true)
+	{
+		Sleep(100);
+	}
 
 	return FALSE;
 }

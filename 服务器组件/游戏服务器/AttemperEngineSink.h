@@ -1,15 +1,11 @@
 #ifndef ATTEMPER_ENGINE_SINK_HEAD_FILE
 #define ATTEMPER_ENGINE_SINK_HEAD_FILE
 
-#pragma once
-
 #include "Stdafx.h"
 #include "TableFrame.h"
 #include "ServerListManager.h"
 #include "DataBasePacket.h"
 
-
-typedef CWHArray<tagOfflineUser>COfflineUserItemArray;
 
 //绑定参数
 struct tagBindParameter
@@ -61,10 +57,6 @@ protected:
 	tagGameServiceAttrib *			m_pGameServiceAttrib;				//服务属性
 	tagGameServiceOption *			m_pGameServiceOption;				//服务配置
 
-	//配置数据
-protected:
-	//COfflineUserItemArray			m_OfflineUserListManager;			//断线玩家列表
-
 	//组件变量
 protected:
 	CTableFrameArray				m_TableFrameArray;					//桌子数组
@@ -96,9 +88,6 @@ public:
 	SCORE							m_ControlValueForRoom;
 	SCORE							m_ControlValueForRoomOrgi;
 
-	//游戏工期标志
-public:
-	BYTE							m_GameProgress;						//游戏工期
 #pragma endregion
 
 #pragma region 初始化函数
@@ -143,7 +132,7 @@ public:
 	//定时器事件
 	virtual bool OnEventTimer(DWORD dwTimerID, WPARAM wBindParam);
 	//数据库事件
-	virtual bool OnEventDataBase(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize);
+	virtual bool OnEventDataBaseResult(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize);
 #pragma endregion
 
 #pragma region Socket系统函数
@@ -403,9 +392,6 @@ public:
 protected:
 	//配置机器
 	bool InitAndroidUser();
-	
-	//发送请求
-	bool SendUIControlPacket(WORD wRequestID, VOID * pData, WORD wDataSize);
 	//设置参数
 	void SetMobileUserParameter(IServerUserItem * pIServerUserItem,BYTE cbDeviceType,WORD wBehaviorFlags,WORD wPageTableCount);
 	//群发数据
@@ -513,6 +499,8 @@ public:
 #pragma endregion
 
 };
+
+extern CAttemperEngineSink * g_AttemperEngineSink;
 
 //////////////////////////////////////////////////////////////////////////////////
 

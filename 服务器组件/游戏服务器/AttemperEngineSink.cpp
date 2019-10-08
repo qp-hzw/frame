@@ -8,6 +8,8 @@
 
 #include "../../全局定义/Define.h"
 
+CAttemperEngineSink * g_AttemperEngineSink = NULL;
+
 //////////////////////////////////////////////////////////////////////////////////
 //时间标识
 
@@ -75,6 +77,8 @@ CAttemperEngineSink::CAttemperEngineSink()
 
 	//比赛变量
 	m_pIGameMatchServiceManager=NULL;
+
+	if(g_AttemperEngineSink == NULL) g_AttemperEngineSink =this;
 
 	return;
 }
@@ -222,10 +226,7 @@ bool CAttemperEngineSink::OnEventControl(WORD wIdentifier, VOID * pData, WORD wD
 	case CT_LOAD_SERVICE_CONFIG:	//加载配置
 		{
 			//加载机器
-			m_pIDBCorrespondManager->PostDataBaseRequest(0L,DBR_GR_LOAD_ANDROID_USER,0L,NULL,0L);
-
-			//对m_GameProgress 初始化
-			m_GameProgress = 0;
+			//m_pIDBCorrespondManager->PostDataBaseRequest(0L,DBR_GR_LOAD_ANDROID_USER,0L,NULL,0L);
 
 			//加载断线重连数据 && 数据库置空对应的桌子的所有数据
 			STR_DBR_GR_LOAD_OFFLINE  dbr;
@@ -233,10 +234,6 @@ bool CAttemperEngineSink::OnEventControl(WORD wIdentifier, VOID * pData, WORD wD
 			dbr.dwGameID = (m_pGameServiceOption->dwServerID) & 0xFFFFFF00;
 			m_pIDBCorrespondManager->PostDataBaseRequest(0L,DBR_GR_LOAD_OFFLINE,0L,&dbr,sizeof(dbr));
 
-			//事件通知 -- 在UI_SERVICE_CONFIG_RESULT的case函数中已经对ServiceStatus做了处理, 因此这里没有问题
-			CP_ControlResult ControlResult;
-			ControlResult.cbSuccess=ER_SUCCESS;
-			SendUIControlPacket(UI_SERVICE_CONFIG_RESULT,&ControlResult,sizeof(ControlResult));
 			return true;
 		}
 	case CT_TRY_TO_STOP_SERVICE:	//停止服务
@@ -353,7 +350,7 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 }
 
 //数据库事件
-bool CAttemperEngineSink::OnEventDataBase(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize)
+bool CAttemperEngineSink::OnEventDataBaseResult(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
 	switch (wRequestID)
 	{
@@ -599,7 +596,7 @@ bool CAttemperEngineSink::OnEventTCPNetworkShut(DWORD dwClientAddr, DWORD dwActi
 			//是否需要处理断线重连
 			bool bRet = m_TableFrameArray[wTableID]->OnEventUserOffLine(pIServerUserItem);
 
-			if(bRet &&  (m_GameProgress == 3)) //只有3期工程才会有断线重连
+			if(bRet) //只有3期工程才会有断线重连
 			{
 				DWORD dwServerID = (m_pGameServiceOption->dwServerID) &0xFFFFFF00;
 
@@ -1101,7 +1098,7 @@ bool CAttemperEngineSink::On_DBO_GR_LOAD_OFFLINE(DWORD dwContextID, VOID * pData
 	//参数校验
 	if(sizeof(BYTE ) != wDataSize) return false;
 
-	m_GameProgress =  *((BYTE*)pData);
+	//m_GameProgress =  *((BYTE*)pData);
 
 	return true;
 }
@@ -1149,35 +1146,18 @@ bool CAttemperEngineSink::OnTCPSocketMainRegister(WORD wSubCmdID, VOID * pData, 
 	{
 	case CPO_PGPL_REGISTER_SUCESS:		//注册完成
 		{
-			//事件处理
-			CP_ControlResult ControlResult;
-			ControlResult.cbSuccess=ER_SUCCESS;
-			SendUIControlPacket(UI_CORRESPOND_RESULT,&ControlResult,sizeof(ControlResult));
+			//开启socket::server服务
+			if(g_pServiceUnits->StartNetworkService() != 0)
+			{
+				g_pServiceUnits->ConcludeService();
+				return true;
+			}
 
 			return true;
 		}
 	case CPO_PGPL_REGISTER_FAILURE:		//注册失败
 		{
-			//效验参数
-			ASSERT(wDataSize ! = sizeof(STR_CPO_PGPL_REGISTER_FAILURE));
-			if (wDataSize != sizeof(STR_CPO_PGPL_REGISTER_FAILURE)) return false;
-
-			//变量定义
-			STR_CPO_PGPL_REGISTER_FAILURE * pRegisterFailure=(STR_CPO_PGPL_REGISTER_FAILURE *)pData;
-
-			//关闭处理
-			m_bNeekCorrespond=false;
-
-			//显示消息
-			if (lstrlen(pRegisterFailure->szDescribeString)>0)
-			{
-				//CLog::Log(log_error, pRegisterFailure->szDescribeString);
-			}
-
-			//事件通知
-			CP_ControlResult ControlResult;
-			ControlResult.cbSuccess=ER_FAILURE;
-			SendUIControlPacket(UI_CORRESPOND_RESULT,&ControlResult,sizeof(ControlResult));
+			g_pServiceUnits->ConcludeService();
 
 			return true;
 		}
@@ -4350,7 +4330,7 @@ bool CAttemperEngineSink::InitAndroidUser()
 	AndroidUserParameter.pITimerEngine=m_pITimerEngine;
 	AndroidUserParameter.pIServerUserManager=&m_ServerUserManager;
 	AndroidUserParameter.pIGameServiceManager=m_pIGameServiceManager;
-	AndroidUserParameter.pITCPNetworkEngineEvent=QUERY_OBJECT_PTR_INTERFACE(m_pIAttemperEngine,ITCPNetworkEngineEvent);
+	//AndroidUserParameter.pITCPNetworkEngineEvent=QUERY_OBJECT_PTR_INTERFACE(m_pIAttemperEngine,ITCPNetworkEngineEvent);
 
 	//设置对象
 	if (m_AndroidUserManager.InitAndroidUser(AndroidUserParameter)==false)
@@ -4409,40 +4389,9 @@ bool CAttemperEngineSink::InitTableFrameArray()
 			m_pIGameMatchServiceManager->InitTableFrame(QUERY_OBJECT_PTR_INTERFACE((m_TableFrameArray[i]),ITableFrame),i);
 	}
 
-	if(m_pIGameMatchServiceManager!=NULL)
-	{
-		if (m_pIGameMatchServiceManager->InitMatchInterface(QUERY_OBJECT_PTR_INTERFACE(m_pIAttemperEngine,ITCPNetworkEngineEvent),m_pIKernelDataBaseEngine,
-			(IServerUserManager*)QUERY_OBJECT_INTERFACE(m_ServerUserManager,IServerUserManager),this,m_pITimerEngine,&m_AndroidUserManager)==false)
-		{
-			ASSERT(FALSE);
-			return false;
-		}
-		// 		if (m_pIGameMatchServiceManager->InitServerUserManager()==false)
-		// 		{
-		// 			ASSERT(FALSE);
-		// 			return false;
-		// 		}
-		// 
-		// 		if(m_pIGameMatchServiceManager->InitMainServiceFrame(QUERY_ME_INTERFACE(IMainServiceFrame))==false)
-		// 		{
-		// 			ASSERT(FALSE);
-		// 			return false;
-		// 		}
-
-	}
-
 	return true;
 }
 
-//发送请求
-bool CAttemperEngineSink::SendUIControlPacket(WORD wRequestID, VOID * pData, WORD wDataSize)
-{
-	//发送数据
-	CServiceUnits * pServiceUnits=CServiceUnits::g_pServiceUnits;
-	pServiceUnits->PostControlRequest(wRequestID,pData,wDataSize);
-
-	return true;
-}
 
 //插入分配
 bool CAttemperEngineSink::InsertDistribute(IServerUserItem * pIServerUserItem)
@@ -4680,9 +4629,7 @@ void CAttemperEngineSink::SendServiceStopped()
 {
 	m_pITimerEngine->KillTimer(IDI_WAIT_SERVICE_STOP);
 
-	CP_ControlResult ControlResult;
-	ControlResult.cbSuccess = ER_SUCCESS;
-	SendUIControlPacket(UI_SERVICE_STOP_SERVICE_FINISH, &ControlResult, sizeof(ControlResult));
+	g_pServiceUnits->ConcludeService();
 }
 
 

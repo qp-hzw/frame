@@ -108,9 +108,6 @@ public:
 
 	//辅助函数
 protected:
-	//发送请求
-	bool SendUIControlPacket(WORD wRequestID, VOID * pData, WORD wDataSize);
-
 	//TODONOW added by WangChengQing
 	//判断玩家状态, 并通知协调服  -- 1大厅在线 ，2正在游戏，3游戏断线，4离线
 	void CheckUserState_Logon(DWORD dwUserID, bool bIsExist);

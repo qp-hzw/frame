@@ -20,10 +20,6 @@
 //服务单元
 class CServiceUnits : public CWnd
 {
-	//友元定义
-	friend class CAttemperEngineSink;
-	friend class CDataBaseEngineSink;
-
 	//组件变量
 private:
 	CWHDataQueue					m_DataQueue;						//数据队列
@@ -36,11 +32,11 @@ protected:
 
 	//内核组件
 protected:
-	CTimerEngineHelper				m_TimerEngine;						//时间引擎
+	CTimerEngineHelper				m_TimerEngine;						//定时器
 	CAttemperEngineHelper			m_AttemperEngine;					//调度引擎
-	CDataBaseEngineHelper			m_DataBaseEngine;					//数据引擎
-	CTCPNetworkEngineHelper			m_TCPNetworkEngine;					//网络引擎
-	CTCPSocketEngineHelper			m_TCPSocketEngine;					//协调服务 -- 目标服务器为 协调服
+	CDataBaseEngineHelper			m_DataBaseEngine;					//DB
+	CTCPNetworkEngineHelper			m_TCPNetworkEngine;					//socket::server
+	CTCPSocketEngineHelper			m_TCPSocketEngine;					//socker::client -- 目标服务器为 协调服
 
 	//函数定义
 public:
@@ -56,16 +52,16 @@ public:
 	//停止服务
 	bool ConcludeService();
 
+public:
+	//启动socket::server 
+	int StartNetworkService();
+
 	//辅助函数
 protected:
 	//配置组件
 	int InitializeService();
 	//启动内核
 	int StartKernelService();
-	//启动网络 -- 协调服 返回成功才会启动
-	int StartNetworkService();
-
-	//DECLARE_MESSAGE_MAP()
 };
 
 extern CServiceUnits *			g_pServiceUnits;					//对象指针

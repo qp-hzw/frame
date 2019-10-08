@@ -181,7 +181,6 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
   <ItemGroup>
     <ClCompile Include="AttemperEngineSink.cpp" />
     <ClCompile Include="DataBaseEngineSink.cpp" />
-    <ClCompile Include="DlgLogon.cpp" />
     <ClCompile Include="LogonServer.cpp" />
     <ClCompile Include="RankManager.cpp" />
     <ClCompile Include="ServerListManager.cpp" />
@@ -189,27 +188,16 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\消息定义\CMD_LogonServer.h" />
-    <ClInclude Include="..\..\消息定义\STR_CMD_LogonServer.h" />
+    <ClInclude Include="..\..\消息定义\CMD_STR_LogonServer.h" />
     <ClInclude Include="AttemperEngineSink.h" />
     <ClInclude Include="ControlPacket.h" />
     <ClInclude Include="DataBaseEngineSink.h" />
     <ClInclude Include="DataBasePacket.h" />
-    <ClInclude Include="DlgLogon.h" />
     <ClInclude Include="LogonServer.h" />
     <ClInclude Include="RankManager.h" />
-    <ClInclude Include="Resource.h" />
     <ClInclude Include="ServerListManager.h" />
     <ClInclude Include="ServiceUnits.h" />
     <ClInclude Include="Stdafx.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="res\LogonServer.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="LogonServer.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="res\LogonServer.rc2" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

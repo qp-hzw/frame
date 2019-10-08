@@ -1,6 +1,6 @@
 #include "Stdafx.h"
 #include "LogonServer.h"
-#include "DlgLogon.h"
+#include "ServiceUnits.h"
 
 //程序对象
 CLogonServerApp theApp;
@@ -19,9 +19,14 @@ BOOL CLogonServerApp::InitInstance()
 	AfxEnableControlContainer();
 
 	//显示窗口
-	DlgLogon LogonServerDlg;
-	m_pMainWnd=&LogonServerDlg;
-	LogonServerDlg.DoModal();
+	CServiceUnits	m_ServiceUnits;	
+	m_ServiceUnits.StartService();
+
+	while(true)
+	{
+		Sleep(100);
+	}
+
 
 	return FALSE;
 }

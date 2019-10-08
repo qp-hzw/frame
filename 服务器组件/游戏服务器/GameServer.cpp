@@ -1,6 +1,6 @@
 #include "Stdafx.h"
 #include "GameServer.h"
-#include "DlgGameServer.h"
+#include "ServiceUnits.h"
 //////////////////////////////////////////////////////////////////////////////////
 
 //程序对象
@@ -21,11 +21,14 @@ BOOL CGameServerApp::InitInstance()
 	InitCommonControls();
 	AfxEnableControlContainer();
 
+	CServiceUnits m_ServiceUnits;
+	m_ServiceUnits.StartService();
 
-	//显示窗口
-	CGameServerDlg GameServerDlg;
-	m_pMainWnd=&GameServerDlg;
-	GameServerDlg.DoModal();
+	//启动服务
+	while(true)
+	{
+		Sleep(100);
+	}
 
 	return FALSE;
 }

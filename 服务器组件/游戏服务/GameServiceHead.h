@@ -255,7 +255,7 @@ struct tagAndroidUserParameter
 	ITimerEngine *					pITimerEngine;						//时间引擎
 	IServerUserManager *			pIServerUserManager;				//用户管理
 	IGameServiceManager *			pIGameServiceManager;				//服务管理
-	ITCPNetworkEngineEvent *		pITCPNetworkEngineEvent;			//事件接口
+	//ITCPNetworkEngineEvent *		pITCPNetworkEngineEvent;			//事件接口
 };
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -1359,8 +1359,8 @@ public:
 	//管理接口
 public:
 	//初始化接口
-	virtual bool  InitMatchInterface(ITCPNetworkEngineEvent *pTCPNetworkEngine,IDataBaseEngine *pIDataBaseEngine, IServerUserManager *pIServerUserManager,
-					IMainServiceFrame *pIMainServiceFrame,ITimerEngine *pITimerEngine,IAndroidUserManager *pAndroidUserManager)=NULL;
+	//virtual bool  InitMatchInterface(ITCPNetworkEngineEvent *pTCPNetworkEngine,IDataBaseEngine *pIDataBaseEngine, IServerUserManager *pIServerUserManager,
+	//				IMainServiceFrame *pIMainServiceFrame,ITimerEngine *pITimerEngine,IAndroidUserManager *pAndroidUserManager)=NULL;
 	//初始化桌子框架
 	virtual bool  InitTableFrame(ITableFrame * pTableFrame,WORD wChairID)=NULL;
 	

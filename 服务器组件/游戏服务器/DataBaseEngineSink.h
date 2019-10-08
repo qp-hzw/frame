@@ -39,7 +39,6 @@ protected:
 protected:
 	IDataBaseEngine *				m_pIDataBaseEngine;					//引擎接口
 	IGameServiceManager *			m_pIGameServiceManager;				//服务管理
-	IDataBaseEngineEvent *			g_AttemperEngineSink;			//数据事件
 
 	//查询接口
 protected:

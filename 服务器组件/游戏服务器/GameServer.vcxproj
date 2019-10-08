@@ -188,13 +188,9 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClCompile Include="AttemperEngineSink.cpp" />
     <ClCompile Include="DataBaseEngineSink.cpp" />
     <ClCompile Include="DBCorrespondManager.cpp" />
-    <ClCompile Include="DistributeManager.cpp" />
     <ClCompile Include="GameServer.cpp" />
-    <ClCompile Include="DlgGameServer.cpp" />
-    <ClCompile Include="SensitiveWordsFilter.cpp" />
     <ClCompile Include="ServerListManager.cpp" />
     <ClCompile Include="ServiceUnits.cpp" />
-    <ClCompile Include="StockManager.cpp" />
     <ClCompile Include="TableFrame.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -206,21 +202,10 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClInclude Include="DataBasePacket.h" />
     <ClInclude Include="DBCorrespondManager.h" />
     <ClInclude Include="GameServer.h" />
-    <ClInclude Include="DlgGameServer.h" />
-    <ClInclude Include="Resource.h" />
     <ClInclude Include="ServerListManager.h" />
     <ClInclude Include="ServiceUnits.h" />
     <ClInclude Include="Stdafx.h" />
     <ClInclude Include="TableFrame.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="res\GameServer.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="GameServer.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="res\GameServer.rc2" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

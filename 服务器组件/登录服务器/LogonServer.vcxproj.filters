@@ -19,9 +19,6 @@
     <ClCompile Include="ServerListManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="DlgLogon.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AttemperEngineSink.h">
@@ -39,9 +36,6 @@
     <ClInclude Include="RankManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Resource.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="ServiceUnits.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -57,11 +51,8 @@
     <ClInclude Include="DataBasePacket.h">
       <Filter>消息定义</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\消息定义\STR_CMD_LogonServer.h">
+    <ClInclude Include="..\..\消息定义\CMD_STR_LogonServer.h">
       <Filter>消息定义</Filter>
-    </ClInclude>
-    <ClInclude Include="DlgLogon.h">
-      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -71,26 +62,8 @@
     <Filter Include="源文件">
       <UniqueIdentifier>{42c9da90-7db1-4885-ab57-23ae171710a9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="资源文件">
-      <UniqueIdentifier>{0c56d812-cd37-4407-895e-1c0bea064e32}</UniqueIdentifier>
-    </Filter>
     <Filter Include="消息定义">
       <UniqueIdentifier>{2148df07-7ca7-4399-8910-cbfc01154b75}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="res\LogonServer.ico">
-      <Filter>资源文件</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="LogonServer.rc">
-      <Filter>资源文件</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="res\LogonServer.rc2">
-      <Filter>资源文件</Filter>
-    </None>
   </ItemGroup>
 </Project>
