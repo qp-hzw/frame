@@ -31,11 +31,11 @@ protected:
 	CDataBaseEngineSink				m_DataBaseEngineSink;			    //DB钩子
 
 	//内核组件
-protected:
-	CTimerEngineHelper				m_TimerEngine;						//定时器
-	CAttemperEngineHelper			m_AttemperEngine;					//调度引擎
-	CTCPNetworkEngineHelper			m_TCPNetworkEngine;					//socket::server
-	CTCPSocketEngineHelper			m_TCPSocketEngine;					//socker::client -- 目标服务器为 协调服
+public:
+	IAttemperEngine			       *m_AttemperEngine;					//调度引擎
+	ITCPNetworkEngine			   *m_TCPNetworkEngine;				    //socket::server
+	ITCPSocketEngine			   *m_TCPSocketEngine;					//socker::client -- 目标服务器为 协调服
+	ITimerEngine				   *m_TimerEngine;						//定时器
 
 	//函数定义
 public:

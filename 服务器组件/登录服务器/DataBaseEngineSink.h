@@ -17,15 +17,9 @@ class CDataBaseEngineSink : public IDataBaseEngineSink
 
 	//用户数据库
 protected:
-	CDataBaseHelper					m_AccountsDBModule;					//用户数据库
-
-	//游戏币数据库
-protected:
-	CDataBaseHelper					m_TreasureDBModule;					//游戏币数据库
-
-	//平台数据库
-protected:
-	CDataBaseHelper					m_PlatformDBModule;					//平台数据库
+	IDataBase					*m_AccountsDBModule;					//用户数据库
+	IDataBase					*m_TreasureDBModule;					//游戏币数据库
+	IDataBase					*m_PlatformDBModule;					//平台数据库
 
 	//函数定义
 public:

@@ -52,7 +52,6 @@
 //模板文件
 #include "../../../../share/依赖项/全局定义/Array.h"
 #include "../../../../share/依赖项/全局定义/Module.h"
-//#include "../../../../share/依赖项/全局定义/PacketAide.h"
 #include "../../全局定义/ServerRule.h"
 #include "../../全局定义/RightDefine.h"
 
@@ -68,14 +67,18 @@
 #include "..\..\消息定义\CMD_GameServer.h"
 
 //组件定义
+#include "../../../../share\依赖项\全局定义\Struct.h"
+
 #include "../../../../share\依赖项\服务核心\ServiceCoreHead.h"
 #include "../../../../share\依赖项\服务核心\WHIniData.h"
 #include "../../../../share\依赖项\服务核心\WHDataLocker.h"
 #include "../../../../share\依赖项\服务核心\WHDataQueue.h"
 #include "../../../../share\依赖项\服务核心\WHService.h"
+#include "../../../../share\依赖项\服务核心\WHModule.h"
+#include "../../../../share\依赖项\服务核心\log.h"
 
 #include "../../../../share\依赖项\内核引擎\KernelEngineHead.h"
-#include "../../../../share\依赖项\内核引擎\log.h"
+
 
 //////////////////////////////////////////////////////////////////////////////////
 //链接代码

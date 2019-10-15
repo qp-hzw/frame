@@ -1,8 +1,9 @@
 #include "stdafx.h"
 #include "RankManager.h"
 #include "DataBasePacket.h"
+#include "ServiceUnits.h"
 
-RankManager::RankManager(IDataBaseEngine* pIDataBaseEngine)
+RankManager::RankManager()
 {
 	m_vecArry[0] = &vecTodayWast;
 	m_vecArry[1] = &vecYseterdatWast;
@@ -29,9 +30,6 @@ RankManager::RankManager(IDataBaseEngine* pIDataBaseEngine)
 		}
 		m_bRecived[i] = false;
 	}
-	//获得数据库引擎
-	m_pIDataBaseEngine = pIDataBaseEngine;
-
 	//初始化
 	Init();
 }
@@ -65,10 +63,7 @@ RankManager::~RankManager(void)
 
 void RankManager::Init()
 {
-	if(NULL != m_pIDataBaseEngine)
-	{
-		m_pIDataBaseEngine->PostDataBaseRequest(DBR_GP_READ_RANK_LIST,0,this,sizeof(RankManager));
-	}
+	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_GP_READ_RANK_LIST,0,this,sizeof(RankManager));
 }
 
 
@@ -200,36 +195,36 @@ void RankManager::AddRankCount(DWORD dwUserID, DWORD dwCount,TCHAR* szNickName, 
 	
 
 	//写入数据库
-	if(NULL != m_pIDataBaseEngine)
-		m_pIDataBaseEngine->PostDataBaseRequest(DBR_GP_UPDATE_RANK_VALUE,0,&dbrRankItem,sizeof(DBR_GP_UserRankItem));
+	if(NULL != g_pServiceUnits->m_AttemperEngine)
+		g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_GP_UPDATE_RANK_VALUE,0,&dbrRankItem,sizeof(DBR_GP_UserRankItem));
 }
 
 
-void RankManager::InitRankList(CDataBaseAide &DataBaseAide, CDataBaseHelper &DataBaseHelper)
+void RankManager::InitRankList(IDataBase *pDataBase)
 {
 	DWORD dwCount[RANK_COUNT];
-	for(int i = 0;i < DataBaseHelper->GetRecordCount();i++,DataBaseHelper->MoveToNext())
+	for(int i = 0;i < pDataBase->GetRecordCount();i++,pDataBase->MoveToNext())
 	{
 		memset(dwCount,0,sizeof(dwCount));
 
-		DWORD UserID = DataBaseAide.GetValue_DWORD(TEXT("UserID"));
-		dwCount[0] = DataBaseAide.GetValue_DWORD(TEXT("ToDayWast"));
-		dwCount[1] = DataBaseAide.GetValue_DWORD(TEXT("YesterdayWast"));
-		dwCount[2] = DataBaseAide.GetValue_DWORD(TEXT("WeekWast"));
-		dwCount[3] = DataBaseAide.GetValue_DWORD(TEXT("MonthWast"));
-		dwCount[4] = DataBaseAide.GetValue_DWORD(TEXT("ToDayWin"));
-		dwCount[5] = DataBaseAide.GetValue_DWORD(TEXT("YesterdayWin"));
-		dwCount[6] = DataBaseAide.GetValue_DWORD(TEXT("WeekWin"));
-		dwCount[7] = DataBaseAide.GetValue_DWORD(TEXT("MonthWin"));
-		dwCount[8] = DataBaseAide.GetValue_DWORD(TEXT("Recharge"));
-		dwCount[9] = DataBaseAide.GetValue_DWORD(TEXT("PlayGoldJuCount"));
-		dwCount[10] = DataBaseAide.GetValue_DWORD(TEXT("PlayJjcCount"));
-		dwCount[11] = DataBaseAide.GetValue_DWORD(TEXT("PlayFkCount"));
+		DWORD UserID = pDataBase->GetValue_DWORD(TEXT("UserID"));
+		dwCount[0] = pDataBase->GetValue_DWORD(TEXT("ToDayWast"));
+		dwCount[1] = pDataBase->GetValue_DWORD(TEXT("YesterdayWast"));
+		dwCount[2] = pDataBase->GetValue_DWORD(TEXT("WeekWast"));
+		dwCount[3] = pDataBase->GetValue_DWORD(TEXT("MonthWast"));
+		dwCount[4] = pDataBase->GetValue_DWORD(TEXT("ToDayWin"));
+		dwCount[5] = pDataBase->GetValue_DWORD(TEXT("YesterdayWin"));
+		dwCount[6] = pDataBase->GetValue_DWORD(TEXT("WeekWin"));
+		dwCount[7] = pDataBase->GetValue_DWORD(TEXT("MonthWin"));
+		dwCount[8] = pDataBase->GetValue_DWORD(TEXT("Recharge"));
+		dwCount[9] = pDataBase->GetValue_DWORD(TEXT("PlayGoldJuCount"));
+		dwCount[10] = pDataBase->GetValue_DWORD(TEXT("PlayJjcCount"));
+		dwCount[11] = pDataBase->GetValue_DWORD(TEXT("PlayFkCount"));
 
 		TCHAR szNickName[LEN_NICKNAME];
 		TCHAR szHeadUrl[256];
-		DataBaseAide.GetValue_String(TEXT("NickName"),szNickName,CountArray(szNickName));
-		DataBaseAide.GetValue_String(TEXT("HeadUrl"),szHeadUrl,CountArray(szHeadUrl));
+		pDataBase->GetValue_String(TEXT("NickName"),szNickName,CountArray(szNickName));
+		pDataBase->GetValue_String(TEXT("HeadUrl"),szHeadUrl,CountArray(szHeadUrl));
 
 		for(int j=0;j < RANK_COUNT;j++)
 		{
@@ -369,7 +364,7 @@ int RankManager::GetRankReward(int index, DWORD dwUserID, TCHAR szDescribe[], DW
 			RecRankReward.dwUserID = dwUserID;
 
 			//投递请求
-			if(true == m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_SERVICE_GET_RANK_REWARD,dwSocketID,&RecRankReward,sizeof(STR_DBR_CL_SERCIVR_GET_RANK_REWARD)))
+			if(true == g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_GET_RANK_REWARD,dwSocketID,&RecRankReward,sizeof(STR_DBR_CL_SERCIVR_GET_RANK_REWARD)))
 			{
 				m_bRecived[i] = true;
 				UnLock();

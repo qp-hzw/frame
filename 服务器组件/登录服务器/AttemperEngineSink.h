@@ -43,11 +43,9 @@ protected:
 	MarqueeMsgArray					m_MarqueeMsgListManager;			//跑马灯消息列表
 
 
-
 	//组件接口
 protected:
 	ITimerEngine *					m_pITimerEngine;					//时间引擎		//定时器通信
-	IDataBaseEngine *				m_pIDataBaseEngine;					//数据引擎		//数据库与登陆服通信
 	ITCPNetworkEngine *				m_pITCPNetworkEngine;				//网络引擎		//socket::server
 	ITCPSocketEngine *				m_pITCPSocketEngine;				//协调服务		//socket::client
 

@@ -14,7 +14,7 @@
 class RankManager
 {
 public:
-	RankManager(IDataBaseEngine* pIDataBaseEngine);
+	RankManager();
 	~RankManager(void);
 
 	void Init();
@@ -41,8 +41,6 @@ protected:
 	RANK_VEC*	m_vecArry[RANK_COUNT];						//列表指针数组
 
 	HANDLE		m_ArrayMutex;			//m_vecArry使用互斥量
-
-	IDataBaseEngine* m_pIDataBaseEngine;				//数据库引擎
 
 public:
 	//增加今日消耗
@@ -77,7 +75,7 @@ public:
 	
 public:
 	//从数据库获取排行榜列表
-	void InitRankList(CDataBaseAide &DataBaseAide, CDataBaseHelper &DataBaseHelper);
+	void InitRankList(IDataBase *DataBase);
 	//排序
 	void SortRankList();
 	//单个列表排序

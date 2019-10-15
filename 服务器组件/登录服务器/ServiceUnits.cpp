@@ -33,13 +33,17 @@ int CServiceUnits::InitializeService()
 
 	/***************************************************  各服务关联配置 *************************************************/
 	//创建组件
-	if ((m_TimerEngine.GetInterface()==NULL)&&(m_TimerEngine.CreateInstance()==false)) return 1;
-	if ((m_AttemperEngine.GetInterface()==NULL)&&(m_AttemperEngine.CreateInstance()==false)) return 2;
-	if ((m_TCPNetworkEngine.GetInterface()==NULL)&&(m_TCPNetworkEngine.CreateInstance()==false)) return 4;
-	if ((m_TCPSocketEngine.GetInterface()==NULL)&&(m_TCPSocketEngine.CreateInstance()==false)) return 5;
+	m_AttemperEngine = static_cast<IAttemperEngine*>(CWHModule::AttemperEngine());
+	m_TCPNetworkEngine = static_cast<ITCPNetworkEngine*>(CWHModule::TCPNetworkEngine());
+	m_TCPSocketEngine = static_cast<ITCPSocketEngine*>(CWHModule::TCPSocketEngine());
+	m_TimerEngine = static_cast<ITimerEngine*>(CWHModule::TimerEngine());
+
+	if(m_AttemperEngine == NULL) return 1;
+	if(m_TCPNetworkEngine == NULL) return 2;
+	if(m_TCPSocketEngine == NULL) return 3;
+	if(m_TimerEngine == NULL) return 4;
 
 	//组件接口
-	IUnknownEx * pIAttemperEngine=m_AttemperEngine.GetInterface();
 	IUnknownEx * pIAttemperEngineSink=QUERY_OBJECT_INTERFACE(m_AttemperEngineSink,IUnknownEx);
 	IUnknownEx * pIDataBaseEngineSink=QUERY_OBJECT_INTERFACE(m_DataBaseEngineSink,IUnknownEx);
 
@@ -50,9 +54,9 @@ int CServiceUnits::InitializeService()
 	if (m_AttemperEngine->SetDataBaseEngineSink(pIDataBaseEngineSink)==false) return 7;
 
 	//AttemperEngine
-	m_AttemperEngineSink.m_pITimerEngine=m_TimerEngine.GetInterface();
-	m_AttemperEngineSink.m_pITCPNetworkEngine=m_TCPNetworkEngine.GetInterface();
-	m_AttemperEngineSink.m_pITCPSocketEngine=m_TCPSocketEngine.GetInterface();
+	m_AttemperEngineSink.m_pITimerEngine=m_TimerEngine;
+	m_AttemperEngineSink.m_pITCPNetworkEngine=m_TCPNetworkEngine;
+	m_AttemperEngineSink.m_pITCPSocketEngine=m_TCPSocketEngine;
 
 	/***************************************************  服务配置信息 *************************************************/
 	//协调服务（协调服务器）
@@ -87,10 +91,10 @@ bool CServiceUnits::StartService()
 	}
 
 	//连接协调
-	if (m_TCPSocketEngine.GetInterface()!=NULL)
+	if (m_TCPSocketEngine!=NULL)
 	{
 		CLog::Log(log_error, "[socket::client] connect to center");
-		m_TCPSocketEngine.GetInterface()->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
+		m_TCPSocketEngine->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
 	}
 	
 	return true;
@@ -100,10 +104,10 @@ bool CServiceUnits::StartService()
 bool CServiceUnits::ConcludeService()
 {
 	//停止服务
-	if (m_TimerEngine.GetInterface()!=NULL) m_TimerEngine->ConcludeService();
-	if (m_AttemperEngine.GetInterface()!=NULL) m_AttemperEngine->ConcludeService();
-	if (m_TCPNetworkEngine.GetInterface()!=NULL) m_TCPNetworkEngine->ConcludeService();
-	if (m_TCPSocketEngine.GetInterface()!=NULL) m_TCPSocketEngine->ConcludeService();
+	if (m_TimerEngine!=NULL) m_TimerEngine->ConcludeService();
+	if (m_AttemperEngine!=NULL) m_AttemperEngine->ConcludeService();
+	if (m_TCPNetworkEngine!=NULL) m_TCPNetworkEngine->ConcludeService();
+	if (m_TCPSocketEngine!=NULL) m_TCPSocketEngine->ConcludeService();
 	
 	return true;
 }
