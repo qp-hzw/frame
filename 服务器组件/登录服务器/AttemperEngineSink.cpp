@@ -12,36 +12,36 @@ using namespace std;
 
 CAttemperEngineSink* g_AttemperEngineSink = NULL;
 //////////////////////////////////////////////////////////////////////////////////
-# pragma region ¶¨Ê±Æ÷
-//Ê±¼ä±êÊ¶
-#define  IDI_LOAD_GAME_LIST			1									//¼ÓÔØÁĞ±í
-#define  IDI_CONNECT_CORRESPOND		2									//ÖØÁ¬±êÊ¶
-#define  IDI_COLLECT_ONLINE_INFO	3									//Í³¼ÆÔÚÏßÈËÊı -- Ğ´Èëµ½Êı¾İ¿â
-#define  IDI_UPDATA_ONLINE_COUNT	5									//¸üĞÂÔÚÏßÈËÊı -- ·¢ËÍ¸ø¿Í»§¶Ë
-#define  IDI_UPDATA_MARQUEE			6									//¼ÓÔØÅÜÂíµÆÏûÏ¢
-#define	 IDI_PLAY_MARQUEE			7									//Í¨Öªclient¹ö¶¯ÅÜÂíµÆÏûÏ¢
+# pragma region å®šæ—¶å™¨
+//æ—¶é—´æ ‡è¯†
+#define  IDI_LOAD_GAME_LIST			1									//åŠ è½½åˆ—è¡¨
+#define  IDI_CONNECT_CORRESPOND		2									//é‡è¿æ ‡è¯†
+#define  IDI_COLLECT_ONLINE_INFO	3									//ç»Ÿè®¡åœ¨çº¿äººæ•° -- å†™å…¥åˆ°æ•°æ®åº“
+#define  IDI_UPDATA_ONLINE_COUNT	5									//æ›´æ–°åœ¨çº¿äººæ•° -- å‘é€ç»™å®¢æˆ·ç«¯
+#define  IDI_UPDATA_MARQUEE			6									//åŠ è½½è·‘é©¬ç¯æ¶ˆæ¯
+#define	 IDI_PLAY_MARQUEE			7									//é€šçŸ¥clientæ»šåŠ¨è·‘é©¬ç¯æ¶ˆæ¯
 
-#define  TIME_COLLECT_ONLINE_INFO   1800L								//Í³¼ÆÔÚÏßÈËÊı -- Ğ´Èëµ½Êı¾İ¿â
-#define  TIME_UPDATA_ONLINE_COUNT   30L									//¸üĞÂÔÚÏßÈËÊı -- ·¢ËÍ¸ø¿Í»§¶Ë
-#define  TIME_UPDATA_MARQUEE	    6L									//¼ÓÔØÅÜÂíµÆÏûÏ¢
-#define	 TIME_CONNECT_CORRESPOND	30*1000L							//Á¬½ÓÊ±¼ä
-#define  TIME_RELOAD_LIST			6									//¼ÓÔØÁĞ±í
-#define  TIME_LOAD_LIST				120									//¼ÓÔØÁĞ±í
-#define  TIME_CONNECT				30									//ÖØÁ¬Ê±¼ä
+#define  TIME_COLLECT_ONLINE_INFO   1800L								//ç»Ÿè®¡åœ¨çº¿äººæ•° -- å†™å…¥åˆ°æ•°æ®åº“
+#define  TIME_UPDATA_ONLINE_COUNT   30L									//æ›´æ–°åœ¨çº¿äººæ•° -- å‘é€ç»™å®¢æˆ·ç«¯
+#define  TIME_UPDATA_MARQUEE	    6L									//åŠ è½½è·‘é©¬ç¯æ¶ˆæ¯
+#define	 TIME_CONNECT_CORRESPOND	30*1000L							//è¿æ¥æ—¶é—´
+#define  TIME_RELOAD_LIST			6									//åŠ è½½åˆ—è¡¨
+#define  TIME_LOAD_LIST				120									//åŠ è½½åˆ—è¡¨
+#define  TIME_CONNECT				30									//é‡è¿æ—¶é—´
 
 #pragma endregion
 
-#pragma region ÊÂ¼ş½Ó¿Ú
-//¹¹Ôìº¯Êı
+#pragma region äº‹ä»¶æ¥å£
+//æ„é€ å‡½æ•°
 CAttemperEngineSink::CAttemperEngineSink()
 {
-	//×´Ì¬±äÁ¿
+	//çŠ¶æ€å˜é‡
 	m_bShowServerStatus=false;
 
-	//×´Ì¬±äÁ¿
+	//çŠ¶æ€å˜é‡
 	m_pBindParameter=NULL;
 
-	//×é¼ş±äÁ¿
+	//ç»„ä»¶å˜é‡
 	m_pITimerEngine=NULL;
 	m_pIDataBaseEngine=NULL;
 	m_pITCPNetworkEngine=NULL;
@@ -55,12 +55,12 @@ CAttemperEngineSink::CAttemperEngineSink()
 	return;
 }
 
-//Îö¹¹º¯Êı
+//ææ„å‡½æ•°
 CAttemperEngineSink::~CAttemperEngineSink()
 {
 }
 
-//½Ó¿Ú²éÑ¯
+//æ¥å£æŸ¥è¯¢
 VOID * CAttemperEngineSink::QueryInterface(REFGUID Guid, DWORD dwQueryVer)
 {
 	QUERYINTERFACE(IAttemperEngineSink,Guid,dwQueryVer);
@@ -68,21 +68,21 @@ VOID * CAttemperEngineSink::QueryInterface(REFGUID Guid, DWORD dwQueryVer)
 	return NULL;
 }
 
-//Æô¶¯ÊÂ¼ş
+//å¯åŠ¨äº‹ä»¶
 bool CAttemperEngineSink::OnAttemperEngineStart(IUnknownEx * pIUnknownEx)
 {
-	//°ó¶¨²ÎÊı
+	//ç»‘å®šå‚æ•°
 	m_pBindParameter=new tagBindParameter[MAX_CONTENT];
 	ZeroMemory(m_pBindParameter,sizeof(tagBindParameter)*MAX_CONTENT);
 
-	//¸üĞÂÔÚÏßÈËÊı -- Í¨Öªdatabase
+	//æ›´æ–°åœ¨çº¿äººæ•° -- é€šçŸ¥database
 	//m_pITimerEngine->SetTimer(IDI_COLLECT_ONLINE_INFO, TIME_COLLECT_ONLINE_INFO*1000L,TIMES_INFINITY,0);
-	//¸üĞÂÔÚÏßÈËÊı -- Í¨Öªclient
+	//æ›´æ–°åœ¨çº¿äººæ•° -- é€šçŸ¥client
 	//m_pITimerEngine->SetTimer(IDI_UPDATA_ONLINE_COUNT,TIME_UPDATA_ONLINE_COUNT*1000L,TIMES_INFINITY, 0);
-	//¼ÓÔØÅÜÂíµÆÏûÏ¢
+	//åŠ è½½è·‘é©¬ç¯æ¶ˆæ¯
 	//m_pITimerEngine->SetTimer(IDI_UPDATA_MARQUEE,TIME_UPDATA_MARQUEE*1000L,1, 0);
 
-	//»ñÈ¡Ä¿Â¼
+	//è·å–ç›®å½•
 	TCHAR szPath[MAX_PATH]=TEXT("");
 	CString szFileName;
 	GetModuleFileName(AfxGetInstanceHandle(),szPath,sizeof(szPath));
@@ -91,29 +91,29 @@ bool CAttemperEngineSink::OnAttemperEngineStart(IUnknownEx * pIUnknownEx)
 	szFileName = szFileName.Left(nIndex);
 	szFileName += TEXT("\\PlazaOptionConfig.ini");
 
-	//¶ÁÈ¡ÅäÖÃ
+	//è¯»å–é…ç½®
 	m_bShowServerStatus = (GetPrivateProfileInt(TEXT("ServerStatus"),TEXT("ShowServerStatus"),0,szFileName) != 0);
 
-	//»ñÈ¡Ä¿Â¼
+	//è·å–ç›®å½•
 	TCHAR szServerAddr[LEN_SERVER]=TEXT("");
 	GetCurrentDirectory(sizeof(szPath),szPath);
 
 	return true;
 }
 
-//Í£Ö¹ÊÂ¼ş
+//åœæ­¢äº‹ä»¶
 bool CAttemperEngineSink::OnAttemperEngineConclude(IUnknownEx * pIUnknownEx)
 {
-	//×é¼ş±äÁ¿
+	//ç»„ä»¶å˜é‡
 	m_pITimerEngine=NULL;
 	m_pIDataBaseEngine=NULL;
 	m_pITCPNetworkEngine=NULL;
 	m_pITCPSocketEngine=NULL;
 
-	//É¾³ıÊı¾İ
+	//åˆ é™¤æ•°æ®
 	SafeDeleteArray(m_pBindParameter);
 
-	//ÁĞ±í×é¼ş
+	//åˆ—è¡¨ç»„ä»¶
 	m_ServerListManager.ResetServerList();
 
 	if(m_pRankManager != NULL)
@@ -125,7 +125,7 @@ bool CAttemperEngineSink::OnAttemperEngineConclude(IUnknownEx * pIUnknownEx)
 	return true;
 }
 
-//¿ØÖÆÊÂ¼ş
+//æ§åˆ¶äº‹ä»¶
 bool CAttemperEngineSink::OnEventControl(WORD wIdentifier, VOID * pData, WORD wDataSize)
 {
 	switch (wIdentifier)
@@ -135,39 +135,39 @@ bool CAttemperEngineSink::OnEventControl(WORD wIdentifier, VOID * pData, WORD wD
 	return false;
 }
 
-//Ê±¼äÊÂ¼ş
+//æ—¶é—´äº‹ä»¶
 bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 {
 	switch (dwTimerID)
 	{
-	case IDI_LOAD_GAME_LIST:		//¼ÓÔØÁĞ±í
+	case IDI_LOAD_GAME_LIST:		//åŠ è½½åˆ—è¡¨
 		{
 			m_pITimerEngine->KillTimer(IDI_LOAD_GAME_LIST);
-			//¼ÓÔØÁĞ±í
+			//åŠ è½½åˆ—è¡¨
 			m_ServerListManager.DisuseKernelItem();
 			m_pIDataBaseEngine->PostDataBaseRequest(DBR_GP_LOAD_GAME_LIST,0,NULL,0);
 
 			return true;
 		}
-	case IDI_CONNECT_CORRESPOND:	//Á¬½ÓĞ­µ÷
+	case IDI_CONNECT_CORRESPOND:	//è¿æ¥åè°ƒ
 		{
 			m_pITimerEngine->KillTimer(IDI_CONNECT_CORRESPOND);
-			//·¢ÆğÁ¬½Ó
+			//å‘èµ·è¿æ¥
 			m_pITCPSocketEngine->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
 
 			return true;
 		}
 		/*
-	case IDI_COLLECT_ONLINE_INFO:		//Í³¼ÆÔÚÏß -- ·¢¸øÊı¾İ¿â
+	case IDI_COLLECT_ONLINE_INFO:		//ç»Ÿè®¡åœ¨çº¿ -- å‘ç»™æ•°æ®åº“
 		{
-			//±äÁ¿¶¨Òå
+			//å˜é‡å®šä¹‰
 			DBR_GP_OnLineCountInfo OnLineCountInfo;
 			ZeroMemory(&OnLineCountInfo,sizeof(OnLineCountInfo));
 
-			//»ñÈ¡×ÜÊı
+			//è·å–æ€»æ•°
 			OnLineCountInfo.dwOnLineCountSum=m_ServerListManager.CollectOnlineInfo();
 
-			//»ñÈ¡ÀàĞÍ
+			//è·å–ç±»å‹
 			POSITION ServerPosition=NULL;
 			do
 			{
@@ -177,10 +177,10 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 					DWORD dwGameID = (pGameServerItem->m_GameServer.wServerID) & 0xFFFFFFFF;
 					bool bIsExit = false;
 
-					//ÅĞ¶ÏÊÇ·ñÔÚlistÖĞÒÑ´æÔÚgameID
+					//åˆ¤æ–­æ˜¯å¦åœ¨listä¸­å·²å­˜åœ¨gameID
 					for(DWORD i = 0; i <= OnLineCountInfo.dwGameCount; i ++)
 					{
-						//Èç¹û´æÔÚ
+						//å¦‚æœå­˜åœ¨
 						if( (dwGameID == OnLineCountInfo.OnLineCountGame[i].dwGameID))
 						{
 							bIsExit = true;
@@ -188,64 +188,64 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 						}
 					}
 
-					//Èç¹û²»´æÔÚ
+					//å¦‚æœä¸å­˜åœ¨
 					if(!bIsExit)
 					{
-						//×î´óÀàĞÍÊıÄ¿
+						//æœ€å¤§ç±»å‹æ•°ç›®
 						OnLineCountInfo.dwGameCount++;
 					}
 					if( OnLineCountInfo.dwGameCount > 0)
 					{
-						//ÀàĞÍ±êÊ¶ && ÔÚÏßÈËÊı
+						//ç±»å‹æ ‡è¯† && åœ¨çº¿äººæ•°
 						OnLineCountInfo.OnLineCountGame[OnLineCountInfo.dwGameCount-1].dwGameID=dwGameID;			
 						OnLineCountInfo.OnLineCountGame[OnLineCountInfo.dwGameCount-1].dwOnLineCount += pGameServerItem->m_GameServer.dwOnlineCount;	
 					}
 				}
 
-				//Òç³öÅĞ¶Ï
+				//æº¢å‡ºåˆ¤æ–­
 				if (OnLineCountInfo.dwGameCount > CountArray(OnLineCountInfo.OnLineCountGame))
 				{
-					//ÌáÊ¾ÏûÏ¢
-					CLog::Log(log_warn, "Í³¼ÆÔÚÏßÈËÊı Òç³ö IDI_COLLECT_ONLINE_INFO");
+					//æç¤ºæ¶ˆæ¯
+					CLog::Log(log_warn, "ç»Ÿè®¡åœ¨çº¿äººæ•° æº¢å‡º IDI_COLLECT_ONLINE_INFO");
 					break;
 				}
 
 			} while (ServerPosition!=NULL);
 
-			//·¢ËÍÇëÇó
+			//å‘é€è¯·æ±‚
 			m_pIDataBaseEngine->PostDataBaseRequest(DBR_GP_ONLINE_COUNT_INFO,0,&OnLineCountInfo,sizeof(OnLineCountInfo));
 
 			return true;
 		}
-	case  IDI_UPDATA_ONLINE_COUNT: //·¢ËÍ¸ø¿Í»§¶Ë
+	case  IDI_UPDATA_ONLINE_COUNT: //å‘é€ç»™å®¢æˆ·ç«¯
 		{
-			//ÍøÂçÊı¾İ
+			//ç½‘ç»œæ•°æ®
 			WORD wSendSize=0;
 			BYTE cbDataBuffer[SOCKET_TCP_PACKET];
 
-			//Ã¶¾ÙÊı¾İ
+			//æšä¸¾æ•°æ®
 			POSITION Position=NULL;
 			CGameServerItem * pGameServerItem=NULL;
 
 			STR_CMD_LC_LIST_ROOM_ONLINE pServerOnLine;
 			ZeroMemory( &pServerOnLine, sizeof(pServerOnLine));
 
-			//Ã¶¾ÙÊı¾İ
+			//æšä¸¾æ•°æ®
 			for (DWORD i=0;i<m_ServerListManager.GetGameServerCount();i++)
 			{
-				//»ñÈ¡Êı¾İ
+				//è·å–æ•°æ®
 				pGameServerItem=m_ServerListManager.EmunGameServerItem(Position);
 				if (pGameServerItem==NULL) break;
 
 				pServerOnLine.dwServerID = pGameServerItem->m_GameServer.wServerID;
 				pServerOnLine.dwOnlineCount = pGameServerItem->m_GameServer.dwOnlineCount;
 
-				//¿½±´Êı¾İ
+				//æ‹·è´æ•°æ®
 				CopyMemory( cbDataBuffer+wSendSize, &pServerOnLine,sizeof(STR_CMD_LC_LIST_ROOM_ONLINE));
 				wSendSize += sizeof(STR_CMD_LC_LIST_ROOM_ONLINE);
 			}
 
-			//²éÕÒÓÃ»§Á¬½Ó,·¢ËÍÏûÏ¢
+			//æŸ¥æ‰¾ç”¨æˆ·è¿æ¥,å‘é€æ¶ˆæ¯
 			for (int i = 0; i < MAX_CONTENT; i++)
 			{
 				tagBindParameter * pBindParameter=(m_pBindParameter+i);
@@ -256,44 +256,44 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 			}
 			return true;
 		}
-	case IDI_UPDATA_MARQUEE:	//¼ÓÔØÅÜÂíµÆÏûÏ¢
+	case IDI_UPDATA_MARQUEE:	//åŠ è½½è·‘é©¬ç¯æ¶ˆæ¯
 		{
 			m_pITimerEngine->KillTimer(IDI_UPDATA_MARQUEE);
 			m_pIDataBaseEngine->PostDataBaseRequest(DBR_UPDATA_MARQUEE,0,NULL,0);
 			return true;
 		}
-	case IDI_PLAY_MARQUEE:		//Í¨Öªclient¹ö¶¯ÅÜÂíµÆÏûÏ¢   
+	case IDI_PLAY_MARQUEE:		//é€šçŸ¥clientæ»šåŠ¨è·‘é©¬ç¯æ¶ˆæ¯   
 		{
-			//TODONOW ÅÜÂíµÆÏûÏ¢ºÅ
+			//TODONOW è·‘é©¬ç¯æ¶ˆæ¯å·
 			//added by WangChengQing 2018/6/2
-			//1. Ó¦¸Ã·ÅÔÚĞ­µ÷·ş
-			//2. ¿ÉÒÔÔÚclientµÇÂ¼µÄÊ±ºò, Ö»·¢ËÍÒ»´Î¸øclient¡£  Ã»±ØÒª·şÎñ¶ËÊ±¿Ì·¢ËÍ¸øËùÓĞ¿Í»§¶Ë
+			//1. åº”è¯¥æ”¾åœ¨åè°ƒæœ
+			//2. å¯ä»¥åœ¨clientç™»å½•çš„æ—¶å€™, åªå‘é€ä¸€æ¬¡ç»™clientã€‚  æ²¡å¿…è¦æœåŠ¡ç«¯æ—¶åˆ»å‘é€ç»™æ‰€æœ‰å®¢æˆ·ç«¯
 
 			static DWORD s_MarqueeID;
 
-			//1. ½áÊøÊ±¼ä < µ±Ç°Ê±¼äµÄ  È¥³ıµô
+			//1. ç»“æŸæ—¶é—´ < å½“å‰æ—¶é—´çš„  å»é™¤æ‰
 			for(int i = 0; i < m_MarqueeMsgListManager.GetCount() ; i++)
 			{
 
 				STR_DBO_UPDATA_MARQUEE strMarquee = m_MarqueeMsgListManager.GetAt(i);
 
-				//´Ó s_MarqueeID ¿ªÊ¼ÅĞ¶Ï,  s_MarqueeIDÊÇµİÔöµÄ
+				//ä» s_MarqueeID å¼€å§‹åˆ¤æ–­,  s_MarqueeIDæ˜¯é€’å¢çš„
 				if(strMarquee.dwMarqueeID <= s_MarqueeID)
 				{
 					if(i != (m_MarqueeMsgListManager.GetCount()-1))
 					{
 						continue;
 					}
-					else //Ñ­»·ÍêÒ»±éÁË
+					else //å¾ªç¯å®Œä¸€éäº†
 					{
 						s_MarqueeID = 0;
-						//×îºóÒ»±éµÄÊ±ºò ĞèÒªÖØÆô¸Ã¶¨Ê±Æ÷
+						//æœ€åä¸€éçš„æ—¶å€™ éœ€è¦é‡å¯è¯¥å®šæ—¶å™¨
 						m_pITimerEngine->SetTimer(IDI_PLAY_MARQUEE,3*1000L,1,0);
 						continue;
 					}
 				}
 
-				//Ê±¼äÅĞ¶Ï
+				//æ—¶é—´åˆ¤æ–­
 				SYSTEMTIME nowTime;
 				 GetLocalTime(&nowTime);
 
@@ -304,41 +304,41 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 				 COleDateTimeSpan dTimeSpan;
 				 double nSecnonSpan = 0;
 
-				 //Èç¹ûÏÖÔÚÊ±¼ä ´óÓÚ ½áÊøÊ±¼ä -- É¾³ı¸ÃĞÅÏ¢
+				 //å¦‚æœç°åœ¨æ—¶é—´ å¤§äº ç»“æŸæ—¶é—´ -- åˆ é™¤è¯¥ä¿¡æ¯
 				 dTimeSpan = dTimeNow - dTimeEnd;
 				 nSecnonSpan = dTimeSpan.GetTotalSeconds();
 				 if(nSecnonSpan > 0)
 				 {
-					 m_MarqueeMsgListManager.GetAt(i).byMask = 2; //É¾³ı
+					 m_MarqueeMsgListManager.GetAt(i).byMask = 2; //åˆ é™¤
 					 continue;
 				 }
 
-				 //Èç¹ûÏÖÔÚÊ±¼ä Ğ¡ÓÚ ¿ªÊ¼Ê±¼ä -- ºöÂÔ¸ÃĞÅÏ¢
+				 //å¦‚æœç°åœ¨æ—¶é—´ å°äº å¼€å§‹æ—¶é—´ -- å¿½ç•¥è¯¥ä¿¡æ¯
 				 dTimeSpan = dTimeStart - dTimeNow;
 				 nSecnonSpan = dTimeSpan.GetTotalSeconds();
 				 if(nSecnonSpan > 0)
 				 {
-					 m_MarqueeMsgListManager.GetAt(i).byMask = 3;//ºöÂÔ
+					 m_MarqueeMsgListManager.GetAt(i).byMask = 3;//å¿½ç•¥
 					 continue;
 				 } 
 
-				  m_MarqueeMsgListManager.GetAt(i).byMask = 4; //²¥·Å
+				  m_MarqueeMsgListManager.GetAt(i).byMask = 4; //æ’­æ”¾
 
-				  //¼ÇÂ¼µ±Ç°·¢ËÍµÄMarqueeID
+				  //è®°å½•å½“å‰å‘é€çš„MarqueeID
 				  s_MarqueeID = strMarquee.dwMarqueeID;
 
-				 //¶¨Ê±Æ÷¼ä¸ôÊ±¼ä
+				 //å®šæ—¶å™¨é—´éš”æ—¶é—´
 				 DWORD wTimerTime =  static_cast<DWORD> (10 + _tcslen(strMarquee.szMarqueeMsg)*0.45);
 				 wTimerTime += strMarquee.dwMaruqeeTime;
 				 m_pITimerEngine->SetTimer(IDI_PLAY_MARQUEE,wTimerTime*1000L,1,0);
 
-				 //·¢ËÍÊı¾İ
+				 //å‘é€æ•°æ®
 				 m_pITCPNetworkEngine->SendDataBatch(MDM_SERVICE, CMD_LC_SERVICE_MARQUEE, &strMarquee, sizeof(strMarquee));
 				 break;
 			}
 
 
-			//É¾³ı¹ıÊ±µÄ ÅÜÂíµÆÏûÏ¢
+			//åˆ é™¤è¿‡æ—¶çš„ è·‘é©¬ç¯æ¶ˆæ¯
 			for(int i = 0; i < m_MarqueeMsgListManager.GetCount() ; i++)
 			{
 				if(2 == m_MarqueeMsgListManager.GetAt(i).byMask)
@@ -356,72 +356,72 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 	return false;
 }
 
-//Êı¾İ¿âÊÂ¼ş
+//æ•°æ®åº“äº‹ä»¶
 bool CAttemperEngineSink::OnEventDataBaseResult(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
 	switch (wRequestID)
 	{
-#pragma region µÇÂ¼Ä£¿é
-	case DBO_CL_LOGON_ACCOUNTS:			//ÕËºÅµÇÂ¼
+#pragma region ç™»å½•æ¨¡å—
+	case DBO_CL_LOGON_ACCOUNTS:			//è´¦å·ç™»å½•
 		{
 			return On_CMD_LC_Logon_Account(dwContextID,pData,wDataSize);
 		}
-	case DBO_CL_LOGON_PLATFORM:			//µÚÈı·½µÇÂ½
+	case DBO_CL_LOGON_PLATFORM:			//ç¬¬ä¸‰æ–¹ç™»é™†
 		{
 			return On_CMD_LC_Logon_Platform(dwContextID, pData, wDataSize);
 		}
 #pragma endregion
 
-	case DBO_CL_SERVICE_USER_FEEDBACK:			//Íæ¼Ò·´À¡·µ»Ø
+	case DBO_CL_SERVICE_USER_FEEDBACK:			//ç©å®¶åé¦ˆè¿”å›
 		{
 			return On_CMD_LC_Service_UserFeedBack(dwContextID, pData);
 		}
-	case DBO_CL_SERVICE_REFRESH_USER_INFO:		//Ë¢ĞÂÓÃ»§ĞÅÏ¢·µ»Ø
+	case DBO_CL_SERVICE_REFRESH_USER_INFO:		//åˆ·æ–°ç”¨æˆ·ä¿¡æ¯è¿”å›
 		{
 			return On_CMD_LC_Service_RefreshUserInfo(dwContextID, pData);
 		}
-	case DBO_CL_SERVICE_QUERY_ROOM_LIST:		//²éÑ¯¿ª·¿ÁĞ±í·µ»Ø
+	case DBO_CL_SERVICE_QUERY_ROOM_LIST:		//æŸ¥è¯¢å¼€æˆ¿åˆ—è¡¨è¿”å›
 		{
 			return On_CMD_LC_Service_QueryRoomList(dwContextID,pData,wDataSize);
 		}
-	case DBO_CL_SERVICE_GET_RICH_LIST:			//»ñÈ¡¸»ºÀ°ñ·µ»Ø
+	case DBO_CL_SERVICE_GET_RICH_LIST:			//è·å–å¯Œè±ªæ¦œè¿”å›
 		{
 			return On_CMD_LC_Service_GetRichList(dwContextID,pData,wDataSize);
 		}
-	case DBO_CL_SERVICE_GET_USER_RECORD_LIST:	//»ñÈ¡ÓÃ»§Â¼ÏñÁĞ±í·µ»Ø£¨´ó¾Ö£©
+	case DBO_CL_SERVICE_GET_USER_RECORD_LIST:	//è·å–ç”¨æˆ·å½•åƒåˆ—è¡¨è¿”å›ï¼ˆå¤§å±€ï¼‰
 		{
 			return On_CMD_LC_Service_GetUserRecordList(dwContextID,pData,wDataSize);
 		}
-	case DBO_CL_SERVICE_GET_SPECIFIC_RECORD:	//»ñÈ¡Ö¸¶¨IDÂ¼Ïñ·µ»Ø£¨Ğ¡¾Ö£©
+	case DBO_CL_SERVICE_GET_SPECIFIC_RECORD:	//è·å–æŒ‡å®šIDå½•åƒè¿”å›ï¼ˆå°å±€ï¼‰
 		{
 			return On_CMD_LC_Service_GetSpecificRecord(dwContextID,pData,wDataSize);
 		}
-	case DBO_CL_SERVICE_ONLINE_REWARD:			//»ñÈ¡ÔÚÏß½±Àø·µ»Ø
+	case DBO_CL_SERVICE_ONLINE_REWARD:			//è·å–åœ¨çº¿å¥–åŠ±è¿”å›
 		{
 			return On_CMD_LC_Service_OnlineReward(dwContextID,pData,wDataSize);
 		}
-	case DBO_CL_SERVICE_GET_TASK_LIST:			//»ñÈ¡ÈÎÎñÁĞ±í·µ»Ø
+	case DBO_CL_SERVICE_GET_TASK_LIST:			//è·å–ä»»åŠ¡åˆ—è¡¨è¿”å›
 		{
 			return On_CMD_LC_Service_GetTaskList(dwContextID,pData,wDataSize);
 		}
-	case DBO_CL_SERVICE_GET_TASK_REWARD:		//ÁìÈ¡ÈÎÎñ½±Àø·µ»Ø
+	case DBO_CL_SERVICE_GET_TASK_REWARD:		//é¢†å–ä»»åŠ¡å¥–åŠ±è¿”å›
 		{
 			return On_CMD_LC_Service_GetTaskReward(dwContextID,pData,wDataSize);
 		}
-	case DBO_CL_SERVICE_REQUEST_LOTTERY:		//ÇëÇó³é½±·µ»Ø
+	case DBO_CL_SERVICE_REQUEST_LOTTERY:		//è¯·æ±‚æŠ½å¥–è¿”å›
 		{
 			return On_CMD_LC_Service_RequestLottery(dwContextID,pData,wDataSize);
 		}
-	case DBO_CL_SERVICE_MODIFY_PERSONAL_INFO:	//ĞŞ¸Ä¸öÈË×ÊÁÏ·µ»Ø
+	case DBO_CL_SERVICE_MODIFY_PERSONAL_INFO:	//ä¿®æ”¹ä¸ªäººèµ„æ–™è¿”å›
 		{
 			return On_CMD_LC_Service_ModifyPersonalInfo(dwContextID,pData,wDataSize);
 		}
-	case DBO_CL_USER_QUERY_SCORE_INFO:			//²éÑ¯(±ä¸ü)½ğ±Ò·¿¿¨
+	case DBO_CL_USER_QUERY_SCORE_INFO:			//æŸ¥è¯¢(å˜æ›´)é‡‘å¸æˆ¿å¡
 		{
 			return On_CMD_LC_Service_QueryScoreInfo(dwContextID,pData,wDataSize);
 		}
-#pragma region Æô¶¯ÃüÁî
-	case DBO_GP_GAME_LIST_RESULT:		//¼ÓÔØ½á¹û
+#pragma region å¯åŠ¨å‘½ä»¤
+	case DBO_GP_GAME_LIST_RESULT:		//åŠ è½½ç»“æœ
 		{
 			return OnDBPCGameListResult(dwContextID,pData,wDataSize);
 		}
@@ -437,281 +437,281 @@ bool CAttemperEngineSink::OnEventDataBaseResult(WORD wRequestID, DWORD dwContext
 		{
 			return OnDBPCGameNodeItem(dwContextID,pData,wDataSize);
 		}
-	case DBO_UPDATA_MARQUEE:			//¼ÓÔØÅÜÂíµÆ ·µ»Ø
+	case DBO_UPDATA_MARQUEE:			//åŠ è½½è·‘é©¬ç¯ è¿”å›
 		{
 			return On_DBO_UPDATA_MARQUEE(dwContextID,pData,wDataSize);
 		}
-	case DBO_UPDATA_MARQUEE_FINISH:		//¼ÓÔØÅÜÂíµÆ ½áÊø
+	case DBO_UPDATA_MARQUEE_FINISH:		//åŠ è½½è·‘é©¬ç¯ ç»“æŸ
 		{
 			return On_DBO_UPDATA_MARQUEE_FINISH(dwContextID,pData,wDataSize);
 		}
 #pragma endregion
 	
-	case DBO_CL_USER_COMMAND_RESULT:		//¹«¹²²Ù×÷½á¹û
+	case DBO_CL_USER_COMMAND_RESULT:		//å…¬å…±æ“ä½œç»“æœ
 		{
 			return On_CMD_LC_CommonOperateResult(dwContextID,pData,wDataSize);
 		}
-#pragma region MDM_GIFT ÀñÎïµÀ¾ß
-	case DBO_CL_GIFT_GIVE_PROPS:			//µÀ¾ßÔùËÍ ·µ»Ø
+#pragma region MDM_GIFT ç¤¼ç‰©é“å…·
+	case DBO_CL_GIFT_GIVE_PROPS:			//é“å…·èµ é€ è¿”å›
 		{
 			return On_CMD_LC_GIFT_GIVE_PROPS(dwContextID,pData,wDataSize);
 		}
-	case DBO_CL_GIFT_GIVE_PROPS_SHOW:		//µÀ¾ßÔùËÍ Í¨Öª½ÓÊÕÈË
+	case DBO_CL_GIFT_GIVE_PROPS_SHOW:		//é“å…·èµ é€ é€šçŸ¥æ¥æ”¶äºº
 		{
 			return On_CMD_LC_GIFT_GIVE_PROPS_SHOW(dwContextID,pData,wDataSize);
 		}
 #pragma endregion
-	case DBO_CL_USER_RECHARGE_INFO:			//³äÖµĞÅÏ¢·µ»Ø
+	case DBO_CL_USER_RECHARGE_INFO:			//å……å€¼ä¿¡æ¯è¿”å›
 		{
 			return On_CMD_LC_Other_RechargeInfo(dwContextID,pData,wDataSize);
 		}
-	case DBO_CL_USER_EXCHANGE_INFO:			//¶Ò»»µÀ¾ß·µ»Ø
+	case DBO_CL_USER_EXCHANGE_INFO:			//å…‘æ¢é“å…·è¿”å›
 		{
 			return On_CMD_LC_Other_ExchangeInfo(dwContextID,pData,wDataSize);
 		}
-	case DBO_CL_SERVICE_GET_RANK_REWARD:		//»ñµÃÅÅĞĞ°ñ½±Àø	
+	case DBO_CL_SERVICE_GET_RANK_REWARD:		//è·å¾—æ’è¡Œæ¦œå¥–åŠ±	
 		{
 			return OnDBRankRewardResult(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_SERVICE_PURE_STANDING_LIST:		//pure´óÌüÅÅĞĞ°ñ ·µ»Ø
+	case DBO_LC_SERVICE_PURE_STANDING_LIST:		//pureå¤§å…æ’è¡Œæ¦œ è¿”å›
 		{
 			return On_CMD_LC_SERVICE_PURE_STANDING_LIST(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_SERVICE_PURE_STANDING_FINISH:	//pure´óÌüÅÅĞĞ°ñ ½áÊø
+	case DBO_LC_SERVICE_PURE_STANDING_FINISH:	//pureå¤§å…æ’è¡Œæ¦œ ç»“æŸ
 		{
 			return On_CMD_LC_SERVICE_PURE_STANDING_FINISH(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_SERVICE_PURE_RECORD_LIST:		//´ó¾ÖÕ½¼¨
+	case DBO_LC_SERVICE_PURE_RECORD_LIST:		//å¤§å±€æˆ˜ç»©
 		{
 			return On_CMD_LC_SERVICE_PURE_RECORD_LIST(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_SERVICE_PURE_RECORD_LIST_PINFO:	//´ó¾ÖÍæ¼ÒĞÅÏ¢
+	case DBO_LC_SERVICE_PURE_RECORD_LIST_PINFO:	//å¤§å±€ç©å®¶ä¿¡æ¯
 		{
 			return On_CMD_LC_SERVICE_PURE_RECORD_LIST_PINFO(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_SERVICE_PURE_RECORD_FINISH://´ó¾ÖÕ½¼¨½áÊø
+	case DBO_LC_SERVICE_PURE_RECORD_FINISH://å¤§å±€æˆ˜ç»©ç»“æŸ
 		{
 			return On_CMD_LC_SERVICE_PURE_RECORD_FINISH(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_SERVICE_PURE_XJ_RECORD_LIST:		//Ğ¡¾ÖÕ½¼¨
+	case DBO_LC_SERVICE_PURE_XJ_RECORD_LIST:		//å°å±€æˆ˜ç»©
 		{
 			return On_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_SERVICE_PURE_XJ_RECORD_LIST_PINFO:	//Ğ¡¾ÖÍæ¼ÒĞÅÏ¢
+	case DBO_LC_SERVICE_PURE_XJ_RECORD_LIST_PINFO:	//å°å±€ç©å®¶ä¿¡æ¯
 		{
 			return On_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_PINFO(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_SERVICE_XJ_RECORD_PLAYBACK:			//Ğ¡¾ÖÂ¼Ïñ»Ø·Å
+	case DBO_LC_SERVICE_XJ_RECORD_PLAYBACK:			//å°å±€å½•åƒå›æ”¾
 		{
 			return On_CMD_LC_Service_XJRecordPlayback(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_SERVICE_CUSTOMER_MESSEGE:		//¿Í·şÏûÏ¢
+	case DBO_LC_SERVICE_CUSTOMER_MESSEGE:		//å®¢æœæ¶ˆæ¯
 		{
 			return On_CMD_LC_SERVICE_CUSTOMER_MESSEGE(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_SERVICE_PURE_XJ_RECORD_FINISH://Ğ¡¾ÖÕ½¼¨½áÊø
+	case DBO_LC_SERVICE_PURE_XJ_RECORD_FINISH://å°å±€æˆ˜ç»©ç»“æŸ
 		{
 			return On_CMD_LC_SERVICE_PURE_XJ_RECORD_FINISH(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_SERVICE_GOLD_INFO:		//ÇëÇó½ğ±Ò´óÌü ·µ»Ø
+	case DBO_LC_SERVICE_GOLD_INFO:		//è¯·æ±‚é‡‘å¸å¤§å… è¿”å›
 		{
 			return On_CMD_LC_SERVICE_GOLD_INFO(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_SERVICE_GOLD_INFO_FINISH:	//ÇëÇó½ğ±Ò´óÌü ½áÊø
+	case DBO_LC_SERVICE_GOLD_INFO_FINISH:	//è¯·æ±‚é‡‘å¸å¤§å… ç»“æŸ
 		{
 			return On_CMD_LC_SERVICE_GOLD_INFO_FINISH(dwContextID,pData,wDataSize);
 		}
 			 
-#pragma region MDM_CLUB ÅÆÓÑÈ¦
-	case DBO_LC_CLUB_ALL_CLUB_INFO_LIST:		//²éÑ¯ÅÆÓÑÈ¦ÁĞ±í ·µ»Ø
+#pragma region MDM_CLUB ç‰Œå‹åœˆ
+	case DBO_LC_CLUB_ALL_CLUB_INFO_LIST:		//æŸ¥è¯¢ç‰Œå‹åœˆåˆ—è¡¨ è¿”å›
 		{
 			return On_CMD_LC_CLUB_ALL_CLUB_INFO_LIST(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_ALL_INFO_FINISH:		//²éÑ¯ÅÆÓÑÈ¦ÁĞ±í ½áÊø
+	case DBO_LC_CLUB_ALL_INFO_FINISH:		//æŸ¥è¯¢ç‰Œå‹åœˆåˆ—è¡¨ ç»“æŸ
 		{
 			return On_CMD_LC_CLUB_ALL_INFO_FINISH(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_ROOM_LIST: //²éÑ¯Ö¸¶¨ÅÆÓÑÈ¦·¿¼äÁĞ±í ·µ»Ø
+	case DBO_LC_CLUB_ROOM_LIST: //æŸ¥è¯¢æŒ‡å®šç‰Œå‹åœˆæˆ¿é—´åˆ—è¡¨ è¿”å›
 		{
 			return On_CMD_LC_CLUB_ROOM_LIST(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_ROOM_LIST_FINISH: //²éÑ¯Ö¸¶¨ÅÆÓÑÈ¦·¿¼äÁĞ±í ½áÊø
+	case DBO_LC_CLUB_ROOM_LIST_FINISH: //æŸ¥è¯¢æŒ‡å®šç‰Œå‹åœˆæˆ¿é—´åˆ—è¡¨ ç»“æŸ
 		{
 			return On_CMD_LC_CLUB_ROOM_LIST_FINISH(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_RANDOM_CLUB_LIST : //²éÑ¯Î´ÂúÔ±Ëæ»úÅÆÓÑÈ¦ ·µ»Ø
+	case DBO_LC_CLUB_RANDOM_CLUB_LIST : //æŸ¥è¯¢æœªæ»¡å‘˜éšæœºç‰Œå‹åœˆ è¿”å›
 		{
 			return On_CMD_LC_CLUB_RANDOM_CLUB_LIST(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_RANDOM_CLUB_LIST_FINISH : //²éÑ¯Î´ÂúÔ±Ëæ»úÅÆÓÑÈ¦  ½áÊø
+	case DBO_LC_CLUB_RANDOM_CLUB_LIST_FINISH : //æŸ¥è¯¢æœªæ»¡å‘˜éšæœºç‰Œå‹åœˆ  ç»“æŸ
 		{
 			return On_CMD_LC_CLUB_RANDOM_CLUB_LIST_FINISH(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_JOIN_CLUB: //ÉêÇë¼ÓÈëÅÆÓÑÈ¦
+	case DBO_LC_CLUB_JOIN_CLUB: //ç”³è¯·åŠ å…¥ç‰Œå‹åœˆ
 		{
 			return On_CMD_LC_CLUB_JOIN_CLUB(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_JOIN_CLUB_BDCAST: //ÉêÇë¼ÓÈëÅÆÓÑÈ¦ ¹ã²¥
+	case DBO_LC_CLUB_JOIN_CLUB_BDCAST: //ç”³è¯·åŠ å…¥ç‰Œå‹åœˆ å¹¿æ’­
 		{
 			return On_CMD_LC_CLUB_JOIN_CLUB_BDCAST(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_JOIN_CLUB_RE:	//ÉêÇë¼ÓÈëÅÆÓÑÈ¦ ¿Í»§¶ËÊµÊ±Ë¢ĞÂ¾ãÀÖ²¿
+	case DBO_LC_CLUB_JOIN_CLUB_RE:	//ç”³è¯·åŠ å…¥ç‰Œå‹åœˆ å®¢æˆ·ç«¯å®æ—¶åˆ·æ–°ä¿±ä¹éƒ¨
 		{
 			return On_CMD_LC_CLUB_JOIN_CLUB_RE(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_DISS_CLUB : //½âÉ¢ÅÆÓÑÈ¦
+	case DBO_LC_CLUB_DISS_CLUB : //è§£æ•£ç‰Œå‹åœˆ
 		{
 			return On_CMD_LC_CLUB_DISS_CLUB(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_ROOM_SETTING: //·¿¼äÉèÖÃ
+	case DBO_LC_CLUB_ROOM_SETTING: //æˆ¿é—´è®¾ç½®
 		{
 			return On_CMD_LC_CLUB_ROOM_SETTING(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_ROOM_QUERY_SETTING: //ÇëÇó·¿¼äÉèÖÃ
+	case DBO_LC_CLUB_ROOM_QUERY_SETTING: //è¯·æ±‚æˆ¿é—´è®¾ç½®
 		{
 			return On_CMD_LC_CLUB_ROOM_QUERY_SETTING(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_ROOM_DISSOLVE: //½âÉ¢·¿¼äÇëÇó ·µ»Ø
+	case DBO_LC_CLUB_ROOM_DISSOLVE: //è§£æ•£æˆ¿é—´è¯·æ±‚ è¿”å›
 		{
 			return On_CMD_LC_CLUB_ROOM_DISSOLVE(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_TABLE_DISSOLVE: //½âÉ¢×À×ÓÇëÇó ·µ»Ø
+	case DBO_LC_CLUB_TABLE_DISSOLVE: //è§£æ•£æ¡Œå­è¯·æ±‚ è¿”å›
 		{
 			return On_CMD_LC_CLUB_TABLE_DISSOLVE(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_NOTICE: //ÅÆÓÑÈ¦¹«¸æ
+	case DBO_LC_CLUB_NOTICE: //ç‰Œå‹åœˆå…¬å‘Š
 		{
 			return On_CMD_LC_CLUB_NOTICE(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_MESSAGE: //ÅÆÓÑÈ¦¼ò½é
+	case DBO_LC_CLUB_MESSAGE: //ç‰Œå‹åœˆç®€ä»‹
 		{
 			return On_CMD_LC_CLUB_MESSAGE(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_CONTRIBUTE_FK://¹±Ï×·¿¿¨
+	case DBO_LC_CLUB_CONTRIBUTE_FK://è´¡çŒ®æˆ¿å¡
 		{
 			return On_CMD_LC_CLUB_CONTRIBUTE_FK(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_AUTO_AGREE://ÅÆÓÑÈ¦ÉèÖÃ
+	case DBO_LC_CLUB_AUTO_AGREE://ç‰Œå‹åœˆè®¾ç½®
 		{
 			return On_CMD_LC_CLUB_AUTO_AGREE(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_INVITE://ÑûÇëËûÈË¼ÓÈëÅÆÓÑÈ¦
+	case DBO_LC_CLUB_INVITE://é‚€è¯·ä»–äººåŠ å…¥ç‰Œå‹åœˆ
 		{
 			return On_CMD_LC_CLUB_INVITE(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_INVITE_REMIND://±»ÑûÇëÈËµÄÌáĞÑ
+	case DBO_LC_CLUB_INVITE_REMIND://è¢«é‚€è¯·äººçš„æé†’
 		{
 			return On_CMD_LC_CLUB_INVITE_REMIND(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_INVITE_RESULT: //±»ÑûÇëÈË »Ø¸´
+	case DBO_LC_CLUB_INVITE_RESULT: //è¢«é‚€è¯·äºº å›å¤
 		{
 			return On_CMD_LC_CLUB_INVITE_RESULT(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_INQUERY_LIST: //±»ÑûÇëÈË²é¿´×Ô¼ºµÄÑûÇëÁĞ±í ·µ»Ø
+	case DBO_LC_CLUB_INQUERY_LIST: //è¢«é‚€è¯·äººæŸ¥çœ‹è‡ªå·±çš„é‚€è¯·åˆ—è¡¨ è¿”å›
 		{
 			return On_CMD_LC_CLUB_INQUERY_LIST(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_APPLICANT_LIST://ÉêÇëÈËÁĞ±í ·µ»Ø
+	case DBO_LC_CLUB_APPLICANT_LIST://ç”³è¯·äººåˆ—è¡¨ è¿”å›
 		{
 			return On_CMD_LC_CLUB_APPLICANT_LIST(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_APPLICANT_LIST_FINISH://ÉêÇëÈËÁĞ±í ½áÊø
+	case DBO_LC_CLUB_APPLICANT_LIST_FINISH://ç”³è¯·äººåˆ—è¡¨ ç»“æŸ
 		{
 			return On_CMD_LC_CLUB_APPLICANT_LIST_FINISH(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_APPOINTMENT: //Ö°ÎñÈÎÃâ
+	case DBO_LC_CLUB_APPOINTMENT: //èŒåŠ¡ä»»å…
 		{
 			return On_CMD_LC_CLUB_APPOINTMENT(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_APPOINTMENT_NOTE: //Ö°ÎñÈÎÃâ ÌáĞÑ
+	case DBO_LC_CLUB_APPOINTMENT_NOTE: //èŒåŠ¡ä»»å… æé†’
 		{
 			return On_CMD_LC_CLUB_APPOINTMENT_NOTE(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CHAT_ALL://¾ãÀÖ²¿ÁÄÌì ·µ»Ø
+	case DBO_LC_CHAT_ALL://ä¿±ä¹éƒ¨èŠå¤© è¿”å›
 		{
 			return On_CMD_LC_CLUB_CHAT(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CHAT_ALL_BDCAST://¾ãÀÖ²¿ÁÄÌì ¹ã²¥
+	case DBO_LC_CHAT_ALL_BDCAST://ä¿±ä¹éƒ¨èŠå¤© å¹¿æ’­
 		{
 			return On_CMD_LC_CLUB_CHAT_BDCAST(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_STICKY_POST:	//ÅÆÓÑÈ¦ÖÃ¶¥·µ»Ø
+	case DBO_LC_CLUB_STICKY_POST:	//ç‰Œå‹åœˆç½®é¡¶è¿”å›
 		{
 			return On_CMD_LC_CLUB_STICKY_POST(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_INQUERY_LIST_FINISH: //±»ÑûÇëÈË²é¿´×Ô¼ºµÄÑûÇëÁĞ±í ½áÊø
+	case DBO_LC_CLUB_INQUERY_LIST_FINISH: //è¢«é‚€è¯·äººæŸ¥çœ‹è‡ªå·±çš„é‚€è¯·åˆ—è¡¨ ç»“æŸ
 		{
 			return On_CMD_LC_CLUB_INQUERY_LIST_FINISH(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_TABLE_LIST_TABLE: //×À×ÓÁĞ±í
+	case DBO_LC_CLUB_TABLE_LIST_TABLE: //æ¡Œå­åˆ—è¡¨
 		{
 			return On_CMD_LC_CLUB_TABLE_LIST_TABLE(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_TABLE_LIST_USER:	//×À×ÓÍæ¼ÒÁĞ±í
+	case DBO_LC_CLUB_TABLE_LIST_USER:	//æ¡Œå­ç©å®¶åˆ—è¡¨
 		{
 			return On_CMD_LC_CLUB_TABLE_LIST_USER(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_CREATE_CLUB://´´½¨ÅÆÓÑÈ¦ ·µ»Ø
+	case DBO_LC_CLUB_CREATE_CLUB://åˆ›å»ºç‰Œå‹åœˆ è¿”å›
 		{
 			return On_CMD_LC_CLUB_CREATE_CLUB(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_JOIN_ROOM: //ÉêÇë¼ÓÈë·¿¼ä ·µ»Ø
+	case DBO_LC_CLUB_JOIN_ROOM: //ç”³è¯·åŠ å…¥æˆ¿é—´ è¿”å›
 		{
 			return On_CMD_LC_CLUB_JOIN_ROOM(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_APPLICANT_RESULT: //ÈºÖ÷|¹ÜÀí¶ÔÉêÇëÏûÏ¢µÄ´ğ¸´(Í¬Òâ|¾Ü¾ø) ·µ»Ø
+	case DBO_LC_CLUB_APPLICANT_RESULT: //ç¾¤ä¸»|ç®¡ç†å¯¹ç”³è¯·æ¶ˆæ¯çš„ç­”å¤(åŒæ„|æ‹’ç») è¿”å›
 		{
 			return On_CMD_LC_CLUB_APPLICANT_RESULT(dwContextID,pData,wDataSize);
 		}
 		/*
-	case DBO_LC_CLUB_JOIN_CLUB_MESSAGE_FINISH: //ÈºÖ÷|¹ÜÀí¶ÔÉêÇëÏûÏ¢µÄ´ğ¸´(Í¬Òâ|¾Ü¾ø) ½áÊø
+	case DBO_LC_CLUB_JOIN_CLUB_MESSAGE_FINISH: //ç¾¤ä¸»|ç®¡ç†å¯¹ç”³è¯·æ¶ˆæ¯çš„ç­”å¤(åŒæ„|æ‹’ç») ç»“æŸ
 		{
 			return On_CMD_LC_CLUB_APPLICANT_LIST_FINISH(dwContextID,pData,wDataSize);
 		}
 		*/
-	case DBO_LC_CLUB_MEMBER_MANAGER://ÇëÇó³ÉÔ±Êı¾İ ·µ»Ø
+	case DBO_LC_CLUB_MEMBER_MANAGER://è¯·æ±‚æˆå‘˜æ•°æ® è¿”å›
 		{
 			return On_CMD_LC_CLUB_MEMBER_MANAGER(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_MEMBER_MANAGER_FINISH://ÇëÇó³ÉÔ±Êı¾İ ½áÊø
+	case DBO_LC_CLUB_MEMBER_MANAGER_FINISH://è¯·æ±‚æˆå‘˜æ•°æ® ç»“æŸ
 		{
 			return On_CMD_LC_CLUB_MEMBER_MANAGER_FINISH(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_DATA ://¹¤»á»ù±¾ĞÅÏ¢
+	case DBO_LC_CLUB_DATA ://å·¥ä¼šåŸºæœ¬ä¿¡æ¯
 		{
 			return On_CMD_LC_CLUB_DATA(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_QUIT://Ìß³öÍË³öÇëÇó ·µ»Ø
+	case DBO_LC_CLUB_QUIT://è¸¢å‡ºé€€å‡ºè¯·æ±‚ è¿”å›
 		{
 			return On_CMD_LC_CLUB_QUIT(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_RECORD_LIST: //¹¤»áÕ½¼¨Í³¼Æ ·µ»Ø
+	case DBO_LC_CLUB_RECORD_LIST: //å·¥ä¼šæˆ˜ç»©ç»Ÿè®¡ è¿”å›
 		{
 			return On_CMD_LC_CLUB_RECORD_LIST(dwContextID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_RECORD_FINISH: //¹¤»áÕ½¼¨Í³¼Æ ½áÊø
+	case DBO_LC_CLUB_RECORD_FINISH: //å·¥ä¼šæˆ˜ç»©ç»Ÿè®¡ ç»“æŸ
 		{
 			return On_CMD_LC_CLUB_RECORD_FINISH(dwContextID,pData,wDataSize);
 		}
 #pragma endregion
-#pragma region MDM_SHOP ÉÌ³ÇµÀ¾ß
-	case DBO_CL_SHOP_QUERY:		//²éÑ¯ÉÌ³Ç
+#pragma region MDM_SHOP å•†åŸé“å…·
+	case DBO_CL_SHOP_QUERY:		//æŸ¥è¯¢å•†åŸ
 		{
 			return On_CMD_LC_SHOP_QUERY_RESULT(dwContextID,pData,wDataSize);
 		}
-	case DBO_CL_SHOP_QUERY_FINISH: //²éÑ¯ÉÌ³Ç½áÊø
+	case DBO_CL_SHOP_QUERY_FINISH: //æŸ¥è¯¢å•†åŸç»“æŸ
 		{
 			return On_CMD_LC_SHOP_QUERY_FINISH(dwContextID,pData,wDataSize);
 		}
-	case DBO_CL_SHOP_DIAMOND : //×êÊ¯¹ºÂòµÀ¾ß
+	case DBO_CL_SHOP_DIAMOND : //é’»çŸ³è´­ä¹°é“å…·
 		{
 			return On_CMD_LC_SHOP_DIAMOND_RESULT(dwContextID,pData,wDataSize);
 		}
-	case DBO_CL_BAG_QUERY: //±³°üÎïÆ·²éÑ¯
+	case DBO_CL_BAG_QUERY: //èƒŒåŒ…ç‰©å“æŸ¥è¯¢
 		{
 			return On_CMD_LC_BAG_RESULT(dwContextID,pData,wDataSize);
 		}
-	case DBO_CL_BAG_FINISH://±³°üÎïÆ·²éÑ¯Íê³É
+	case DBO_CL_BAG_FINISH://èƒŒåŒ…ç‰©å“æŸ¥è¯¢å®Œæˆ
 		{
 			return On_CMD_LC_BAG_FINISH(dwContextID,pData,wDataSize);
 		}
@@ -723,37 +723,37 @@ bool CAttemperEngineSink::OnEventDataBaseResult(WORD wRequestID, DWORD dwContext
 
 #pragma endregion
 
-#pragma region SocketÊÂ¼ş
-//Ó¦´ğÊÂ¼ş
+#pragma region Socketäº‹ä»¶
+//åº”ç­”äº‹ä»¶
 bool CAttemperEngineSink::OnEventTCPNetworkBind(DWORD dwClientAddr, DWORD dwSocketID)
 {
-	//»ñÈ¡Ë÷Òı
+	//è·å–ç´¢å¼•
 	if (LOWORD(dwSocketID)>=MAX_CONTENT) return false;
 
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	WORD wBindIndex=LOWORD(dwSocketID);
 	tagBindParameter * pBindParameter=(m_pBindParameter+wBindIndex);
 
-	//ÉèÖÃ±äÁ¿
+	//è®¾ç½®å˜é‡
 	pBindParameter->dwSocketID=dwSocketID;
 	pBindParameter->dwClientAddr=dwClientAddr;
 	pBindParameter->dwActiveTime=(DWORD)time(NULL);
 	return true;
 }
 
-//¹Ø±ÕÊÂ¼ş
+//å…³é—­äº‹ä»¶
 bool CAttemperEngineSink::OnEventTCPNetworkShut(DWORD dwClientAddr, DWORD dwActiveTime, DWORD dwSocketID)
 {
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	WORD wBindIndex=LOWORD(dwSocketID);
 	tagBindParameter * pBindParameter=(m_pBindParameter+wBindIndex);
 
-	///SocketÁ¬½Ó¹Ø±Õ Êı¾İ¿â´¦Àí
+	///Socketè¿æ¥å…³é—­ æ•°æ®åº“å¤„ç†
 	if(pBindParameter->dwUserID != 0)
 	{
 		/*
-		** ÇéĞÎËÄ µÇÂ¼·ş socket¶ÏµôµÄÊ±ºò
-		** ÅĞ¶ÏÊÇ·ñÔÚ¶ÏÏßÁĞ±íÖĞ, Èç¹û´æÔÚ£¬ÔòÉèÖÃÎªÓÎÏ·¶ÏÏß£» Èç¹û²»´æÔÚ£¬ ÔòÉèÖÃÎªÀëÏß
+		** æƒ…å½¢å›› ç™»å½•æœ socketæ–­æ‰çš„æ—¶å€™
+		** åˆ¤æ–­æ˜¯å¦åœ¨æ–­çº¿åˆ—è¡¨ä¸­, å¦‚æœå­˜åœ¨ï¼Œåˆ™è®¾ç½®ä¸ºæ¸¸æˆæ–­çº¿ï¼› å¦‚æœä¸å­˜åœ¨ï¼Œ åˆ™è®¾ç½®ä¸ºç¦»çº¿
 		*/
 		bool bIsExsit = false;
 		for(int i=0; i < m_OfflineUserListManager.GetCount(); i++)
@@ -767,7 +767,7 @@ bool CAttemperEngineSink::OnEventTCPNetworkShut(DWORD dwClientAddr, DWORD dwActi
 		DBR_GP_UserQuitInfo quitInfo;
 		quitInfo.dwUserID = pBindParameter->dwUserID;
 
-		//1´óÌüÔÚÏß £¬2ÕıÔÚÓÎÏ·£¬3ÓÎÏ·¶ÏÏß£¬4ÀëÏß
+		//1å¤§å…åœ¨çº¿ ï¼Œ2æ­£åœ¨æ¸¸æˆï¼Œ3æ¸¸æˆæ–­çº¿ï¼Œ4ç¦»çº¿
 		if(bIsExsit)
 		{
 			quitInfo.byOnlineMask = 3;
@@ -779,55 +779,55 @@ bool CAttemperEngineSink::OnEventTCPNetworkShut(DWORD dwClientAddr, DWORD dwActi
 		m_pIDataBaseEngine->PostDataBaseRequest(DBR_GP_LOGON_USER_STATE,dwSocketID, &quitInfo,sizeof(quitInfo));
 	}
 
-	//Çå³ıĞÅÏ¢
+	//æ¸…é™¤ä¿¡æ¯
 	//WORD wBindIndex=LOWORD(dwSocketID);
 	ZeroMemory((m_pBindParameter+wBindIndex),sizeof(tagBindParameter));
 
 	return false;
 }
 
-//¶ÁÈ¡ÊÂ¼ş
+//è¯»å–äº‹ä»¶
 bool CAttemperEngineSink::OnEventTCPNetworkRead(TCP_Command Command, VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
 	switch (Command.wMainCmdID)
 	{
-	case MDM_LOGON:				//µÇÂ¼ÃüÁî
+	case MDM_LOGON:				//ç™»å½•å‘½ä»¤
 		{
 			return OnTCPNetworkMainLogon(Command.wSubCmdID,pData,wDataSize,dwSocketID);
 		}
-	case MDM_SERVICE:			//·şÎñÃüÁî
+	case MDM_SERVICE:			//æœåŠ¡å‘½ä»¤
 		{
 			return OnTCPNetworkMainService(Command.wSubCmdID,pData,wDataSize,dwSocketID);
 		}
-	case MDM_CLUB:				//ÅÆÓÑÈ¦(°æ±¾2)
+	case MDM_CLUB:				//ç‰Œå‹åœˆ(ç‰ˆæœ¬2)
 		{
 			return On_MDM_CLUB(Command.wSubCmdID,pData,wDataSize,dwSocketID);
 		}
-	case MDM_GIFT:				//ÀñÎïµÀ¾ß	
+	case MDM_GIFT:				//ç¤¼ç‰©é“å…·	
 		{
 			return OnTCPNetworkMainOther(Command.wSubCmdID,pData,wDataSize,dwSocketID);
 		}
-	case MDM_SHOP:				//ÉÌ³ÇµÀ¾ß
+	case MDM_SHOP:				//å•†åŸé“å…·
 		{
 			return On_MDM_SHOP(Command.wSubCmdID,pData,wDataSize,dwSocketID);
 		}
-	case MDM_GAME:				//ÓÎÏ··şÏà¹Ø
+	case MDM_GAME:				//æ¸¸æˆæœç›¸å…³
 		{
 			return On_MDM_GAME(Command.wSubCmdID,pData,wDataSize,dwSocketID);
 		}
 
 	}
 
-	//µÇÂ¼·şÊÇ¶ÌÁ¬½Ó, ĞÄÌø°üÎŞĞ§
+	//ç™»å½•æœæ˜¯çŸ­è¿æ¥, å¿ƒè·³åŒ…æ— æ•ˆ
 	return false;
 }
 
 
 
-//»ñÈ¡ÍâÍøip
+//è·å–å¤–ç½‘ip
 int GetInternetIP( TCHAR *szInernet_ip)
 {
-	//ÏÂÔØ½Å±¾
+	//ä¸‹è½½è„šæœ¬
 	TCHAR szTempPath[_MAX_PATH] = {0}, szTempFile[MAX_PATH] = {0};
 	GetTempPath(MAX_PATH, szTempPath);
 
@@ -836,18 +836,18 @@ int GetInternetIP( TCHAR *szInernet_ip)
 	if (ret == S_FALSE)
 		return 1;
 
-	//ÅĞ¶Ï½Å±¾ÊÇ·ñÏÂÔØ³É¹¦
+	//åˆ¤æ–­è„šæœ¬æ˜¯å¦ä¸‹è½½æˆåŠŸ
 	FILE *fp;
 	if (_wfopen_s(&fp,szTempFile,_T("r"))!=0)
 		return 2;
 
 
-	fseek(fp,0,SEEK_END);//µÃµ½ÎÄ¼ş´óĞ¡
+	fseek(fp,0,SEEK_END);//å¾—åˆ°æ–‡ä»¶å¤§å°
 	int ilength=ftell(fp);
 	fseek(fp,0,SEEK_SET);
 
 
-	//¶ÁÈ¡½Å±¾ÖĞµÄipµØÖ·
+	//è¯»å–è„šæœ¬ä¸­çš„ipåœ°å€
 	if(ilength>0)
 	{ 
 		std::string buffer;
@@ -863,8 +863,8 @@ int GetInternetIP( TCHAR *szInernet_ip)
 		{
 			MultiByteToWideChar(CP_ACP, 0,  &(iter->str())[0], -1, szInernet_ip, 32);
 
-			//ÌáÊ¾ÏûÏ¢
-			CLog::Log(log_debug, "ÍâÍøIP: %s", szInernet_ip);
+			//æç¤ºæ¶ˆæ¯
+			CLog::Log(log_debug, "å¤–ç½‘IP: %s", szInernet_ip);
 		}
 	}
 	else
@@ -876,13 +876,13 @@ int GetInternetIP( TCHAR *szInernet_ip)
 	return 5;
 }
 
-//¹Ø±ÕÊÂ¼ş
+//å…³é—­äº‹ä»¶
 bool CAttemperEngineSink::OnEventTCPSocketShut(WORD wServiceID, BYTE cbShutReason)
 {
-	//Ğ­µ÷Á¬½Ó
+	//åè°ƒè¿æ¥
 	if (wServiceID==NETWORK_CORRESPOND)
 	{
-		//ÉèÖÃÊ±¼ä
+		//è®¾ç½®æ—¶é—´
 		m_pITimerEngine->SetTimer(IDI_CONNECT_CORRESPOND, TIME_CONNECT_CORRESPOND, 1, 0);
 		return true;
 	}
@@ -890,32 +890,32 @@ bool CAttemperEngineSink::OnEventTCPSocketShut(WORD wServiceID, BYTE cbShutReaso
 	return false;
 }
 
-//Á¬½ÓÊÂ¼ş
+//è¿æ¥äº‹ä»¶
 bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 {
-	//Ğ­µ÷Á¬½Ó
+	//åè°ƒè¿æ¥
 	if (wServiceID==NETWORK_CORRESPOND)
 	{
-		//´íÎóÅĞ¶Ï
+		//é”™è¯¯åˆ¤æ–­
 		if (nErrorCode!=0)
 		{
-			//ÉèÖÃÊ±¼ä
+			//è®¾ç½®æ—¶é—´
 			m_pITimerEngine->SetTimer(IDI_CONNECT_CORRESPOND, TIME_CONNECT_CORRESPOND, 1, 0);
 			return false;
 		}
 
-		//±äÁ¿¶¨Òå
+		//å˜é‡å®šä¹‰
 		STR_CPR_LP_REGISTER_LOGON CPR;
 		ZeroMemory(&CPR,sizeof(CPR));
 
-		//ÉèÖÃ±äÁ¿
+		//è®¾ç½®å˜é‡
 		TCHAR szInernet_ip[32] = TEXT("0.0.0.0");
 		//GetInternetIP(szInernet_ip);
 		//lstrcpyn(CPR.szServerAddr,szInernet_ip ,CountArray(CPR.szServerAddr));
 
 		lstrcpyn(CPR.szServerAddr,TEXT("127.0.0.1"),CountArray(CPR.szServerAddr));
 
-		//·¢ËÍÊı¾İ
+		//å‘é€æ•°æ®
 		m_pITCPSocketEngine->SendData(MDM_REGISTER,CPR_LP_REGISTER_LOGON,&CPR,sizeof(CPR));
 
 		return true;
@@ -924,27 +924,27 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 	return true;
 }
 
-//¶ÁÈ¡ÊÂ¼ş
+//è¯»å–äº‹ä»¶
 bool CAttemperEngineSink::OnEventTCPSocketRead(WORD wServiceID, TCP_Command Command, VOID * pData, WORD wDataSize)
 {
-	//Ğ­µ÷Á¬½Ó
+	//åè°ƒè¿æ¥
 	if (wServiceID==NETWORK_CORRESPOND)
 	{
 		switch (Command.wMainCmdID)
 		{
-		case MDM_REGISTER:		//×¢²áÄ£¿é
+		case MDM_REGISTER:		//æ³¨å†Œæ¨¡å—
 			{
 				return OnTCPSocketMainRegister(Command.wSubCmdID,pData,wDataSize);
 			}
-		case MDM_CPD_LIST:	//ÁĞ±íÃüÁî
+		case MDM_CPD_LIST:	//åˆ—è¡¨å‘½ä»¤
 			{
 				return OnTCPSocketMainServiceInfo(Command.wSubCmdID,pData,wDataSize);
 			}
-		case MDM_TRANSFER:	//ÖĞ×ª·şÎñ
+		case MDM_TRANSFER:	//ä¸­è½¬æœåŠ¡
 			{
 				return OnTCPSocketMainTransfer(Command.wSubCmdID,pData,wDataSize);	
 			}
-		case MDM_WEB: //ºóÌ¨·şÎñ
+		case MDM_WEB: //åå°æœåŠ¡
 			{
 				return OnTCPSocketMainWeb(Command.wSubCmdID,pData,wDataSize);
 			}
@@ -956,141 +956,141 @@ bool CAttemperEngineSink::OnEventTCPSocketRead(WORD wServiceID, TCP_Command Comm
 
 #pragma endregion
 
-#pragma region  Æô¶¯ÃüÁî
-/*********************************************¡¾Æô¶¯µÇÂ½·şÊ±£¬·şÎñµ¥Ôª·¢ËÍµÄÏûÏ¢´¦Àíº¯Êı¡¿*********************************************************/
-//ÓÎÏ·ÖÖÀà
+#pragma region  å¯åŠ¨å‘½ä»¤
+/*********************************************ã€å¯åŠ¨ç™»é™†æœæ—¶ï¼ŒæœåŠ¡å•å…ƒå‘é€çš„æ¶ˆæ¯å¤„ç†å‡½æ•°ã€‘*********************************************************/
+//æ¸¸æˆç§ç±»
 bool CAttemperEngineSink::OnDBPCGameTypeItem(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	ASSERT(wDataSize%sizeof(tagGameType)==0);
 	if (wDataSize%sizeof(tagGameType)!=0) return false;
 
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	WORD wItemCount=wDataSize/sizeof(tagGameType);
 	tagGameType * pGameType=(tagGameType *)pData;
 
-	//¸üĞÂÊı¾İ
+	//æ›´æ–°æ•°æ®
 	for (WORD i=0;i<wItemCount;i++)
 	{
-		//±äÁ¿¶¨Òå
+		//å˜é‡å®šä¹‰
 		tagGameType GameType;
 		ZeroMemory(&GameType,sizeof(GameType));
 
-		//¹¹ÔìÊı¾İ
+		//æ„é€ æ•°æ®
 		GameType.wTypeID=(pGameType+i)->wTypeID;
 		lstrcpyn(GameType.szTypeName,(pGameType+i)->szTypeName,CountArray(GameType.szTypeName));
 
-		//²åÈëÁĞ±í
+		//æ’å…¥åˆ—è¡¨
 		m_ServerListManager.InsertGameType(&GameType);
 	}
 
 	return true;
 }
 
-//ÓÎÏ·ÀàĞÍ
+//æ¸¸æˆç±»å‹
 bool CAttemperEngineSink::OnDBPCGameKindItem(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	ASSERT(wDataSize%sizeof(tagGameKind)==0);
 	if (wDataSize%sizeof(tagGameKind)!=0) return false;
 
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	WORD wItemCount=wDataSize/sizeof(tagGameKind);
 	tagGameKind * pGameKind=(tagGameKind *)pData;
 
-	//¸üĞÂÊı¾İ
+	//æ›´æ–°æ•°æ®
 	for (WORD i=0;i<wItemCount;i++)
 	{
-		//±äÁ¿¶¨Òå
+		//å˜é‡å®šä¹‰
 		tagGameKind GameKind;
 		ZeroMemory(&GameKind,sizeof(GameKind));
 
-		//¹¹ÔìÊı¾İ
+		//æ„é€ æ•°æ®
 		GameKind.wKindID=(pGameKind+i)->wKindID;
 		GameKind.wTypeID=(pGameKind+i)->wTypeID;
 		lstrcpyn(GameKind.szKindName,(pGameKind+i)->szKindName,CountArray(GameKind.szKindName));
 
-		//²åÈëÁĞ±í
+		//æ’å…¥åˆ—è¡¨
 		m_ServerListManager.InsertGameKind(&GameKind);
 	}
 
 	return true;
 }
 
-//ÓÎÏ·½Úµã
+//æ¸¸æˆèŠ‚ç‚¹
 bool CAttemperEngineSink::OnDBPCGameNodeItem(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	ASSERT(wDataSize%sizeof(tagGameNode)==0);
 	if (wDataSize%sizeof(tagGameNode)!=0) return false;
 
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	WORD wItemCount=wDataSize/sizeof(tagGameNode);
 	tagGameNode * pGameNode=(tagGameNode *)pData;
 
-	//¸üĞÂÊı¾İ
+	//æ›´æ–°æ•°æ®
 	for (WORD i=0;i<wItemCount;i++)
 	{
-		//±äÁ¿¶¨Òå
+		//å˜é‡å®šä¹‰
 		tagGameNode GameNode;
 		ZeroMemory(&GameNode,sizeof(GameNode));
 
-		//¹¹ÔìÊı¾İ
+		//æ„é€ æ•°æ®
 		GameNode.wKindID=(pGameNode+i)->wKindID;
 		GameNode.wNodeID=(pGameNode+i)->wNodeID;
 		lstrcpyn(GameNode.szNodeName,(pGameNode+i)->szNodeName,CountArray(GameNode.szNodeName));
 
-		//²åÈëÁĞ±í
+		//æ’å…¥åˆ—è¡¨
 		m_ServerListManager.InsertGameNode(&GameNode);
 	}
 
 	return true;
 }
 
-//ÓÎÏ·ÁĞ±í
+//æ¸¸æˆåˆ—è¡¨
 bool CAttemperEngineSink::OnDBPCGameListResult(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize!=sizeof(DBO_GP_GameListResult)) return false;
 
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	DBO_GP_GameListResult * pGameListResult=(DBO_GP_GameListResult *)pData;
 
-	//ÏûÏ¢´¦Àí
+	//æ¶ˆæ¯å¤„ç†
 	if (pGameListResult->cbSuccess==TRUE)
 	{
-		//ÇåÀíÁĞ±í
+		//æ¸…ç†åˆ—è¡¨
 		//m_ServerListManager.CleanKernelItem();
 
-		//ÊÂ¼şÍ¨Öª
+		//äº‹ä»¶é€šçŸ¥
 		CP_ControlResult ControlResult;
 		ControlResult.cbSuccess=ER_SUCCESS;
 
 	}
 	else
 	{
-		//ÌáÊ¾ÏûÏ¢
-		CLog::Log(log_warn, "·şÎñÆ÷ÁĞ±í¼ÓÔØÊ§°Ü£¬%ld Ãëºó½«ÖØĞÂ¼ÓÔØ", TIME_RELOAD_LIST);
+		//æç¤ºæ¶ˆæ¯
+		CLog::Log(log_warn, "æœåŠ¡å™¨åˆ—è¡¨åŠ è½½å¤±è´¥ï¼Œ%ld ç§’åå°†é‡æ–°åŠ è½½", TIME_RELOAD_LIST);
 
-		//ÉèÖÃÊ±¼ä
+		//è®¾ç½®æ—¶é—´
 		m_pITimerEngine->SetTimer(IDI_LOAD_GAME_LIST,TIME_RELOAD_LIST*1000L,1,0);
 	}
 
 	return true;
 }
 
-//¼ÓÔØÅÜÂíµÆÏûÏ¢ ·µ»Ø
+//åŠ è½½è·‘é©¬ç¯æ¶ˆæ¯ è¿”å›
 bool CAttemperEngineSink::On_DBO_UPDATA_MARQUEE(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	WORD size = sizeof(STR_DBO_UPDATA_MARQUEE);
 	if ((wDataSize < size) || ( (wDataSize % size) != 0))  return false;
 
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	WORD wItemCount=wDataSize/size;
 	STR_DBO_UPDATA_MARQUEE * pMarquee=(STR_DBO_UPDATA_MARQUEE *)pData;
 
-	//¸üĞÂÊı¾İ
+	//æ›´æ–°æ•°æ®
 	for (WORD i=0;i<wItemCount;i++)
 	{
 		STR_DBO_UPDATA_MARQUEE strMarquee;
@@ -1101,17 +1101,17 @@ bool CAttemperEngineSink::On_DBO_UPDATA_MARQUEE(DWORD dwContextID, VOID * pData,
 		memcpy(&strMarquee.timeEndTime, &(pMarquee+i)->timeEndTime, sizeof(SYSTEMTIME));
 		memcpy(strMarquee.szMarqueeMsg, (pMarquee+i)->szMarqueeMsg, sizeof(strMarquee.szMarqueeMsg));
 
-		//²åÈëÁĞ±í
+		//æ’å…¥åˆ—è¡¨
 		m_MarqueeMsgListManager.Add(strMarquee);
 	}
 
 	return true;
 }
 
-//¼ÓÔØÅÜÂíµÆÏûÏ¢ ½áÊø
+//åŠ è½½è·‘é©¬ç¯æ¶ˆæ¯ ç»“æŸ
 bool CAttemperEngineSink::On_DBO_UPDATA_MARQUEE_FINISH(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//¿ªÆô¶¨Ê±Æ÷,  Í¨Öª¿Í»§¶Ë ¹ö¶¯ÅÜÂíµÆ
+	//å¼€å¯å®šæ—¶å™¨,  é€šçŸ¥å®¢æˆ·ç«¯ æ»šåŠ¨è·‘é©¬ç¯
 	m_pITimerEngine->SetTimer(IDI_PLAY_MARQUEE,1*1000L,1, 0);
 
 	return true;
@@ -1120,35 +1120,35 @@ bool CAttemperEngineSink::On_DBO_UPDATA_MARQUEE_FINISH(DWORD dwContextID, VOID *
 
 #pragma endregion
 
-#pragma region Ğ­µ÷·ş Ö÷ÏûÏ¢ºÅ·Ö·¢´¦Àí
-//×¢²áÄ£¿é
+#pragma region åè°ƒæœ ä¸»æ¶ˆæ¯å·åˆ†å‘å¤„ç†
+//æ³¨å†Œæ¨¡å—
 bool CAttemperEngineSink::OnTCPSocketMainRegister(WORD wSubCmdID, VOID * pData, WORD wDataSize)
 {
 	switch (wSubCmdID)
 	{
-	case CPO_PGPL_REGISTER_SUCESS:	//×¢²á³É¹¦
+	case CPO_PGPL_REGISTER_SUCESS:	//æ³¨å†ŒæˆåŠŸ
 		{
-			//¿ªÆôsocket::server·şÎñ
+			//å¼€å¯socket::serveræœåŠ¡
 			if(g_pServiceUnits->StartNetworkService() != 0)
 			{
 				g_pServiceUnits->ConcludeService();
 				return true;
 			}
 
-			//¶ÁÈ¡Êı¾İ¿â ¼ÓÔØÁĞ±í
+			//è¯»å–æ•°æ®åº“ åŠ è½½åˆ—è¡¨
 			m_ServerListManager.DisuseKernelItem();
 			m_pIDataBaseEngine->PostDataBaseRequest(DBR_GP_LOAD_GAME_LIST,0,NULL,0);
 
-			//×¢²áÍê³É£¬ÔÚÕâÀï³õÊ¼»¯ÅÅĞĞ°ñ
+			//æ³¨å†Œå®Œæˆï¼Œåœ¨è¿™é‡Œåˆå§‹åŒ–æ’è¡Œæ¦œ
 			if(NULL == m_pRankManager)
 				m_pRankManager = new RankManager(m_pIDataBaseEngine);
 
 			return true;
 		}
 
-	case CPO_PGPL_REGISTER_FAILURE:		//×¢²áÊ§°Ü
+	case CPO_PGPL_REGISTER_FAILURE:		//æ³¨å†Œå¤±è´¥
 		{
-			//ÊÂ¼şÍ¨Öª 
+			//äº‹ä»¶é€šçŸ¥ 
 			g_pServiceUnits ->ConcludeService();
 			return true;
 		}
@@ -1157,45 +1157,45 @@ bool CAttemperEngineSink::OnTCPSocketMainRegister(WORD wSubCmdID, VOID * pData, 
 	return true;
 }
 
-//ÁĞ±íÃüÁî
+//åˆ—è¡¨å‘½ä»¤
 bool CAttemperEngineSink::OnTCPSocketMainServiceInfo(WORD wSubCmdID, VOID * pData, WORD wDataSize)
 {
 	switch (wSubCmdID)
 	{
-	case SUB_CS_S_SERVER_INFO:		//·¿¼äĞÅÏ¢
+	case SUB_CS_S_SERVER_INFO:		//æˆ¿é—´ä¿¡æ¯
 		{
-			//·ÏÆúÁĞ±í
+			//åºŸå¼ƒåˆ—è¡¨
 			m_ServerListManager.DisuseServerItem();
 
 			return true;
 		}
-	case CPO_PL_LIST_GAME_ONLINE:	//·¿¼äÈËÊı
+	case CPO_PL_LIST_GAME_ONLINE:	//æˆ¿é—´äººæ•°
 		{
-			//Ğ§Ñé²ÎÊı
+			//æ•ˆéªŒå‚æ•°
 			if (wDataSize!=sizeof(STR_CPR_PL_LIST_GAME_ONLINE)) return false;
 
-			//±äÁ¿¶¨Òå
+			//å˜é‡å®šä¹‰
 			STR_CPR_PL_LIST_GAME_ONLINE * pServerOnLine=(STR_CPR_PL_LIST_GAME_ONLINE *)pData;
 
-			//²éÕÒ·¿¼ä
+			//æŸ¥æ‰¾æˆ¿é—´
 			CGameServerItem * pGameServerItem=m_ServerListManager.SearchGameServer(pServerOnLine->wServerID);
 			if(pGameServerItem == NULL) return true;
 
 			pGameServerItem->m_GameServer.dwOnlineCount = pServerOnLine->dwOnLineCount;
 			return true;
 		}
-	case CPO_PL_LIST_INSERT_GAME:	//·¿¼ä²åÈë
+	case CPO_PL_LIST_INSERT_GAME:	//æˆ¿é—´æ’å…¥
 		{
-			//Ğ§Ñé²ÎÊı
+			//æ•ˆéªŒå‚æ•°
 			if (wDataSize != sizeof(tagGameServer)) return false;
 
-			//±äÁ¿¶¨Òå
+			//å˜é‡å®šä¹‰
 			tagGameServer * pGameServer=(tagGameServer *)pData;
 
-			//²åÈë·¿¼ä
+			//æ’å…¥æˆ¿é—´
 			byte byRet = m_ServerListManager.InsertGameServer(pGameServer);
 
-			// Èç¹ûÊÇĞÂ·¿¼ä, ĞèÒªÍ¨ÖªËùÓĞclient
+			// å¦‚æœæ˜¯æ–°æˆ¿é—´, éœ€è¦é€šçŸ¥æ‰€æœ‰client
 			if(byRet == 2)
 			{
 				pGameServer->byMask = 0;
@@ -1204,37 +1204,37 @@ bool CAttemperEngineSink::OnTCPSocketMainServiceInfo(WORD wSubCmdID, VOID * pDat
 
 			return true;
 		}
-	case CPO_PL_LIST_INSERT_GAME_LIST:	//·¿¼ä²åÈë(ÁĞ±í)
+	case CPO_PL_LIST_INSERT_GAME_LIST:	//æˆ¿é—´æ’å…¥(åˆ—è¡¨)
 		{
-			//Ğ§Ñé²ÎÊı
+			//æ•ˆéªŒå‚æ•°
 			if ((wDataSize < sizeof(tagGameServer))
 				||(wDataSize%sizeof(tagGameServer)!=0)) return false;
 
-			//±äÁ¿¶¨Òå
+			//å˜é‡å®šä¹‰
 			WORD wItemCount=wDataSize/sizeof(tagGameServer);
 			tagGameServer * pGameServer=(tagGameServer *)pData;
 
-			//¸üĞÂÊı¾İ
+			//æ›´æ–°æ•°æ®
 			for (WORD i=0;i<wItemCount;i++)
 			{
-				//listÊ±ºòÎŞĞëÍ¨Öªclient
+				//listæ—¶å€™æ— é¡»é€šçŸ¥client
 				m_ServerListManager.InsertGameServer(pGameServer++);
 			}
 
 			return true;
 		}
-	case CPO_PL_LIST_REMOVE_GAME:	//·¿¼äÉ¾³ı
+	case CPO_PL_LIST_REMOVE_GAME:	//æˆ¿é—´åˆ é™¤
 		{
-			//Ğ§Ñé²ÎÊı
+			//æ•ˆéªŒå‚æ•°
 			if (wDataSize!=sizeof(STR_CPO_PL_LIST_REMOVE_GAME)) return false;
 
-			//±äÁ¿¶¨Òå
+			//å˜é‡å®šä¹‰
 			STR_CPO_PL_LIST_REMOVE_GAME * pServerRemove=(STR_CPO_PL_LIST_REMOVE_GAME *)pData;
 
-			//±äÁ¿¶¨Òå
+			//å˜é‡å®šä¹‰
 			m_ServerListManager.DeleteGameServer(pServerRemove->dwServerID);
 
-			//Í¬Ê±É¾³ı Óë´Ë ServerIDÏà¹ØµÄ¶ÏÏßÓÃ»§
+			//åŒæ—¶åˆ é™¤ ä¸æ­¤ ServerIDç›¸å…³çš„æ–­çº¿ç”¨æˆ·
 			for(int i=0; i < m_OfflineUserListManager.GetCount(); i++)
 			{
 				if(m_OfflineUserListManager.GetAt(i).dwServerID == pServerRemove->dwServerID)
@@ -1243,20 +1243,20 @@ bool CAttemperEngineSink::OnTCPSocketMainServiceInfo(WORD wSubCmdID, VOID * pDat
 				}
 			}
 
-			//Í¨Öªclient, ÓĞ¸öÓÎÏ··şµôÏßÁË
+			//é€šçŸ¥client, æœ‰ä¸ªæ¸¸æˆæœæ‰çº¿äº†
 			tagGameServer GameServer;
 			GameServer.wServerID = pServerRemove->dwServerID;
-			GameServer.byMask = 1; //É¾³ı±êÖ¾
+			GameServer.byMask = 1; //åˆ é™¤æ ‡å¿—
 			m_pITCPNetworkEngine->SendDataBatch(MDM_LIST, CMD_LC_LIST_ROOM, &GameServer, sizeof(tagGameServer));
 
 			return true;
 		}
-	case SUB_CS_C_USER_OFFLINE_B: //ÓÃ»§¶ÏÏß
+	case SUB_CS_C_USER_OFFLINE_B: //ç”¨æˆ·æ–­çº¿
 		{
-			//Ğ§Ñé²ÎÊı
+			//æ•ˆéªŒå‚æ•°
 			if (wDataSize!=sizeof(tagOfflineUser)) return false;
 
-			//±äÁ¿¶¨Òå
+			//å˜é‡å®šä¹‰
 			tagOfflineUser * pOfflineUser=(tagOfflineUser *)pData;
 			tagOfflineUser OfflineUser;
 			OfflineUser.dwUserID = pOfflineUser->dwUserID;
@@ -1267,7 +1267,7 @@ bool CAttemperEngineSink::OnTCPSocketMainServiceInfo(WORD wSubCmdID, VOID * pDat
 			{
 				m_OfflineUserListManager.Add(OfflineUser);
 
-				//Í¨ÖªÊı¾İ¿â, ¸ü¸ÄÍæ¼ÒÔÚÏß×´Ì¬
+				//é€šçŸ¥æ•°æ®åº“, æ›´æ”¹ç©å®¶åœ¨çº¿çŠ¶æ€
 				DBR_GP_UserQuitInfo quitInfo;
 				quitInfo.dwUserID = OfflineUser.dwUserID ;
 				quitInfo.byOnlineMask = 3;
@@ -1291,36 +1291,36 @@ bool CAttemperEngineSink::OnTCPSocketMainServiceInfo(WORD wSubCmdID, VOID * pDat
 	return true;
 }
 
-//ÖĞ×ª·şÎñ
+//ä¸­è½¬æœåŠ¡
 bool CAttemperEngineSink::OnTCPSocketMainTransfer(WORD wSubCmdID, VOID * pData, WORD wDataSize)
 {
 	switch (wSubCmdID)
 	{
-	case CPO_PL_CLUB_TABLE_INFO:  //¾ãÀÖ²¿×À×ÓĞÅÏ¢
+	case CPO_PL_CLUB_TABLE_INFO:  //ä¿±ä¹éƒ¨æ¡Œå­ä¿¡æ¯
 		{
-			//TODONOW ÔİÊ±ÏÈ¸ÄÎªÍ¨ÖªËùÓĞclient, ºóÃæ¸ÄÎªÍ¨ÖªÔÚ¸Ã·¿¼äÄÚµÄÈË
+			//TODONOW æš‚æ—¶å…ˆæ”¹ä¸ºé€šçŸ¥æ‰€æœ‰client, åé¢æ”¹ä¸ºé€šçŸ¥åœ¨è¯¥æˆ¿é—´å†…çš„äºº
 			//added by WangChengQing 2018/5/21
-			//Ğ§ÑéÊı¾İ
+			//æ•ˆéªŒæ•°æ®
 			if (wDataSize!=sizeof(STR_CMD_LC_CLUB_TABLE_LIST)) return true;
 
-			//·¢ËÍÍ¨Öª -- È«²¿¿Í»§¶Ë
+			//å‘é€é€šçŸ¥ -- å…¨éƒ¨å®¢æˆ·ç«¯
 			m_pITCPNetworkEngine->SendDataBatch(MDM_CLUB,CMD_LC_CLUB_TABLE_LIST_TABLE,pData,wDataSize);
 			return true;
 		}
-	case CPO_PL_CLUB_PLAYER_INFO: //¾ãÀÖ²¿Íæ¼ÒĞÅÏ¢
+	case CPO_PL_CLUB_PLAYER_INFO: //ä¿±ä¹éƒ¨ç©å®¶ä¿¡æ¯
 		{
-			//TODONOW ÔİÊ±ÏÈ¸ÄÎªÍ¨ÖªËùÓĞclient, ºóÃæ¸ÄÎªÍ¨ÖªÔÚ¸Ã·¿¼äÄÚµÄÈË
+			//TODONOW æš‚æ—¶å…ˆæ”¹ä¸ºé€šçŸ¥æ‰€æœ‰client, åé¢æ”¹ä¸ºé€šçŸ¥åœ¨è¯¥æˆ¿é—´å†…çš„äºº
 			//added by WangChengQing 2018/5/21
-			//Ğ§ÑéÊı¾İ
+			//æ•ˆéªŒæ•°æ®
 			if (wDataSize!=sizeof(STR_CMD_LC_CLUB_TABLE_USER_LIST)) return true;
 
-			//·¢ËÍÍ¨Öª -- È«²¿¿Í»§¶Ë
+			//å‘é€é€šçŸ¥ -- å…¨éƒ¨å®¢æˆ·ç«¯
 			m_pITCPNetworkEngine->SendDataBatch(MDM_CLUB, CMD_LC_CLUB_TABLE_LIST_USER,pData,wDataSize);
 			return true;
 		}
-	case CPO_PL_CREATE_TABLE:	//´´½¨×À×Ó ²éÑ¯¿ÉÓÃµÄGameID
+	case CPO_PL_CREATE_TABLE:	//åˆ›å»ºæ¡Œå­ æŸ¥è¯¢å¯ç”¨çš„GameID
 		{
-			//Ğ§ÑéÊı¾İ
+			//æ•ˆéªŒæ•°æ®
 			if (wDataSize!=sizeof(STR_CPO_PL_CREATE_TABLE)) return true;
 			STR_CPO_PL_CREATE_TABLE *pCPO = (STR_CPO_PL_CREATE_TABLE*)pData;
 			
@@ -1337,37 +1337,37 @@ bool CAttemperEngineSink::OnTCPSocketMainTransfer(WORD wSubCmdID, VOID * pData, 
 	return true;
 }
 
-//ºóÌ¨¹ÜÀí
+//åå°ç®¡ç†
 bool CAttemperEngineSink::OnTCPSocketMainWeb( WORD wSubCmdID, VOID * pData, WORD wDataSize )
 {
 	switch (wSubCmdID)
 	{
-		case CPO_PL_WEB_MARQUEE: //ÅÜÂíµÆĞÅÏ¢¶ÁÈ¡
+		case CPO_PL_WEB_MARQUEE: //è·‘é©¬ç¯ä¿¡æ¯è¯»å–
 		{
 			if (wDataSize!=sizeof(STR_CPR_WP_WEB_MARQUEE)) return true;
 
-			//TODONOW added by WangChengQing 2018/8/14 Èç¹û³ÌĞò±ÀÀ£, Çë²é¿´´Ë´¦
-			//1. ÏÈÇå¿ÕÅÜÂíµÆÁĞ±í
+			//TODONOW added by WangChengQing 2018/8/14 å¦‚æœç¨‹åºå´©æºƒ, è¯·æŸ¥çœ‹æ­¤å¤„
+			//1. å…ˆæ¸…ç©ºè·‘é©¬ç¯åˆ—è¡¨
 			m_MarqueeMsgListManager.RemoveAll();
 
-			//2. ÖØĞÂ¶ÁÈ¡Êı¾İ¿â
+			//2. é‡æ–°è¯»å–æ•°æ®åº“
 			m_pIDataBaseEngine->PostDataBaseRequest(DBR_UPDATA_MARQUEE,0,NULL,0);
 			return true;
 		}
-		case CPO_PL_WEB_SYSTEM_MESSAGE: //ÁÄÌìÏûÏ¢ -- ÏµÍ³ÏûÏ¢
+		case CPO_PL_WEB_SYSTEM_MESSAGE: //èŠå¤©æ¶ˆæ¯ -- ç³»ç»Ÿæ¶ˆæ¯
 		{
-			//Ğ§Ñé´óĞ¡
+			//æ•ˆéªŒå¤§å°
 			if (wDataSize!=sizeof(STR_CPR_WP_WEB_SYSTEM_MESSAGE))
 			{
 				return true;
 			}
 			STR_CPR_WP_WEB_SYSTEM_MESSAGE *pSub = (STR_CPR_WP_WEB_SYSTEM_MESSAGE*) pData;
 
-			//½á¹¹Ìå¹¹Ôì 
+			//ç»“æ„ä½“æ„é€  
 			STR_CMD_LC_CLUB_CHAT_BDCAST CMD;
 			ZeroMemory(&CMD, sizeof(CMD));
 			CMD.byChatMode = 2;
-			memcpy(CMD.szUserNickName, TEXT("ÏµÍ³¹ÜÀíÔ±"), sizeof(CMD.szUserNickName));
+			memcpy(CMD.szUserNickName, TEXT("ç³»ç»Ÿç®¡ç†å‘˜"), sizeof(CMD.szUserNickName));
 			memcpy(CMD.szChat, pSub->szMessage, sizeof(CMD.szChat));
 
 			m_pITCPNetworkEngine->SendDataBatch(MDM_CLUB, CMD_LC_CLUB_CHAT_BDCAST, &CMD, sizeof(CMD));
@@ -1379,23 +1379,23 @@ bool CAttemperEngineSink::OnTCPSocketMainWeb( WORD wSubCmdID, VOID * pData, WORD
 
 #pragma endregion
 
-#pragma region ¿Í»§¶Ë Ö÷ÏûÏ¢ºÅ·Ö·¢´¦Àí
-/*********************************************·şÎñÆ÷<->¿Í»§¶ËÏûÏ¢ÏìÓ¦º¯Êı*********************************************************/
+#pragma region å®¢æˆ·ç«¯ ä¸»æ¶ˆæ¯å·åˆ†å‘å¤„ç†
+/*********************************************æœåŠ¡å™¨<->å®¢æˆ·ç«¯æ¶ˆæ¯å“åº”å‡½æ•°*********************************************************/
 
-//µÇÂ¼Ä£¿é
+//ç™»å½•æ¨¡å—
 bool CAttemperEngineSink::OnTCPNetworkMainLogon(WORD wSubCmdID, VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
 	switch (wSubCmdID)
 	{
-	case SUB_CL_LOGON_ACCOUNTS:		//ÕÊºÅµÇÂ¼
+	case SUB_CL_LOGON_ACCOUNTS:		//å¸å·ç™»å½•
 		{
 			return On_SUB_CL_Logon_Accounts(pData,wDataSize,dwSocketID);
 		}
-	case SUB_CL_LOGON_REGISTER:		//ÕÊºÅ×¢²á
+	case SUB_CL_LOGON_REGISTER:		//å¸å·æ³¨å†Œ
 		{
 			return On_SUB_CL_Logon_Register(pData,wDataSize,dwSocketID);
 		}
-	case SUB_CL_LOGON_PLATFORM:		//Æ½Ì¨µÇÂ¼
+	case SUB_CL_LOGON_PLATFORM:		//å¹³å°ç™»å½•
 		{
 			return On_SUB_CL_Logon_Platform(pData,wDataSize,dwSocketID);
 		}
@@ -1403,80 +1403,80 @@ bool CAttemperEngineSink::OnTCPNetworkMainLogon(WORD wSubCmdID, VOID * pData, WO
 	return false;
 }
 
-//ÓÃ»§·şÎñ
+//ç”¨æˆ·æœåŠ¡
 bool CAttemperEngineSink::OnTCPNetworkMainService(WORD wSubCmdID, VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
 	switch (wSubCmdID)
 	{
-	case SUB_CL_SERVICE_USER_FEEDBACK:			//Íæ¼Ò·´À¡
+	case SUB_CL_SERVICE_USER_FEEDBACK:			//ç©å®¶åé¦ˆ
 		{
 			return On_SUB_CL_Service_UserFeedBack(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_SERVICE_REFRESH_USER_INFO:		//Ë¢ĞÂÓÃ»§ĞÅÏ¢
+	case SUB_CL_SERVICE_REFRESH_USER_INFO:		//åˆ·æ–°ç”¨æˆ·ä¿¡æ¯
 		{
 			return On_SUB_CL_Service_RefreshUserInfo(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_SERVICE_QUERY_ROOM_LIST:		//²éÑ¯¿ª·¿ĞÅÏ¢ÁĞ±í
+	case SUB_CL_SERVICE_QUERY_ROOM_LIST:		//æŸ¥è¯¢å¼€æˆ¿ä¿¡æ¯åˆ—è¡¨
 		{
 			return On_SUB_CL_Service_QueryRoomList(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_SERVICE_MODIFY_PERSONAL_INFO:	//ĞŞ¸Ä¸öÈË×ÊÁÏ
+	case SUB_CL_SERVICE_MODIFY_PERSONAL_INFO:	//ä¿®æ”¹ä¸ªäººèµ„æ–™
 		{
 			return On_SUB_CL_Service_ModifyPersonalInfo(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_SERVICE_GET_RICH_LIST:			//»ñÈ¡¸»ºÀ°ñ
+	case SUB_CL_SERVICE_GET_RICH_LIST:			//è·å–å¯Œè±ªæ¦œ
 		{
 			return On_SUB_CL_Service_GetRichList(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_SERVICE_GET_DJ_RECORD_LIST:	//»ñÈ¡ÓÃ»§Â¼ÏñÁĞ±í
+	case SUB_CL_SERVICE_GET_DJ_RECORD_LIST:	//è·å–ç”¨æˆ·å½•åƒåˆ—è¡¨
 		{
 			return On_SUB_CL_Service_GetUserRecordList(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_SERVICE_GET_XJ_RECORD_LIST:	//»ñÈ¡Ö¸¶¨IDÂ¼Ïñ
+	case SUB_CL_SERVICE_GET_XJ_RECORD_LIST:	//è·å–æŒ‡å®šIDå½•åƒ
 		{
 			return On_SUB_CL_Service_GetSpecificRecord(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_SERVICE_ONLINE_REWARD:			//»ñÈ¡ÔÚÏß½±Àø
+	case SUB_CL_SERVICE_ONLINE_REWARD:			//è·å–åœ¨çº¿å¥–åŠ±
 		{
 			return On_SUB_CL_Service_OnlineReward(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_SERVICE_GET_TASK_LIST:			//»ñÈ¡ÈÎÎñÁĞ±í
+	case SUB_CL_SERVICE_GET_TASK_LIST:			//è·å–ä»»åŠ¡åˆ—è¡¨
 		{
 			return On_SUB_CL_Service_GetTaskList(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_SERVICE_GET_TASK_REWARD:		//ÁìÈ¡ÈÎÎñ½±Àø
+	case SUB_CL_SERVICE_GET_TASK_REWARD:		//é¢†å–ä»»åŠ¡å¥–åŠ±
 		{
 			return On_SUB_CL_Service_GetTaskReward(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_SERVICE_GET_RANK_LIST:			//»ñÈ¡ÅÅĞĞ°ñ
+	case SUB_CL_SERVICE_GET_RANK_LIST:			//è·å–æ’è¡Œæ¦œ
 		{
 			return On_SUB_CL_Service_GetRankList(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_SERVICE_REQUEST_LOTTERY:		//ÇëÇó³é½±
+	case SUB_CL_SERVICE_REQUEST_LOTTERY:		//è¯·æ±‚æŠ½å¥–
 		{
 			return On_SUB_CL_Service_RequestLottery(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_SERVICE_PURE_STANDING_LIST:		//pure´óÌüÅÅĞĞ°æ
+	case SUB_CL_SERVICE_PURE_STANDING_LIST:		//pureå¤§å…æ’è¡Œç‰ˆ
 		{
 			return On_SUB_CL_SERVICE_PURE_STANDING_LIST(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_SERVICE_PURE_RECORD_LIST:		//´ó¾ÖÕ½¼¨
+	case SUB_CL_SERVICE_PURE_RECORD_LIST:		//å¤§å±€æˆ˜ç»©
 		{
 			return On_SUB_CL_SERVICE_PURE_RECORD_LIST(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_SERVICE_PURE_XJ_RECORD_LIST:	//Ğ¡¾ÖÕ½¼¨
+	case SUB_CL_SERVICE_PURE_XJ_RECORD_LIST:	//å°å±€æˆ˜ç»©
 		{
 			return On_SUB_CL_SERVICE_PURE_XJ_RECORD_LIST(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_SERVICE_GOLD_INFO: //½ğ±Ò³¡ĞÅÏ¢
+	case SUB_CL_SERVICE_GOLD_INFO: //é‡‘å¸åœºä¿¡æ¯
 		{
 			return On_SUB_CL_SERVICE_GOLD_INFO(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_SERVICE_XJ_RECORD_PLAYBACK:	//Ğ¡¾ÖÂ¼Ïñ»Ø·Å
+	case SUB_CL_SERVICE_XJ_RECORD_PLAYBACK:	//å°å±€å½•åƒå›æ”¾
 		{
 			return On_SUB_CL_Service_XJRecordPlayback(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_SERVICE_CUSTOMER_MESSEGE:	//¿Í·şÏûÏ¢
+	case SUB_CL_SERVICE_CUSTOMER_MESSEGE:	//å®¢æœæ¶ˆæ¯
 		{
 			return On_SUB_CL_SERVICE_CUSTOMER_MESSEGE(pData, wDataSize, dwSocketID);
 		}
@@ -1485,122 +1485,122 @@ bool CAttemperEngineSink::OnTCPNetworkMainService(WORD wSubCmdID, VOID * pData, 
 	return false;
 }
 
-//ÅÆÓÑÈ¦
+//ç‰Œå‹åœˆ
 bool CAttemperEngineSink::On_MDM_CLUB(WORD wSubCmdID, VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
 	switch(wSubCmdID)
 	{
-	case SUB_CL_CLUB_ALL_CLUB_INFO_LIST:	 //²éÑ¯ÅÆÓÑÈ¦ÁĞ±í
+	case SUB_CL_CLUB_ALL_CLUB_INFO_LIST:	 //æŸ¥è¯¢ç‰Œå‹åœˆåˆ—è¡¨
 		{
 			return On_SUB_CL_CLUB_ALL_CLUB_INFO_LIST(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_CLUB_ROOM_LIST:  //²éÑ¯Ö¸¶¨ÅÆÓÑÈ¦·¿¼äÁĞ±í
+	case SUB_CL_CLUB_ROOM_LIST:  //æŸ¥è¯¢æŒ‡å®šç‰Œå‹åœˆæˆ¿é—´åˆ—è¡¨
 		{
 			return On_SUB_CL_CLUB_ROOM_LIST(pData, wDataSize, dwSocketID);	
 		}
-	case SUB_CL_CLUB_RANDOM_CLUB_LIST: //²éÑ¯Î´ÂúÔ±, Ëæ»úÅÆÓÑÈ¦(×î´ó9¸ö)
+	case SUB_CL_CLUB_RANDOM_CLUB_LIST: //æŸ¥è¯¢æœªæ»¡å‘˜, éšæœºç‰Œå‹åœˆ(æœ€å¤§9ä¸ª)
 		{
 			return On_SUB_CL_CLUB_RANDOM_CLUB_LIST(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_CLUB_JOIN_CLUB: //ÉêÇë¼ÓÈëÅÆÓÑÈ¦
+	case SUB_CL_CLUB_JOIN_CLUB: //ç”³è¯·åŠ å…¥ç‰Œå‹åœˆ
 		{
 			return On_SUB_CL_CLUB_JOIN_CLUB(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_CLUB_DISS_CLUB: //½âÉ¢ÅÆÓÑÈ¦
+	case SUB_CL_CLUB_DISS_CLUB: //è§£æ•£ç‰Œå‹åœˆ
 		{
 			return On_SUB_CL_CLUB_DISS_CLUB(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_CLUB_CREATE_CLUB:	 //´´½¨ÅÆÓÑÈ¦
+	case SUB_CL_CLUB_CREATE_CLUB:	 //åˆ›å»ºç‰Œå‹åœˆ
 		{
 			return On_SUB_CL_CLUB_CREATE_CLUB(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_CLUB_JOIN_ROOM: //ÉêÇë¼ÓÈë·¿¼ä
+	case SUB_CL_CLUB_JOIN_ROOM: //ç”³è¯·åŠ å…¥æˆ¿é—´
 		{
 			return On_SUB_CL_CLUB_JOIN_ROOM(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_CLUB_ROOM_SETTING: //·¿¼äÉèÖÃ
+	case SUB_CL_CLUB_ROOM_SETTING: //æˆ¿é—´è®¾ç½®
 		{
 			return On_SUB_CL_CLUB_ROOM_SETTING(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_CLUB_ROOM_QUERY_SETTING://ÇëÇó·¿¼äÉèÖÃ
+	case SUB_CL_CLUB_ROOM_QUERY_SETTING://è¯·æ±‚æˆ¿é—´è®¾ç½®
 		{
 			return On_SUB_CL_CLUB_ROOM_QUERY_SETTING(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_CLUB_ROOM_USER_LEAVE://Íæ¼ÒÀë¿ª·¿¼ä
+	case SUB_CL_CLUB_ROOM_USER_LEAVE://ç©å®¶ç¦»å¼€æˆ¿é—´
 		{
 			return On_SUB_CL_CLUB_ROOM_USER_LEAVE(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_CLUB_ROOM_DISSOLVE:	//½âÉ¢·¿¼ä
+	case SUB_CL_CLUB_ROOM_DISSOLVE:	//è§£æ•£æˆ¿é—´
 		{
 			return On_SUB_CL_CLUB_ROOM_DISSOLVE(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_CLUB_TABLE_DISSOLVE:	//½âÉ¢×À×Ó
+	case SUB_CL_CLUB_TABLE_DISSOLVE:	//è§£æ•£æ¡Œå­
 		{
 			return On_SUB_CL_CLUB_TABLE_DISSOLVE(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_CLUB_NOTICE: //ÅÆÓÑÈ¦¹«¸æ
+	case SUB_CL_CLUB_NOTICE: //ç‰Œå‹åœˆå…¬å‘Š
 		{
 			return On_SUB_CL_CLUB_NOTICE(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_CLUB_MESSAGE: //ÅÆÓÑÈ¦¼ò½é
+	case SUB_CL_CLUB_MESSAGE: //ç‰Œå‹åœˆç®€ä»‹
 		{
 			return On_SUB_CL_CLUB_MESSAGE(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_CLUB_CONTRIBUTE_FK: //¹±Ï×·¿¿¨
+	case SUB_CL_CLUB_CONTRIBUTE_FK: //è´¡çŒ®æˆ¿å¡
 		{
 			return On_SUB_CL_CLUB_CONTRIBUTE_FK(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_CLUB_AUTO_AGREE: //ÅÆÓÑÈ¦ÉèÖÃ
+	case SUB_CL_CLUB_AUTO_AGREE: //ç‰Œå‹åœˆè®¾ç½®
 		{
 			return On_SUB_CL_CLUB_AUTO_AGREE(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_CLUB_CHAT://ÅÆÓÑÈ¦ ÁÄÌì
+	case SUB_CL_CLUB_CHAT://ç‰Œå‹åœˆ èŠå¤©
 		{
 			return On_SUB_CL_CLUB_CHAT(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_CLUB_STICKY_POST:	//ÅÆÓÑÈ¦ÖÃ¶¥
+	case SUB_CL_CLUB_STICKY_POST:	//ç‰Œå‹åœˆç½®é¡¶
 		{
 			return On_SUB_CL_CLUBSTICKY_POST(pData, wDataSize, dwSocketID);
 		}
 		/*
-	case SUB_CL_CLUB_CREATE_CLUB_ROOM_APPLY:  //´´½¨ÅÆÓÑÈ¦·¿¼ä
+	case SUB_CL_CLUB_CREATE_CLUB_ROOM_APPLY:  //åˆ›å»ºç‰Œå‹åœˆæˆ¿é—´
 		{
 			return On_SUB_CL_CLUB_CREATE_CLUB_ROOM_APPLY(pData, wDataSize, dwSocketID);	
 		}
 		*/
-	case SUB_CL_CLUB_APPLICANT_RESULT:	 //ÈºÖ÷|¹ÜÀí¶ÔÉêÇëÏûÏ¢µÄ´ğ¸´(Í¬Òâ|¾Ü¾ø)
+	case SUB_CL_CLUB_APPLICANT_RESULT:	 //ç¾¤ä¸»|ç®¡ç†å¯¹ç”³è¯·æ¶ˆæ¯çš„ç­”å¤(åŒæ„|æ‹’ç»)
 		{
 			return On_SUB_CL_CLUB_APPLICANT_RESULT(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_CLUB_MEMBER_MANAGER:  //ÇëÇó³ÉÔ±Êı¾İ
+	case SUB_CL_CLUB_MEMBER_MANAGER:  //è¯·æ±‚æˆå‘˜æ•°æ®
 		{
 			return On_SUB_CL_CLUB_MEMBER_MANAGER(pData, wDataSize, dwSocketID);	
 		}
-	case SUB_CL_CLUB_INVITE://ÑûÇëËûÈË¼ÓÈëÅÆÓÑÈ¦
+	case SUB_CL_CLUB_INVITE://é‚€è¯·ä»–äººåŠ å…¥ç‰Œå‹åœˆ
 		{
 			return On_SUB_CL_CLUB_INVITE(pData, wDataSize, dwSocketID);	
 		}
-	case SUB_CL_CLUB_INVITE_RESULT:// ±»ÑûÇëÈË »Ø¸´
+	case SUB_CL_CLUB_INVITE_RESULT:// è¢«é‚€è¯·äºº å›å¤
 		{
 			return On_SUB_CL_CLUB_INVITE_RESULT(pData, wDataSize, dwSocketID);	
 		}
-	case SUB_CL_CLUB_INQUERY_LIST://±»ÑûÇëÈË²é¿´×Ô¼ºµÄÑûÇëÁĞ±í
+	case SUB_CL_CLUB_INQUERY_LIST://è¢«é‚€è¯·äººæŸ¥çœ‹è‡ªå·±çš„é‚€è¯·åˆ—è¡¨
 		{
 			return On_SUB_CL_CLUB_INQUERY_LIST(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_CLUB_APPLICANT_LIST: //ÉêÇëÈËÁĞ±í
+	case SUB_CL_CLUB_APPLICANT_LIST: //ç”³è¯·äººåˆ—è¡¨
 		{
 			return On_SUB_CL_CLUB_APPLICANT_LIST(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_CLUB_QUIT: //Ìß³öÍË³öÇëÇó
+	case SUB_CL_CLUB_QUIT: //è¸¢å‡ºé€€å‡ºè¯·æ±‚
 		{
 			return On_SUB_CL_CLUB_QUIT(pData, wDataSize, dwSocketID);
 		}
-	case  SUB_CL_CLUB_APPOINTMENT://Ö°ÎñÈÎÃâ
+	case  SUB_CL_CLUB_APPOINTMENT://èŒåŠ¡ä»»å…
 		{
 			return On_SUB_CL_CLUB_APPOINTMENT(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_CLUB_RECORD_LIST:	//¹¤»áÕ½¼¨Í³¼Æ
+	case SUB_CL_CLUB_RECORD_LIST:	//å·¥ä¼šæˆ˜ç»©ç»Ÿè®¡
 		{
 			return On_SUB_CL_CLUB_RECORD_LIST(pData, wDataSize, dwSocketID);
 		}
@@ -1609,20 +1609,20 @@ bool CAttemperEngineSink::On_MDM_CLUB(WORD wSubCmdID, VOID * pData, WORD wDataSi
 	return false;
 }
 
-//ÀñÎïµÀ¾ß
+//ç¤¼ç‰©é“å…·
 bool CAttemperEngineSink::OnTCPNetworkMainOther(WORD wSubCmdID, VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
 	switch (wSubCmdID)
 	{
-	case SUB_CL_GIFT_GIVE_PROPS:				//ÔùËÍµÀ¾ß
+	case SUB_CL_GIFT_GIVE_PROPS:				//èµ é€é“å…·
 		{
 			return On_SUB_CL_GIFT_GIVE_PROPS(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_OTHERS_RECHARGE_INFO:				//³äÖµĞÅÏ¢
+	case SUB_CL_OTHERS_RECHARGE_INFO:				//å……å€¼ä¿¡æ¯
 		{
 			return On_SUB_CL_Other_ReChargeInfo(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_OTHERS_EXCHANGE_INFO:				//¶Ò»»µÀ¾ßĞÅÏ¢
+	case SUB_CL_OTHERS_EXCHANGE_INFO:				//å…‘æ¢é“å…·ä¿¡æ¯
 		{
 			return On_SUB_CL_Other_ExchangeInfo(pData, wDataSize, dwSocketID);
 		}
@@ -1631,24 +1631,24 @@ bool CAttemperEngineSink::OnTCPNetworkMainOther(WORD wSubCmdID, VOID * pData, WO
 	return false;
 }
 
-//ÉÌ³ÇµÀ¾ß
+//å•†åŸé“å…·
 bool CAttemperEngineSink::On_MDM_SHOP(WORD wSubCmdID, VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
 	switch(wSubCmdID)
 	{
-	case SUB_CL_SHOP_QUERY:	 //²éÑ¯ÉÌ³Ç
+	case SUB_CL_SHOP_QUERY:	 //æŸ¥è¯¢å•†åŸ
 		{
 			return On_SUB_CL_SHOP_QUERY(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_SHOP_MONEY:  //½ğÇ®¹ºÂòµÀ¾ß
+	case SUB_CL_SHOP_MONEY:  //é‡‘é’±è´­ä¹°é“å…·
 		{
 			//return On_SUB_CL_SHOP_MONEY(pData, wDataSize, dwSocketID);	
 		}
-	case SUB_CL_SHOP_DIAMOND: //×êÊ¯¹ºÂòµÀ¾ß
+	case SUB_CL_SHOP_DIAMOND: //é’»çŸ³è´­ä¹°é“å…·
 		{
 			return On_SUB_CL_SHOP_DIAMOND(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_BAG_QUERY: //±³°üÎïÆ·²éÑ¯
+	case SUB_CL_BAG_QUERY: //èƒŒåŒ…ç‰©å“æŸ¥è¯¢
 		{
 			return On_SUB_CL_BAG_QUERY(pData, wDataSize, dwSocketID);
 		}	
@@ -1657,14 +1657,14 @@ bool CAttemperEngineSink::On_MDM_SHOP(WORD wSubCmdID, VOID * pData, WORD wDataSi
 	return false;
 }
 
-//ÓÎÏ··şÏà¹Ø
+//æ¸¸æˆæœç›¸å…³
 bool CAttemperEngineSink::On_MDM_GAME(WORD wSubCmdID, VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
 	switch(wSubCmdID)
 	{
-	case SUB_CL_GAME_QUERY_GAMEID:	 //´´½¨·¿¼äÖ®Ç°, ÏÈ²éÑ¯¿ÉÓÃµÄGameID
+	case SUB_CL_GAME_QUERY_GAMEID:	 //åˆ›å»ºæˆ¿é—´ä¹‹å‰, å…ˆæŸ¥è¯¢å¯ç”¨çš„GameID
 		{
-			//Ğ£ÑéÊı¾İ
+			//æ ¡éªŒæ•°æ®
 			if (wDataSize!=sizeof(STR_SUB_CL_GAME_QUERY_GAMEID)) return true;
 
 			STR_SUB_CL_GAME_QUERY_GAMEID *pSub = (STR_SUB_CL_GAME_QUERY_GAMEID*)pData;
@@ -1684,66 +1684,66 @@ bool CAttemperEngineSink::On_MDM_GAME(WORD wSubCmdID, VOID * pData, WORD wDataSi
 
 #pragma endregion
 
-#pragma region MDM_LOGON µÇÂ¼Ä£¿é
-/***************************************** ¡¾µÇÂ¼´¦Àíº¯Êı-Ö÷ÏûÏ¢1¡¿ *******************************************/
-//ÕÊºÅµÇÂ¼
+#pragma region MDM_LOGON ç™»å½•æ¨¡å—
+/***************************************** ã€ç™»å½•å¤„ç†å‡½æ•°-ä¸»æ¶ˆæ¯1ã€‘ *******************************************/
+//å¸å·ç™»å½•
 bool CAttemperEngineSink::On_SUB_CL_Logon_Accounts(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_SUB_CL_LOGON_ACCOUNTS))
 	{
 		return false;
 	}
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	STR_SUB_CL_LOGON_ACCOUNTS * pSUBLogonAccounts=(STR_SUB_CL_LOGON_ACCOUNTS *)pData;
 
-	//°æ±¾ÅĞ¶Ï£¨°æ±¾²»¶Ô£¬Ö±½ÓÍË³ö£©
+	//ç‰ˆæœ¬åˆ¤æ–­ï¼ˆç‰ˆæœ¬ä¸å¯¹ï¼Œç›´æ¥é€€å‡ºï¼‰
 	if ( On_CMD_LC_Logon_UpdateNotify(pSUBLogonAccounts->dwVersionCheck, dwSocketID) )
 	{
 		return true;
 	}
 
-	//±äÁ¿¹¹Ôì
+	//å˜é‡æ„é€ 
 	STR_DBR_CL_LOGON_ACCOUNTS DBRLogonAccounts;
 	ZeroMemory(&DBRLogonAccounts,sizeof(DBRLogonAccounts));
-	//SocketĞ£Ñé
+	//Socketæ ¡éªŒ
 	DBRLogonAccounts.pBindParameter=(m_pBindParameter+LOWORD(dwSocketID));
-	//Êı¾İ¸³Öµ
+	//æ•°æ®èµ‹å€¼
 	lstrcpyn(DBRLogonAccounts.szAccounts,pSUBLogonAccounts->szAccounts,CountArray(DBRLogonAccounts.szAccounts));
 	lstrcpyn(DBRLogonAccounts.szPassword,pSUBLogonAccounts->szPassword,CountArray(DBRLogonAccounts.szPassword));
 	lstrcpyn(DBRLogonAccounts.szMachineID,pSUBLogonAccounts->szMachineID,CountArray(DBRLogonAccounts.szMachineID));
 	DBRLogonAccounts.dwProxyID = pSUBLogonAccounts->dwProxyID;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_LOGON_ACCOUNTS,dwSocketID,&DBRLogonAccounts,sizeof(DBRLogonAccounts));
 	return true;
 }
 
-//ÕËºÅµÇÂ¼·µ»Ø
+//è´¦å·ç™»å½•è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_Logon_Account(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//ÅĞ¶ÏÔÚÏß
+	//åˆ¤æ–­åœ¨çº¿
 	if ((m_pBindParameter+LOWORD(dwContextID))->dwSocketID!=dwContextID) return true;
 	if(wDataSize != sizeof(STR_CMD_LC_LOGON_PLATFORM)) return false;
 
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	STR_CMD_LC_LOGON_PLATFORM * pCMD=(STR_CMD_LC_LOGON_PLATFORM *)pData;
 
-	//Èç¹ûµÇÂ¼Ê§°Ü, Ö±½Ó·µ»Ø
+	//å¦‚æœç™»å½•å¤±è´¥, ç›´æ¥è¿”å›
 	if(DB_SUCCESS != pCMD->dwResultCode)
 	{
-		//·¢ËÍÊı¾İ
+		//å‘é€æ•°æ®
 		m_pITCPNetworkEngine->SendData(dwContextID, MDM_LOGON, CMD_LC_LOGON_ACCOUNTS, pCMD, sizeof(STR_CMD_LC_LOGON_PLATFORM));
 
 		return true;
 	}
 
-	//ÖØ¸´µÇÂ¼Ìß³ö
+	//é‡å¤ç™»å½•è¸¢å‡º
 	On_CMD_LC_Logon_RepeatLogon( pCMD->dwUserID, dwContextID );
 
-	//¶ÏÏßÖØÁ¬µÄ´¦Àí 1.CMD½á¹¹Ìå¸³Öµ  2.listÖĞÇå³ıitme 
-	bool bIsExist = false; //ÊÇ·ñ´æÔÚ¶ÏÏßÁĞ±íÖĞ
+	//æ–­çº¿é‡è¿çš„å¤„ç† 1.CMDç»“æ„ä½“èµ‹å€¼  2.listä¸­æ¸…é™¤itme 
+	bool bIsExist = false; //æ˜¯å¦å­˜åœ¨æ–­çº¿åˆ—è¡¨ä¸­
 	for(int i=0; i < m_OfflineUserListManager.GetCount(); i++)
 	{
 		if(m_OfflineUserListManager.GetAt(i).dwUserID == pCMD->dwUserID)
@@ -1754,23 +1754,23 @@ bool CAttemperEngineSink::On_CMD_LC_Logon_Account(DWORD dwContextID, VOID * pDat
 		}
 	}
 
-	//ÉèÖÃÁ¬½Ó
-	(m_pBindParameter+LOWORD(dwContextID))->dwUserID = pCMD->dwUserID;	//¼ÇÂ¼´ËÁ¬½ÓµÄÓÃ»§ID
+	//è®¾ç½®è¿æ¥
+	(m_pBindParameter+LOWORD(dwContextID))->dwUserID = pCMD->dwUserID;	//è®°å½•æ­¤è¿æ¥çš„ç”¨æˆ·ID
 
-	//·¢ËÍµÇÂ¼³É¹¦
+	//å‘é€ç™»å½•æˆåŠŸ
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_LOGON, CMD_LC_LOGON_ACCOUNTS, pCMD, sizeof(STR_CMD_LC_LOGON_PLATFORM));
 
 
-	//·¢ËÍÁĞ±í
+	//å‘é€åˆ—è¡¨
 	On_CMD_LC_List_Type(dwContextID);
 	On_CMD_LC_List_Kind(dwContextID);
 	On_CMD_LC_List_Node(dwContextID);
 	On_CMD_LC_List_Room(dwContextID);
 
-	//µÇÂ¼½±Àø
+	//ç™»å½•å¥–åŠ±
 	On_CMD_LC_Logon_Logon_Reward(dwContextID, pCMD->LasLogonDate);
 
-	// ¸ü¸ÄÓÃ»§ÔÚÏß±êÖ¾
+	// æ›´æ”¹ç”¨æˆ·åœ¨çº¿æ ‡å¿—
 	CheckUserState_Logon(pCMD->dwUserID, bIsExist);
 
 	return true;
@@ -1779,48 +1779,48 @@ bool CAttemperEngineSink::On_CMD_LC_Logon_Account(DWORD dwContextID, VOID * pDat
 void CAttemperEngineSink::CheckUserState_Logon(DWORD dwUserID, bool bIsExist)
 {
 	/*
-	 ** ÇéĞÎÒ»  µÇÂ¼·ş µÇÂ¼µÄÊ±ºò
-     ** 1. Óë ÓÎÏ··ş¿Ï¶¨Ã»ÓĞÁ¬½Ó
-     ** 2. Óë µÇÂ¼·ş¿Ï¶¨Á¬½ÓÁË
-     ** 3. ÅĞ¶Ï¶ÏÏßÁĞ±í -- Èç¹û´æÔÚ, Ôò²»·¢ËÍ; Èç¹û²»´æÔÚ, ÔòÎª´óÌüÔÚÏß 
+	 ** æƒ…å½¢ä¸€  ç™»å½•æœ ç™»å½•çš„æ—¶å€™
+     ** 1. ä¸ æ¸¸æˆæœè‚¯å®šæ²¡æœ‰è¿æ¥
+     ** 2. ä¸ ç™»å½•æœè‚¯å®šè¿æ¥äº†
+     ** 3. åˆ¤æ–­æ–­çº¿åˆ—è¡¨ -- å¦‚æœå­˜åœ¨, åˆ™ä¸å‘é€; å¦‚æœä¸å­˜åœ¨, åˆ™ä¸ºå¤§å…åœ¨çº¿ 
 	 */
 
 	if(!bIsExist)
 	{
-		//TODONOWW Í¨ÖªÊı¾İ¿â¸üĞÂÍæ¼Ò×´Ì¬Îª "´óÌüÔÚÏß"
+		//TODONOWW é€šçŸ¥æ•°æ®åº“æ›´æ–°ç©å®¶çŠ¶æ€ä¸º "å¤§å…åœ¨çº¿"
 		DBR_GP_UserQuitInfo quitInfo;
 		quitInfo.dwUserID = dwUserID;
-		quitInfo.byOnlineMask =  1; //1´óÌüÔÚÏß £¬2ÕıÔÚÓÎÏ·£¬3ÓÎÏ·¶ÏÏß£¬4ÀëÏß
+		quitInfo.byOnlineMask =  1; //1å¤§å…åœ¨çº¿ ï¼Œ2æ­£åœ¨æ¸¸æˆï¼Œ3æ¸¸æˆæ–­çº¿ï¼Œ4ç¦»çº¿
 
 		m_pIDataBaseEngine->PostDataBaseRequest(DBR_GP_LOGON_USER_STATE,0, &quitInfo,sizeof(quitInfo));
 	}
 }
 
-//ÕÊºÅ×¢²á
+//å¸å·æ³¨å†Œ
 bool CAttemperEngineSink::On_SUB_CL_Logon_Register(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_SUB_CL_LOGON_REGISTER))
 	{
 		return false;
 	}
 	
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	STR_SUB_CL_LOGON_REGISTER * pSUBLogonRegister=(STR_SUB_CL_LOGON_REGISTER *)pData;
 
-	//Ğ§Ñé°æ±¾
+	//æ•ˆéªŒç‰ˆæœ¬
 	if ( On_CMD_LC_Logon_UpdateNotify(pSUBLogonRegister->dwVersionCheck, dwSocketID) )
 	{
 		return true;
 	}
 	
 
-	//±äÁ¿¶¨Òå
-	//TODONOW Ôö¼Ó´úÀíID  added by WangChengQing 2018/8/13
+	//å˜é‡å®šä¹‰
+	//TODONOW å¢åŠ ä»£ç†ID  added by WangChengQing 2018/8/13
 	STR_DBR_CL_LOGON_REGISTER DBRLogonRegister;
 	ZeroMemory(&DBRLogonRegister,sizeof(DBRLogonRegister));
 	DBRLogonRegister.pBindParameter = (m_pBindParameter+LOWORD(dwSocketID));
-	//Êı¾İ¸³Öµ
+	//æ•°æ®èµ‹å€¼
 	lstrcpyn(DBRLogonRegister.szAccounts,pSUBLogonRegister->szAccounts,CountArray(DBRLogonRegister.szAccounts));
 	lstrcpyn(DBRLogonRegister.szPassword,pSUBLogonRegister->szPassword,CountArray(DBRLogonRegister.szPassword));
 	lstrcpyn(DBRLogonRegister.szNickName,pSUBLogonRegister->szNickName,CountArray(DBRLogonRegister.szNickName));
@@ -1829,34 +1829,34 @@ bool CAttemperEngineSink::On_SUB_CL_Logon_Register(VOID * pData, WORD wDataSize,
 	lstrcpyn(DBRLogonRegister.szMachineID,pSUBLogonRegister->szMachineID,CountArray(DBRLogonRegister.szMachineID));
 	DBRLogonRegister.dwProxyID = pSUBLogonRegister->dwProxyID;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_LOGON_REGISTER,dwSocketID,&DBRLogonRegister,sizeof(DBRLogonRegister));
 
 	return true;
 }
 
-//Æ½Ì¨µÇÂ¼
+//å¹³å°ç™»å½•
 bool CAttemperEngineSink::On_SUB_CL_Logon_Platform(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_SUB_CL_LOGON_PLATFORM))
 	{
 		return false;
 	}
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	STR_SUB_CL_LOGON_PLATFORM * pSUBLogonPlatform=(STR_SUB_CL_LOGON_PLATFORM *)pData;
 
-	//Ğ§Ñé°æ±¾
+	//æ•ˆéªŒç‰ˆæœ¬
 	if ( On_CMD_LC_Logon_UpdateNotify(pSUBLogonPlatform->dwVersionCheck, dwSocketID) )
 	{
 		return true;
 	}
 
-	//±äÁ¿¹¹Ôì
+	//å˜é‡æ„é€ 
 	STR_DBR_CL_LOGON_PLATFORM DBRLogonPlatform;
 	ZeroMemory(&DBRLogonPlatform,sizeof(DBRLogonPlatform));
-	//SocketĞ£Ñé
+	//Socketæ ¡éªŒ
 	DBRLogonPlatform.pBindParameter=(m_pBindParameter+LOWORD(dwSocketID));
 	DBRLogonPlatform.cbGender = pSUBLogonPlatform->cbGender;
 	lstrcpyn(DBRLogonPlatform.szNickName, pSUBLogonPlatform->szNickName, CountArray(DBRLogonPlatform.szNickName));
@@ -1866,37 +1866,37 @@ bool CAttemperEngineSink::On_SUB_CL_Logon_Platform(VOID * pData, WORD wDataSize,
 	lstrcpyn(DBRLogonPlatform.szMachineID,pSUBLogonPlatform->szMachineID,CountArray(DBRLogonPlatform.szMachineID));
 	DBRLogonPlatform.dwProxyID = pSUBLogonPlatform->dwProxyID;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_LOGON_PLATFORM, dwSocketID, &DBRLogonPlatform, sizeof(DBRLogonPlatform));
 
 	return true;}
 
-//Æ½Ì¨µÇÂ¼·µ»Ø
+//å¹³å°ç™»å½•è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_Logon_Platform(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//ÅĞ¶ÏÔÚÏß
+	//åˆ¤æ–­åœ¨çº¿
 	if ((m_pBindParameter+LOWORD(dwContextID))->dwSocketID!=dwContextID) return true;
 
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	STR_CMD_LC_LOGON_PLATFORM * pDBOLogonPlatform = (STR_CMD_LC_LOGON_PLATFORM *)pData;
 
-	//¹¹ÔìÊı¾İ
+	//æ„é€ æ•°æ®
 	STR_CMD_LC_LOGON_PLATFORM pCMDLogonPlatform;
 	ZeroMemory(&pCMDLogonPlatform, sizeof(STR_CMD_LC_LOGON_PLATFORM));
 	memcpy_s(&pCMDLogonPlatform, sizeof(STR_CMD_LC_LOGON_PLATFORM), pDBOLogonPlatform, sizeof(STR_CMD_LC_LOGON_PLATFORM));
 
-	//Èç¹ûµÇÂ¼Ê§°Ü, Ö±½Ó·µ»Ø
+	//å¦‚æœç™»å½•å¤±è´¥, ç›´æ¥è¿”å›
 	if(DB_SUCCESS != pDBOLogonPlatform->dwResultCode)
 	{
 		m_pITCPNetworkEngine->SendData(dwContextID, MDM_LOGON, CMD_LC_LOGON_ACCOUNTS, &pCMDLogonPlatform, sizeof(STR_CMD_LC_LOGON_PLATFORM));
 		return true;
 	}
 
-	//ÖØ¸´µÇÂ¼Ìß³ö
+	//é‡å¤ç™»å½•è¸¢å‡º
 	On_CMD_LC_Logon_RepeatLogon( pCMDLogonPlatform.dwUserID ,dwContextID);
 
-	//¶ÏÏßÖØÁ¬µÄ´¦Àí 1.CMD½á¹¹Ìå¸³Öµ  2.listÖĞÇå³ıitme 
-	bool bIsExist = false; //ÊÇ·ñ´æÔÚ¶ÏÏßÁĞ±íÖĞ
+	//æ–­çº¿é‡è¿çš„å¤„ç† 1.CMDç»“æ„ä½“èµ‹å€¼  2.listä¸­æ¸…é™¤itme 
+	bool bIsExist = false; //æ˜¯å¦å­˜åœ¨æ–­çº¿åˆ—è¡¨ä¸­
 	for(int i=0; i < m_OfflineUserListManager.GetCount(); i++)
 	{
 		if(m_OfflineUserListManager.GetAt(i).dwUserID == pCMDLogonPlatform.dwUserID)
@@ -1907,57 +1907,57 @@ bool CAttemperEngineSink::On_CMD_LC_Logon_Platform(DWORD dwContextID, VOID * pDa
 		}
 	}
 	
-	//ÉèÖÃÁ¬½Ó
-	(m_pBindParameter+LOWORD(dwContextID))->dwUserID = pCMDLogonPlatform.dwUserID;//¼ÇÂ¼´ËÁ¬½ÓµÄÓÃ»§ID
+	//è®¾ç½®è¿æ¥
+	(m_pBindParameter+LOWORD(dwContextID))->dwUserID = pCMDLogonPlatform.dwUserID;//è®°å½•æ­¤è¿æ¥çš„ç”¨æˆ·ID
 
-	//·¢ËÍµÇÂ¼³É¹¦
+	//å‘é€ç™»å½•æˆåŠŸ
 	m_pITCPNetworkEngine->SendData(dwContextID,MDM_LOGON,CMD_LC_LOGON_PLATFORM, &pCMDLogonPlatform, sizeof(STR_CMD_LC_LOGON_PLATFORM));
 
-	//·¢ËÍÁĞ±í
+	//å‘é€åˆ—è¡¨
 	On_CMD_LC_List_Type(dwContextID);
 	On_CMD_LC_List_Kind(dwContextID);
 	On_CMD_LC_List_Node(dwContextID);
 	On_CMD_LC_List_Room(dwContextID);
 
-	//TODONOW µÚÈı·½µÇÂ½£¬µÇÂ½½±ÀøºÍÀÏÍæ¼Ò½±ÀøÓ¦¸Ã·ÅÔÚÕâÀï
+	//TODONOW ç¬¬ä¸‰æ–¹ç™»é™†ï¼Œç™»é™†å¥–åŠ±å’Œè€ç©å®¶å¥–åŠ±åº”è¯¥æ”¾åœ¨è¿™é‡Œ
 
-	//¸ü¸ÄÓÃ»§ÔÚÏß±êÖ¾
+	//æ›´æ”¹ç”¨æˆ·åœ¨çº¿æ ‡å¿—
 	CheckUserState_Logon(pCMDLogonPlatform.dwUserID, bIsExist);
 
 	return true;
 }
 
-//ÖØ¸´µÇÂ¼Ìß³ö
+//é‡å¤ç™»å½•è¸¢å‡º
 bool CAttemperEngineSink::On_CMD_LC_Logon_RepeatLogon(DWORD UserID, DWORD dwContextID)
 {
-	//ÖØ¸´µÇÂ¼
+	//é‡å¤ç™»å½•
 	bool bIsRepeatLogon = false;
 
-	//±éÀúËùÓĞÁ¬½Ó
+	//éå†æ‰€æœ‰è¿æ¥
 	for ( int i = 0; i <  MAX_CONTENT; i++ )
 	{
 		tagBindParameter* p_tempBind = (m_pBindParameter+LOWORD(i));
 
-		//ÅĞ¶ÏÓÃ»§ÊÇ·ñÒÑ¾­µÇÂ¼
+		//åˆ¤æ–­ç”¨æˆ·æ˜¯å¦å·²ç»ç™»å½•
 		if (p_tempBind->dwUserID == UserID)
 		{
 			STR_CMD_LC_LOGON_REPEAT_LOGON pCMDLogonRepeatLogon;
 			ZeroMemory(&pCMDLogonRepeatLogon, sizeof(STR_CMD_LC_LOGON_REPEAT_LOGON));
 
-			//ÌáÊ¾µ±Ç°ÓÃ»§ÕËºÅÒÑµÇÂ¼£¬ÎŞ·¨µÇÂ¼
-			_snwprintf(pCMDLogonRepeatLogon.szDescribe, sizeof(pCMDLogonRepeatLogon.szDescribe), TEXT("ÕËºÅÒÑ¾­ÔÚÆäËüµØ·½µÇÂ¼"));
+			//æç¤ºå½“å‰ç”¨æˆ·è´¦å·å·²ç™»å½•ï¼Œæ— æ³•ç™»å½•
+			_snwprintf(pCMDLogonRepeatLogon.szDescribe, sizeof(pCMDLogonRepeatLogon.szDescribe), TEXT("è´¦å·å·²ç»åœ¨å…¶å®ƒåœ°æ–¹ç™»å½•"));
 			m_pITCPNetworkEngine->SendData(p_tempBind->dwSocketID, MDM_LOGON, CMD_LC_LOGON_REPEAT_LOGON, &pCMDLogonRepeatLogon, sizeof(STR_CMD_LC_LOGON_REPEAT_LOGON));
 
 
-			//ÌáÊ¾ÒÑµÇÂ¼µÄÓÃ»§
-			_snwprintf(pCMDLogonRepeatLogon.szDescribe, sizeof(pCMDLogonRepeatLogon.szDescribe), TEXT("ÕËºÅÔÚÆäËüµØ·½µÇÂ¼"));
+			//æç¤ºå·²ç™»å½•çš„ç”¨æˆ·
+			_snwprintf(pCMDLogonRepeatLogon.szDescribe, sizeof(pCMDLogonRepeatLogon.szDescribe), TEXT("è´¦å·åœ¨å…¶å®ƒåœ°æ–¹ç™»å½•"));
 			m_pITCPNetworkEngine->SendData(dwContextID, MDM_LOGON, CMD_LC_LOGON_REPEAT_LOGON, &pCMDLogonRepeatLogon, sizeof(STR_CMD_LC_LOGON_REPEAT_LOGON));
 
-			//¹Ø±ÕÁ¬½Ó --  ¹Ø±ÕÖ®Ç°µÄÁ¬½Ó
+			//å…³é—­è¿æ¥ --  å…³é—­ä¹‹å‰çš„è¿æ¥
 			//m_pITCPNetworkEngine->ShutDownSocket(p_tempBind->dwSocketID);
 			m_pITCPNetworkEngine->CloseSocket(p_tempBind->dwSocketID);
 			
-			//Çå¿ÕÊı¾İ
+			//æ¸…ç©ºæ•°æ®
 			WORD wBindIndex = LOWORD(i);
 			ZeroMemory( p_tempBind,sizeof(tagBindParameter));
 
@@ -1968,68 +1968,68 @@ bool CAttemperEngineSink::On_CMD_LC_Logon_RepeatLogon(DWORD UserID, DWORD dwCont
 	return bIsRepeatLogon;
 }
 
-//Éı¼¶ÌáÊ¾£¨°æ±¾Ğ£Ñé£©
+//å‡çº§æç¤ºï¼ˆç‰ˆæœ¬æ ¡éªŒï¼‰
 bool CAttemperEngineSink::On_CMD_LC_Logon_UpdateNotify(DWORD dwVersionCheck, DWORD dwSocketID)
 {
-	DWORD serverFrameVersion = Get_Framework_Version(PLATFORM_VERSION);  //·şÎñ¶Ë frame °æ±¾
-	DWORD clientFrameVersion = dwVersionCheck; //client  Hall °æ±¾
+	DWORD serverFrameVersion = Get_Framework_Version(PLATFORM_VERSION);  //æœåŠ¡ç«¯ frame ç‰ˆæœ¬
+	DWORD clientFrameVersion = dwVersionCheck; //client  Hall ç‰ˆæœ¬
 
 	byte ret = Compate_Hall_LogonServer(clientFrameVersion, serverFrameVersion);
-	CLog::Log(log_debug, "°æ±¾Ğ£Ñé½á¹û:%d  ·şÎñÆ÷°æ±¾:%ld  ¿Í»§¶Ë°æ±¾:%ld", ret, serverFrameVersion, clientFrameVersion);
+	CLog::Log(log_debug, "ç‰ˆæœ¬æ ¡éªŒç»“æœ:%d  æœåŠ¡å™¨ç‰ˆæœ¬:%ld  å®¢æˆ·ç«¯ç‰ˆæœ¬:%ld", ret, serverFrameVersion, clientFrameVersion);
 
 
-	//°æ±¾Æ¥Åä, ÔòÖ±½ÓÍË³ö, ²»ĞèÒª·¢ËÍÏûÏ¢
+	//ç‰ˆæœ¬åŒ¹é…, åˆ™ç›´æ¥é€€å‡º, ä¸éœ€è¦å‘é€æ¶ˆæ¯
 	if(0 == ret )
 	{
 		return false;
 	}
 
-	//¹¹ÔìÊı¾İ
+	//æ„é€ æ•°æ®
 	STR_CMD_LC_LOGON_UPDATE_NOTIFY UpdateNotify;
 	ZeroMemory(&UpdateNotify,sizeof(UpdateNotify));
 	UpdateNotify.cbUpdateNotify = ret;
 	UpdateNotify.dwCurrentServerVersion = serverFrameVersion;
-	//·¢ËÍÏûÏ¢
+	//å‘é€æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwSocketID, MDM_LOGON, CMD_LC_LOGON_UPDATE_NOTIFY, &UpdateNotify, sizeof(UpdateNotify));
 
 	return true;
 }
 
-//µÇÂ¼½±Àø
+//ç™»å½•å¥–åŠ±
 bool CAttemperEngineSink::On_CMD_LC_Logon_Logon_Reward(DWORD dwContextID, SYSTEMTIME LasLogonDate)
 { 
-	// 1. ½±ÀøÓ¦¸ÃÊÇ¶ÁÈ¡Êı¾İ¿â
-	// 2. µÇÂ¼½±Àø -- 1)½ÚÈÕ½±Àø  2)ÀÏÍæ¼Ò½±ÀøµÈ
+	// 1. å¥–åŠ±åº”è¯¥æ˜¯è¯»å–æ•°æ®åº“
+	// 2. ç™»å½•å¥–åŠ± -- 1)èŠ‚æ—¥å¥–åŠ±  2)è€ç©å®¶å¥–åŠ±ç­‰
 	
-	//»ñµÃÏµÍ³Ê±¼ä
+	//è·å¾—ç³»ç»Ÿæ—¶é—´
 	SYSTEMTIME systime;
 	GetLocalTime(&systime);
 
 	CTime tmLeft(systime.wYear, systime.wMonth, systime.wDay, 0, 0, 0);
 	CTime tmRight(LasLogonDate.wYear, LasLogonDate.wMonth, LasLogonDate.wDay, 0, 0, 0);
 
-	//»ñµÃÉÏ´ÎµÇÂ¼Ê±¼ä
+	//è·å¾—ä¸Šæ¬¡ç™»å½•æ—¶é—´
 	CTimeSpan sp = tmLeft - tmRight;
 	long MillisecondsL = (systime.wHour*3600 + systime.wMinute*60 + systime.wSecond)*1000 + systime.wMilliseconds;  
 	long MillisecondsR = (LasLogonDate.wHour*3600 + LasLogonDate.wMinute*60 + LasLogonDate.wSecond)*1000 + LasLogonDate.wMilliseconds;  
 
-	//¼ÆËãÊ±¼ä¼ä¸ô
-	LONGLONG seconds =  ((__int64)sp.GetDays()*86400000 + (MillisecondsL - MillisecondsR))/1000;//´Ë´¦·µ»ØÃë
+	//è®¡ç®—æ—¶é—´é—´éš”
+	LONGLONG seconds =  ((__int64)sp.GetDays()*86400000 + (MillisecondsL - MillisecondsR))/1000;//æ­¤å¤„è¿”å›ç§’
 
-	//¼ÆËãÊÇ·ñÂú30Ìì,½±Àø50·¿¿¨
+	//è®¡ç®—æ˜¯å¦æ»¡30å¤©,å¥–åŠ±50æˆ¿å¡
 	if(seconds > 30*24*3600)
 	{
-		//±ä¸üÓÃ»§²Æ¸»
+		//å˜æ›´ç”¨æˆ·è´¢å¯Œ
 		DBR_GP_ModifyUserInsure modifyUserInsure;
 		ZeroMemory(&modifyUserInsure,sizeof(DBR_GP_ModifyUserInsure));
 		modifyUserInsure.lOpenRoomCard = 50;
 		m_pIDataBaseEngine->PostDataBaseRequest(DBR_GP_MODIFY_USER_INSURE, dwContextID, &modifyUserInsure, sizeof(DBR_GP_ModifyUserInsure));
 
-		//ÀÏÍæ¼Ò½±Àø·µ»Ø
+		//è€ç©å®¶å¥–åŠ±è¿”å›
 		STR_CMD_LC_LOGON_LOGON_REWARD OldBackReward;
 		OldBackReward.byRewardType = 2;
 		OldBackReward.dwRewardCount = 50;
-		lstrcpyn( OldBackReward.szDescribe,TEXT("»¶Ó­»ØÀ´£¬ÄúÒÑ»ñµÃÀÏÍæ¼Ò»Ø¹é½±Àø50·¿¿¨!"),CountArray(OldBackReward.szDescribe));
+		lstrcpyn( OldBackReward.szDescribe,TEXT("æ¬¢è¿å›æ¥ï¼Œæ‚¨å·²è·å¾—è€ç©å®¶å›å½’å¥–åŠ±50æˆ¿å¡!"),CountArray(OldBackReward.szDescribe));
 
 		m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_LOGON_LOGON_REWARD, &OldBackReward, sizeof(STR_CMD_LC_LOGON_LOGON_REWARD));
 	}
@@ -2039,102 +2039,102 @@ bool CAttemperEngineSink::On_CMD_LC_Logon_Logon_Reward(DWORD dwContextID, SYSTEM
 
 #pragma endregion
 
-#pragma region MDM_LIST ÁĞ±íÃüÁî
-/***************************************** ¡¾ÁĞ±í´¦Àíº¯Êı-Ö÷ÏûÏ¢2¡¿ *******************************************/
-//·¢ËÍÓÎÏ·ÀàĞÍ£¨ÆåÅÆ¡¢Âé½«µÈ£©
+#pragma region MDM_LIST åˆ—è¡¨å‘½ä»¤
+/***************************************** ã€åˆ—è¡¨å¤„ç†å‡½æ•°-ä¸»æ¶ˆæ¯2ã€‘ *******************************************/
+//å‘é€æ¸¸æˆç±»å‹ï¼ˆæ£‹ç‰Œã€éº»å°†ç­‰ï¼‰
 VOID CAttemperEngineSink::On_CMD_LC_List_Type(DWORD dwSocketID)
 {
-	//ÍøÂçÊı¾İ
+	//ç½‘ç»œæ•°æ®
 	WORD wSendSize=0;
 	BYTE cbDataBuffer[SOCKET_TCP_PACKET];
 
-	//Ã¶¾ÙÊı¾İ
+	//æšä¸¾æ•°æ®
 	POSITION Position=NULL;
-	CGameTypeItem * pGameTypeItem=NULL;		//Êı¾İ¿âPlatformÖĞµÄGameTypeItem£¨ÆåÅÆ/ĞİÏĞ...£©
+	CGameTypeItem * pGameTypeItem=NULL;		//æ•°æ®åº“Platformä¸­çš„GameTypeItemï¼ˆæ£‹ç‰Œ/ä¼‘é—²...ï¼‰
 
-	//Ã¶¾ÙÊı¾İ
+	//æšä¸¾æ•°æ®
 	for (DWORD i=0;i<m_ServerListManager.GetGameTypeCount();i++)
 	{
-		//·¢ËÍÊı¾İ(·ÀÖ¹Êı¾İÌ«¶à£¬Ò»ÅúÅú·¢ËÍ)
+		//å‘é€æ•°æ®(é˜²æ­¢æ•°æ®å¤ªå¤šï¼Œä¸€æ‰¹æ‰¹å‘é€)
 		if ((wSendSize+sizeof(tagGameType))>sizeof(cbDataBuffer))
 		{
 			m_pITCPNetworkEngine->SendData(dwSocketID,MDM_LIST,CMD_LC_LIST_TYPE,cbDataBuffer,wSendSize);
 			wSendSize=0;
 		}
 
-		//»ñÈ¡Êı¾İ
+		//è·å–æ•°æ®
 		pGameTypeItem=m_ServerListManager.EmunGameTypeItem(Position);
 		if (pGameTypeItem==NULL) break;
 
-		//¿½±´Êı¾İ
+		//æ‹·è´æ•°æ®
 		CopyMemory(cbDataBuffer+wSendSize,&pGameTypeItem->m_GameType,sizeof(tagGameType));
 		wSendSize+=sizeof(tagGameType);
 	}
 
-	//·¢ËÍÊ£Óà
+	//å‘é€å‰©ä½™
 	if (wSendSize>0) m_pITCPNetworkEngine->SendData(dwSocketID,MDM_LIST,CMD_LC_LIST_TYPE,cbDataBuffer,wSendSize);
 
 	return;
 }
 
-//·¢ËÍÓÎÏ·ÖÖÀà£¨¶·µØÖ÷¡¢Õ¨½ğ»¨µÈ£©
+//å‘é€æ¸¸æˆç§ç±»ï¼ˆæ–—åœ°ä¸»ã€ç‚¸é‡‘èŠ±ç­‰ï¼‰
 VOID CAttemperEngineSink::On_CMD_LC_List_Kind(DWORD dwSocketID)
 {
-	//ÍøÂçÊı¾İ
+	//ç½‘ç»œæ•°æ®
 	WORD wSendSize=0;
 	BYTE cbDataBuffer[SOCKET_TCP_PACKET];
 
-	//Ã¶¾ÙÊı¾İ
+	//æšä¸¾æ•°æ®
 	POSITION Position=NULL;
 	CGameKindItem * pGameKindItem=NULL;
 
-	//Ã¶¾ÙÊı¾İ
+	//æšä¸¾æ•°æ®
 	for (DWORD i=0;i<m_ServerListManager.GetGameKindCount();i++)
 	{
-		//·¢ËÍÊı¾İ
+		//å‘é€æ•°æ®
 		if ((wSendSize+sizeof(tagGameKind))>sizeof(cbDataBuffer))
 		{
 			m_pITCPNetworkEngine->SendData(dwSocketID, MDM_LIST, CMD_LC_LIST_KIND, cbDataBuffer,wSendSize);
 			wSendSize=0;
 		}
 
-		//»ñÈ¡Êı¾İ
+		//è·å–æ•°æ®
 		pGameKindItem=m_ServerListManager.EmunGameKindItem(Position);
 		if (pGameKindItem==NULL) break;
 
-		//¿½±´Êı¾İ
+		//æ‹·è´æ•°æ®
 		CopyMemory(cbDataBuffer+wSendSize,&pGameKindItem->m_GameKind,sizeof(tagGameKind));
 		wSendSize+=sizeof(tagGameKind);
 	}
 
-	//·¢ËÍÊ£Óà
+	//å‘é€å‰©ä½™
 	if (wSendSize>0) m_pITCPNetworkEngine->SendData(dwSocketID, MDM_LIST, CMD_LC_LIST_KIND, cbDataBuffer, wSendSize);
 
 	return;
 }
 
-//·¢ËÍ½Úµã£¨µçĞÅÇø¡¢ÍøÍ¨ÇøµÈ£©
+//å‘é€èŠ‚ç‚¹ï¼ˆç”µä¿¡åŒºã€ç½‘é€šåŒºç­‰ï¼‰
 VOID CAttemperEngineSink::On_CMD_LC_List_Node(DWORD dwSocketID)
 {
-	//ÍøÂçÊı¾İ
+	//ç½‘ç»œæ•°æ®
 	WORD wSendSize=0;
 	BYTE cbDataBuffer[SOCKET_TCP_PACKET];
 
-	//Ã¶¾ÙÊı¾İ
+	//æšä¸¾æ•°æ®
 	POSITION Position=NULL;
 	CGameNodeItem * pGameNodeItem=NULL;
 
-	//Ã¶¾ÙÊı¾İ
+	//æšä¸¾æ•°æ®
 	for (DWORD i=0;i<m_ServerListManager.GetGameNodeCount();i++)
 	{
-		//·¢ËÍÊı¾İ
+		//å‘é€æ•°æ®
 		if ((wSendSize+sizeof(tagGameNode))>sizeof(cbDataBuffer))
 		{
 			m_pITCPNetworkEngine->SendData(dwSocketID,MDM_LIST,CMD_LC_LIST_NODE,cbDataBuffer,wSendSize);
 			wSendSize=0;
 		}
 
-		//»ñÈ¡Êı¾İ
+		//è·å–æ•°æ®
 		pGameNodeItem=m_ServerListManager.EmunGameNodeItem(Position);
 		if (pGameNodeItem==NULL) break;
 
@@ -2142,43 +2142,43 @@ VOID CAttemperEngineSink::On_CMD_LC_List_Node(DWORD dwSocketID)
 		wSendSize+=sizeof(tagGameNode);
 	}
 
-	//·¢ËÍÊ£Óà
+	//å‘é€å‰©ä½™
 	if (wSendSize>0) m_pITCPNetworkEngine->SendData(dwSocketID,MDM_LIST,CMD_LC_LIST_NODE,cbDataBuffer,wSendSize);
 
 	return;
 }
 
-//·¢ËÍ·¿¼ä£¨ÓÎÏ··ş·¿¼ä£©
+//å‘é€æˆ¿é—´ï¼ˆæ¸¸æˆæœæˆ¿é—´ï¼‰
 VOID CAttemperEngineSink::On_CMD_LC_List_Room(DWORD dwSocketID)
 {
-	//ÍøÂçÊı¾İ
+	//ç½‘ç»œæ•°æ®
 	WORD wSendSize=0;
 	BYTE cbDataBuffer[SOCKET_TCP_PACKET];
 
-	//Ã¶¾ÙÊı¾İ
+	//æšä¸¾æ•°æ®
 	POSITION Position=NULL;
 	CGameServerItem * pGameServerItem=NULL;	
 
-	//Ã¶¾ÙÊı¾İ
+	//æšä¸¾æ•°æ®
 	for (DWORD i=0;i<m_ServerListManager.GetGameServerCount();i++)
 	{
-		//·¢ËÍÊı¾İ
+		//å‘é€æ•°æ®
 		if ((wSendSize+sizeof(tagGameServer))>sizeof(cbDataBuffer))
 		{
 			m_pITCPNetworkEngine->SendData(dwSocketID,MDM_LIST,CMD_LC_LIST_ROOM,cbDataBuffer,wSendSize);
 			wSendSize=0;
 		}
 
-		//»ñÈ¡ÁĞ±íÊı¾İ
+		//è·å–åˆ—è¡¨æ•°æ®
 		pGameServerItem=m_ServerListManager.EmunGameServerItem(Position);
 		if (pGameServerItem==NULL) break;
 
-		//¿½±´Êı¾İ
+		//æ‹·è´æ•°æ®
 		CopyMemory(cbDataBuffer+wSendSize,&pGameServerItem->m_GameServer,sizeof(tagGameServer));
 		wSendSize+=sizeof(tagGameServer);
 	}
 
-	//·¢ËÍÊ£Óà
+	//å‘é€å‰©ä½™
 	if (wSendSize>0)
 		m_pITCPNetworkEngine->SendData(dwSocketID, MDM_LIST, CMD_LC_LIST_ROOM, cbDataBuffer, wSendSize);
 
@@ -2187,19 +2187,19 @@ VOID CAttemperEngineSink::On_CMD_LC_List_Room(DWORD dwSocketID)
 
 #pragma endregion
 
-#pragma region MDM_SERVICE ÓÃ»§·şÎñ
-/***************************************** ¡¾·şÎñ´¦Àíº¯Êı-Ö÷ÏûÏ¢3¡¿ *******************************************/
-//Íæ¼Ò·´À¡
+#pragma region MDM_SERVICE ç”¨æˆ·æœåŠ¡
+/***************************************** ã€æœåŠ¡å¤„ç†å‡½æ•°-ä¸»æ¶ˆæ¯3ã€‘ *******************************************/
+//ç©å®¶åé¦ˆ
 bool CAttemperEngineSink::On_SUB_CL_Service_UserFeedBack(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	ASSERT( wDataSize == sizeof(STR_SUB_CL_SERVICE_FEEDBACK));
 	if(wDataSize != sizeof(STR_SUB_CL_SERVICE_FEEDBACK)) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	STR_SUB_CL_SERVICE_FEEDBACK * pUserSuggestion = (STR_SUB_CL_SERVICE_FEEDBACK *)pData;
 
-	//¹¹ÔìÍæ¼Ò·´À¡Êı¾İ
+	//æ„é€ ç©å®¶åé¦ˆæ•°æ®
 	STR_DBR_CL_SERVICE_FEEDBACK UserSuggestion;
 	ZeroMemory(&UserSuggestion,sizeof(UserSuggestion));
 	UserSuggestion.dwUserID = pUserSuggestion->dwUserID;
@@ -2207,80 +2207,80 @@ bool CAttemperEngineSink::On_SUB_CL_Service_UserFeedBack(VOID * pData, WORD wDat
 	lstrcpyn(UserSuggestion.szContact,pUserSuggestion->szContact,CountArray(UserSuggestion.szContact));
 	lstrcpyn(UserSuggestion.szFB_Content,pUserSuggestion->szFB_Content,CountArray(UserSuggestion.szFB_Content));
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_SERVICE_USER_FEEDBACK, dwSocketID, &UserSuggestion, sizeof(UserSuggestion));
 
 	return true;
 }
 
-//Íæ¼Ò·´À¡·µ»Ø
+//ç©å®¶åé¦ˆè¿”å›
 bool CAttemperEngineSink::On_CMD_LC_Service_UserFeedBack( DWORD dwContextID, VOID * pData)
 {
-	//ÅĞ¶ÏÔÚÏß
+	//åˆ¤æ–­åœ¨çº¿
 	if ((m_pBindParameter+LOWORD(dwContextID))->dwSocketID!=dwContextID) return true;
 
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	STR_CMD_LC_SERVICE_FEEDBACK FeedBack;
 	ZeroMemory(&FeedBack, sizeof(FeedBack));
 
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	STR_DBO_CL_SERVICE_FEEDBACK *pOperate = (STR_DBO_CL_SERVICE_FEEDBACK *)pData;
 
-	//¹¹ÔìÊı¾İ
+	//æ„é€ æ•°æ®
 	FeedBack.lResultCode=pOperate->lResultCode;
 	lstrcpyn(FeedBack.szDescribeString, pOperate->szDescribeString, CountArray(FeedBack.szDescribeString));
 
-	//·¢ËÍÊı¾İ
+	//å‘é€æ•°æ®
 	WORD wDataSize = sizeof(FeedBack);
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_USER_FEEDBACK, &FeedBack, wDataSize);
 
 	return true;
 }
 
-//Ë¢ĞÂÓÃ»§ĞÅÏ¢
+//åˆ·æ–°ç”¨æˆ·ä¿¡æ¯
 bool CAttemperEngineSink::On_SUB_CL_Service_RefreshUserInfo(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	ASSERT( wDataSize == sizeof(STR_SUB_CL_SERVICE_REFRESH_INFO));
 	if(wDataSize != sizeof(STR_SUB_CL_SERVICE_REFRESH_INFO)) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	STR_SUB_CL_SERVICE_REFRESH_INFO *pUserRequest = (STR_SUB_CL_SERVICE_REFRESH_INFO *)pData;
-	//¶¨Òå±äÁ¿
+	//å®šä¹‰å˜é‡
 	STR_DBR_CL_SERCIVR_REFRESH_INFO UserRequest;
 	ZeroMemory(&UserRequest,sizeof(UserRequest));
 
 	UserRequest.dwUserID = pUserRequest->dwUserID;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_SERVICE_REFRESH_USER_INFO, dwSocketID, &UserRequest, sizeof(UserRequest));
 	return true;
 }
 
-//Ë¢ĞÂÓÃ»§ĞÅÏ¢·µ»Ø
+//åˆ·æ–°ç”¨æˆ·ä¿¡æ¯è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_Service_RefreshUserInfo( DWORD dwContextID, VOID * pData )
 {
-	//ÅĞ¶ÏÔÚÏß
+	//åˆ¤æ–­åœ¨çº¿
 	if ((m_pBindParameter+LOWORD(dwContextID))->dwSocketID!=dwContextID) return true;
 
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	STR_CMD_LC_SERVICE_REFRESH_INFO UserInfo;
 	ZeroMemory(&UserInfo,sizeof(UserInfo));
 
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	STR_DBO_CL_SERCIVR_REFRESH_INFO * pUserInfo=(STR_DBO_CL_SERCIVR_REFRESH_INFO *)pData;
 
-	//¹¹ÔìÊı¾İ
+	//æ„é€ æ•°æ®
 	memcpy_s(&UserInfo, sizeof(STR_CMD_LC_SERVICE_REFRESH_INFO), pUserInfo, sizeof(STR_CMD_LC_SERVICE_REFRESH_INFO));
 
-	//·¢ËÍÊı¾İ
+	//å‘é€æ•°æ®
 	WORD wDataSize = sizeof(STR_CMD_LC_SERVICE_REFRESH_INFO);
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_CL_SERVICE_REFRESH_USER_INFO, &UserInfo, wDataSize);
 
 	return true;
 }
 
-//²éÑ¯¿ª·¿ĞÅÏ¢ÁĞ±í
+//æŸ¥è¯¢å¼€æˆ¿ä¿¡æ¯åˆ—è¡¨
 bool CAttemperEngineSink::On_SUB_CL_Service_QueryRoomList(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
 	ASSERT( wDataSize == sizeof(STR_SUB_CL_SERVICE_QUERY_ROOMLIST));
@@ -2292,16 +2292,16 @@ bool CAttemperEngineSink::On_SUB_CL_Service_QueryRoomList(VOID * pData, WORD wDa
 	STR_DBR_CL_SERCIVR_QUERY_ROOMLIST GetTableInfoList;
 	GetTableInfoList.dwUserID = pTableInfoList->dwUserID;
 
-	//²éÑ¯¿ª·¿ÁĞ±í
+	//æŸ¥è¯¢å¼€æˆ¿åˆ—è¡¨
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_SERVICE_QUERY_ROOM_LIST,dwSocketID,&GetTableInfoList,sizeof(STR_DBR_CL_SERCIVR_QUERY_ROOMLIST));
 
 	return true;
 }
 
-//²éÑ¯¿ª·¿ÁĞ±í·µ»Ø
+//æŸ¥è¯¢å¼€æˆ¿åˆ—è¡¨è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_Service_QueryRoomList(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	ASSERT(wDataSize==sizeof(STR_DBO_CL_SERCIVR_QUERY_ROOMLIST));
 	STR_DBO_CL_SERCIVR_QUERY_ROOMLIST *pRecord = (STR_DBO_CL_SERCIVR_QUERY_ROOMLIST*)pData;
 
@@ -2315,10 +2315,10 @@ bool CAttemperEngineSink::On_CMD_LC_Service_QueryRoomList(DWORD dwContextID, VOI
 	return true;
 }
 
-//»ñÈ¡¸»ºÀ°ñ
+//è·å–å¯Œè±ªæ¦œ
 bool CAttemperEngineSink::On_SUB_CL_Service_GetRichList(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé
+	//æ ¡éªŒ
 	ASSERT( wDataSize == sizeof(STR_SUB_CL_SERVICE_GET_RICHLIST));
 	if( wDataSize != sizeof(STR_SUB_CL_SERVICE_GET_RICHLIST) ) 		
 	{
@@ -2328,10 +2328,10 @@ bool CAttemperEngineSink::On_SUB_CL_Service_GetRichList(VOID * pData, WORD wData
 	return m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_SERVICE_GET_RICH_LIST, dwSocketID, pData, 0);
 }
 
-//»ñÈ¡¸»ºÀ°ñ·µ»Ø
+//è·å–å¯Œè±ªæ¦œè¿”å›
 bool CAttemperEngineSink::On_CMD_LC_Service_GetRichList( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	ASSERT(wDataSize==sizeof(STR_DBO_CL_SERCIVR_GET_RICHLIST));
 	if(wDataSize!=sizeof(STR_DBO_CL_SERCIVR_GET_RICHLIST))
 		return false;
@@ -2341,14 +2341,14 @@ bool CAttemperEngineSink::On_CMD_LC_Service_GetRichList( DWORD dwContextID, VOID
 	STR_CMD_LC_SERVICE_GET_RICHLIST LotteryResult;
 	ZeroMemory(&LotteryResult,sizeof(STR_CMD_LC_SERVICE_GET_RICHLIST));
 
-	memcpy(&LotteryResult,pLotteryResult,sizeof(STR_DBO_CL_SERCIVR_GET_RICHLIST));		//ĞŞ¸Äbug£¬Ô­À´µÄsizeofÀïÃæ²»ÊÇÕâ¸ö½á¹¹Ìå
+	memcpy(&LotteryResult,pLotteryResult,sizeof(STR_DBO_CL_SERCIVR_GET_RICHLIST));		//ä¿®æ”¹bugï¼ŒåŸæ¥çš„sizeofé‡Œé¢ä¸æ˜¯è¿™ä¸ªç»“æ„ä½“
 
 	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_GET_RICH_LIST, &LotteryResult, sizeof(STR_CMD_LC_SERVICE_GET_RICHLIST));
 
 	return true;
 }
 
-//»ñÈ¡ÓÃ»§Â¼ÏñÁĞ±í
+//è·å–ç”¨æˆ·å½•åƒåˆ—è¡¨
 bool CAttemperEngineSink::On_SUB_CL_Service_GetUserRecordList(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
 	ASSERT( wDataSize == sizeof(STR_SUB_CL_SERVICE_GET_DJ_RECORDLIST));
@@ -2356,20 +2356,20 @@ bool CAttemperEngineSink::On_SUB_CL_Service_GetUserRecordList(VOID * pData, WORD
 
 	STR_SUB_CL_SERVICE_GET_DJ_RECORDLIST* pGetRecordList = (STR_SUB_CL_SERVICE_GET_DJ_RECORDLIST*)pData;
 
-	//Â¼ÏñÁĞ±íÇëÇó
+	//å½•åƒåˆ—è¡¨è¯·æ±‚
 	STR_DBR_CL_SERCIVR_GET_RECORDLIST GetRecordList;
 	GetRecordList.dwUserID = pGetRecordList->dwUserID;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_SERVICE_GET_USER_RECORD_LIST, dwSocketID, &GetRecordList, sizeof(STR_DBR_CL_SERCIVR_GET_RECORDLIST));
 
 	return true;
 }
 
-//»ñÈ¡ÓÃ»§Â¼ÏñÁĞ±í·µ»Ø
+//è·å–ç”¨æˆ·å½•åƒåˆ—è¡¨è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_Service_GetUserRecordList(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	ASSERT(wDataSize==sizeof(STR_DBO_CL_SERCIVR_GET_RECORDLIST));
 	STR_DBO_CL_SERCIVR_GET_RECORDLIST *pRecord = (STR_DBO_CL_SERCIVR_GET_RECORDLIST*)pData;
 
@@ -2417,7 +2417,7 @@ bool CAttemperEngineSink::On_CMD_LC_Service_GetUserRecordList(DWORD dwContextID,
 	return true;
 }
 
-//»ñÈ¡Ö¸¶¨IDÂ¼Ïñ
+//è·å–æŒ‡å®šIDå½•åƒ
 bool CAttemperEngineSink::On_SUB_CL_Service_GetSpecificRecord(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
 	ASSERT( wDataSize == sizeof(STR_SUB_CL_SERVICE_GET_XJ_RECORDLIST));
@@ -2425,24 +2425,24 @@ bool CAttemperEngineSink::On_SUB_CL_Service_GetSpecificRecord(VOID * pData, WORD
 
 	STR_SUB_CL_SERVICE_GET_XJ_RECORDLIST* pGetRecordList = (STR_SUB_CL_SERVICE_GET_XJ_RECORDLIST*)pData;
 
-	//DBRÊı¾İ
+	//DBRæ•°æ®
 	STR_DBR_CL_SERCIVR_GET_SPECIFIC_RECORD GetRecordList;
 	GetRecordList.dwTableID = pGetRecordList->dwTableID;
 
-	//Ğ£Ñé×À×ÓID
+	//æ ¡éªŒæ¡Œå­ID
 	if ( 0 != GetRecordList.dwTableID )
 	{
-		//Í¶µİÇëÇó
+		//æŠ•é€’è¯·æ±‚
 		m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_SERVICE_GET_SPECIFIC_RECORD,dwSocketID,&GetRecordList,sizeof(STR_DBR_CL_SERCIVR_GET_SPECIFIC_RECORD));
 	}
 
 	return true;
 }
 
-//»ñÈ¡Ö¸¶¨IDÂ¼Ïñ·µ»Ø
+//è·å–æŒ‡å®šIDå½•åƒè¿”å›
 bool CAttemperEngineSink::On_CMD_LC_Service_GetSpecificRecord(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	ASSERT(wDataSize==sizeof(STR_DBO_CL_SERCIVR_GET_SPECIFIC_RECORD));
 	STR_DBO_CL_SERCIVR_GET_SPECIFIC_RECORD *pRecord = (STR_DBO_CL_SERCIVR_GET_SPECIFIC_RECORD*)pData;
 
@@ -2454,7 +2454,7 @@ bool CAttemperEngineSink::On_CMD_LC_Service_GetSpecificRecord(DWORD dwContextID,
 	return true;
 }
 
-//»ñÈ¡ÔÚÏß½±Àø
+//è·å–åœ¨çº¿å¥–åŠ±
 bool CAttemperEngineSink::On_SUB_CL_Service_OnlineReward(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
 	ASSERT(wDataSize == sizeof(STR_SUB_CL_SERVICE_ONLINE_REWARD));
@@ -2471,10 +2471,10 @@ bool CAttemperEngineSink::On_SUB_CL_Service_OnlineReward(VOID * pData, WORD wDat
 	return m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_SERVICE_ONLINE_REWARD,dwSocketID,&GetLogonReward,sizeof(GetLogonReward));
 }
 
-//»ñÈ¡ÔÚÏß½±Àø·µ»Ø
+//è·å–åœ¨çº¿å¥–åŠ±è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_Service_OnlineReward( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	ASSERT(wDataSize==sizeof(STR_DBO_CL_SERCIVR_ONLINE_REWARD));
 	if(wDataSize!=sizeof(STR_DBO_CL_SERCIVR_ONLINE_REWARD))
 		return false;
@@ -2492,55 +2492,55 @@ bool CAttemperEngineSink::On_CMD_LC_Service_OnlineReward( DWORD dwContextID, VOI
 	return true;
 }
 
-//»ñÈ¡ÈÎÎñÁĞ±í
+//è·å–ä»»åŠ¡åˆ—è¡¨
 bool CAttemperEngineSink::On_SUB_CL_Service_GetTaskList(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
 	ASSERT(wDataSize >= sizeof(STR_SUB_CL_SERVICE_GET_TASKLIST));
 	if (wDataSize<sizeof(STR_SUB_CL_SERVICE_GET_TASKLIST)) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	STR_SUB_CL_SERVICE_GET_TASKLIST * pGetTaskList = (STR_SUB_CL_SERVICE_GET_TASKLIST *)pData;
 
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	STR_DBR_CL_SERCIVR_GET_TASKLIST GetTaskList;
 	ZeroMemory(&GetTaskList,sizeof(GetTaskList));
 
-	//¹¹ÔìÊı¾İ
+	//æ„é€ æ•°æ®
 	memcpy(&GetTaskList,pGetTaskList,sizeof(GetTaskList));
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_SERVICE_GET_TASK_LIST,dwSocketID,&GetTaskList,sizeof(GetTaskList));
 
 	return true;
 }
 
-//»ñÈ¡ÈÎÎñÁĞ±í·µ»Ø
+//è·å–ä»»åŠ¡åˆ—è¡¨è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_Service_GetTaskList( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	if( 0 != (wDataSize % sizeof(STR_DBO_CL_SERCIVR_GET_TASKLIST)) )
 		return false;
 
-	//»ñµÃÈÎÎñ¸öÊı
+	//è·å¾—ä»»åŠ¡ä¸ªæ•°
 	int count = wDataSize / sizeof(STR_DBO_CL_SERCIVR_GET_TASKLIST);
 
-	//Êı¾İ¿âÈÎÎñÁĞ±í
+	//æ•°æ®åº“ä»»åŠ¡åˆ—è¡¨
 	STR_DBO_CL_SERCIVR_GET_TASKLIST *TaskList = (STR_DBO_CL_SERCIVR_GET_TASKLIST *)pData;
 
-	//·µ»ØµÄÈÎÎñÁĞ±í
+	//è¿”å›çš„ä»»åŠ¡åˆ—è¡¨
 	STR_CMD_LC_SERVICE_GET_TASKLIST *pCMDTaskList = new STR_CMD_LC_SERVICE_GET_TASKLIST[count];
 
-	//ÍøÂçÊı¾İ
+	//ç½‘ç»œæ•°æ®
 	WORD wSendSize=0;
 	BYTE cbDataBuffer[SOCKET_TCP_PACKET];
 
-	//Ã¶¾ÙÊı¾İ
+	//æšä¸¾æ•°æ®
 	for (int i=0; i<count; i++)
 	{
-		//½«DBOÊı¾İ¸³¸ø·µ»ØµÄÊı¾İ,Íê³É±êÖ¾µ¥¶À¸³Öµ
+		//å°†DBOæ•°æ®èµ‹ç»™è¿”å›çš„æ•°æ®,å®Œæˆæ ‡å¿—å•ç‹¬èµ‹å€¼
 		memcpy_s(&pCMDTaskList[i], sizeof(STR_DBO_CL_SERCIVR_GET_TASKLIST), &TaskList[i], sizeof(STR_DBO_CL_SERCIVR_GET_TASKLIST));
 
-		//×îºóÒ»´Î·¢ËÍ,ÉèÖÃÍê³É±êÖ¾Îª1
+		//æœ€åä¸€æ¬¡å‘é€,è®¾ç½®å®Œæˆæ ‡å¿—ä¸º1
 		if ( i == (count-1) )		
 		{
 			pCMDTaskList[i].cbListFinishMask = 1;
@@ -2550,57 +2550,57 @@ bool CAttemperEngineSink::On_CMD_LC_Service_GetTaskList( DWORD dwContextID, VOID
 			pCMDTaskList[i].cbListFinishMask = 0;
 		}
 		
-		//·¢ËÍÊı¾İ(·ÀÖ¹Êı¾İÌ«¶à£¬Ò»ÅúÅú·¢ËÍ)
+		//å‘é€æ•°æ®(é˜²æ­¢æ•°æ®å¤ªå¤šï¼Œä¸€æ‰¹æ‰¹å‘é€)
 		if ( (wSendSize+sizeof(STR_CMD_LC_SERVICE_GET_TASKLIST)) > sizeof(cbDataBuffer) )
 		{
-			//·¢ËÍÊı¾İ
+			//å‘é€æ•°æ®
 			m_pITCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_GET_TASK_LIST, cbDataBuffer, wSendSize);			
 			wSendSize=0;
 		}
 
-		//¿½±´Êı¾İ
+		//æ‹·è´æ•°æ®
 		CopyMemory(cbDataBuffer+wSendSize, &pCMDTaskList[i], sizeof(STR_CMD_LC_SERVICE_GET_TASKLIST));
 		wSendSize += sizeof(STR_CMD_LC_SERVICE_GET_TASKLIST);
 	}
 
-	//·¢ËÍÊ£Óà
+	//å‘é€å‰©ä½™
 	if (wSendSize>0) 	
 	{
 		m_pITCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_GET_TASK_LIST, cbDataBuffer, wSendSize);
 	}
 
-	//ÊÍ·ÅÄÚ´æ		TODO Ôø¾­±¨´í¹ı
-	delete [] pData;		//Ç°ÃæÊı¾İÊ±new³öÀ´µÄ£¬ËùÒÔĞèÒªdelete£¬½ø³ÌÖ®Ç°ÊÇÄÚ´æ´«ÊäµÄ
+	//é‡Šæ”¾å†…å­˜		TODO æ›¾ç»æŠ¥é”™è¿‡
+	delete [] pData;		//å‰é¢æ•°æ®æ—¶newå‡ºæ¥çš„ï¼Œæ‰€ä»¥éœ€è¦deleteï¼Œè¿›ç¨‹ä¹‹å‰æ˜¯å†…å­˜ä¼ è¾“çš„
 	delete [] pCMDTaskList;
 
 	return true;
 }
 
-//ÁìÈ¡ÈÎÎñ½±Àø
+//é¢†å–ä»»åŠ¡å¥–åŠ±
 bool CAttemperEngineSink::On_SUB_CL_Service_GetTaskReward(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
 	ASSERT(wDataSize >= sizeof(STR_SUB_CL_SERVICE_GET_TASK_REWARD));
 	if (wDataSize<sizeof(STR_SUB_CL_SERVICE_GET_TASK_REWARD)) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	STR_SUB_CL_SERVICE_GET_TASK_REWARD * pSetTaskDone =(STR_SUB_CL_SERVICE_GET_TASK_REWARD *)pData;
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	STR_DBR_CL_SERCIVR_GET_TASK_REWARD SetTaskDone;
 	ZeroMemory(&SetTaskDone,sizeof(SetTaskDone));
 
-	//¹¹ÔìÊı¾İ
+	//æ„é€ æ•°æ®
 	memcpy(&SetTaskDone,pSetTaskDone,sizeof(SetTaskDone));
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_SERVICE_GET_TASK_REWARD,dwSocketID,&SetTaskDone,sizeof(SetTaskDone));
 
 	return true;
 }
 
-//ÁìÈ¡ÈÎÎñ½±Àø·µ»Ø
+//é¢†å–ä»»åŠ¡å¥–åŠ±è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_Service_GetTaskReward( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	ASSERT(wDataSize==sizeof(STR_DBO_CL_SERCIVR_GET_TASK_REWARD));
 	if(wDataSize!=sizeof(STR_DBO_CL_SERCIVR_GET_TASK_REWARD))
 		return false;
@@ -2616,10 +2616,10 @@ bool CAttemperEngineSink::On_CMD_LC_Service_GetTaskReward( DWORD dwContextID, VO
 	return true;
 }
 
-//»ñÈ¡ÅÅĞĞ°ñ
+//è·å–æ’è¡Œæ¦œ
 bool CAttemperEngineSink::On_SUB_CL_Service_GetRankList(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	ASSERT(wDataSize==sizeof(STR_SUB_CL_SERVICE_GET_RANKLIST));
 	if(wDataSize!=sizeof(STR_SUB_CL_SERVICE_GET_RANKLIST))
 		return false;
@@ -2629,7 +2629,7 @@ bool CAttemperEngineSink::On_SUB_CL_Service_GetRankList(VOID * pData, WORD wData
 	STR_CMD_LC_SERVICE_GET_RANKLIST rankList;
 	ZeroMemory(&rankList, sizeof(STR_CMD_LC_SERVICE_GET_RANKLIST));
 
-	//ÅÅĞĞ°ñ¹ÜÀíÆ÷»ñÈ¡ÅÅĞĞ°ñÁĞ±í
+	//æ’è¡Œæ¦œç®¡ç†å™¨è·å–æ’è¡Œæ¦œåˆ—è¡¨
 	int wCount = ((RankManager*)m_pRankManager)->GetRankCountByIndex(pTaskList->byIndex);
 
 	for(int i=0;i < 20 && i < wCount;i++)
@@ -2644,10 +2644,10 @@ bool CAttemperEngineSink::On_SUB_CL_Service_GetRankList(VOID * pData, WORD wData
 	return true;
 }
 
-//ÇëÇó³é½±
+//è¯·æ±‚æŠ½å¥–
 bool CAttemperEngineSink::On_SUB_CL_Service_RequestLottery(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	ASSERT(wDataSize==sizeof(STR_SUB_CL_SERVICE_REQUEST_LOTTERY));
 	if(wDataSize!=sizeof(STR_SUB_CL_SERVICE_REQUEST_LOTTERY))
 		return false;
@@ -2661,73 +2661,73 @@ bool CAttemperEngineSink::On_SUB_CL_Service_RequestLottery(VOID * pData, WORD wD
 
 }
 
-//ÇëÇó³é½±·µ»Ø
+//è¯·æ±‚æŠ½å¥–è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_Service_RequestLottery( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	ASSERT(wDataSize==sizeof(STR_DBO_CL_SERCIVR_REQUEST_LOTTERY));
 	if(wDataSize!=sizeof(STR_DBO_CL_SERCIVR_REQUEST_LOTTERY))
 		return false;
 
 	STR_DBO_CL_SERCIVR_REQUEST_LOTTERY *pLotteryResult = (STR_DBO_CL_SERCIVR_REQUEST_LOTTERY*)pData;
 
-	//¹¹Ôì³é½±Êı¾İ
+	//æ„é€ æŠ½å¥–æ•°æ®
 	STR_CMD_LC_SERVICE_REQUEST_LOTTERY LotteryResult;
 	ZeroMemory(&LotteryResult,sizeof(STR_CMD_LC_SERVICE_REQUEST_LOTTERY));
 
-	//¸³Öµ
+	//èµ‹å€¼
 	LotteryResult.byIndex = pLotteryResult->byIndex;
 	LotteryResult.lResultCode = pLotteryResult->lResultCode;
 	lstrcpyn(LotteryResult.szDescribeString, pLotteryResult->szDescribeString, CountArray(LotteryResult.szDescribeString));
 
-	//·¢ËÍÊı¾İ
+	//å‘é€æ•°æ®
 	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_REQUEST_LOTTERY, &LotteryResult, sizeof(STR_CMD_LC_SERVICE_REQUEST_LOTTERY));
 
 	return true;
 }
 
-//pure´óÌüÅÅĞĞ°æ ²éÑ¯
+//pureå¤§å…æ’è¡Œç‰ˆ æŸ¥è¯¢
 bool CAttemperEngineSink::On_SUB_CL_SERVICE_PURE_STANDING_LIST(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	if(wDataSize!=sizeof(STR_SUB_CL_SERVICE_PURE_STANDING_LIST))
 		return false;
 
 	return m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_SERVICE_PURE_STANDING_LIST,dwSocketID,pData, wDataSize);
 }
-//pure´óÌüÅÅĞĞ°æ ·µ»Ø
+//pureå¤§å…æ’è¡Œç‰ˆ è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_SERVICE_PURE_STANDING_LIST( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	DWORD Count = sizeof(STR_CMD_LC_SERVICE_PURE_STANDING_LIST);
 	if(wDataSize<Count || (wDataSize%Count != 0))
 		return false;
 
-	//·¢ËÍÊı¾İ
+	//å‘é€æ•°æ®
 	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_PURE_STANDING_LIST, pData, wDataSize);
 
 	return true;
 }
-//pure´óÌüÅÅĞĞ°æ ½áÊø
+//pureå¤§å…æ’è¡Œç‰ˆ ç»“æŸ
 bool CAttemperEngineSink::On_CMD_LC_SERVICE_PURE_STANDING_FINISH( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	if(wDataSize!=sizeof(STR_CMD_LC_SERVICE_PURE_STANDING_FINISH))
 		return false;
 
 	STR_CMD_LC_SERVICE_PURE_STANDING_FINISH *pLotteryResult = (STR_CMD_LC_SERVICE_PURE_STANDING_FINISH*)pData;
 	pLotteryResult->byMask = 1;
 
-	//·¢ËÍÊı¾İ
+	//å‘é€æ•°æ®
 	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_PURE_STANDING_FINISH, pLotteryResult, sizeof(STR_CMD_LC_SERVICE_PURE_STANDING_FINISH));
 
 	return true;
 }
 
-//pure´ó¾ÖÕ½¼¨ ²éÑ¯
+//pureå¤§å±€æˆ˜ç»© æŸ¥è¯¢
 bool CAttemperEngineSink::On_SUB_CL_SERVICE_PURE_RECORD_LIST(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	if(wDataSize!=sizeof(STR_SUB_CL_SERVICE_PURE_RECORD_LIST))
 		return false;
 
@@ -2735,132 +2735,132 @@ bool CAttemperEngineSink::On_SUB_CL_SERVICE_PURE_RECORD_LIST(VOID * pData, WORD 
 
 	return true;
 }
-//pure´ó¾ÖÕ½¼¨ ·µ»Ø
+//pureå¤§å±€æˆ˜ç»© è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_SERVICE_PURE_RECORD_LIST( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	DWORD Count = sizeof(STR_CMD_LC_SERVICE_PURE_RECORD_LIST);
 	if(wDataSize<Count || (wDataSize%Count != 0))
 		return false;
 
-	//·¢ËÍÊı¾İ
+	//å‘é€æ•°æ®
 	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_PURE_RECORD_LIST, pData, wDataSize);
 
 	return true;
 }
-//pure´ó¾ÖÍæ¼ÒĞÅÏ¢ ·µ»Ø
+//pureå¤§å±€ç©å®¶ä¿¡æ¯ è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_SERVICE_PURE_RECORD_LIST_PINFO( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	DWORD Count = sizeof(STR_CMD_LC_SERVICE_PURE_RECORD_LIST_PLAYERINFO);
 	if(wDataSize<Count || (wDataSize%Count != 0))
 		return false;
 
-	//·¢ËÍÊı¾İ
+	//å‘é€æ•°æ®
 	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_PURE_RECORD_LIST_PINFO, pData, wDataSize);
 
 	return true;
 }
-//pure´ó¾ÖÕ½¼¨ ½áÊø
+//pureå¤§å±€æˆ˜ç»© ç»“æŸ
 bool CAttemperEngineSink::On_CMD_LC_SERVICE_PURE_RECORD_FINISH( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	if(wDataSize!=sizeof(STR_CMD_LC_SERVICE_PURE_RECORD_LIST_FINIST))
 		return false;
 
 	STR_CMD_LC_SERVICE_PURE_RECORD_LIST_FINIST *pLotteryResult = (STR_CMD_LC_SERVICE_PURE_RECORD_LIST_FINIST*)pData;
 	pLotteryResult->byMask = 1;
 
-	//·¢ËÍÊı¾İ
+	//å‘é€æ•°æ®
 	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_PURE_RECORD_FINISH, pLotteryResult, sizeof(STR_CMD_LC_SERVICE_PURE_RECORD_LIST_FINIST));
 
 	return true;
 }
 
-//pureĞ¡¾ÖÕ½¼¨ ²éÑ¯
+//pureå°å±€æˆ˜ç»© æŸ¥è¯¢
 bool CAttemperEngineSink::On_SUB_CL_SERVICE_PURE_XJ_RECORD_LIST(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	if(wDataSize!=sizeof(STR_SUB_CL_SERVICE_PURE_XJ_RECORD_LIST))
 		return false;
 
 	return m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_SERVICE_PURE_XJ_RECORD_LIST,dwSocketID,pData, wDataSize);
 }
-//pureĞ¡¾ÖÕ½¼¨ ·µ»Ø
+//pureå°å±€æˆ˜ç»© è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	DWORD Count = sizeof(STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST);
 	if(wDataSize<Count || (wDataSize%Count != 0))
 		return false;
 
 	STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST * pCMD = (STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST *) pData;
 
-	//·¢ËÍÊı¾İ
+	//å‘é€æ•°æ®
 	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_PURE_XJ_RECORD_LIST, pData, wDataSize);
 
 	return true;
 }
-//pureĞ¡¾ÖÍæ¼ÒĞÅÏ¢ ·µ»Ø
+//pureå°å±€ç©å®¶ä¿¡æ¯ è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_PINFO( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	DWORD Count = sizeof(STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_PLAYERINFO);
 	if(wDataSize<Count || (wDataSize%Count != 0))
 		return false;
 
-	//·¢ËÍÊı¾İ
+	//å‘é€æ•°æ®
 	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_PINFO, pData, wDataSize);
 
 	return true;
 }
-//pureĞ¡¾ÖÕ½¼¨ ½áÊø
+//pureå°å±€æˆ˜ç»© ç»“æŸ
 bool CAttemperEngineSink::On_CMD_LC_SERVICE_PURE_XJ_RECORD_FINISH( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	if(wDataSize!=sizeof(STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_FINISH))
 		return false;
 
 	STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_FINISH *pLotteryResult = (STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_FINISH*)pData;
 	pLotteryResult->byMask = 1;
 
-	//·¢ËÍÊı¾İ
+	//å‘é€æ•°æ®
 	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_PURE_XJ_RECORD_FINISH, pLotteryResult, sizeof(STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_FINISH));
 
 	return true;
 }
 
-//Ğ¡¾ÖÂ¼Ïñ»Ø·Å
+//å°å±€å½•åƒå›æ”¾
 bool CAttemperEngineSink::On_SUB_CL_Service_XJRecordPlayback(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Êı¾İ´óĞ¡Ğ£Ñé
+	//æ•°æ®å¤§å°æ ¡éªŒ
 	if ( wDataSize != sizeof(STR_SUB_CL_SERVICE_XJ_RECORD_PLAYBACK) )
 		return false;
 
-	//SUBÊı¾İ
+	//SUBæ•°æ®
 	STR_SUB_CL_SERVICE_XJ_RECORD_PLAYBACK *SUB = (STR_SUB_CL_SERVICE_XJ_RECORD_PLAYBACK *)pData;
 	
-	//¹¹ÔìDBRÊı¾İ
+	//æ„é€ DBRæ•°æ®
 	STR_DBR_CL_SERVICE_XJ_RECORD_PLAYBACK DBR;
 	ZeroMemory(&DBR, sizeof(STR_DBR_CL_SERVICE_XJ_RECORD_PLAYBACK));
 	DBR.dwRecordID = SUB->dwRecordID;
 
 	return m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_SERVICE_XJ_RECORD_PLAYBACK, dwSocketID, &DBR, wDataSize);
 }
-//Ğ¡¾ÖÂ¼Ïñ»Ø·Å ·µ»Ø
+//å°å±€å½•åƒå›æ”¾ è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_Service_XJRecordPlayback( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	if(wDataSize != sizeof(STR_DBO_LC_SERVICE_XJ_RECORD_PLAYBACK))
 		return false;
 
-	//DBOÊı¾İ
+	//DBOæ•°æ®
 	STR_DBO_LC_SERVICE_XJ_RECORD_PLAYBACK *pDBO = (STR_DBO_LC_SERVICE_XJ_RECORD_PLAYBACK*)pData;
 
 	BYTE cbBuffer[LEN_MAX_RECORD_SIZE];	
 	memcpy_s(cbBuffer, sizeof(cbBuffer), pDBO->cbRecordData, sizeof(cbBuffer));
 
-	//·ÖÅú·¢ËÍ
+	//åˆ†æ‰¹å‘é€
 	for (int i = 0; i < 4; i++)
 	{
 		STR_CMD_LC_SERVICE_XJ_RECORD_PLAYBACK CMD;
@@ -2868,7 +2868,7 @@ bool CAttemperEngineSink::On_CMD_LC_Service_XJRecordPlayback( DWORD dwContextID,
 		memcpy_s(CMD.cbRecordData, sizeof(CMD.cbRecordData), cbBuffer+i*LEN_MAX_RECORD_SIZE/4, sizeof(CMD.cbRecordData));
 		CMD.cbfinish = (i==3) ? 1 : 0;
 
-		//·¢ËÍÊı¾İ
+		//å‘é€æ•°æ®
 		m_pITCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_XJ_RECORD_PLAYBACK, &CMD, sizeof(CMD));
 
 	}
@@ -2876,170 +2876,170 @@ bool CAttemperEngineSink::On_CMD_LC_Service_XJRecordPlayback( DWORD dwContextID,
 	return true;
 }
 
-//¿Í·şÏûÏ¢
+//å®¢æœæ¶ˆæ¯
 bool CAttemperEngineSink::On_SUB_CL_SERVICE_CUSTOMER_MESSEGE(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Êı¾İ´óĞ¡Ğ£Ñé
+	//æ•°æ®å¤§å°æ ¡éªŒ
 	if ( wDataSize != sizeof(STR_SUB_CL_SERVICE_CUSTOMER_MESSEGE) )
 		return false;
 
-	//SUBÊı¾İ
+	//SUBæ•°æ®
 	STR_SUB_CL_SERVICE_CUSTOMER_MESSEGE *SUB = (STR_SUB_CL_SERVICE_CUSTOMER_MESSEGE *)pData;
 	
-	//¹¹ÔìDBRÊı¾İ
+	//æ„é€ DBRæ•°æ®
 	STR_DBR_CL_SERVICE_CUSTOMER_MESSEGE DBR;
 	ZeroMemory(&DBR, sizeof(STR_DBR_CL_SERVICE_CUSTOMER_MESSEGE));
 	DBR.cbMessegeFlag = SUB->cbMessegeFlag;
 
 	return m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_SERVICE_CUSTOMER_MESSEGE, dwSocketID, &DBR, sizeof(DBR));
 }
-//¿Í·şÏûÏ¢ ·µ»Ø
+//å®¢æœæ¶ˆæ¯ è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_SERVICE_CUSTOMER_MESSEGE( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	if(wDataSize != sizeof(STR_DBO_LC_SERVICE_CUSTOMER_MESSEGE))
 		return false;
 
-	//DBOÊı¾İ
+	//DBOæ•°æ®
 	STR_DBO_LC_SERVICE_CUSTOMER_MESSEGE *pDBO = (STR_DBO_LC_SERVICE_CUSTOMER_MESSEGE*)pData;
 
-	//¹¹ÔìCMDÊı¾İ
+	//æ„é€ CMDæ•°æ®
 	STR_CMD_LC_SERVICE_CUSTOMER_MESSEGE CMD;
 	ZeroMemory(&CMD, sizeof(STR_CMD_LC_SERVICE_CUSTOMER_MESSEGE));
 	CMD.cbMessegeFlag = pDBO->cbMessegeFlag;
 	lstrcpyn(CMD.szMessege, pDBO->szMessege, CountArray(CMD.szMessege));
 
-	//·¢ËÍÊı¾İ
+	//å‘é€æ•°æ®
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_CUSTOMER_MESSEGE, &CMD, sizeof(STR_CMD_LC_SERVICE_CUSTOMER_MESSEGE));
 
 	return true;
 }
 
-//ÇëÇó½ğ±Ò´óÌüĞÅÏ¢
+//è¯·æ±‚é‡‘å¸å¤§å…ä¿¡æ¯
 bool CAttemperEngineSink::On_SUB_CL_SERVICE_GOLD_INFO(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	if(wDataSize!=sizeof(STR_SUB_CL_SERVICE_GOLD_INFO))
 		return false;
 
 	return m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_SERVICE_GOLD_INFO,dwSocketID,pData, wDataSize);
 }
-//ÇëÇó½ğ±Ò´óÌüĞÅÏ¢ ·µ»Ø
+//è¯·æ±‚é‡‘å¸å¤§å…ä¿¡æ¯ è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_SERVICE_GOLD_INFO( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	DWORD Count = sizeof(STR_CMD_LC_SERVICE_GOLD_INFO);
 	if(wDataSize<Count || (wDataSize%Count != 0))
 		return false;
 
-	//·¢ËÍÊı¾İ
+	//å‘é€æ•°æ®
 	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_GOLD_INFO, pData, wDataSize);
 
 	return true;
 }
-//ÇëÇó½ğ±Ò´óÌüĞÅÏ¢ ½áÊø
+//è¯·æ±‚é‡‘å¸å¤§å…ä¿¡æ¯ ç»“æŸ
 bool CAttemperEngineSink::On_CMD_LC_SERVICE_GOLD_INFO_FINISH( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	if(wDataSize!=sizeof(STR_CMD_LC_SERVICE_GOLD_INFO_FINISH))
 		return false;
 
 	STR_CMD_LC_SERVICE_GOLD_INFO_FINISH *pLotteryResult = (STR_CMD_LC_SERVICE_GOLD_INFO_FINISH*)pData;
 	pLotteryResult->byMask = 1;
 
-	//·¢ËÍÊı¾İ
+	//å‘é€æ•°æ®
 	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_GOLD_INFO_FINISH, pLotteryResult, sizeof(STR_CMD_LC_SERVICE_GOLD_INFO_FINISH));
 
 	return true;
 }
 
-//ĞŞ¸Ä¸öÈË×ÊÁÏ
+//ä¿®æ”¹ä¸ªäººèµ„æ–™
 bool CAttemperEngineSink::On_SUB_CL_Service_ModifyPersonalInfo(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé
+	//æ ¡éªŒ
 	if (wDataSize != sizeof(STR_SUB_CL_SERVICE_MODIFY_PERSONAL_INFO)) return false;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_SERVICE_MODIFY_PERSONAL_INFO, dwSocketID, pData, wDataSize);
 
 	return true;
 }
 
-//ĞŞ¸Ä¸öÈË×ÊÁÏ·µ»Ø
+//ä¿®æ”¹ä¸ªäººèµ„æ–™è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_Service_ModifyPersonalInfo( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	if(wDataSize!=sizeof(STR_DBO_CL_MODIFY_PERSONL_INFO))
 		return false;
 
 	STR_DBO_CL_MODIFY_PERSONL_INFO *pModifyInfo = (STR_DBO_CL_MODIFY_PERSONL_INFO*)pData;
 
-	//¹¹ÔìÊı¾İ
+	//æ„é€ æ•°æ®
 	STR_CMD_LC_SERVICE_MODIFY_PERSONL_INFO PersonalInfo;
 	ZeroMemory(&PersonalInfo,sizeof(STR_CMD_LC_SERVICE_MODIFY_PERSONL_INFO));
 	CopyMemory(&PersonalInfo, pModifyInfo, sizeof(PersonalInfo));
 
-	//·¢ËÍÊı¾İ
+	//å‘é€æ•°æ®
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_MODIFY_PERSONAL_INFO, &PersonalInfo, sizeof(STR_CMD_LC_SERVICE_MODIFY_PERSONL_INFO));
 
 	return true;
 }
 
-//²éÑ¯½ğ±Ò·¿¿¨·µ»Ø
+//æŸ¥è¯¢é‡‘å¸æˆ¿å¡è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_Service_QueryScoreInfo(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//ÅĞ¶ÏÔÚÏß
+	//åˆ¤æ–­åœ¨çº¿
 	if ((m_pBindParameter+LOWORD(dwContextID))->dwSocketID!=dwContextID) return true;
 
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO * pScoreInfo =(STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO *)pData;
 
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	STR_CMD_LC_QUERY_SCORE_INFO ScoreInfo;
 	ZeroMemory(&ScoreInfo,sizeof(ScoreInfo));
 
-	//ÃèÊöĞÅÏ¢
+	//æè¿°ä¿¡æ¯
 	ScoreInfo.lResultCode = pScoreInfo->lResultCode;
 	lstrcpyn(ScoreInfo.szDescribeString, pScoreInfo->szDescribeString, CountArray(ScoreInfo.szDescribeString));
 
-	//²Æ¸»ĞÅÏ¢
+	//è´¢å¯Œä¿¡æ¯
 	ScoreInfo.dwUserID = pScoreInfo->dwUserID;
 	ScoreInfo.lGold = pScoreInfo->lGold;
 	ScoreInfo.lOpenRoomCard = pScoreInfo->lOpenRoomCard;
 	ScoreInfo.lDiamond = pScoreInfo->lDiamond;
 
-	//·¢ËÍÊı¾İ
+	//å‘é€æ•°æ®
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_USER_QUERY_SCORE_INFO, &ScoreInfo, sizeof(STR_CMD_LC_QUERY_SCORE_INFO));
 
 	return true;
 }
 
-//¹«¹²²Ù×÷½á¹û
+//å…¬å…±æ“ä½œç»“æœ
 bool CAttemperEngineSink::On_CMD_LC_CommonOperateResult( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//ÅĞ¶ÏÔÚÏß
+	//åˆ¤æ–­åœ¨çº¿
 	if ((m_pBindParameter+LOWORD(dwContextID))->dwSocketID!=dwContextID) return true;
 
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	STR_CMD_LC_OTHER_OPERATE_RESULT OperateResult;
 	ZeroMemory(&OperateResult,sizeof(OperateResult));
 
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	DBO_GP_OperateCommand * pOperate=(DBO_GP_OperateCommand *)pData;
 
-	//¹¹ÔìÊı¾İ
+	//æ„é€ æ•°æ®
 	OperateResult.lResultCode=pOperate->lResultCode;
 
-	//·¢ËÍÊı¾İ
+	//å‘é€æ•°æ®
 	WORD wHeadSize=sizeof(OperateResult);
 	m_pITCPNetworkEngine->SendData(dwContextID,pOperate->mCommand.MainCommand,pOperate->mCommand.SubCommand,&OperateResult,wHeadSize);
 	return true;
 }
 
-//ÁìÈ¡ÈÎÎñ·µ»Ø
+//é¢†å–ä»»åŠ¡è¿”å›
 bool CAttemperEngineSink::OnDBRankRewardResult( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	ASSERT(wDataSize==sizeof(STR_DBO_CL_SERCIVR_GET_RANK_REWARD));
 	if(wDataSize!=sizeof(STR_DBO_CL_SERCIVR_GET_RANK_REWARD))
 		return false;
@@ -3056,65 +3056,65 @@ bool CAttemperEngineSink::OnDBRankRewardResult( DWORD dwContextID, VOID * pData,
 }
 #pragma endregion
 
-/***************************************** ¡¾ÆäËûÏûÏ¢´¦Àíº¯Êı-Ö÷ÏûÏ¢6¡¿ *******************************************/
-//ÓÃ»§³äÖµĞÅÏ¢
+/***************************************** ã€å…¶ä»–æ¶ˆæ¯å¤„ç†å‡½æ•°-ä¸»æ¶ˆæ¯6ã€‘ *******************************************/
+//ç”¨æˆ·å……å€¼ä¿¡æ¯
 bool CAttemperEngineSink::On_SUB_CL_Other_ReChargeInfo(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	ASSERT( wDataSize == sizeof(STR_SUB_CL_OTHER_RECHARGE_INFO));
 	if(wDataSize != sizeof(STR_SUB_CL_OTHER_RECHARGE_INFO)) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	STR_SUB_CL_OTHER_RECHARGE_INFO * pUserRequest = (STR_SUB_CL_OTHER_RECHARGE_INFO *)pData;
-	//¶¨Òå±äÁ¿
+	//å®šä¹‰å˜é‡
 	STR_DBR_CL_OTHER_RECHARGE_INFO UserRequest;
 	ZeroMemory(&UserRequest,sizeof(UserRequest));
 
 	UserRequest.dwUserID = pUserRequest->dwUserID;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_USER_RECHARGE_INFO,dwSocketID,&UserRequest,sizeof(UserRequest));
 	return true;
 }
 
-//ÓÃ»§³äÖµĞÅÏ¢·µ»Ø
+//ç”¨æˆ·å……å€¼ä¿¡æ¯è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_Other_RechargeInfo( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//ÅĞ¶ÏÔÚÏß
+	//åˆ¤æ–­åœ¨çº¿
 	if ((m_pBindParameter+LOWORD(dwContextID))->dwSocketID!=dwContextID) return true;
 
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	STR_CMD_LC_OTHER_RECHARGE_INFO RechangeInfo;
 	ZeroMemory(&RechangeInfo,sizeof(RechangeInfo));
 
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	STR_DBO_CL_OTHER_RECHARGE_INFO * pRechangeInfo = (STR_DBO_CL_OTHER_RECHARGE_INFO *)pData;
 
-	//¹¹ÔìÊı¾İ
+	//æ„é€ æ•°æ®
 	RechangeInfo.dwMinMoney = pRechangeInfo->dwMinMoney;
 	RechangeInfo.dwChangeScale = pRechangeInfo->dwChangeScale;
 
-	//·¢ËÍÊı¾İ
+	//å‘é€æ•°æ®
 	WORD wHeadSize=sizeof(RechangeInfo);
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_OTHERS_RECHARGE_INFO, &RechangeInfo, wHeadSize);
 	return true;
 }
 
-#pragma region ÀñÎïµÀ¾ß
-//ÔùËÍµÀ¾ß
+#pragma region ç¤¼ç‰©é“å…·
+//èµ é€é“å…·
 bool CAttemperEngineSink::On_SUB_CL_GIFT_GIVE_PROPS(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	if(wDataSize!=sizeof(STR_SUB_CL_GIFT_GIVE_PROPS))
 		return false;
 
 	return m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_GIFT_GIVE_PROPS,dwSocketID, pData, wDataSize);
 }
 
-//ÔùËÍµÀ¾ß·µ»Ø
+//èµ é€é“å…·è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_GIFT_GIVE_PROPS( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	if(wDataSize!=sizeof(STR_CMD_LC_GIFT_GIVE_PROPS))
 		return false;
 
@@ -3123,16 +3123,16 @@ bool CAttemperEngineSink::On_CMD_LC_GIFT_GIVE_PROPS( DWORD dwContextID, VOID * p
 	return true;
 }
 
-//ÔùËÍµÀ¾ß Í¨Öª½ÓÊÜÈË
+//èµ é€é“å…· é€šçŸ¥æ¥å—äºº
 bool CAttemperEngineSink::On_CMD_LC_GIFT_GIVE_PROPS_SHOW( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//²ÎÊıĞ£Ñé
+	//å‚æ•°æ ¡éªŒ
 	if(wDataSize!=sizeof(STR_CMD_LC_GIFT_GIVE_PROPS_SHOW))
 		return false;
 
 	STR_CMD_LC_GIFT_GIVE_PROPS_SHOW *pCMD = (STR_CMD_LC_GIFT_GIVE_PROPS_SHOW*) pData;
 
-	//²éÕÒÔÚÏßÓÃ»§ ·¢ËÍÊı¾İ
+	//æŸ¥æ‰¾åœ¨çº¿ç”¨æˆ· å‘é€æ•°æ®
 	for (int j = 0; j < MAX_CONTENT; j++)
 	{
 		tagBindParameter * pBindParameter=(m_pBindParameter+j);
@@ -3140,51 +3140,51 @@ bool CAttemperEngineSink::On_CMD_LC_GIFT_GIVE_PROPS_SHOW( DWORD dwContextID, VOI
 			pBindParameter->dwSocketID != 0 && 
 			pBindParameter->dwUserID == pCMD->dwTargetID)
 		{
-			//Í¨ÖªÓÃ»§
+			//é€šçŸ¥ç”¨æˆ·
 			m_pITCPNetworkEngine->SendData(pBindParameter->dwSocketID, MDM_GIFT, CMD_LC_GIFT_GIVE_PROPS_SHOW, 
 											pData, wDataSize);		
 		}
 	}
 
-	//TODONOW ºóÆÚÔùËÍÀñÎïµÄÏûÏ¢ÆµµÀ ¿ÉÒÔÔÚÕâÀï·¢ËÍ   
-	//1. ÊÀ½çÁÄÌìµÄÊ±ºòÒ»¶¨²»Òª¼ÓÍ·Ïñ, Ö»Ğ´êÇ³ÆºÍÁÄÌìµÄÏûÏ¢¼´¿É
-	//2. ¿Í»§¶ËÔö¼ÓÒ»¸ö°´Å¥, ¿ÉÒÔ¿ØÖÆÊÇ·ñ½ÓÊÜÊÀ½çÆµµÀ 
+	//TODONOW åæœŸèµ é€ç¤¼ç‰©çš„æ¶ˆæ¯é¢‘é“ å¯ä»¥åœ¨è¿™é‡Œå‘é€   
+	//1. ä¸–ç•ŒèŠå¤©çš„æ—¶å€™ä¸€å®šä¸è¦åŠ å¤´åƒ, åªå†™æ˜µç§°å’ŒèŠå¤©çš„æ¶ˆæ¯å³å¯
+	//2. å®¢æˆ·ç«¯å¢åŠ ä¸€ä¸ªæŒ‰é’®, å¯ä»¥æ§åˆ¶æ˜¯å¦æ¥å—ä¸–ç•Œé¢‘é“ 
 	return true;
 }
 
 #pragma endregion
 
 
-//¶Ò»»µÀ¾ß
+//å…‘æ¢é“å…·
 bool CAttemperEngineSink::On_SUB_CL_Other_ExchangeInfo(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	ASSERT( wDataSize == sizeof(STR_SUB_CL_OTHER_EXCHANGE_INFO));
 	if(wDataSize != sizeof(STR_SUB_CL_OTHER_EXCHANGE_INFO)) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	STR_SUB_CL_OTHER_EXCHANGE_INFO * pUserRequest = (STR_SUB_CL_OTHER_EXCHANGE_INFO *)pData;
-	//¶¨Òå±äÁ¿
+	//å®šä¹‰å˜é‡
 	STR_DBR_CL_OTHER_EXCHANGE_INFO UserRequest;
 	ZeroMemory(&UserRequest,sizeof(UserRequest));
 
 	UserRequest.dwUserID = pUserRequest->dwUserID;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_USER_EXCHANGE_INFO, dwSocketID, &UserRequest, sizeof(UserRequest));
 	return true;
 }
 
-//¶Ò»»µÀ¾ß·µ»Ø
+//å…‘æ¢é“å…·è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_Other_ExchangeInfo( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//ÅĞ¶ÏÔÚÏß
+	//åˆ¤æ–­åœ¨çº¿
 	if ((m_pBindParameter+LOWORD(dwContextID))->dwSocketID!=dwContextID) return true;
 
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	STR_DBO_CL_OTHER_EXCHANGE_INFO * pExchangeInfo=(STR_DBO_CL_OTHER_EXCHANGE_INFO *)pData;
 
-	//¹¹ÔìÊı¾İ
+	//æ„é€ æ•°æ®
 	STR_CMD_LC_OTHER_EXCHANGE_INFO ExchangeInfo;
 	ZeroMemory(&ExchangeInfo,sizeof(ExchangeInfo));
 
@@ -3193,187 +3193,187 @@ bool CAttemperEngineSink::On_CMD_LC_Other_ExchangeInfo( DWORD dwContextID, VOID 
 	ExchangeInfo.dwBankMoney = pExchangeInfo->dwBankMoney;
 	ExchangeInfo.dwWithdrawals = pExchangeInfo->dwWithdrawals;
 
-	//·¢ËÍÊı¾İ
+	//å‘é€æ•°æ®
 	WORD wHeadSize=sizeof(ExchangeInfo);
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_OTHERS_EXCHANGE_INFO, &ExchangeInfo, wHeadSize);
 
 	return true;
 }
 
-#pragma region MDM_CLUB ÅÆÓÑÈ¦(°æ±¾2)
-//²éÑ¯ÅÆÓÑÈ¦ÁĞ±í
+#pragma region MDM_CLUB ç‰Œå‹åœˆ(ç‰ˆæœ¬2)
+//æŸ¥è¯¢ç‰Œå‹åœˆåˆ—è¡¨
 bool CAttemperEngineSink::On_SUB_CL_CLUB_ALL_CLUB_INFO_LIST(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_ALL_CLUB_INFO_LIST)) return false;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_ALL_CLUB_INFO_LIST, dwSocketID, pData, wDataSize);
 
 	return true;
 }
-//²éÑ¯ÅÆÓÑÈ¦ÁĞ±í½á¹û
+//æŸ¥è¯¢ç‰Œå‹åœˆåˆ—è¡¨ç»“æœ
 bool CAttemperEngineSink::On_CMD_LC_CLUB_ALL_CLUB_INFO_LIST( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_ALL_CLUB_INFO_LIST);
 	if( (wDataSize % Size) != 0) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_ALL_CLUB_INFO_LIST, pData, wDataSize);
 	return true;
 }
-//²éÑ¯ÅÆÓÑÈ¦ÁĞ±í½áÊø
+//æŸ¥è¯¢ç‰Œå‹åœˆåˆ—è¡¨ç»“æŸ
 bool CAttemperEngineSink::On_CMD_LC_CLUB_ALL_INFO_FINISH( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
 	STR_CMD_LC_CLUB_ALL_INFO_FINISH cmd;
 	cmd.byMask = 1;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_ALL_INFO_FINISH, &cmd, sizeof(STR_CMD_LC_CLUB_ALL_INFO_FINISH));
 	return true;
 }
 
-//²éÑ¯Ö¸¶¨ÅÆÓÑÈ¦·¿¼äÁĞ±í
+//æŸ¥è¯¢æŒ‡å®šç‰Œå‹åœˆæˆ¿é—´åˆ—è¡¨
 bool CAttemperEngineSink::On_SUB_CL_CLUB_ROOM_LIST(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_ROOM_LIST)) return false;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_ROOM_LIST, dwSocketID, pData, wDataSize);
 	return true;
 }
-//²éÑ¯Ö¸¶¨ÅÆÓÑÈ¦·¿¼äÁĞ±í ·µ»Ø
+//æŸ¥è¯¢æŒ‡å®šç‰Œå‹åœˆæˆ¿é—´åˆ—è¡¨ è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_CLUB_ROOM_LIST( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_ROOM_LIST);
 	if( (wDataSize % Size ) != 0) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_ROOM_LIST, pData, wDataSize);
 	return true;
 }
-//²éÑ¯Ö¸¶¨ÅÆÓÑÈ¦·¿¼äÁĞ±í ½áÊø
+//æŸ¥è¯¢æŒ‡å®šç‰Œå‹åœˆæˆ¿é—´åˆ—è¡¨ ç»“æŸ
 bool CAttemperEngineSink::On_CMD_LC_CLUB_ROOM_LIST_FINISH( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
 	STR_CMD_LC_CLUB_ROOM_LIST_FINISH cmd;
 	cmd.byMask = 1;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_ROOM_LIST_FINISH, &cmd, sizeof(STR_CMD_LC_CLUB_ROOM_LIST_FINISH));
 	return true;
 }
 
-//²éÑ¯Î´ÂúÔ±, Ëæ»úÅÆÓÑÈ¦(×î´ó9¸ö)
+//æŸ¥è¯¢æœªæ»¡å‘˜, éšæœºç‰Œå‹åœˆ(æœ€å¤§9ä¸ª)
 bool CAttemperEngineSink::On_SUB_CL_CLUB_RANDOM_CLUB_LIST(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_RANDOM_CLUB_LIST)) return false;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_RANDOM_CLUB_LIST, dwSocketID, pData, wDataSize);
 	return true;
 }
-//²éÑ¯Î´ÂúÔ±, Ëæ»úÅÆÓÑÈ¦(×î´ó9¸ö) ·µ»Ø
+//æŸ¥è¯¢æœªæ»¡å‘˜, éšæœºç‰Œå‹åœˆ(æœ€å¤§9ä¸ª) è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_CLUB_RANDOM_CLUB_LIST( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_RANDOM_CLUB_LIST);
 	if( (wDataSize % Size) != 0) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_RANDOM_CLUB_LIST, pData, wDataSize);
 	return true;
 }
-//²éÑ¯Î´ÂúÔ±, Ëæ»úÅÆÓÑÈ¦(×î´ó9¸ö) ½áÊø
+//æŸ¥è¯¢æœªæ»¡å‘˜, éšæœºç‰Œå‹åœˆ(æœ€å¤§9ä¸ª) ç»“æŸ
 bool CAttemperEngineSink::On_CMD_LC_CLUB_RANDOM_CLUB_LIST_FINISH( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
 	STR_CMD_LC_CLUB_RANDOM_CLUB_LIST_FINISH cmd;
 	cmd.byMask = 1;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_RANDOM_CLUB_LIST_FINISH, &cmd, sizeof(STR_CMD_LC_CLUB_RANDOM_CLUB_LIST_FINISH));
 	return true;
 }
 
-//ÉêÇë¼ÓÈëÅÆÓÑÈ¦
+//ç”³è¯·åŠ å…¥ç‰Œå‹åœˆ
 bool CAttemperEngineSink::On_SUB_CL_CLUB_JOIN_CLUB(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_JOIN_CLUB)) return false;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_JOIN_CLUB, dwSocketID, pData, wDataSize);
 	return true;
 }
-//ÉêÇë¼ÓÈëÅÆÓÑÈ¦·µ»Ø 
+//ç”³è¯·åŠ å…¥ç‰Œå‹åœˆè¿”å› 
 bool CAttemperEngineSink::On_CMD_LC_CLUB_JOIN_CLUB( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_JOIN_CLUB);
 	if( wDataSize != Size) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_JOIN_CLUB, pData, wDataSize);
 	return true;
 }
-//ÉêÇë¼ÓÈëÅÆÓÑÈ¦¹ã²¥
+//ç”³è¯·åŠ å…¥ç‰Œå‹åœˆå¹¿æ’­
 bool CAttemperEngineSink::On_CMD_LC_CLUB_JOIN_CLUB_BDCAST( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_SUB_CL_CLUB_JOIN_CLUB_BDCAST);
 	if( wDataSize != Size) return false;
 
-	//TODONOW ÔİÊ±ÊÇÃ¿¸öÈË¶¼·¢ËÍ£¬ºóÃæ¸ÄÎª 1.ÌØ¶¨¾ãÀÖ²¿µÄ  2.»á³¤ºÍ¹ÜÀíÔ±·¢ËÍ
+	//TODONOW æš‚æ—¶æ˜¯æ¯ä¸ªäººéƒ½å‘é€ï¼Œåé¢æ”¹ä¸º 1.ç‰¹å®šä¿±ä¹éƒ¨çš„  2.ä¼šé•¿å’Œç®¡ç†å‘˜å‘é€
 	m_pITCPNetworkEngine->SendDataBatch(MDM_CLUB, CMD_LC_CLUB_JOIN_CLUB_BDCAST, pData, wDataSize);
 	return true;
 }
-//ÉêÇë¼ÓÈëÅÆÓÑÈ¦ Í¨Öª¿Í»§¶ËÊµÊ±Ë¢ĞÂ
+//ç”³è¯·åŠ å…¥ç‰Œå‹åœˆ é€šçŸ¥å®¢æˆ·ç«¯å®æ—¶åˆ·æ–°
 bool CAttemperEngineSink::On_CMD_LC_CLUB_JOIN_CLUB_RE( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_LIST_RE);
 	if( wDataSize != Size) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_LIST_RE, pData, wDataSize);
 	return true;
 }
 
 
-//½âÉ¢ÅÆÓÑÈ¦
+//è§£æ•£ç‰Œå‹åœˆ
 bool CAttemperEngineSink::On_SUB_CL_CLUB_DISS_CLUB(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_DISS_CLUB)) return false;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_DISS_CLUB, dwSocketID, pData, wDataSize);
 	return true;
 }
-//½âÉ¢ÅÆÓÑÈ¦ ·µ»Ø 
+//è§£æ•£ç‰Œå‹åœˆ è¿”å› 
 bool CAttemperEngineSink::On_CMD_LC_CLUB_DISS_CLUB( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_DISS_CLUB);
 	if( wDataSize != Size) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_DISS_CLUB, pData, wDataSize);
 	return true;
 }
 
-//´´½¨ÅÆÓÑÈ¦
+//åˆ›å»ºç‰Œå‹åœˆ
 bool CAttemperEngineSink::On_SUB_CL_CLUB_CREATE_CLUB(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_CREATE_CLUB)) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	STR_SUB_CL_CLUB_CREATE_CLUB * pSub = (STR_SUB_CL_CLUB_CREATE_CLUB *)pData;
-	//¶¨Òå±äÁ¿
+	//å®šä¹‰å˜é‡
 	STR_DBR_CL_CLUB_CREATE_CLUB Dbr;
 	ZeroMemory(&Dbr,sizeof(Dbr));
 
@@ -3383,7 +3383,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_CREATE_CLUB(VOID * pData, WORD wDataSiz
 	lstrcpyn(Dbr.szMessag, pSub->szMessag, CountArray(Dbr.szMessag));
 	Dbr.dwMajorKindID = pSub->dwMajorKindID;
 
-	//¹¹ÔìĞÅÏ¢
+	//æ„é€ ä¿¡æ¯
 	for (WORD i=0; i<10; i++)
 	{
 		INT nLength=lstrlen(Dbr.szMinorKindID);
@@ -3392,125 +3392,125 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_CREATE_CLUB(VOID * pData, WORD wDataSiz
 			pSub->dwMinorKindID[i]);
 	}
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_CREATE_CLUB, dwSocketID, &Dbr, sizeof(Dbr));
 	return true;
 }
-//´´½¨ÅÆÓÑÈ¦ ·µ»Ø
+//åˆ›å»ºç‰Œå‹åœˆ è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_CLUB_CREATE_CLUB( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_CREATE_CLUB);
 	if( wDataSize != Size ) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_CREATE_CLUB, pData, wDataSize);
 	return true;
 }
 
-//·¿¼äÉèÖÃ
+//æˆ¿é—´è®¾ç½®
 bool CAttemperEngineSink::On_SUB_CL_CLUB_ROOM_SETTING(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_ROOM_SETTING)) return false;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_ROOM_SETTING, dwSocketID, pData, wDataSize);
 	return true;
 }
-//·¿¼äÉèÖÃ ·µ»Ø
+//æˆ¿é—´è®¾ç½® è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_CLUB_ROOM_SETTING( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_ROOM_SETTING);
 	if( wDataSize != Size) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_ROOM_SETTING, pData, wDataSize);
 	return true;
 }
 
-//ÇëÇó·¿¼äÉèÖÃ
+//è¯·æ±‚æˆ¿é—´è®¾ç½®
 bool CAttemperEngineSink::On_SUB_CL_CLUB_ROOM_QUERY_SETTING(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_ROOM_QUERY_SETTING)) return false;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_ROOM_QUERY_SETTING, dwSocketID, pData, wDataSize);
 	return true;
 }
-//ÇëÇó·¿¼äÉèÖÃ ·µ»Ø
+//è¯·æ±‚æˆ¿é—´è®¾ç½® è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_CLUB_ROOM_QUERY_SETTING( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_ROOM_QUERY_SETTING);
 	if( wDataSize != Size) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_ROOM_QUERY_SETTING, pData, wDataSize);
 	return true;
 }
 
 
-//Íæ¼ÒÀë¿ª¾ãÀÖ²¿·¿¼ä
+//ç©å®¶ç¦»å¼€ä¿±ä¹éƒ¨æˆ¿é—´
 bool CAttemperEngineSink::On_SUB_CL_CLUB_ROOM_USER_LEAVE(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_ROOM_USER_LEAVE)) return false;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_ROOM_USER_LEAVE, dwSocketID, pData, wDataSize);
 	return true;
 }
 
-//½âÉ¢·¿¼äÇëÇó
+//è§£æ•£æˆ¿é—´è¯·æ±‚
 bool CAttemperEngineSink::On_SUB_CL_CLUB_ROOM_DISSOLVE(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_ROOM_DISSOLVE)) return false;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_ROOM_DISSOLVE, dwSocketID, pData, wDataSize);
 	return true;
 }
-//½âÉ¢·¿¼äÇëÇó ·µ»Ø
+//è§£æ•£æˆ¿é—´è¯·æ±‚ è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_CLUB_ROOM_DISSOLVE( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_ROOM_DISSOLVE);
 	if( wDataSize != Size) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_ROOM_DISSOLVE, pData, wDataSize);
 	return true;
 }
 
-//½âÉ¢·¿¼äÇëÇó
+//è§£æ•£æˆ¿é—´è¯·æ±‚
 bool CAttemperEngineSink::On_SUB_CL_CLUB_TABLE_DISSOLVE(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_TABLE_DISSOLVE)) return false;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_TABLE_DISSOLVE, dwSocketID, pData, wDataSize);
 	return true;
 }
-//½âÉ¢·¿¼äÇëÇó ·µ»Ø
+//è§£æ•£æˆ¿é—´è¯·æ±‚ è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_CLUB_TABLE_DISSOLVE( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_TABLE_DISSOLVE);
 	if( wDataSize != Size) return false;
 
 	STR_CMD_LC_CLUB_TABLE_DISSOLVE* pCmd = (STR_CMD_LC_CLUB_TABLE_DISSOLVE *) pData;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_TABLE_DISSOLVE, pData, wDataSize);
 
 	if( (DB_SUCCESS ==  pCmd->lResultCode) && (0 == pCmd->byMask) && (0 != pCmd->dwGameID))
 	{
-		//Í¨ÖªĞ­µ÷·ş, Ğ­µ÷·şÍ¨ÖªÓÎÏ··ş
+		//é€šçŸ¥åè°ƒæœ, åè°ƒæœé€šçŸ¥æ¸¸æˆæœ
 		STR_CPR_LP_CLUB_TABLE_DISSOLVE CPR;
 		CPR.dwGameID = pCmd->dwGameID;
 		CPR.dwTableID = pCmd->dwTableID;
@@ -3521,78 +3521,78 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_TABLE_DISSOLVE( DWORD dwContextID, VOID
 }
 
 
-//ÅÆÓÑÈ¦¹«¸æ
+//ç‰Œå‹åœˆå…¬å‘Š
 bool CAttemperEngineSink::On_SUB_CL_CLUB_NOTICE(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_NOTICE)) return false;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_NOTICE, dwSocketID, pData, wDataSize);
 	return true;
 }
-//ÅÆÓÑÈ¦¹«¸æ ·µ»Ø
+//ç‰Œå‹åœˆå…¬å‘Š è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_CLUB_NOTICE( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_NOTICE);
 	if( wDataSize != Size) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_NOTICE, pData, wDataSize);
 	return true;
 }
-//ÅÆÓÑÈ¦¹«¸æ ¹ã²¥
+//ç‰Œå‹åœˆå…¬å‘Š å¹¿æ’­
 bool CAttemperEngineSink::On_CMD_LC_CLUB_NOTICE_BDCAST( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//TODONOW ĞèÒªÊµÏÖ
-	//Ğ£Ñé²ÎÊı
+	//TODONOW éœ€è¦å®ç°
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_SHOP_QUERY_RESULT);
 	if( wDataSize != Size) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_ROOM_SETTING, pData, wDataSize);
 	return true;
 }
 
-//ÁÄÌì
+//èŠå¤©
 bool CAttemperEngineSink::On_SUB_CL_CLUB_CHAT(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_CHAT)) return false;
 	STR_SUB_CL_CLUB_CHAT *pSub = (STR_SUB_CL_CLUB_CHAT*)pData;
 
-	if(0 == pSub->byChatMode) //¾ãÀÖ²¿ÁÄÌì
+	if(0 == pSub->byChatMode) //ä¿±ä¹éƒ¨èŠå¤©
 	{
 		m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_CHAT, dwSocketID, pData, wDataSize);
 	}
-	else if( 1 == pSub->byChatMode) //ÊÀ½çÁÄÌì
+	else if( 1 == pSub->byChatMode) //ä¸–ç•ŒèŠå¤©
 	{
 		m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_WORD_CHAT, dwSocketID, pData, wDataSize);
 	}
-	else if( 2 == pSub->byChatMode) //ÏµÍ³ÁÄÌì
+	else if( 2 == pSub->byChatMode) //ç³»ç»ŸèŠå¤©
 	{
 		m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_SYSTEM_CHAT, dwSocketID, pData, wDataSize);
 	}
-	else if( 3 == pSub->byChatMode) //Ë½ÁÄ
+	else if( 3 == pSub->byChatMode) //ç§èŠ
 	{
 		m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_SECRET_CHAT, dwSocketID, pData, wDataSize);
 	}
 
 	return true;
 }
-//ÁÄÌì ·µ»Ø
+//èŠå¤© è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_CLUB_CHAT( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_CHAT);
 	if( wDataSize != Size) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_CHAT, pData, wDataSize);
 	return true;
 }
-//ÅÆÓÑÈ¦ÁÄÌì ¹ã²¥
+//ç‰Œå‹åœˆèŠå¤© å¹¿æ’­
 bool CAttemperEngineSink::On_CMD_LC_CLUB_CHAT_BDCAST( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
 	WORD Size = sizeof(STR_CMD_LC_CLUB_CHAT_BDCAST);
@@ -3601,14 +3601,14 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_CHAT_BDCAST( DWORD dwContextID, VOID * 
 
 	switch(pCmd->byChatMode)
 	{
-	case 0: //¾ãÀÖ²¿ÁÄÌì
+	case 0: //ä¿±ä¹éƒ¨èŠå¤©
 		{
 			int DataNum = wDataSize / Size;
 
-			//²éÑ¯ÓÃ»§
+			//æŸ¥è¯¢ç”¨æˆ·
 			for(int i = 0; i < DataNum; i ++)
 			{
-				//²éÕÒÔÚÏßÓÃ»§ ·¢ËÍÊı¾İ
+				//æŸ¥æ‰¾åœ¨çº¿ç”¨æˆ· å‘é€æ•°æ®
 				for (int j = 0; j < MAX_CONTENT; j++)
 				{
 					tagBindParameter * pBindParameter=(m_pBindParameter+j);
@@ -3616,7 +3616,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_CHAT_BDCAST( DWORD dwContextID, VOID * 
 						pBindParameter->dwSocketID != 0 && 
 						(pBindParameter->dwUserID == (pCmd + i)->dwTagID))
 					{
-						//Í¨ÖªÓÃ»§
+						//é€šçŸ¥ç”¨æˆ·
 						m_pITCPNetworkEngine->SendData(pBindParameter->dwSocketID, MDM_CLUB, CMD_LC_CLUB_CHAT_BDCAST, 
 							pCmd+i, sizeof(STR_CMD_LC_CLUB_CHAT_BDCAST));
 					}
@@ -3624,23 +3624,23 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_CHAT_BDCAST( DWORD dwContextID, VOID * 
 			}
 			break;
 		}
-	case 1: //ÊÀ½çÁÄÌì
+	case 1: //ä¸–ç•ŒèŠå¤©
 		{
 			m_pITCPNetworkEngine->SendDataBatch(MDM_CLUB, CMD_LC_CLUB_CHAT_BDCAST, pData, wDataSize);
 			break;
 		}
-	case 2: //ÏµÍ³ÁÄÌì
+	case 2: //ç³»ç»ŸèŠå¤©
 		{
 			break;
 		}
-	case 3: //Ë½ÃÜÁÄÌì
+	case 3: //ç§å¯†èŠå¤©
 		{
-			//TODONOW added by WangChengQing ĞèÒªĞŞ¸ÄÏÂÃæµÄÂß¼­
-			//¸ù¾İIDÕÒµ½ÓÃ»§Àà
-			//¸ù¾İÓÃ»§Àà ÕÒµ½¶ÔÓ¦µÄsocket
-			//ÅĞ¶ÏsocketÊÇ·ñÔÚÏß
+			//TODONOW added by WangChengQing éœ€è¦ä¿®æ”¹ä¸‹é¢çš„é€»è¾‘
+			//æ ¹æ®IDæ‰¾åˆ°ç”¨æˆ·ç±»
+			//æ ¹æ®ç”¨æˆ·ç±» æ‰¾åˆ°å¯¹åº”çš„socket
+			//åˆ¤æ–­socketæ˜¯å¦åœ¨çº¿
 
-			//²éÕÒÄ¿±êÓÃ»§ ·¢ËÍÊı¾İ
+			//æŸ¥æ‰¾ç›®æ ‡ç”¨æˆ· å‘é€æ•°æ®
 			for (int j = 0; j < MAX_CONTENT; j++)
 			{
 				tagBindParameter * pBindParameter=(m_pBindParameter+j);
@@ -3648,7 +3648,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_CHAT_BDCAST( DWORD dwContextID, VOID * 
 					pBindParameter->dwSocketID != 0 && 
 					(pBindParameter->dwUserID == (pCmd->dwTagID)))
 				{
-					//Í¨ÖªÓÃ»§
+					//é€šçŸ¥ç”¨æˆ·
 					m_pITCPNetworkEngine->SendData(pBindParameter->dwSocketID, MDM_CLUB, CMD_LC_CLUB_CHAT_BDCAST, 
 						pData, wDataSize);
 				}
@@ -3660,254 +3660,254 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_CHAT_BDCAST( DWORD dwContextID, VOID * 
 	return true;
 }
 
-//ÅÆÓÑÈ¦ÖÃ¶¥
+//ç‰Œå‹åœˆç½®é¡¶
 bool CAttemperEngineSink::On_SUB_CL_CLUBSTICKY_POST(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_STICKY_POST)) return false;
 	STR_SUB_CL_CLUB_STICKY_POST *pSub = (STR_SUB_CL_CLUB_STICKY_POST*)pData;
 
-	//¹¹ÔìDBRÊı¾İ
+	//æ„é€ DBRæ•°æ®
 	STR_DBR_CL_CLUB_STICKY_POST DBR;
 	ZeroMemory(&DBR, sizeof(STR_DBR_CL_CLUB_STICKY_POST));
 	DBR.dwClubID = pSub->dwClubID;
 	DBR.cbTopFlag = pSub->cbTopFlag;
 	DBR.dwUserID = pSub->dwUserID;
 
-	//·¢ËÍÇëÇó
+	//å‘é€è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_STICKY_POST, dwSocketID, pData, wDataSize);
 
 	return true;
 }
-//ÅÆÓÑÈ¦ÖÃ¶¥ ·µ»Ø
+//ç‰Œå‹åœˆç½®é¡¶ è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_CLUB_STICKY_POST( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if( wDataSize != sizeof(STR_CMD_LC_CLUB_STICKY_POST)) return false;
 
-	//¹¹ÔìCMDÊı¾İ
+	//æ„é€ CMDæ•°æ®
 	STR_DBO_LC_CLUB_STICKY_POST *DBO = (STR_DBO_LC_CLUB_STICKY_POST *)pData;
 
 	STR_CMD_LC_CLUB_STICKY_POST CMD;
 	ZeroMemory(&CMD, sizeof(STR_CMD_LC_CLUB_STICKY_POST));
 	CMD.lResultCode = DBO->lResultCode;
 
-	//·¢ËÍ·µ»Ø
+	//å‘é€è¿”å›
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_STICKY_POST, &CMD, sizeof(CMD));
 
 	return true;
 }
 
-//ÅÆÓÑÈ¦¼ò½é
+//ç‰Œå‹åœˆç®€ä»‹
 bool CAttemperEngineSink::On_SUB_CL_CLUB_MESSAGE(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_MESSAGE)) return false;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_MESSAGE, dwSocketID, pData, wDataSize);
 	return true;
 }
-//ÅÆÓÑÈ¦¼ò½é ·µ»Ø
+//ç‰Œå‹åœˆç®€ä»‹ è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_CLUB_MESSAGE( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_MESSAGE);
 	if( wDataSize != Size) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_MESSAGE, pData, wDataSize);
 	return true;
 }
 
-//¹±Ï×·¿¿¨
+//è´¡çŒ®æˆ¿å¡
 bool CAttemperEngineSink::On_SUB_CL_CLUB_CONTRIBUTE_FK(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_CONTRIBUTE_FK)) return false;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_CONTRIBUTE_FK, dwSocketID, pData, wDataSize);
 	return true;
 }
-//¹±Ï×·¿¿¨ ·µ»Ø
+//è´¡çŒ®æˆ¿å¡ è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_CLUB_CONTRIBUTE_FK( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_CONTRIBUTE_FK);
 	if( wDataSize != Size) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_CONTRIBUTE_FK, pData, wDataSize);
 	return true;
 }
 
-//ÅÆÓÑÈ¦ÉèÖÃ
+//ç‰Œå‹åœˆè®¾ç½®
 bool CAttemperEngineSink::On_SUB_CL_CLUB_AUTO_AGREE(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_AUTO_AGREE)) return false;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_AUTO_AGREE, dwSocketID, pData, wDataSize);
 	return true;
 }
-//ÅÆÓÑÈ¦ÉèÖÃ ·µ»Ø
+//ç‰Œå‹åœˆè®¾ç½® è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_CLUB_AUTO_AGREE( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_AUTO_AGREE);
 	if( wDataSize != Size) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_AUTO_AGREE, pData, wDataSize);
 	return true;
 }
 
-//ÉêÇë¼ÓÈë·¿¼ä
+//ç”³è¯·åŠ å…¥æˆ¿é—´
 bool CAttemperEngineSink::On_SUB_CL_CLUB_JOIN_ROOM(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_JOIN_ROOM)) return false;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_JOIN_ROOM, dwSocketID, pData, wDataSize);
 	return true;
 }
-//ÉêÇë¼ÓÈë·¿¼ä ·µ»Ø
+//ç”³è¯·åŠ å…¥æˆ¿é—´ è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_CLUB_JOIN_ROOM( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_JOIN_ROOM);
 	if( wDataSize != Size) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_JOIN_ROOM, pData, wDataSize);
 	return true;
 }
-//×À×ÓÁĞ±í
+//æ¡Œå­åˆ—è¡¨
 bool CAttemperEngineSink::On_CMD_LC_CLUB_TABLE_LIST_TABLE( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_TABLE_LIST);
 	if( (wDataSize % Size) != 0) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_TABLE_LIST_TABLE, pData, wDataSize);
 	return true;
 }
-//×À×ÓÍæ¼ÒÁĞ±í
+//æ¡Œå­ç©å®¶åˆ—è¡¨
 bool CAttemperEngineSink::On_CMD_LC_CLUB_TABLE_LIST_USER( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_TABLE_USER_LIST);
 	if( (wDataSize % Size) != 0) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_TABLE_LIST_USER, pData, wDataSize);
 	return true;
 }
 
 
 
-//ÈºÖ÷|¹ÜÀí¶ÔÉêÇëÏûÏ¢µÄ´ğ¸´(Í¬Òâ|¾Ü¾ø)
+//ç¾¤ä¸»|ç®¡ç†å¯¹ç”³è¯·æ¶ˆæ¯çš„ç­”å¤(åŒæ„|æ‹’ç»)
 bool CAttemperEngineSink::On_SUB_CL_CLUB_APPLICANT_RESULT(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_APPLICANT_RESULT)) return false;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_APPLICANT_RESULT, dwSocketID, pData, wDataSize);
 	return true;
 }
-//ÈºÖ÷|¹ÜÀí¶ÔÉêÇëÏûÏ¢µÄ´ğ¸´(Í¬Òâ|¾Ü¾ø) ·µ»Ø
+//ç¾¤ä¸»|ç®¡ç†å¯¹ç”³è¯·æ¶ˆæ¯çš„ç­”å¤(åŒæ„|æ‹’ç») è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_CLUB_APPLICANT_RESULT( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_APPLICANT_RESULT);
 	if( wDataSize != Size) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_APPLICANT_RESULT, pData, wDataSize);
 	return true;
 }
 
-//ÇëÇó³ÉÔ±Êı¾İ
+//è¯·æ±‚æˆå‘˜æ•°æ®
 bool CAttemperEngineSink::On_SUB_CL_CLUB_MEMBER_MANAGER(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_MEMBER_MANAGER)) return false;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_MEMBER_MANAGER, dwSocketID, pData, wDataSize);
 	return true;
 }
-//ÇëÇó³ÉÔ±Êı¾İ ·µ»Ø
+//è¯·æ±‚æˆå‘˜æ•°æ® è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_CLUB_MEMBER_MANAGER( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_MEMBER_MANAGER);
 	if( (wDataSize % Size) != 0) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_MEMBER_MANAGER, pData, wDataSize);
 	return true;
 }
-//ÇëÇó³ÉÔ±Êı¾İ ½áÊø
+//è¯·æ±‚æˆå‘˜æ•°æ® ç»“æŸ
 bool CAttemperEngineSink::On_CMD_LC_CLUB_MEMBER_MANAGER_FINISH( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
 	STR_CMD_LC_CLUB_MEMBER_MANAGER_FINISH cmd;
 	cmd.byMask = 1;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_MEMBER_MANAGER_FINISH, &cmd, sizeof(STR_CMD_LC_SHOP_QUERY_FINISH));
 	return true;
 }
-//¹¤»á»ù±¾ĞÅÏ¢
+//å·¥ä¼šåŸºæœ¬ä¿¡æ¯
 bool CAttemperEngineSink::On_CMD_LC_CLUB_DATA( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_DATA);
 	if( wDataSize != Size) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_DATA, pData, wDataSize);
 	return true;
 }
 
-//ÑûÇëËûÈë¼ÓÈëÅÆÓÑÈ¦
+//é‚€è¯·ä»–å…¥åŠ å…¥ç‰Œå‹åœˆ
 bool CAttemperEngineSink::On_SUB_CL_CLUB_INVITE(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_INVITE)) return false;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_INVITE, dwSocketID, pData, wDataSize);
 
 	return true;
 }
-//ÑûÇëËûÈë¼ÓÈëÅÆÓÑÈ¦ ·µ»Ø
+//é‚€è¯·ä»–å…¥åŠ å…¥ç‰Œå‹åœˆ è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_CLUB_INVITE( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_INVITE);
 	if( wDataSize != Size) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_INVITE, pData, wDataSize);
 
 	return true;
 }
 
-//±»ÑûÇëÈËµÄÌáĞÑ 
+//è¢«é‚€è¯·äººçš„æé†’ 
 bool CAttemperEngineSink::On_CMD_LC_CLUB_INVITE_REMIND( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_INVITE_REMIND);
 	if( wDataSize != Size) return false;
 	STR_CMD_LC_CLUB_INVITE_REMIND * pCMD = (STR_CMD_LC_CLUB_INVITE_REMIND*) pData;
 
-	//²éÕÒÔÚÏßÓÃ»§ ·¢ËÍÊı¾İ
+	//æŸ¥æ‰¾åœ¨çº¿ç”¨æˆ· å‘é€æ•°æ®
 	for (int j = 0; j < MAX_CONTENT; j++)
 	{
 		tagBindParameter * pBindParameter=(m_pBindParameter+j);
@@ -3915,7 +3915,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_INVITE_REMIND( DWORD dwContextID, VOID 
 			pBindParameter->dwSocketID != 0 && 
 			pBindParameter->dwUserID == pCMD->dwTagID)
 		{
-			//Í¨ÖªÓÃ»§
+			//é€šçŸ¥ç”¨æˆ·
 			m_pITCPNetworkEngine->SendData(pBindParameter->dwSocketID, MDM_CLUB, CMD_LC_CLUB_INVITE_REMIND, 
 											pData, wDataSize);		
 		}
@@ -3924,27 +3924,27 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_INVITE_REMIND( DWORD dwContextID, VOID 
 	return true;
 }
 
-//±»ÑûÇëÈËµÄ»Ø¸´
+//è¢«é‚€è¯·äººçš„å›å¤
 bool CAttemperEngineSink::On_SUB_CL_CLUB_INVITE_RESULT(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_INVITE_RESULT)) return false;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_INVITE_RESULT, dwSocketID, pData, wDataSize);
 
 	return true;
 }
-//±»ÑûÇëÈËµÄ»Ø¸´ ·µ»Ø 
+//è¢«é‚€è¯·äººçš„å›å¤ è¿”å› 
 bool CAttemperEngineSink::On_CMD_LC_CLUB_INVITE_RESULT( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_INVITE_RESULT);
 	if( wDataSize != Size) return false;
 
 	STR_CMD_LC_CLUB_INVITE_RESULT *pCMD = (STR_CMD_LC_CLUB_INVITE_RESULT*) pData;
 
-	//Èç¹û·µ»Ø³É¹¦, ÔòÍ¨Öª¿Í»§¶ËË¢ĞÂ¹¤»áÁĞ±í
+	//å¦‚æœè¿”å›æˆåŠŸ, åˆ™é€šçŸ¥å®¢æˆ·ç«¯åˆ·æ–°å·¥ä¼šåˆ—è¡¨
 	if(pCMD->lResultCode == DB_SUCCESS)
 	{
 		STR_CMD_LC_CLUB_LIST_RE CMD;
@@ -3953,64 +3953,64 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_INVITE_RESULT( DWORD dwContextID, VOID 
 		m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_LIST_RE, &CMD, sizeof(CMD));
 	}
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_INVITE_RESULT, pData, wDataSize);
 
 	return true;
 }
 
-//Ìß³öÍË³öÇëÇó
+//è¸¢å‡ºé€€å‡ºè¯·æ±‚
 bool CAttemperEngineSink::On_SUB_CL_CLUB_QUIT(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_QUIT)) return false;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_QUIT, dwSocketID, pData, wDataSize);
 	return true;
 }
-//ÓÃ»§ÍË³öÇëÇó ·µ»Ø
+//ç”¨æˆ·é€€å‡ºè¯·æ±‚ è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_CLUB_QUIT( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_QUIT);
 	if( wDataSize != Size) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_QUIT, pData, wDataSize);
 	return true;
 }
 
-//Ö°ÎñÈÎÃâ
+//èŒåŠ¡ä»»å…
 bool CAttemperEngineSink::On_SUB_CL_CLUB_APPOINTMENT(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_APPOINTMENT)) return false;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_APPOINTMENT, dwSocketID, pData, wDataSize);
 	return true;
 }
-//Ö°ÎñÈÎÃâ ·µ»Ø
+//èŒåŠ¡ä»»å… è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_CLUB_APPOINTMENT( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_APPOINTMENT);
 	if( wDataSize != Size) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_APPOINTMENT, pData, wDataSize);
 	return true;
 }
-//Ö°ÎñÈÎÃâ ÌáĞÑ
+//èŒåŠ¡ä»»å… æé†’
 bool CAttemperEngineSink::On_CMD_LC_CLUB_APPOINTMENT_NOTE( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-		//Ğ£Ñé²ÎÊı
+		//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_APPOINTMENT_NOTE);
 	if( wDataSize != Size) return false;
 	STR_CMD_LC_CLUB_APPOINTMENT_NOTE * pCMD = (STR_CMD_LC_CLUB_APPOINTMENT_NOTE*) pData;
 
-	//²éÕÒÔÚÏßÓÃ»§ ·¢ËÍÊı¾İ
+	//æŸ¥æ‰¾åœ¨çº¿ç”¨æˆ· å‘é€æ•°æ®
 	for (int j = 0; j < MAX_CONTENT; j++)
 	{
 		tagBindParameter * pBindParameter=(m_pBindParameter+j);
@@ -4018,7 +4018,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_APPOINTMENT_NOTE( DWORD dwContextID, VO
 			pBindParameter->dwSocketID != 0 && 
 			pBindParameter->dwUserID == pCMD->dwUserID)
 		{
-			//Í¨ÖªÓÃ»§
+			//é€šçŸ¥ç”¨æˆ·
 			m_pITCPNetworkEngine->SendData(pBindParameter->dwSocketID, MDM_CLUB, CMD_LC_CLUB_APPOINTMENT_NOTE, 
 											pData, wDataSize);		
 		}
@@ -4028,167 +4028,167 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_APPOINTMENT_NOTE( DWORD dwContextID, VO
 }
 
 
-//ÉêÇëÈËÁĞ±í
+//ç”³è¯·äººåˆ—è¡¨
 bool CAttemperEngineSink::On_SUB_CL_CLUB_APPLICANT_LIST(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_APPLICANT_LIST)) return false;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_APPLICANT_LIST, dwSocketID, pData, wDataSize);
 	return true;
 }
-//ÉêÇëÈËÁĞ±í ·µ»Ø
+//ç”³è¯·äººåˆ—è¡¨ è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_CLUB_APPLICANT_LIST( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_APPLICANT_LIST);
 	if( (wDataSize % Size) != 0) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_APPLICANT_LIST, pData, wDataSize);
 	return true;
 }
-//ÉêÇëÈËÁĞ±í ½áÊø
+//ç”³è¯·äººåˆ—è¡¨ ç»“æŸ
 bool CAttemperEngineSink::On_CMD_LC_CLUB_APPLICANT_LIST_FINISH( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
 	STR_CMD_LC_CLUB_APPLICANT_LIST_FINISH cmd;
 	cmd.byMask = 1;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_APPLICANT_LIST_FINISH, &cmd, sizeof(cmd));
 	return true;
 }
 
-//±»ÑûÇëÈË²é¿´×Ô¼ºµÄÑûÇëÁĞ±í
+//è¢«é‚€è¯·äººæŸ¥çœ‹è‡ªå·±çš„é‚€è¯·åˆ—è¡¨
 bool CAttemperEngineSink::On_SUB_CL_CLUB_INQUERY_LIST(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_INQUERY_LIST)) return false;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_INQUERY_LIST, dwSocketID, pData, wDataSize);
 	return true;
 }
-//±»ÑûÇëÈË²é¿´×Ô¼ºµÄÑûÇëÁĞ±í ·µ»Ø
+//è¢«é‚€è¯·äººæŸ¥çœ‹è‡ªå·±çš„é‚€è¯·åˆ—è¡¨ è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_CLUB_INQUERY_LIST( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_INQUERY_LIST);
 	if( (wDataSize % Size) != 0) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_INQUERY_LIST, pData, wDataSize);
 	return true;
 }
-//±»ÑûÇëÈË²é¿´×Ô¼ºµÄÑûÇëÁĞ±í ½áÊø
+//è¢«é‚€è¯·äººæŸ¥çœ‹è‡ªå·±çš„é‚€è¯·åˆ—è¡¨ ç»“æŸ
 bool CAttemperEngineSink::On_CMD_LC_CLUB_INQUERY_LIST_FINISH( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
 	STR_CMD_LC_CLUB_INQUERY_LIST_FINISH cmd;
 	cmd.byMask = 1;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_INQUERY_LIST_FINISH, &cmd, sizeof(cmd));
 	return true;
 }
 
 
-//¹¤»áÕ½¼¨Í³¼Æ
+//å·¥ä¼šæˆ˜ç»©ç»Ÿè®¡
 bool CAttemperEngineSink::On_SUB_CL_CLUB_RECORD_LIST(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_RECORD_LIST)) return false;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_CLUB_RECORD_LIST, dwSocketID, pData, wDataSize);
 	return true;
 }
-//¹¤»áÕ½¼¨Í³¼Æ ·µ»Ø
+//å·¥ä¼šæˆ˜ç»©ç»Ÿè®¡ è¿”å›
 bool CAttemperEngineSink::On_CMD_LC_CLUB_RECORD_LIST( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_CLUB_RECORD_LIST);
 	if( (wDataSize < Size) || 
 		( (wDataSize % Size) != 0))
 		return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_RECORD_LIST, pData, wDataSize);
 	return true;
 }
-//¹¤»áÕ½¼¨Í³¼Æ ½áÊø
+//å·¥ä¼šæˆ˜ç»©ç»Ÿè®¡ ç»“æŸ
 bool CAttemperEngineSink::On_CMD_LC_CLUB_RECORD_FINISH( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
 	STR_CMD_LC_CLUB_RECORD_FINISH cmd;
 	cmd.byMask = 1;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_RECORD_FINISH, &cmd, sizeof(cmd));
 	return true;
 }
 
 #pragma endregion
 
-#pragma region MDM_SHOP ÉÌ³ÇµÀ¾ß
-//²éÑ¯ÉÌ³Ç
+#pragma region MDM_SHOP å•†åŸé“å…·
+//æŸ¥è¯¢å•†åŸ
 bool CAttemperEngineSink::On_SUB_CL_SHOP_QUERY(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_SHOP_QUERY)) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	STR_SUB_CL_SHOP_QUERY * pSub = (STR_SUB_CL_SHOP_QUERY *)pData;
-	//¶¨Òå±äÁ¿
+	//å®šä¹‰å˜é‡
 	STR_DBR_CL_SHOP_QUERY Dbr;
 	ZeroMemory(&Dbr,sizeof(Dbr));
 
 	Dbr.byGoodsType = pSub->byGoodsType;
 	Dbr.dwUserID = pSub->dwUserID;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_SHOP_QUERY, dwSocketID, &Dbr, sizeof(Dbr));
 	return true;
 }
-//²éÑ¯ÉÌ³ÇCMD
+//æŸ¥è¯¢å•†åŸCMD
 bool CAttemperEngineSink::On_CMD_LC_SHOP_QUERY_RESULT( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_SHOP_QUERY_RESULT);
 	if( (wDataSize%Size) != 0) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SHOP, CMD_LC_SHOP_QUERY_RESULT, pData, wDataSize);
 	return true;
 }
-//²éÑ¯ÉÌ³Ç½áÊøCMD
+//æŸ¥è¯¢å•†åŸç»“æŸCMD
 bool CAttemperEngineSink::On_CMD_LC_SHOP_QUERY_FINISH( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
 	STR_CMD_LC_SHOP_QUERY_FINISH cmd;
 	cmd.byMask = 1;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SHOP, CMD_LC_SHOP_QUERY_FINISH, &cmd, sizeof(STR_CMD_LC_SHOP_QUERY_FINISH));
 	return true;
 }
 
-//×êÊ¯¹ºÂòµÀ¾ß
+//é’»çŸ³è´­ä¹°é“å…·
 bool CAttemperEngineSink::On_SUB_CL_SHOP_DIAMOND(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if(wDataSize != sizeof(STR_SUB_CL_SHOP_DIAMOND)) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	STR_SUB_CL_SHOP_DIAMOND * pSub = (STR_SUB_CL_SHOP_DIAMOND *)pData;
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_SHOP_DIAMOND, dwSocketID, pData, wDataSize);
 	return true;
 }
 
-//×êÊ¯¹ºÂòµÀ¾ßCMD
+//é’»çŸ³è´­ä¹°é“å…·CMD
 bool CAttemperEngineSink::On_CMD_LC_SHOP_DIAMOND_RESULT( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	ASSERT( wDataSize == sizeof(STR_DBO_CL_SHOP_DIAMOND));
 	if(wDataSize != sizeof(STR_DBO_CL_SHOP_DIAMOND)) return false;
 
@@ -4197,52 +4197,52 @@ bool CAttemperEngineSink::On_CMD_LC_SHOP_DIAMOND_RESULT( DWORD dwContextID, VOID
 	CMD.lResultCode = pDBO->lResultCode;
 	lstrcpyn(CMD.szDescribe,pDBO->szDescribeString,CountArray(CMD.szDescribe));
 	
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SHOP, CMD_LC_SHOP_DIAMOND_RESULT, &CMD, sizeof(CMD));
 	return true;
 }
 
-//±³°üÎïÆ·²éÑ¯
+//èƒŒåŒ…ç‰©å“æŸ¥è¯¢
 bool CAttemperEngineSink::On_SUB_CL_BAG_QUERY(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	ASSERT( wDataSize == sizeof(STR_SUB_CL_BAG_QUERY));
 	if(wDataSize != sizeof(STR_SUB_CL_BAG_QUERY)) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	STR_SUB_CL_BAG_QUERY * pSub = (STR_SUB_CL_BAG_QUERY *)pData;
-	//¶¨Òå±äÁ¿
+	//å®šä¹‰å˜é‡
 	STR_DBR_CL_BAG_QUERY Dbr;
 	ZeroMemory(&Dbr,sizeof(Dbr));
 
 	Dbr.dwUserID = pSub->dwUserID;	
 
-	//Í¶µİÇëÇó
+	//æŠ•é€’è¯·æ±‚
 	m_pIDataBaseEngine->PostDataBaseRequest(DBR_CL_BAG_QUERY, dwSocketID, &Dbr, sizeof(Dbr));
 	return true;
 }
 
-//±³°üÎïÆ·²éÑ¯CMD
+//èƒŒåŒ…ç‰©å“æŸ¥è¯¢CMD
 bool CAttemperEngineSink::On_CMD_LC_BAG_RESULT( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_DBO_CL_BAG_QUERY);
 	if( (wDataSize%Size) != 0) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SHOP, CMD_LC_BAG_RESULT, pData, wDataSize);
 	return true;
 }
 
-//±³°üÎïÆ·²éÑ¯½áÊøCMD
+//èƒŒåŒ…ç‰©å“æŸ¥è¯¢ç»“æŸCMD
 bool CAttemperEngineSink::On_CMD_LC_BAG_FINISH( DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	WORD Size = sizeof(STR_CMD_LC_BAG_FINISH);
 
 	if( wDataSize != Size) return false;
 
-	//´¦ÀíÏûÏ¢
+	//å¤„ç†æ¶ˆæ¯
 	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SHOP, CMD_LC_BAG_FINISH, pData, wDataSize);
 	return true;
 }

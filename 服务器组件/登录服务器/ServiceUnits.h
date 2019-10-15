@@ -27,14 +27,13 @@ private:
 
 	//服务组件
 protected:
-	CAttemperEngineSink				m_AttemperEngineSink;				//调度钩子
-	CDataBaseEngineSink				m_DataBaseEngineSink[4];			//数据钩子
+	CAttemperEngineSink				m_AttemperEngineSink;				//Attemper钩子
+	CDataBaseEngineSink				m_DataBaseEngineSink;			    //DB钩子
 
 	//内核组件
 protected:
 	CTimerEngineHelper				m_TimerEngine;						//定时器
 	CAttemperEngineHelper			m_AttemperEngine;					//调度引擎
-	CDataBaseEngineHelper			m_DataBaseEngine;					//DB
 	CTCPNetworkEngineHelper			m_TCPNetworkEngine;					//socket::server
 	CTCPSocketEngineHelper			m_TCPSocketEngine;					//socker::client -- 目标服务器为 协调服
 

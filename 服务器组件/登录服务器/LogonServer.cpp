@@ -24,7 +24,7 @@ BOOL CLogonServerApp::InitInstance()
 
 	while(true)
 	{
-		Sleep(100);
+		Sleep(10000000000);
 	}
 
 

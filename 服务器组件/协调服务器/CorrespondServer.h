@@ -14,8 +14,6 @@ public:
 public:
 	//启动函数
 	virtual BOOL InitInstance();
-
-	DECLARE_MESSAGE_MAP()
 };
 
 //程序对象

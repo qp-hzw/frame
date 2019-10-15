@@ -4,9 +4,6 @@
 //程序对象
 CCorrespondServerApp theApp;
 
-BEGIN_MESSAGE_MAP(CCorrespondServerApp, CWinApp)
-END_MESSAGE_MAP()
-
 //启动函数
 BOOL CCorrespondServerApp::InitInstance()
 {
@@ -23,7 +20,7 @@ BOOL CCorrespondServerApp::InitInstance()
 	//启动服务
 	while(true)
 	{
-		Sleep(100);
+		Sleep(10000000000);
 	}
 
 	return FALSE;

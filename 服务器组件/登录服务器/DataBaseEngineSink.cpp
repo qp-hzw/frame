@@ -7,12 +7,12 @@
 #include "RankManager.h"
 
 
-//¹¹Ôìº¯Êı
+//æ„é€ å‡½æ•°
 CDataBaseEngineSink::CDataBaseEngineSink()
 {
 	return;
 }
-//½Ó¿Ú²éÑ¯
+//æ¥å£æŸ¥è¯¢
 VOID * CDataBaseEngineSink::QueryInterface(REFGUID Guid, DWORD dwQueryVer)
 {
 	QUERYINTERFACE(IDataBaseEngineSink,Guid,dwQueryVer);
@@ -20,65 +20,65 @@ VOID * CDataBaseEngineSink::QueryInterface(REFGUID Guid, DWORD dwQueryVer)
 	return NULL;
 }
 
-//Æô¶¯ÊÂ¼ş
+//å¯åŠ¨äº‹ä»¶
 bool CDataBaseEngineSink::OnDataBaseEngineStart(IUnknownEx * pIUnknownEx)
 {
-	//´´½¨¶ÔÏó
+	//åˆ›å»ºå¯¹è±¡
 	if ((m_AccountsDBModule.GetInterface()==NULL)&&(m_AccountsDBModule.CreateInstance()==false))
 	{
 		return false;
 	}
 
-	//´´½¨¶ÔÏó
+	//åˆ›å»ºå¯¹è±¡
 	if ((m_TreasureDBModule.GetInterface()==NULL)&&(m_TreasureDBModule.CreateInstance()==false))
 	{
 		return false;
 	}
 
-	//´´½¨¶ÔÏó
+	//åˆ›å»ºå¯¹è±¡
 	if ((m_PlatformDBModule.GetInterface()==NULL)&&(m_PlatformDBModule.CreateInstance()==false))
 	{
 		return false;
 	}
 
-	//·¢ÆğÁ¬½Ó
+	//å‘èµ·è¿æ¥
 	m_PlatformDBModule->Connect(1);
 	m_AccountsDBModule->Connect(2);
 	m_TreasureDBModule->Connect(3);
 
-	//·¢ÆğÁ¬½Ó
-	m_AccountsDBAide.SetDataBase(m_AccountsDBModule.GetInterface());
+	//å‘èµ·è¿æ¥
+	m_AccountsDBModule.SetDataBase(m_AccountsDBModule.GetInterface());
 
-	//·¢ÆğÁ¬½Ó
-	m_TreasureDBAide.SetDataBase(m_TreasureDBModule.GetInterface());
+	//å‘èµ·è¿æ¥
+	m_TreasureDBModule.SetDataBase(m_TreasureDBModule.GetInterface());
 
-	//·¢ÆğÁ¬½Ó
-	m_PlatformDBAide.SetDataBase(m_PlatformDBModule.GetInterface());
+	//å‘èµ·è¿æ¥
+	m_PlatformDBModule.SetDataBase(m_PlatformDBModule.GetInterface());
 
 	return true;
 }
 
-//Í£Ö¹ÊÂ¼ş
+//åœæ­¢äº‹ä»¶
 bool CDataBaseEngineSink::OnDataBaseEngineConclude(IUnknownEx * pIUnknownEx)
 {
-	//ÉèÖÃ¶ÔÏó
-	m_AccountsDBAide.SetDataBase(NULL);
-	m_TreasureDBAide.SetDataBase(NULL);
-	m_PlatformDBAide.SetDataBase(NULL);
+	//è®¾ç½®å¯¹è±¡
+	m_AccountsDBModule.SetDataBase(NULL);
+	m_TreasureDBModule.SetDataBase(NULL);
+	m_PlatformDBModule.SetDataBase(NULL);
 
-	//¹Ø±ÕÁ¬½Ó
+	//å…³é—­è¿æ¥
 	if (m_AccountsDBModule.GetInterface()!=NULL)
 	{
 		m_AccountsDBModule.CloseInstance();
 	}
 
-	//¹Ø±ÕÁ¬½Ó
+	//å…³é—­è¿æ¥
 	if (m_TreasureDBModule.GetInterface()!=NULL)
 	{
 		m_TreasureDBModule.CloseInstance();
 	}
 
-	//¹Ø±ÕÁ¬½Ó
+	//å…³é—­è¿æ¥
 	if (m_PlatformDBModule.GetInterface()!=NULL)
 	{
 		m_PlatformDBModule.CloseInstance();
@@ -87,279 +87,279 @@ bool CDataBaseEngineSink::OnDataBaseEngineConclude(IUnknownEx * pIUnknownEx)
 	return true;
 }
 
-//Êı¾İ¿âÇëÇóÊÂ¼ş
+//æ•°æ®åº“è¯·æ±‚äº‹ä»¶
 bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
 	switch (wRequestID)
 	{
-	case DBR_GP_LOGON_USER_STATE: //ÓÃ»§SocktÁ¬½Ó¹Ø±Õ
+	case DBR_GP_LOGON_USER_STATE: //ç”¨æˆ·Socktè¿æ¥å…³é—­
 		{
 			return On_DBR_GP_QUIT(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_LOGON_ACCOUNTS:			//ÕÊºÅµÇÂ¼
+	case DBR_CL_LOGON_ACCOUNTS:			//å¸å·ç™»å½•
 		{
 			return On_DBR_Logon_Accounts(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_LOGON_REGISTER:			//×¢²áÕÊºÅ
+	case DBR_CL_LOGON_REGISTER:			//æ³¨å†Œå¸å·
 		{
 			return On_DBR_Logon_Register(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_LOGON_PLATFORM:			//Æ½Ì¨µÇÂ¼
+	case DBR_CL_LOGON_PLATFORM:			//å¹³å°ç™»å½•
 		{
 			return On_DBR_Logon_Platform(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_USER_QUERY_SCORE_INFO:		//²éÑ¯½ğ±Ò×êÊ¯ĞÅÏ¢
+	case DBR_CL_USER_QUERY_SCORE_INFO:		//æŸ¥è¯¢é‡‘å¸é’»çŸ³ä¿¡æ¯
 		{
 			return On_DBR_QueryScoreInfo(dwContextID,pData,wDataSize);
 		}
-#pragma region Æô¶¯ÃüÁî
-	case DBR_GP_LOAD_GAME_LIST:				//¼ÓÔØÁĞ±í
+#pragma region å¯åŠ¨å‘½ä»¤
+	case DBR_GP_LOAD_GAME_LIST:				//åŠ è½½åˆ—è¡¨
 		{
 			return OnRequestLoadGameList(dwContextID,pData,wDataSize);
 		}
-	case DBR_GP_ONLINE_COUNT_INFO:			//ÔÚÏßÍ³¼Æ -- ·¢¸øÊı¾İ¿â
+	case DBR_GP_ONLINE_COUNT_INFO:			//åœ¨çº¿ç»Ÿè®¡ -- å‘ç»™æ•°æ®åº“
 		{
 			return OnRequestOnLineCountInfo(dwContextID,pData,wDataSize);
 		}
-	case DBR_UPDATA_MARQUEE:				//¼ÓÔØÅÜÂíµÆÏûÏ¢
+	case DBR_UPDATA_MARQUEE:				//åŠ è½½è·‘é©¬ç¯æ¶ˆæ¯
 		{
 			return On_DBR_UPDATA_MARQUEE(dwContextID,pData,wDataSize);
 		}
 #pragma endregion 
-	case DBR_CL_SERVICE_USER_FEEDBACK:			//Íæ¼Ò·´À¡
+	case DBR_CL_SERVICE_USER_FEEDBACK:			//ç©å®¶åé¦ˆ
 		{
 			return On_DBR_Service_UserFeedback(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_SERVICE_REFRESH_USER_INFO:		//Ë¢ĞÂÓÃ»§ĞÅÏ¢
+	case DBR_CL_SERVICE_REFRESH_USER_INFO:		//åˆ·æ–°ç”¨æˆ·ä¿¡æ¯
 		{
 			return On_DBR_Service_RefreshUserInfo(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_SERVICE_QUERY_ROOM_LIST:		//²éÑ¯¿ª·¿ĞÅÏ¢ÁĞ±í
+	case DBR_CL_SERVICE_QUERY_ROOM_LIST:		//æŸ¥è¯¢å¼€æˆ¿ä¿¡æ¯åˆ—è¡¨
 		{
 			return On_DBR_Service_QueryRoomList(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_SERVICE_GET_RICH_LIST:			//»ñÈ¡¸»ºÀ°ñ
+	case DBR_CL_SERVICE_GET_RICH_LIST:			//è·å–å¯Œè±ªæ¦œ
 		{
 			return On_DBR_Service_GetRichList(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_SERVICE_GET_USER_RECORD_LIST:	//»ñÈ¡ÓÃ»§Ï·Â¼ÏñÁĞ±í
+	case DBR_CL_SERVICE_GET_USER_RECORD_LIST:	//è·å–ç”¨æˆ·æˆå½•åƒåˆ—è¡¨
 		{
 			return On_DBR_Service_GetUserRecordList(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_SERVICE_GET_SPECIFIC_RECORD:	//»ñÈ¡Ö¸¶¨IDÂ¼ÏñÊı¾İ£¨Ğ¡¾Ö£©
+	case DBR_CL_SERVICE_GET_SPECIFIC_RECORD:	//è·å–æŒ‡å®šIDå½•åƒæ•°æ®ï¼ˆå°å±€ï¼‰
 		{
 			return On_DBR_Service_GetSpecifiRecord(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_SERVICE_ONLINE_REWARD:			//»ñÈ¡ÔÚÏß½±Àø
+	case DBR_CL_SERVICE_ONLINE_REWARD:			//è·å–åœ¨çº¿å¥–åŠ±
 		{
 			return On_DBR_Service_OnlineReward(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_SERVICE_GET_TASK_LIST:			//»ñÈ¡ÈÎÎñÁĞ±í
+	case DBR_CL_SERVICE_GET_TASK_LIST:			//è·å–ä»»åŠ¡åˆ—è¡¨
 		{
 			return On_DBR_Service_GetTaskList(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_SERVICE_GET_TASK_REWARD:		//ÁìÈ¡ÈÎÎñ½±Àø
+	case DBR_CL_SERVICE_GET_TASK_REWARD:		//é¢†å–ä»»åŠ¡å¥–åŠ±
 		{
 			return On_DBR_Service_GetTaskReward(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_SERVICE_REQUEST_LOTTERY:		//³é½±ÇëÇó
+	case DBR_CL_SERVICE_REQUEST_LOTTERY:		//æŠ½å¥–è¯·æ±‚
 		{
 			return On_DBR_Service_RequestLottery(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_SERVICE_PURE_STANDING_LIST:		//pure´óÌüÅÅĞĞ°ñ
+	case DBR_CL_SERVICE_PURE_STANDING_LIST:		//pureå¤§å…æ’è¡Œæ¦œ
 		{
 			return On_DBR_CL_SERVICE_PURE_STANDING_LIST(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_SERVICE_PURE_RECORD_LIST:		//pure´ó¾ÖÕ½¼¨
+	case DBR_CL_SERVICE_PURE_RECORD_LIST:		//pureå¤§å±€æˆ˜ç»©
 		{
 			return On_DBR_CL_SERVICE_PURE_RECORD_LIST(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_SERVICE_PURE_XJ_RECORD_LIST:	//pureĞ¡¾ÖÕ½¼¨
+	case DBR_CL_SERVICE_PURE_XJ_RECORD_LIST:	//pureå°å±€æˆ˜ç»©
 		{
 			return On_DBR_CL_SERVICE_PURE_XJ_RECORD_LIST(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_SERVICE_XJ_RECORD_PLAYBACK:		//Ğ¡¾ÖÂ¼Ïñ»Ø·Å
+	case DBR_CL_SERVICE_XJ_RECORD_PLAYBACK:		//å°å±€å½•åƒå›æ”¾
 		{
 			return On_DBR_CL_Service_XJRecordPlayback(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_SERVICE_CUSTOMER_MESSEGE:		//¿Í·şÏûÏ¢
+	case DBR_CL_SERVICE_CUSTOMER_MESSEGE:		//å®¢æœæ¶ˆæ¯
 		{
 			return On_DBR_CL_SERVICE_CUSTOMER_MESSEGE(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_SERVICE_GOLD_INFO:				//ÇëÇó½ğ±Ò´óÌüĞÅÏ¢
+	case DBR_CL_SERVICE_GOLD_INFO:				//è¯·æ±‚é‡‘å¸å¤§å…ä¿¡æ¯
 		{
 			return On_DBR_CL_SERVICE_GOLD_INFO(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_SERVICE_MODIFY_PERSONAL_INFO:	//ĞŞ¸Ä¸öÈË×ÊÁÏ
+	case DBR_CL_SERVICE_MODIFY_PERSONAL_INFO:	//ä¿®æ”¹ä¸ªäººèµ„æ–™
 		{
 			return On_DBR_Service_ModifyPersonalInfo(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_USER_RECHARGE_INFO:				//³äÖµĞÅÏ¢
+	case DBR_CL_USER_RECHARGE_INFO:				//å……å€¼ä¿¡æ¯
 		{
 			return On_DBR_Other_RechargeInfo(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_USER_EXCHANGE_INFO:				//¶Ò»»ĞÅÏ¢
+	case DBR_CL_USER_EXCHANGE_INFO:				//å…‘æ¢ä¿¡æ¯
 		{
 			return On_DBR_Other_ExchangeInfo(dwContextID,pData,wDataSize);
 		}
-#pragma region MDM_GIFT ÀñÎïµÀ¾ß
-	case DBR_CL_GIFT_GIVE_PROPS:			//ÔùËÍµÀ¾ß
+#pragma region MDM_GIFT ç¤¼ç‰©é“å…·
+	case DBR_CL_GIFT_GIVE_PROPS:			//èµ é€é“å…·
 		{
 			return On_DBR_CL_GIFT_GIVE_PROPS(dwContextID,pData,wDataSize);
 		}
 #pragma endregion
-	case DBR_GP_UPDATE_RANK_VALUE:			//¸üĞÂÅÅĞĞ°ñÓÃ»§Êı¾İ
+	case DBR_GP_UPDATE_RANK_VALUE:			//æ›´æ–°æ’è¡Œæ¦œç”¨æˆ·æ•°æ®
 		{
 			return OnDBUpdateRankUserItem(dwContextID,pData,wDataSize);
 		}
-	case DBR_GP_READ_RANK_LIST:				//»ñÈ¡ÅÅĞĞ°ñÁĞ±í
+	case DBR_GP_READ_RANK_LIST:				//è·å–æ’è¡Œæ¦œåˆ—è¡¨
 		{
 			return OnDBReadRankList(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_SERVICE_GET_RANK_REWARD:	//ÁìÈ¡ÅÅĞĞ°ñ½±Àø
+	case DBR_CL_SERVICE_GET_RANK_REWARD:	//é¢†å–æ’è¡Œæ¦œå¥–åŠ±
 		{
 			return OnReceiveRankReward(dwContextID,pData,wDataSize);
 		}
-	case DBR_GP_MODIFY_USER_INSURE:			//ĞŞ¸ÄÓÃ»§²Æ¸»ĞÅÏ¢
+	case DBR_GP_MODIFY_USER_INSURE:			//ä¿®æ”¹ç”¨æˆ·è´¢å¯Œä¿¡æ¯
 		{
 			return OnModifyUserInsure(dwContextID,pData,wDataSize);
 		}
-#pragma region MDM_CLUB ÅÆÓÑÈ¦(°æ±¾2)
-	case DBR_CL_CLUB_ALL_CLUB_INFO_LIST:  //²éÑ¯ÅÆÓÑÈ¦ÁĞ±í
+#pragma region MDM_CLUB ç‰Œå‹åœˆ(ç‰ˆæœ¬2)
+	case DBR_CL_CLUB_ALL_CLUB_INFO_LIST:  //æŸ¥è¯¢ç‰Œå‹åœˆåˆ—è¡¨
 		{
 			return On_DBR_CL_CLUB_ALL_CLUB_INFO_LIST(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_CLUB_ROOM_LIST: //²éÑ¯Ö¸¶¨ÅÆÓÑÈ¦·¿¼äÁĞ±í
+	case DBR_CL_CLUB_ROOM_LIST: //æŸ¥è¯¢æŒ‡å®šç‰Œå‹åœˆæˆ¿é—´åˆ—è¡¨
 		{
 			return On_DBR_CL_CLUB_ROOM_LIST(dwContextID,pData,wDataSize); 
 		}
-	case DBR_CL_CLUB_RANDOM_CLUB_LIST:  //²éÑ¯Î´ÂúÔ±, Ëæ»úÅÆÓÑÈ¦(×î´ó9¸ö)
+	case DBR_CL_CLUB_RANDOM_CLUB_LIST:  //æŸ¥è¯¢æœªæ»¡å‘˜, éšæœºç‰Œå‹åœˆ(æœ€å¤§9ä¸ª)
 		{
 			return On_DBR_CL_CLUB_RANDOM_CLUB_LIST(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_CLUB_JOIN_CLUB: //ÉêÇë¼ÓÈëÅÆÓÑÈ¦
+	case DBR_CL_CLUB_JOIN_CLUB: //ç”³è¯·åŠ å…¥ç‰Œå‹åœˆ
 		{
 			return On_DBR_CL_CLUB_JOIN_CLUB(dwContextID,pData,wDataSize);	 
 		}
-	case DBR_CL_CLUB_DISS_CLUB: //½âÉ¢ÅÆÓÑÈ¦
+	case DBR_CL_CLUB_DISS_CLUB: //è§£æ•£ç‰Œå‹åœˆ
 		{
 			return On_DBR_CL_CLUB_DISS_CLUB(dwContextID,pData,wDataSize);	
 		}
-	case DBR_CL_CLUB_ROOM_SETTING: //·¿¼äÉèÖÃ
+	case DBR_CL_CLUB_ROOM_SETTING: //æˆ¿é—´è®¾ç½®
 		{
 			return On_DBR_CL_CLUB_ROOM_SETTING(dwContextID,pData,wDataSize);	
 		}
-	case DBR_CL_CLUB_ROOM_QUERY_SETTING: //ÇëÇó·¿¼äÉèÖÃ
+	case DBR_CL_CLUB_ROOM_QUERY_SETTING: //è¯·æ±‚æˆ¿é—´è®¾ç½®
 		{
 			return On_DBR_CL_CLUB_ROOM_QUERY_SETTING(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_CLUB_ROOM_DISSOLVE: //½âÉ¢·¿¼äÇëÇó
+	case DBR_CL_CLUB_ROOM_DISSOLVE: //è§£æ•£æˆ¿é—´è¯·æ±‚
 		{
 			return On_DBR_CL_CLUB_ROOM_DISSOLVE(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_CLUB_TABLE_DISSOLVE: //½âÉ¢×À×ÓÇëÇó
+	case DBR_CL_CLUB_TABLE_DISSOLVE: //è§£æ•£æ¡Œå­è¯·æ±‚
 		{
 			return On_DBR_CL_CLUB_TABLE_DISSOLVE(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_CLUB_ROOM_USER_LEAVE://Íæ¼ÒÀë¿ª¾ãÀÖ²¿·¿¼ä
+	case DBR_CL_CLUB_ROOM_USER_LEAVE://ç©å®¶ç¦»å¼€ä¿±ä¹éƒ¨æˆ¿é—´
 		{
 			return On_DBR_CL_CLUB_ROOM_USER_LEAVE(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_CLUB_NOTICE: //ÅÆÓÑÈ¦¹«¸æ
+	case DBR_CL_CLUB_NOTICE: //ç‰Œå‹åœˆå…¬å‘Š
 		{
 			return On_DBR_CL_CLUB_NOTICE(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_CLUB_MESSAGE: //ÅÆÓÑÈ¦¼ò½é
+	case DBR_CL_CLUB_MESSAGE: //ç‰Œå‹åœˆç®€ä»‹
 		{
 			return On_DBR_CL_CLUB_MESSAGE(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_CLUB_CONTRIBUTE_FK://¹±Ï×·¿¿¨
+	case DBR_CL_CLUB_CONTRIBUTE_FK://è´¡çŒ®æˆ¿å¡
 		{
 			return On_DBR_CL_CLUB_CONTRIBUTE_FK(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_CLUB_AUTO_AGREE://ÅÆÓÑÈ¦ÉèÖÃ
+	case DBR_CL_CLUB_AUTO_AGREE://ç‰Œå‹åœˆè®¾ç½®
 		{
 			return On_DBR_CL_CLUB_AUTO_AGREE(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_CLUB_INVITE: //ÑûÇëËûÈË¼ÓÈëÅÆÓÑÈ¦
+	case DBR_CL_CLUB_INVITE: //é‚€è¯·ä»–äººåŠ å…¥ç‰Œå‹åœˆ
 		{
 			return On_DBR_CL_CLUB_INVITE(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_CLUB_INVITE_RESULT: //±»ÑûÈË »Ø¸´
+	case DBR_CL_CLUB_INVITE_RESULT: //è¢«é‚€äºº å›å¤
 		{
 			return On_DBR_CL_CLUB_INVITE_RESULT(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_CLUB_INQUERY_LIST://±»ÑûÇëÈË²é¿´×Ô¼ºµÄÑûÇëÁĞ±í
+	case DBR_CL_CLUB_INQUERY_LIST://è¢«é‚€è¯·äººæŸ¥çœ‹è‡ªå·±çš„é‚€è¯·åˆ—è¡¨
 		{
 			return On_DBR_CL_CLUB_INQUERY_LIST(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_CLUB_APPLICANT_LIST://ÉêÇëÈËÁĞ±í
+	case DBR_CL_CLUB_APPLICANT_LIST://ç”³è¯·äººåˆ—è¡¨
 		{
 			return On_DBR_CL_CLUB_APPLICANT_LIST(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_CLUB_APPOINTMENT://Ö°ÎñÈÎÃâ
+	case DBR_CL_CLUB_APPOINTMENT://èŒåŠ¡ä»»å…
 		{
 			return On_DBR_CL_CLUB_APPOINTMENT(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_CLUB_CHAT://ÅÆÓÑÈ¦ÁÄÌì
+	case DBR_CL_CLUB_CHAT://ç‰Œå‹åœˆèŠå¤©
 		{
 			return On_DBR_CL_CLUB_CHAT(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_WORD_CHAT: //ÊÀ½çÁÄÌì
+	case DBR_CL_WORD_CHAT: //ä¸–ç•ŒèŠå¤©
 		{
 			return On_DBR_CL_WORD_CHAT(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_SYSTEM_CHAT: //ÏµÍ³ÁÄÌì
+	case DBR_CL_SYSTEM_CHAT: //ç³»ç»ŸèŠå¤©
 		{
 			return On_DBR_CL_SYSTEM_CHAT(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_SECRET_CHAT: //Ë½ÃÜÁÄÌì
+	case DBR_CL_SECRET_CHAT: //ç§å¯†èŠå¤©
 		{
 			return On_DBR_CL_SECRET_CHAT(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_CLUB_STICKY_POST:	//ÅÆÓÑÈ¦ÖÃ¶¥
+	case DBR_CL_CLUB_STICKY_POST:	//ç‰Œå‹åœˆç½®é¡¶
 		{
 			return On_DBR_CL_STICKY_POST(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_CLUB_RECORD_LIST: //¹¤»áÕ½¼¨Í³¼Æ
+	case DBR_CL_CLUB_RECORD_LIST: //å·¥ä¼šæˆ˜ç»©ç»Ÿè®¡
 		{
 			return On_DBR_CL_CLUB_RECORD_LIST(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_CLUB_CREATE_CLUB:  //´´½¨ÅÆÓÑÈ¦
+	case DBR_CL_CLUB_CREATE_CLUB:  //åˆ›å»ºç‰Œå‹åœˆ
 		{
 			return On_DBR_CL_CLUB_CREATE_CLUB(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_CLUB_JOIN_ROOM:  //ÉêÇë¼ÓÈë·¿¼ä
+	case DBR_CL_CLUB_JOIN_ROOM:  //ç”³è¯·åŠ å…¥æˆ¿é—´
 		{
 			return On_DBR_CL_CLUB_JOIN_ROOM(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_CLUB_APPLICANT_RESULT:  //ÈºÖ÷|¹ÜÀí¶ÔÉêÇëÏûÏ¢µÄ´ğ¸´(Í¬Òâ|¾Ü¾ø)
+	case DBR_CL_CLUB_APPLICANT_RESULT:  //ç¾¤ä¸»|ç®¡ç†å¯¹ç”³è¯·æ¶ˆæ¯çš„ç­”å¤(åŒæ„|æ‹’ç»)
 		{
 			return On_DBR_CL_CLUB_APPLICANT_RESULT(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_CLUB_MEMBER_MANAGER: //ÇëÇó³ÉÔ±Êı¾İ
+	case DBR_CL_CLUB_MEMBER_MANAGER: //è¯·æ±‚æˆå‘˜æ•°æ®
 		{
 			return On_DBR_CL_CLUB_MEMBER_MANAGER(dwContextID,pData,wDataSize); 
 		}
-	case DBR_CL_CLUB_QUIT:  //Ìß³öÍË³öÇëÇó
+	case DBR_CL_CLUB_QUIT:  //è¸¢å‡ºé€€å‡ºè¯·æ±‚
 		{
 			return On_DBR_CL_CLUB_QUIT(dwContextID,pData,wDataSize);
 		}
 #pragma endregion
-#pragma region MDM_SHOP ÉÌ³ÇµÀ¾ß
-	case DBR_CL_SHOP_QUERY:  //²éÑ¯ÉÌ³Ç
+#pragma region MDM_SHOP å•†åŸé“å…·
+	case DBR_CL_SHOP_QUERY:  //æŸ¥è¯¢å•†åŸ
 		{
 			return On_DBR_CL_SHOP_QUERY(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_SHOP_MONEY: //½ğÇ®¹ºÂòµÀ¾ß
+	case DBR_CL_SHOP_MONEY: //é‡‘é’±è´­ä¹°é“å…·
 		{
 			//return On_DBR_CL_SHOP_MONEY(dwContextID,pData,wDataSize); 
 		}
-	case DBR_CL_SHOP_DIAMOND:  //×êÊ¯¹ºÂòµÀ¾ß
+	case DBR_CL_SHOP_DIAMOND:  //é’»çŸ³è´­ä¹°é“å…·
 		{
 			return On_DBR_CL_SHOP_DIAMOND(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_BAG_QUERY: //ÎïÆ·±³°ü²éÑ¯
+	case DBR_CL_BAG_QUERY: //ç‰©å“èƒŒåŒ…æŸ¥è¯¢
 		{
 			return On_DBR_CL_BAG_QUERY(dwContextID,pData,wDataSize);	 
 		}
@@ -369,45 +369,45 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 	return false;
 }
 
-/* **************************¡¾MAIN:3    MDM_SERVICE    ·şÎñ¡¿*************************************/
-//Íæ¼Ò·´À¡
+/* **************************ã€MAIN:3    MDM_SERVICE    æœåŠ¡ã€‘*************************************/
+//ç©å®¶åé¦ˆ
 bool CDataBaseEngineSink::On_DBR_Service_UserFeedback( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	ASSERT(wDataSize==sizeof(STR_DBR_CL_SERVICE_FEEDBACK));
 	if (wDataSize!=sizeof(STR_DBR_CL_SERVICE_FEEDBACK)) return false;
 
-	//ÇëÇó´¦Àí
+	//è¯·æ±‚å¤„ç†
 	STR_DBR_CL_SERVICE_FEEDBACK * pUserSuggestion = (STR_DBR_CL_SERVICE_FEEDBACK *)pData;
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.ResetParameter();
-	m_AccountsDBAide.AddParameter(TEXT("@iUserID"),pUserSuggestion->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("@chFB_Title"),pUserSuggestion->szFB_Title);
-	m_AccountsDBAide.AddParameter(TEXT("@chFB_Content"),pUserSuggestion->szFB_Content);
-	m_AccountsDBAide.AddParameter(TEXT("@chContact"),pUserSuggestion->szContact);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.ResetParameter();
+	m_AccountsDBModule.AddParameter(TEXT("@iUserID"),pUserSuggestion->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("@chFB_Title"),pUserSuggestion->szFB_Title);
+	m_AccountsDBModule.AddParameter(TEXT("@chFB_Content"),pUserSuggestion->szFB_Content);
+	m_AccountsDBModule.AddParameter(TEXT("@chContact"),pUserSuggestion->szContact);
 
-	//½á¹û´¦Àí
-	LONG lResultCode=m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_Service_Feedback"),true);		//ÔÚQPAccountsDBÊı¾İ¿âµÄAccountsInfo±íÖĞ²åÈëÓÃ»§·´À¡
+	//ç»“æœå¤„ç†
+	LONG lResultCode=m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_Service_Feedback"),true);		//åœ¨QPAccountsDBæ•°æ®åº“çš„AccountsInfoè¡¨ä¸­æ’å…¥ç”¨æˆ·åé¦ˆ
 
-	//·µ»Ø½á¹û´¦Àí
-	On_DBO_Service_UserFeedback(dwContextID, lResultCode, TEXT("Íæ¼Ò·´À¡´¦ÀíÍê³É!"));
+	//è¿”å›ç»“æœå¤„ç†
+	On_DBO_Service_UserFeedback(dwContextID, lResultCode, TEXT("ç©å®¶åé¦ˆå¤„ç†å®Œæˆ!"));
 
 	return true;
 }
 
-//Íæ¼Ò·´À¡·µ»Ø
+//ç©å®¶åé¦ˆè¿”å›
 bool CDataBaseEngineSink::On_DBO_Service_UserFeedback(DWORD dwContextID, DWORD dwResultCode, LPCTSTR pszErrorString)
 {
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	STR_DBO_CL_SERVICE_FEEDBACK OperateResult;
 	ZeroMemory(&OperateResult,sizeof(OperateResult));
 
-	//¹¹ÔìÊı¾İ
+	//æ„é€ æ•°æ®
 	OperateResult.lResultCode = dwResultCode;
 	lstrcpyn(OperateResult.szDescribeString,pszErrorString,CountArray(OperateResult.szDescribeString));
 
-	//·¢ËÍ½á¹û
+	//å‘é€ç»“æœ
 	WORD wDataSize=CountStringBuffer(OperateResult.szDescribeString);
 	WORD wHeadSize=sizeof(OperateResult)-sizeof(OperateResult.szDescribeString);
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_SERVICE_USER_FEEDBACK,dwContextID,&OperateResult,wHeadSize+wDataSize);
@@ -415,182 +415,182 @@ bool CDataBaseEngineSink::On_DBO_Service_UserFeedback(DWORD dwContextID, DWORD d
 	return true;
 }
 
-//Ë¢ĞÂÓÃ»§ĞÅÏ¢
+//åˆ·æ–°ç”¨æˆ·ä¿¡æ¯
 bool CDataBaseEngineSink::On_DBR_Service_RefreshUserInfo( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	ASSERT(wDataSize == sizeof(STR_DBR_CL_SERCIVR_REFRESH_INFO));
 	if (wDataSize != sizeof(STR_DBR_CL_SERCIVR_REFRESH_INFO)) return false;
 
-	//ÇëÇó´¦Àí
+	//è¯·æ±‚å¤„ç†
 	STR_DBR_CL_SERCIVR_REFRESH_INFO * pUserRequest=(STR_DBR_CL_SERCIVR_REFRESH_INFO *)pData;
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.ResetParameter();
-	m_AccountsDBAide.AddParameter(TEXT("@dwUserID"),pUserRequest->dwUserID);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.ResetParameter();
+	m_AccountsDBModule.AddParameter(TEXT("@dwUserID"),pUserRequest->dwUserID);
 
 	WCHAR szDescribe[128]=L"";
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribe,sizeof(szDescribe),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribe,sizeof(szDescribe),adParamOutput);
 
-	//½á¹û´¦Àí
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_Service_RefreshUserInfo"),true);
+	//ç»“æœå¤„ç†
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_Service_RefreshUserInfo"),true);
 
 	CDBVarValue DBVarValue;
 	m_AccountsDBModule->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	On_DBO_Service_RefreshUserInfo(dwContextID, lResultCode, CW2CT(DBVarValue.bstrVal));
 
 	return true;
 }
 
-//Ë¢ĞÂÓÃ»§ĞÅÏ¢·µ»Ø
+//åˆ·æ–°ç”¨æˆ·ä¿¡æ¯è¿”å›
 bool CDataBaseEngineSink::On_DBO_Service_RefreshUserInfo(DWORD dwContextID, DWORD dwResultCode, LPCTSTR pszErrorString)
 {
-	//¹¹ÔìÊı¾İ
+	//æ„é€ æ•°æ®
 	STR_DBO_CL_SERCIVR_REFRESH_INFO UserInfo;
 	ZeroMemory( &UserInfo, sizeof(UserInfo));
 	UserInfo.dwResultCode = dwResultCode;
 	lstrcpyn(UserInfo.szDescribeString, pszErrorString, CountArray(UserInfo.szDescribeString));
 
-	if (dwResultCode == DB_SUCCESS)		//³É¹¦
+	if (dwResultCode == DB_SUCCESS)		//æˆåŠŸ
 	{
-		/* *****************************    ÓÃ»§ĞÅÏ¢     ****************************/
-		//ÓÃ»§±êÖ¾
-		UserInfo.dwUserID=m_AccountsDBAide.GetValue_DWORD(TEXT("UserID"));
-		//ÓÃ»§êÇ³Æ
-		m_AccountsDBAide.GetValue_String(TEXT("NickName"),UserInfo.szNickName,CountArray(UserInfo.szNickName));
-		//ÓÃ»§ĞÔ±ğ
-		UserInfo.cbGender=m_AccountsDBAide.GetValue_BYTE(TEXT("Gender"));
-		//Í·ÏñË÷Òı
-		UserInfo.wFaceID=m_AccountsDBAide.GetValue_WORD(TEXT("FaceID"));
-		//¸öĞÔÇ©Ãû
-		m_AccountsDBAide.GetValue_String(TEXT("MySignature"),UserInfo.szMySignature,CountArray(UserInfo.szMySignature));
+		/* *****************************    ç”¨æˆ·ä¿¡æ¯     ****************************/
+		//ç”¨æˆ·æ ‡å¿—
+		UserInfo.dwUserID=m_AccountsDBModule.GetValue_DWORD(TEXT("UserID"));
+		//ç”¨æˆ·æ˜µç§°
+		m_AccountsDBModule.GetValue_String(TEXT("NickName"),UserInfo.szNickName,CountArray(UserInfo.szNickName));
+		//ç”¨æˆ·æ€§åˆ«
+		UserInfo.cbGender=m_AccountsDBModule.GetValue_BYTE(TEXT("Gender"));
+		//å¤´åƒç´¢å¼•
+		UserInfo.wFaceID=m_AccountsDBModule.GetValue_WORD(TEXT("FaceID"));
+		//ä¸ªæ€§ç­¾å
+		m_AccountsDBModule.GetValue_String(TEXT("MySignature"),UserInfo.szMySignature,CountArray(UserInfo.szMySignature));
 
-		//ÓÃ»§Ôª±¦
-		UserInfo.dwUserDiamond=m_AccountsDBAide.GetValue_LONGLONG(TEXT("UserDiamond"));
-		//ÓÃ»§½±ÅÆ
-		UserInfo.dwUserMedal=m_AccountsDBAide.GetValue_DWORD(TEXT("UserMedal"));
-		//¾­ÑéÊıÖµ
-		UserInfo.dwExperience=m_AccountsDBAide.GetValue_DWORD(TEXT("Experience"));
-		//ÓÃ»§÷ÈÁ¦
-		UserInfo.dwLoveLiness=m_AccountsDBAide.GetValue_DWORD(TEXT("LoveLiness"));
+		//ç”¨æˆ·å…ƒå®
+		UserInfo.dwUserDiamond=m_AccountsDBModule.GetValue_LONGLONG(TEXT("UserDiamond"));
+		//ç”¨æˆ·å¥–ç‰Œ
+		UserInfo.dwUserMedal=m_AccountsDBModule.GetValue_DWORD(TEXT("UserMedal"));
+		//ç»éªŒæ•°å€¼
+		UserInfo.dwExperience=m_AccountsDBModule.GetValue_DWORD(TEXT("Experience"));
+		//ç”¨æˆ·é­…åŠ›
+		UserInfo.dwLoveLiness=m_AccountsDBModule.GetValue_DWORD(TEXT("LoveLiness"));
 
-		//¹ÜÀíÔ±µÈ¼¶
-		UserInfo.cbMasterOrder=m_AccountsDBAide.GetValue_BYTE(TEXT("MasterOrder"));
-		//»áÔ±µÈ¼¶
-		UserInfo.cbMemberOrder=m_AccountsDBAide.GetValue_BYTE(TEXT("MemberOrder"));
-		//»áÔ±µ½ÆÚÊ±
-		m_AccountsDBAide.GetValue_SystemTime(TEXT("MemberOverDate"),UserInfo.MemberOverDate);
+		//ç®¡ç†å‘˜ç­‰çº§
+		UserInfo.cbMasterOrder=m_AccountsDBModule.GetValue_BYTE(TEXT("MasterOrder"));
+		//ä¼šå‘˜ç­‰çº§
+		UserInfo.cbMemberOrder=m_AccountsDBModule.GetValue_BYTE(TEXT("MemberOrder"));
+		//ä¼šå‘˜åˆ°æœŸæ—¶
+		m_AccountsDBModule.GetValue_SystemTime(TEXT("MemberOverDate"),UserInfo.MemberOverDate);
 
-		//ÕæÊµĞÕÃû
-		m_AccountsDBAide.GetValue_String(TEXT("IdentityName"),UserInfo.szIdentityName,CountArray(UserInfo.szIdentityName));
-		//Éí·İÖ¤ºÅ
-		m_AccountsDBAide.GetValue_String(TEXT("IdentityNum"),UserInfo.szIdentityNum,CountArray(UserInfo.szIdentityNum));
-		//ÊÖ»úºÅÂë
-		m_AccountsDBAide.GetValue_String(TEXT("MobilePhone"),UserInfo.szMobilePhone,CountArray(UserInfo.szMobilePhone));
-		/* *****************************    ÕËºÅĞÅÏ¢     ****************************/
-		//×îºóµÇÂ¼µØÖ·
-		m_AccountsDBAide.GetValue_String(TEXT("LastLogonIP"),UserInfo.szLasLogonIp,CountArray(UserInfo.szLasLogonIp));
-		//×îºóÉÏÏßÊ±¼ä 
-		m_AccountsDBAide.GetValue_SystemTime(TEXT("LastLogonDate"),UserInfo.LasLogonDate);
-		/* *****************************    ¸½¼ÓÊı¾İ     ****************************/
-		//ÉçÍÅ±êÖ¾ -- ÅÆÓÑÈ¦
-		UserInfo.dwGroupID=m_AccountsDBAide.GetValue_DWORD(TEXT("GroupID"));
-		//ÉçÍÅÃû×Ö -- ÅÆÓÑÈ¦
-		m_AccountsDBAide.GetValue_String(TEXT("GroupName"),UserInfo.szGroupName,CountArray(UserInfo.szGroupName));
+		//çœŸå®å§“å
+		m_AccountsDBModule.GetValue_String(TEXT("IdentityName"),UserInfo.szIdentityName,CountArray(UserInfo.szIdentityName));
+		//èº«ä»½è¯å·
+		m_AccountsDBModule.GetValue_String(TEXT("IdentityNum"),UserInfo.szIdentityNum,CountArray(UserInfo.szIdentityNum));
+		//æ‰‹æœºå·ç 
+		m_AccountsDBModule.GetValue_String(TEXT("MobilePhone"),UserInfo.szMobilePhone,CountArray(UserInfo.szMobilePhone));
+		/* *****************************    è´¦å·ä¿¡æ¯     ****************************/
+		//æœ€åç™»å½•åœ°å€
+		m_AccountsDBModule.GetValue_String(TEXT("LastLogonIP"),UserInfo.szLasLogonIp,CountArray(UserInfo.szLasLogonIp));
+		//æœ€åä¸Šçº¿æ—¶é—´ 
+		m_AccountsDBModule.GetValue_SystemTime(TEXT("LastLogonDate"),UserInfo.LasLogonDate);
+		/* *****************************    é™„åŠ æ•°æ®     ****************************/
+		//ç¤¾å›¢æ ‡å¿— -- ç‰Œå‹åœˆ
+		UserInfo.dwGroupID=m_AccountsDBModule.GetValue_DWORD(TEXT("GroupID"));
+		//ç¤¾å›¢åå­— -- ç‰Œå‹åœˆ
+		m_AccountsDBModule.GetValue_String(TEXT("GroupName"),UserInfo.szGroupName,CountArray(UserInfo.szGroupName));
 
-		//ÓÃ»§»ı·Ö
-		UserInfo.lUserScore = m_AccountsDBAide.GetValue_LONGLONG(TEXT("UserScore"));
-		//ÓÃ»§ÓÎÏ·±Ò
-		UserInfo.lUserGold = m_AccountsDBAide.GetValue_LONGLONG(TEXT("UserGold"));
-		//ÓÃ»§·¿¿¨
-		UserInfo.lUserRoomCard = m_AccountsDBAide.GetValue_LONGLONG(TEXT("UserRoomCard"));
+		//ç”¨æˆ·ç§¯åˆ†
+		UserInfo.lUserScore = m_AccountsDBModule.GetValue_LONGLONG(TEXT("UserScore"));
+		//ç”¨æˆ·æ¸¸æˆå¸
+		UserInfo.lUserGold = m_AccountsDBModule.GetValue_LONGLONG(TEXT("UserGold"));
+		//ç”¨æˆ·æˆ¿å¡
+		UserInfo.lUserRoomCard = m_AccountsDBModule.GetValue_LONGLONG(TEXT("UserRoomCard"));
 
-		//·¢ËÍÊı¾İ
+		//å‘é€æ•°æ®
 		g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_SERVICE_REFRESH_USER_INFO, dwContextID, &UserInfo, sizeof(UserInfo));
 	}
-	else								//Ê§°Ü´¦Àí
+	else								//å¤±è´¥å¤„ç†
 	{
-		//·¢ËÍÊı¾İ
+		//å‘é€æ•°æ®
 		g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_SERVICE_REFRESH_USER_INFO, dwContextID, &UserInfo, sizeof(UserInfo));
 	}
 
 	return true;
 }
 
-//²éÑ¯¿ª·¿ĞÅÏ¢ÁĞ±í
+//æŸ¥è¯¢å¼€æˆ¿ä¿¡æ¯åˆ—è¡¨
 bool CDataBaseEngineSink::On_DBR_Service_QueryRoomList(DWORD dwContextID, void * pData, WORD wDataSize)
 {
 	STR_DBR_CL_SERCIVR_QUERY_ROOMLIST* pGetTableInfo = (STR_DBR_CL_SERCIVR_QUERY_ROOMLIST* )pData;
 	if(pData == NULL || wDataSize != sizeof(STR_DBR_CL_SERCIVR_QUERY_ROOMLIST))
 		return false;
 
-	m_TreasureDBAide.ResetParameter();
-	m_TreasureDBAide.AddParameter(TEXT("dwOwnerID"),pGetTableInfo->dwUserID);
+	m_TreasureDBModule.ResetParameter();
+	m_TreasureDBModule.AddParameter(TEXT("dwOwnerID"),pGetTableInfo->dwUserID);
 
 
-	//Ö´ĞĞ²éÑ¯
-	LONG lResultCode = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CL_Service_GetRoomList"),true);	//²éÑ¯QPTreasureÊı¾İ¿âµÄTableInfo±í
+	//æ‰§è¡ŒæŸ¥è¯¢
+	LONG lResultCode = m_TreasureDBModule.ExecuteProcess(TEXT("GSP_CL_Service_GetRoomList"),true);	//æŸ¥è¯¢QPTreasureæ•°æ®åº“çš„TableInfoè¡¨
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	On_DBO_Service_QueryRoomList(dwContextID, lResultCode);
 
 	return true;
 
 }
 
-//²éÑ¯¿ª·¿ĞÅÏ¢ÁĞ±í·µ»Ø
+//æŸ¥è¯¢å¼€æˆ¿ä¿¡æ¯åˆ—è¡¨è¿”å›
 bool CDataBaseEngineSink::On_DBO_Service_QueryRoomList(DWORD dwContextID, DWORD dwResultCode)
 {
-	//½á¹û´¦Àí
-	if (dwResultCode == DB_SUCCESS)		//³É¹¦
+	//ç»“æœå¤„ç†
+	if (dwResultCode == DB_SUCCESS)		//æˆåŠŸ
 	{
 		for(int i=0;i < m_TreasureDBModule->GetRecordCount() && i < 10;i++,m_TreasureDBModule->MoveToNext())
 		{
-			//±äÁ¿¶¨Òå
+			//å˜é‡å®šä¹‰
 			STR_DBO_CL_SERCIVR_QUERY_ROOMLIST TableInfo;
 			ZeroMemory(&TableInfo,sizeof(TableInfo));
 
-			TableInfo.dwTableID = m_TreasureDBAide.GetValue_DWORD(TEXT("TableID"));
-			TableInfo.dwCreaterID = m_TreasureDBAide.GetValue_DWORD(TEXT("CreaterID"));
-			TableInfo.dwPassword = m_TreasureDBAide.GetValue_DWORD(TEXT("Password"));
-			TableInfo.wJuShu = m_TreasureDBAide.GetValue_WORD(TEXT("JuShu"));
-			TableInfo.byMode = m_TreasureDBAide.GetValue_BYTE(TEXT("GameMode"));
-			TableInfo.byZhuangType = m_TreasureDBAide.GetValue_BYTE(TEXT("ZhuangType"));
-			TableInfo.byPlayerCount = m_TreasureDBAide.GetValue_BYTE(TEXT("PlayerCount"));
-			TableInfo.byMaxPlayerCount = m_TreasureDBAide.GetValue_BYTE(TEXT("MaxPlayerCount"));
-			TableInfo.byCost = m_TreasureDBAide.GetValue_BYTE(TEXT("PayCost"));
-			TableInfo.byIsStart = m_TreasureDBAide.GetValue_BYTE(TEXT("IsStart"));
+			TableInfo.dwTableID = m_TreasureDBModule.GetValue_DWORD(TEXT("TableID"));
+			TableInfo.dwCreaterID = m_TreasureDBModule.GetValue_DWORD(TEXT("CreaterID"));
+			TableInfo.dwPassword = m_TreasureDBModule.GetValue_DWORD(TEXT("Password"));
+			TableInfo.wJuShu = m_TreasureDBModule.GetValue_WORD(TEXT("JuShu"));
+			TableInfo.byMode = m_TreasureDBModule.GetValue_BYTE(TEXT("GameMode"));
+			TableInfo.byZhuangType = m_TreasureDBModule.GetValue_BYTE(TEXT("ZhuangType"));
+			TableInfo.byPlayerCount = m_TreasureDBModule.GetValue_BYTE(TEXT("PlayerCount"));
+			TableInfo.byMaxPlayerCount = m_TreasureDBModule.GetValue_BYTE(TEXT("MaxPlayerCount"));
+			TableInfo.byCost = m_TreasureDBModule.GetValue_BYTE(TEXT("PayCost"));
+			TableInfo.byIsStart = m_TreasureDBModule.GetValue_BYTE(TEXT("IsStart"));
 
-			//ÓÃ»§ID
-			TableInfo.dwUserID[0] = m_TreasureDBAide.GetValue_DWORD(TEXT("UserID1"));
-			TableInfo.dwUserID[1] = m_TreasureDBAide.GetValue_DWORD(TEXT("UserID2"));
-			TableInfo.dwUserID[2] = m_TreasureDBAide.GetValue_DWORD(TEXT("UserID3"));
-			TableInfo.dwUserID[3] = m_TreasureDBAide.GetValue_DWORD(TEXT("UserID4"));
-			TableInfo.dwUserID[4] = m_TreasureDBAide.GetValue_DWORD(TEXT("UserID5"));
+			//ç”¨æˆ·ID
+			TableInfo.dwUserID[0] = m_TreasureDBModule.GetValue_DWORD(TEXT("UserID1"));
+			TableInfo.dwUserID[1] = m_TreasureDBModule.GetValue_DWORD(TEXT("UserID2"));
+			TableInfo.dwUserID[2] = m_TreasureDBModule.GetValue_DWORD(TEXT("UserID3"));
+			TableInfo.dwUserID[3] = m_TreasureDBModule.GetValue_DWORD(TEXT("UserID4"));
+			TableInfo.dwUserID[4] = m_TreasureDBModule.GetValue_DWORD(TEXT("UserID5"));
 
-			//ÓÃ»§êÇ³Æ
-			m_TreasureDBAide.GetValue_String(TEXT("NickName1"),TableInfo.szNickName[0],CountArray(TableInfo.szNickName[0]));
-			m_TreasureDBAide.GetValue_String(TEXT("NickName2"),TableInfo.szNickName[1],CountArray(TableInfo.szNickName[1]));
-			m_TreasureDBAide.GetValue_String(TEXT("NickName3"),TableInfo.szNickName[2],CountArray(TableInfo.szNickName[2]));
-			m_TreasureDBAide.GetValue_String(TEXT("NickName4"),TableInfo.szNickName[3],CountArray(TableInfo.szNickName[3]));
-			m_TreasureDBAide.GetValue_String(TEXT("NickName5"),TableInfo.szNickName[4],CountArray(TableInfo.szNickName[4]));
+			//ç”¨æˆ·æ˜µç§°
+			m_TreasureDBModule.GetValue_String(TEXT("NickName1"),TableInfo.szNickName[0],CountArray(TableInfo.szNickName[0]));
+			m_TreasureDBModule.GetValue_String(TEXT("NickName2"),TableInfo.szNickName[1],CountArray(TableInfo.szNickName[1]));
+			m_TreasureDBModule.GetValue_String(TEXT("NickName3"),TableInfo.szNickName[2],CountArray(TableInfo.szNickName[2]));
+			m_TreasureDBModule.GetValue_String(TEXT("NickName4"),TableInfo.szNickName[3],CountArray(TableInfo.szNickName[3]));
+			m_TreasureDBModule.GetValue_String(TEXT("NickName5"),TableInfo.szNickName[4],CountArray(TableInfo.szNickName[4]));
 
-			//ÓÃ»§»ı·Ö
-			TableInfo.dwScore[0] = m_TreasureDBAide.GetValue_DWORD(TEXT("Score1"));
-			TableInfo.dwScore[1] = m_TreasureDBAide.GetValue_DWORD(TEXT("Score2"));
-			TableInfo.dwScore[2] = m_TreasureDBAide.GetValue_DWORD(TEXT("Score3"));
-			TableInfo.dwScore[3] = m_TreasureDBAide.GetValue_DWORD(TEXT("Score4"));
-			TableInfo.dwScore[4] = m_TreasureDBAide.GetValue_DWORD(TEXT("Score5"));
+			//ç”¨æˆ·ç§¯åˆ†
+			TableInfo.dwScore[0] = m_TreasureDBModule.GetValue_DWORD(TEXT("Score1"));
+			TableInfo.dwScore[1] = m_TreasureDBModule.GetValue_DWORD(TEXT("Score2"));
+			TableInfo.dwScore[2] = m_TreasureDBModule.GetValue_DWORD(TEXT("Score3"));
+			TableInfo.dwScore[3] = m_TreasureDBModule.GetValue_DWORD(TEXT("Score4"));
+			TableInfo.dwScore[4] = m_TreasureDBModule.GetValue_DWORD(TEXT("Score5"));
 
-			m_TreasureDBAide.GetValue_String(TEXT("CreateTime"),TableInfo.szTime,CountArray(TableInfo.szTime));	
+			m_TreasureDBModule.GetValue_String(TEXT("CreateTime"),TableInfo.szTime,CountArray(TableInfo.szTime));	
 
 			g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_SERVICE_QUERY_ROOM_LIST, dwContextID, &TableInfo, sizeof(STR_DBO_CL_SERCIVR_QUERY_ROOMLIST));
 		}
 	}
-	else			//TODO Ê§°ÜÊÇ·ñĞèÒª¼ÓÈëÍ¨ÓÃ´¦Àí
+	else			//TODO å¤±è´¥æ˜¯å¦éœ€è¦åŠ å…¥é€šç”¨å¤„ç†
 	{
 
 	}
@@ -598,7 +598,7 @@ bool CDataBaseEngineSink::On_DBO_Service_QueryRoomList(DWORD dwContextID, DWORD 
 	return true;
 }
 
-//»ñÈ¡¸»ºÀ°ñ
+//è·å–å¯Œè±ªæ¦œ
 bool CDataBaseEngineSink::On_DBR_Service_GetRichList(DWORD dwContextID, void * pData, WORD wDataSize)
 {
 
@@ -606,12 +606,12 @@ bool CDataBaseEngineSink::On_DBR_Service_GetRichList(DWORD dwContextID, void * p
 	if(pData == NULL || wDataSize != sizeof(STR_DBR_CL_SERCIVR_GET_RICHLIST))
 		return false;
 
-	m_AccountsDBAide.ResetParameter();
+	m_AccountsDBModule.ResetParameter();
 
-	//Ö´ĞĞ²éÑ¯
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_Service_GetRichList"), true);		//²éÑ¯Êı¾İ¿â[QPAccountsDB]ÖĞµÄRegalRank±í
+	//æ‰§è¡ŒæŸ¥è¯¢
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_Service_GetRichList"), true);		//æŸ¥è¯¢æ•°æ®åº“[QPAccountsDB]ä¸­çš„RegalRankè¡¨
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	On_DBO_Service_GetRichList(dwContextID, lResultCode);
 
 
@@ -619,7 +619,7 @@ bool CDataBaseEngineSink::On_DBR_Service_GetRichList(DWORD dwContextID, void * p
 
 }
 
-//»ñÈ¡¸»ºÀ°ñ·µ»Ø
+//è·å–å¯Œè±ªæ¦œè¿”å›
 bool CDataBaseEngineSink::On_DBO_Service_GetRichList(DWORD dwContextID, DWORD dwResultCode)
 {
 	if(dwResultCode == DB_SUCCESS)
@@ -630,12 +630,12 @@ bool CDataBaseEngineSink::On_DBO_Service_GetRichList(DWORD dwContextID, DWORD dw
 		for(int i=0;i < m_AccountsDBModule->GetRecordCount() && i < 15;i++)
 		{
 			result.byCount ++;
-			m_AccountsDBAide.GetValue_String(TEXT("Name"),result.RegalInfoList[i].szName,CountArray(result.RegalInfoList[i].szName));
-			result.RegalInfoList[i].dwMoney = m_AccountsDBAide.GetValue_DWORD(TEXT("Money"));
-			m_AccountsDBAide.GetValue_String(TEXT("Wechat"),result.RegalInfoList[i].szWechatAccount,CountArray(result.RegalInfoList[i].szWechatAccount));
-			result.RegalInfoList[i].dwRegistID = m_AccountsDBAide.GetValue_DWORD(TEXT("RegistID"));	
-			m_AccountsDBAide.GetValue_String(TEXT("QQ"),result.RegalInfoList[i].szQQ,CountArray(result.RegalInfoList[i].szQQ));
-			m_AccountsDBAide.GetValue_String(TEXT("MobilePhone"),result.RegalInfoList[i].szMobilePhone,CountArray(result.RegalInfoList[i].szMobilePhone));
+			m_AccountsDBModule.GetValue_String(TEXT("Name"),result.RegalInfoList[i].szName,CountArray(result.RegalInfoList[i].szName));
+			result.RegalInfoList[i].dwMoney = m_AccountsDBModule.GetValue_DWORD(TEXT("Money"));
+			m_AccountsDBModule.GetValue_String(TEXT("Wechat"),result.RegalInfoList[i].szWechatAccount,CountArray(result.RegalInfoList[i].szWechatAccount));
+			result.RegalInfoList[i].dwRegistID = m_AccountsDBModule.GetValue_DWORD(TEXT("RegistID"));	
+			m_AccountsDBModule.GetValue_String(TEXT("QQ"),result.RegalInfoList[i].szQQ,CountArray(result.RegalInfoList[i].szQQ));
+			m_AccountsDBModule.GetValue_String(TEXT("MobilePhone"),result.RegalInfoList[i].szMobilePhone,CountArray(result.RegalInfoList[i].szMobilePhone));
 
 			m_AccountsDBModule->MoveToNext();
 		}
@@ -647,7 +647,7 @@ bool CDataBaseEngineSink::On_DBO_Service_GetRichList(DWORD dwContextID, DWORD dw
 	return true;
 }
 
-//»ñÈ¡Â¼ÏñÁĞ±í
+//è·å–å½•åƒåˆ—è¡¨
 bool CDataBaseEngineSink::On_DBR_Service_GetUserRecordList(DWORD dwContextID, void * pData, WORD wDataSize)
 {
 	if (sizeof(STR_DBR_CL_SERCIVR_GET_RECORDLIST) < wDataSize)
@@ -657,30 +657,30 @@ bool CDataBaseEngineSink::On_DBR_Service_GetUserRecordList(DWORD dwContextID, vo
 
 	STR_DBR_CL_SERCIVR_GET_RECORDLIST* pDbReq = (STR_DBR_CL_SERCIVR_GET_RECORDLIST*)pData;
 
-	m_TreasureDBAide.ResetParameter();
+	m_TreasureDBModule.ResetParameter();
 
-	m_TreasureDBAide.AddParameter(TEXT("@UserID"),pDbReq->dwUserID);
+	m_TreasureDBModule.AddParameter(TEXT("@UserID"),pDbReq->dwUserID);
 
-	//Ö´ĞĞ²éÑ¯
-	LONG lResultCode = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CL_Service_GetRecordList"),true);		//²éÑ¯Êı¾İ¿â[QPTreasureDB]ÖĞµÄGameRecord±í
+	//æ‰§è¡ŒæŸ¥è¯¢
+	LONG lResultCode = m_TreasureDBModule.ExecuteProcess(TEXT("GSP_CL_Service_GetRecordList"),true);		//æŸ¥è¯¢æ•°æ®åº“[QPTreasureDB]ä¸­çš„GameRecordè¡¨
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	On_DBO_Service_GetUserRecordList(dwContextID,lResultCode,NULL);
 
 	return true;
 }
 
-//»ñÈ¡Â¼ÏñÁĞ±í·µ»Ø
+//è·å–å½•åƒåˆ—è¡¨è¿”å›
 bool CDataBaseEngineSink::On_DBO_Service_GetUserRecordList(DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString)
 {
 	if (dwErrorCode == DB_SUCCESS)
 	{
-		//»ñµÃËùÓĞ×À×ÓID
+		//è·å¾—æ‰€æœ‰æ¡Œå­ID
 		vector <DWORD> dwTableID;
 		for (int i = 0; i < m_TreasureDBModule->GetRecordCount(); i++)
 		{
-			//É¾³ıÖØ¸´µÄ×À×Ó
-			DWORD dwTmpTableID = m_TreasureDBAide.GetValue_DWORD(TEXT("TableID"));
+			//åˆ é™¤é‡å¤çš„æ¡Œå­
+			DWORD dwTmpTableID = m_TreasureDBModule.GetValue_DWORD(TEXT("TableID"));
 			std::vector <DWORD>::iterator result = find(dwTableID.begin(), dwTableID.end(), dwTmpTableID);
 			if ( result == dwTableID.end() )
 			{
@@ -689,11 +689,11 @@ bool CDataBaseEngineSink::On_DBO_Service_GetUserRecordList(DWORD dwContextID, DW
 			m_TreasureDBModule->MoveToNext();
 		}
 
-		//ÒÆµ½¿ªÍ·
+		//ç§»åˆ°å¼€å¤´
 		m_TreasureDBModule->MoveToFirst();
 		int nRecordListNum = m_TreasureDBModule->GetRecordCount();
 
-		//´ó¾ÖµÃ·Ö
+		//å¤§å±€å¾—åˆ†
 		LONGLONG lTotalscore[10][5];
 		for (int i = 0; i < 10; i++)
 		{
@@ -703,9 +703,9 @@ bool CDataBaseEngineSink::On_DBO_Service_GetUserRecordList(DWORD dwContextID, DW
 			}			
 		}
 
-		//DBOÊı¾İ
+		//DBOæ•°æ®
 		STR_DBO_CL_SERCIVR_GET_RECORDLIST *RecordList = new STR_DBO_CL_SERCIVR_GET_RECORDLIST[nRecordListNum];
-		//TableID¸³Öµ
+		//TableIDèµ‹å€¼
 		for (DWORD i = 0; i < dwTableID.size(); i++)
 		{
 			RecordList[i].dwTableID = dwTableID[i];
@@ -713,34 +713,34 @@ bool CDataBaseEngineSink::On_DBO_Service_GetUserRecordList(DWORD dwContextID, DW
 
 		for(int i=0;i < nRecordListNum;i++)
 		{
-			m_TreasureDBAide.ResetParameter();
+			m_TreasureDBModule.ResetParameter();
 
-			//»ñµÃ×À×ÓID
-			DWORD dwTempTableID = m_TreasureDBAide.GetValue_DWORD(TEXT("TableID"));
+			//è·å¾—æ¡Œå­ID
+			DWORD dwTempTableID = m_TreasureDBModule.GetValue_DWORD(TEXT("TableID"));
 
-			//»ñµÃ¸Ã×À×ÓµÄÊı¾İ
+			//è·å¾—è¯¥æ¡Œå­çš„æ•°æ®
 			for (DWORD j = 0; j < dwTableID.size(); j++)
 			{
 				if ( dwTempTableID == dwTableID[j] )
 				{
-					RecordList[i].dwUserID[0] = m_TreasureDBAide.GetValue_DWORD(TEXT("UserID0"));
-					RecordList[i].dwUserID[1] = m_TreasureDBAide.GetValue_DWORD(TEXT("UserID1"));
-					RecordList[i].dwUserID[2] = m_TreasureDBAide.GetValue_DWORD(TEXT("UserID2"));
-					RecordList[i].dwUserID[3] = m_TreasureDBAide.GetValue_DWORD(TEXT("UserID3"));
-					RecordList[i].dwUserID[4] = m_TreasureDBAide.GetValue_DWORD(TEXT("UserID4"));
-					m_TreasureDBAide.GetValue_String(TEXT("Nick0"),RecordList[i].szUserName[0],LEN_NICKNAME);
-					m_TreasureDBAide.GetValue_String(TEXT("Nick1"),RecordList[i].szUserName[1],LEN_NICKNAME);
-					m_TreasureDBAide.GetValue_String(TEXT("Nick2"),RecordList[i].szUserName[2],LEN_NICKNAME);
-					m_TreasureDBAide.GetValue_String(TEXT("Nick3"),RecordList[i].szUserName[3],LEN_NICKNAME);
-					m_TreasureDBAide.GetValue_String(TEXT("Nick4"),RecordList[i].szUserName[4],LEN_NICKNAME);
-					RecordList[i].byGameMode = m_TreasureDBAide.GetValue_BYTE(TEXT("GameMode"));
-					RecordList[i].byZhuangType = m_TreasureDBAide.GetValue_BYTE(TEXT("ZhuangType"));
-					RecordList[i].wCurrentJuShu = m_TreasureDBAide.GetValue_WORD(TEXT("CurrentJuShu"));
-					RecordList[i].wTotalJuShu = m_TreasureDBAide.GetValue_WORD(TEXT("TotalJuShu"));
-					m_TreasureDBAide.GetValue_String(TEXT("GameTime"),RecordList[i].szGameTime,30);
-					m_TreasureDBAide.GetValue_String(TEXT("Score"),RecordList[i].szScore,50);
+					RecordList[i].dwUserID[0] = m_TreasureDBModule.GetValue_DWORD(TEXT("UserID0"));
+					RecordList[i].dwUserID[1] = m_TreasureDBModule.GetValue_DWORD(TEXT("UserID1"));
+					RecordList[i].dwUserID[2] = m_TreasureDBModule.GetValue_DWORD(TEXT("UserID2"));
+					RecordList[i].dwUserID[3] = m_TreasureDBModule.GetValue_DWORD(TEXT("UserID3"));
+					RecordList[i].dwUserID[4] = m_TreasureDBModule.GetValue_DWORD(TEXT("UserID4"));
+					m_TreasureDBModule.GetValue_String(TEXT("Nick0"),RecordList[i].szUserName[0],LEN_NICKNAME);
+					m_TreasureDBModule.GetValue_String(TEXT("Nick1"),RecordList[i].szUserName[1],LEN_NICKNAME);
+					m_TreasureDBModule.GetValue_String(TEXT("Nick2"),RecordList[i].szUserName[2],LEN_NICKNAME);
+					m_TreasureDBModule.GetValue_String(TEXT("Nick3"),RecordList[i].szUserName[3],LEN_NICKNAME);
+					m_TreasureDBModule.GetValue_String(TEXT("Nick4"),RecordList[i].szUserName[4],LEN_NICKNAME);
+					RecordList[i].byGameMode = m_TreasureDBModule.GetValue_BYTE(TEXT("GameMode"));
+					RecordList[i].byZhuangType = m_TreasureDBModule.GetValue_BYTE(TEXT("ZhuangType"));
+					RecordList[i].wCurrentJuShu = m_TreasureDBModule.GetValue_WORD(TEXT("CurrentJuShu"));
+					RecordList[i].wTotalJuShu = m_TreasureDBModule.GetValue_WORD(TEXT("TotalJuShu"));
+					m_TreasureDBModule.GetValue_String(TEXT("GameTime"),RecordList[i].szGameTime,30);
+					m_TreasureDBModule.GetValue_String(TEXT("Score"),RecordList[i].szScore,50);
 
-					//»ñÈ¡×Ü·ÖÊı
+					//è·å–æ€»åˆ†æ•°
 					CString strScore = RecordList[i].szScore;
 					int nPos = 0;
 					int score_index = 0;
@@ -756,10 +756,10 @@ bool CDataBaseEngineSink::On_DBO_Service_GetUserRecordList(DWORD dwContextID, DW
 			m_TreasureDBModule->MoveToNext();
 		}
 
-		//·¢ËÍ´ó¾ÖÂ¼ÏñÊı¾İ
+		//å‘é€å¤§å±€å½•åƒæ•°æ®
 		for (DWORD i = 0; i < dwTableID.size(); i++)
 		{
-			//Ôö¼Ó´ó¾Ö·ÖÊı
+			//å¢åŠ å¤§å±€åˆ†æ•°
 			_sntprintf_s(RecordList[i].szTotalScore, CountArray(RecordList[i].szTotalScore), TEXT("%lld,%lld,%lld,%lld,%lld"),
 				lTotalscore[i][0], lTotalscore[i][1], lTotalscore[i][2], lTotalscore[i][3], lTotalscore[i][4]);
 
@@ -776,7 +776,7 @@ bool CDataBaseEngineSink::On_DBO_Service_GetUserRecordList(DWORD dwContextID, DW
 	return true;
 }
 
-//»ñÈ¡Ö¸¶¨IDÂ¼Ïñ
+//è·å–æŒ‡å®šIDå½•åƒ
 bool CDataBaseEngineSink::On_DBR_Service_GetSpecifiRecord(DWORD dwContextID, void * pData, WORD wDataSize)
 {
 
@@ -787,18 +787,18 @@ bool CDataBaseEngineSink::On_DBR_Service_GetSpecifiRecord(DWORD dwContextID, voi
 
 	STR_DBR_CL_SERCIVR_GET_SPECIFIC_RECORD* pDbReq = (STR_DBR_CL_SERCIVR_GET_SPECIFIC_RECORD*)pData;
 
-	m_TreasureDBAide.ResetParameter();
+	m_TreasureDBModule.ResetParameter();
 
-	m_TreasureDBAide.AddParameter(TEXT("@dwTableID"),pDbReq->dwTableID);
+	m_TreasureDBModule.AddParameter(TEXT("@dwTableID"),pDbReq->dwTableID);
 
-	//Êä³ö²ÎÊı
+	//è¾“å‡ºå‚æ•°
 	TCHAR szDescribeString[128]=TEXT("");
-	m_TreasureDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
+	m_TreasureDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-	//Ö´ĞĞ²éÑ¯
-	LONG lResultCode = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CL_Service_GetSpecificRecord"),true);		//²éÑ¯Êı¾İ¿â[QPTreasureDB]ÖĞµÄGameRecord±í
+	//æ‰§è¡ŒæŸ¥è¯¢
+	LONG lResultCode = m_TreasureDBModule.ExecuteProcess(TEXT("GSP_CL_Service_GetSpecificRecord"),true);		//æŸ¥è¯¢æ•°æ®åº“[QPTreasureDB]ä¸­çš„GameRecordè¡¨
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
 	m_TreasureDBModule->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
@@ -808,25 +808,25 @@ bool CDataBaseEngineSink::On_DBR_Service_GetSpecifiRecord(DWORD dwContextID, voi
 
 }
 
-//»ñÈ¡Ö¸¶¨IDÂ¼Ïñ·µ»Ø
+//è·å–æŒ‡å®šIDå½•åƒè¿”å›
 bool CDataBaseEngineSink::On_DBO_Service_GetSpecificRecord(DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString)
 {
 	if (dwErrorCode==DB_SUCCESS)
 	{
 		for(int i=0; i < m_TreasureDBModule->GetRecordCount(); i++)
 		{
-			//±äÁ¿¶¨Òå
+			//å˜é‡å®šä¹‰
 			STR_DBO_CL_SERCIVR_GET_SPECIFIC_RECORD RecordInfo;
 			ZeroMemory(&RecordInfo,sizeof(RecordInfo));
 
-			//»ñµÃÊı¾İ
-			RecordInfo.wCurrentJuShu = m_TreasureDBAide.GetValue_WORD(TEXT("CurrentJuShu"));
-			m_TreasureDBAide.GetValue_String(TEXT("Nick0"), RecordInfo.szNickName[0], LEN_NICKNAME);
-			m_TreasureDBAide.GetValue_String(TEXT("Nick1"), RecordInfo.szNickName[1], LEN_NICKNAME);
-			m_TreasureDBAide.GetValue_String(TEXT("Nick2"), RecordInfo.szNickName[2], LEN_NICKNAME);
-			m_TreasureDBAide.GetValue_String(TEXT("Nick3"), RecordInfo.szNickName[3], LEN_NICKNAME);
-			m_TreasureDBAide.GetValue_String(TEXT("Nick4"), RecordInfo.szNickName[4], LEN_NICKNAME);
-			m_TreasureDBAide.GetValue_String(TEXT("Score"), RecordInfo.szScore, 50);
+			//è·å¾—æ•°æ®
+			RecordInfo.wCurrentJuShu = m_TreasureDBModule.GetValue_WORD(TEXT("CurrentJuShu"));
+			m_TreasureDBModule.GetValue_String(TEXT("Nick0"), RecordInfo.szNickName[0], LEN_NICKNAME);
+			m_TreasureDBModule.GetValue_String(TEXT("Nick1"), RecordInfo.szNickName[1], LEN_NICKNAME);
+			m_TreasureDBModule.GetValue_String(TEXT("Nick2"), RecordInfo.szNickName[2], LEN_NICKNAME);
+			m_TreasureDBModule.GetValue_String(TEXT("Nick3"), RecordInfo.szNickName[3], LEN_NICKNAME);
+			m_TreasureDBModule.GetValue_String(TEXT("Nick4"), RecordInfo.szNickName[4], LEN_NICKNAME);
+			m_TreasureDBModule.GetValue_String(TEXT("Score"), RecordInfo.szScore, 50);
 
 			g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_SERVICE_GET_SPECIFIC_RECORD, dwContextID, &RecordInfo, sizeof(STR_DBO_CL_SERCIVR_GET_SPECIFIC_RECORD));
 
@@ -837,7 +837,7 @@ bool CDataBaseEngineSink::On_DBO_Service_GetSpecificRecord(DWORD dwContextID, DW
 	return true;
 }
 
-//»ñÈ¡ÔÚÏß½±Àø
+//è·å–åœ¨çº¿å¥–åŠ±
 bool CDataBaseEngineSink::On_DBR_Service_OnlineReward(DWORD dwContextID, void * pData, WORD wDataSize)
 {
 
@@ -848,44 +848,44 @@ bool CDataBaseEngineSink::On_DBR_Service_OnlineReward(DWORD dwContextID, void * 
 
 	STR_DBR_CL_SERCIVR_ONLINE_REWARD* pDbReq = (STR_DBR_CL_SERCIVR_ONLINE_REWARD*)pData;
 
-	//µÇÂ¼½±Àø200½ğ±Ò
+	//ç™»å½•å¥–åŠ±200é‡‘å¸
 
-	m_TreasureDBAide.ResetParameter();
-	m_TreasureDBAide.AddParameter(TEXT("@UserID"), pDbReq->dwUserID);
-	m_TreasureDBAide.AddParameter(TEXT("@lGold"), 200);
-	m_TreasureDBAide.AddParameter(TEXT("@lOpenRoomCard"), 0);
-	m_TreasureDBAide.AddParameter(TEXT("@lDiamond"), 0);
+	m_TreasureDBModule.ResetParameter();
+	m_TreasureDBModule.AddParameter(TEXT("@UserID"), pDbReq->dwUserID);
+	m_TreasureDBModule.AddParameter(TEXT("@lGold"), 200);
+	m_TreasureDBModule.AddParameter(TEXT("@lOpenRoomCard"), 0);
+	m_TreasureDBModule.AddParameter(TEXT("@lDiamond"), 0);
 
-	//Ö´ĞĞ²éÑ¯
-	LONG lResultCode = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CL_Service_ModifyUserMoney"), true);	//ĞŞ¸Ä[QPTreasureDB]Êı¾İ¿âÖĞµÄGameScoreInfo±í
+	//æ‰§è¡ŒæŸ¥è¯¢
+	LONG lResultCode = m_TreasureDBModule.ExecuteProcess(TEXT("GSP_CL_Service_ModifyUserMoney"), true);	//ä¿®æ”¹[QPTreasureDB]æ•°æ®åº“ä¸­çš„GameScoreInfoè¡¨
 
-	//½á¹û´¦Àí
-	On_DBO_Service_OnlineReward(dwContextID, lResultCode, TEXT("ÁìÈ¡µÇÂ¼½±ÀøÊ§°Ü£¡"));
+	//ç»“æœå¤„ç†
+	On_DBO_Service_OnlineReward(dwContextID, lResultCode, TEXT("é¢†å–ç™»å½•å¥–åŠ±å¤±è´¥ï¼"));
 
 	return true;
 
 }
 
-//»ñÈ¡ÔÚÏß½±Àø·µ»Ø
+//è·å–åœ¨çº¿å¥–åŠ±è¿”å›
 bool CDataBaseEngineSink::On_DBO_Service_OnlineReward(DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString)
 {
 	if(dwErrorCode == DB_SUCCESS)
 	{
 		STR_DBO_CL_SERCIVR_ONLINE_REWARD result;
 		result.byType = 1;
-		result.dwCount = m_TreasureDBAide.GetValue_DWORD(TEXT("Gold"));
-		lstrcpyn(result.szDescribe,TEXT("³É¹¦ÁìÈ¡µÇÂ¼½±Àø£¡"),CountArray(result.szDescribe));
+		result.dwCount = m_TreasureDBModule.GetValue_DWORD(TEXT("Gold"));
+		lstrcpyn(result.szDescribe,TEXT("æˆåŠŸé¢†å–ç™»å½•å¥–åŠ±ï¼"),CountArray(result.szDescribe));
 
 		g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_SERVICE_ONLINE_REWARD, dwContextID, &result, sizeof(STR_DBO_CL_SERCIVR_ONLINE_REWARD));
 
-		//²Æ¸»±ä¸ü´¦Àí
+		//è´¢å¯Œå˜æ›´å¤„ç†
 		STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO UserScoreInfo;
-		UserScoreInfo.dwUserID = m_TreasureDBAide.GetValue_DWORD(TEXT("UserID"));
-		UserScoreInfo.lGold = m_TreasureDBAide.GetValue_LONGLONG(TEXT("Gold"));
-		UserScoreInfo.lOpenRoomCard = m_TreasureDBAide.GetValue_LONGLONG(TEXT("OpenRoomCard"));
-		UserScoreInfo.lDiamond = m_TreasureDBAide.GetValue_LONGLONG(TEXT("Diamond"));
+		UserScoreInfo.dwUserID = m_TreasureDBModule.GetValue_DWORD(TEXT("UserID"));
+		UserScoreInfo.lGold = m_TreasureDBModule.GetValue_LONGLONG(TEXT("Gold"));
+		UserScoreInfo.lOpenRoomCard = m_TreasureDBModule.GetValue_LONGLONG(TEXT("OpenRoomCard"));
+		UserScoreInfo.lDiamond = m_TreasureDBModule.GetValue_LONGLONG(TEXT("Diamond"));
 
-		//·¢ËÍ½á¹û
+		//å‘é€ç»“æœ
 		g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_USER_QUERY_SCORE_INFO,dwContextID,&UserScoreInfo,sizeof(STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO));
 
 	}
@@ -902,7 +902,7 @@ bool CDataBaseEngineSink::On_DBO_Service_OnlineReward(DWORD dwContextID, DWORD d
 	return true;
 }
 
-//»ñÈ¡ÈÎÎñÁĞ±í
+//è·å–ä»»åŠ¡åˆ—è¡¨
 bool CDataBaseEngineSink::On_DBR_Service_GetTaskList(DWORD dwContextID, void * pData, WORD wDataSize)
 {
 
@@ -913,61 +913,61 @@ bool CDataBaseEngineSink::On_DBR_Service_GetTaskList(DWORD dwContextID, void * p
 
 	STR_DBR_CL_SERCIVR_GET_TASKLIST* pDbReq = (STR_DBR_CL_SERCIVR_GET_TASKLIST*)pData;
 
-	//»ñÈ¡ÈÎÎñÁĞ±í
-	m_AccountsDBAide.ResetParameter();
-	m_AccountsDBAide.AddParameter(TEXT("@dwUserID"), pDbReq->dwUserID);
+	//è·å–ä»»åŠ¡åˆ—è¡¨
+	m_AccountsDBModule.ResetParameter();
+	m_AccountsDBModule.AddParameter(TEXT("@dwUserID"), pDbReq->dwUserID);
 
-	//Ö´ĞĞ²éÑ¯
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_Service_GetTaskList"), true);		//²éÑ¯[QPAccountsDB]Êı¾İ¿âµÄTaskList±í
+	//æ‰§è¡ŒæŸ¥è¯¢
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_Service_GetTaskList"), true);		//æŸ¥è¯¢[QPAccountsDB]æ•°æ®åº“çš„TaskListè¡¨
 
-	//½á¹û´¦Àí
-	On_DBO_Service_GetTaskList(pDbReq->dwUserID, dwContextID, lResultCode, TEXT("ÈÎÎñ´¦ÀíÊ§°Ü£¬ÇëÉÔºóÖØÊÔ!"));
+	//ç»“æœå¤„ç†
+	On_DBO_Service_GetTaskList(pDbReq->dwUserID, dwContextID, lResultCode, TEXT("ä»»åŠ¡å¤„ç†å¤±è´¥ï¼Œè¯·ç¨åé‡è¯•!"));
 
 	return true;
 
 }
 
-//»ñÈ¡ÈÎÎñÁĞ±í·µ»Ø
+//è·å–ä»»åŠ¡åˆ—è¡¨è¿”å›
 bool CDataBaseEngineSink::On_DBO_Service_GetTaskList(DWORD dwUserID, DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString)
 {
-	//¹¹ÔìÊı¾İ
+	//æ„é€ æ•°æ®
 	STR_DBO_CL_SERCIVR_GET_TASKLIST taskItem;
 	ZeroMemory(&taskItem,sizeof(STR_DBO_CL_SERCIVR_GET_TASKLIST));
 
-	//ÁÙÊ±Êı¾İ
+	//ä¸´æ—¶æ•°æ®
 	int nTaskNum = m_AccountsDBModule->GetRecordCount();
-	//TODO ÈÎÎñ¸öÊıµÄ¿ØÖÆºóÃæÈÃweb¿ØÖÆ£¬ÕâÀïÔİÊ±Ğ´ËÀ
+	//TODO ä»»åŠ¡ä¸ªæ•°çš„æ§åˆ¶åé¢è®©webæ§åˆ¶ï¼Œè¿™é‡Œæš‚æ—¶å†™æ­»
 	if ( MAX_SEND_CLIENT_TASK_NUM < nTaskNum )
 	{
 		nTaskNum = MAX_SEND_CLIENT_TASK_NUM;
 	}
 
-	//¹¹ÔìÊı¾İ
+	//æ„é€ æ•°æ®
 	STR_DBO_CL_SERCIVR_GET_TASKLIST *arTaskList = new STR_DBO_CL_SERCIVR_GET_TASKLIST [nTaskNum]; 
 
-	//²éÑ¯³É¹¦£¬·µ»ØÊı¾İ	
+	//æŸ¥è¯¢æˆåŠŸï¼Œè¿”å›æ•°æ®	
 	if(dwErrorCode == DB_SUCCESS)
 	{
-		//ÍøÂçÊı¾İ
+		//ç½‘ç»œæ•°æ®
 		WORD wSendSize=0;
 
-		//Ñ­»·»ñµÃÃ¿¸öÈÎÎñÊı¾İ
+		//å¾ªç¯è·å¾—æ¯ä¸ªä»»åŠ¡æ•°æ®
 		for(int i=0; i<nTaskNum; i++)
 		{
-			//»ñµÃÈÎÎñÁĞ±í
-			taskItem.wTaskID = m_AccountsDBAide.GetValue_WORD(TEXT("TaskID"));
-			taskItem.cbTaskType = m_AccountsDBAide.GetValue_BYTE(TEXT("TaskType"));
-			taskItem.cbActionType = m_AccountsDBAide.GetValue_BYTE(TEXT("ActionType"));
-			taskItem.dwNeedCount = m_AccountsDBAide.GetValue_DWORD(TEXT("NeedCount"));
-			m_AccountsDBAide.GetValue_String(TEXT("Describe"), taskItem.szDescribe, CountArray(taskItem.szDescribe));		
-			taskItem.byRewardType = m_AccountsDBAide.GetValue_BYTE(TEXT("RewardType"));
-			taskItem.dwRewardCount = m_AccountsDBAide.GetValue_DWORD(TEXT("RewardCount"));
+			//è·å¾—ä»»åŠ¡åˆ—è¡¨
+			taskItem.wTaskID = m_AccountsDBModule.GetValue_WORD(TEXT("TaskID"));
+			taskItem.cbTaskType = m_AccountsDBModule.GetValue_BYTE(TEXT("TaskType"));
+			taskItem.cbActionType = m_AccountsDBModule.GetValue_BYTE(TEXT("ActionType"));
+			taskItem.dwNeedCount = m_AccountsDBModule.GetValue_DWORD(TEXT("NeedCount"));
+			m_AccountsDBModule.GetValue_String(TEXT("Describe"), taskItem.szDescribe, CountArray(taskItem.szDescribe));		
+			taskItem.byRewardType = m_AccountsDBModule.GetValue_BYTE(TEXT("RewardType"));
+			taskItem.dwRewardCount = m_AccountsDBModule.GetValue_DWORD(TEXT("RewardCount"));
 
-			//»ñµÃÈÎÎñ×´Ì¬
-			taskItem.cbTaskStatus = m_AccountsDBAide.GetValue_BYTE(TEXT("TaskStatus"));
-			taskItem.dwFinishedCount = m_AccountsDBAide.GetValue_DWORD(TEXT("LeftCount"));
+			//è·å¾—ä»»åŠ¡çŠ¶æ€
+			taskItem.cbTaskStatus = m_AccountsDBModule.GetValue_BYTE(TEXT("TaskStatus"));
+			taskItem.dwFinishedCount = m_AccountsDBModule.GetValue_DWORD(TEXT("LeftCount"));
 
-			//¸³Öµ
+			//èµ‹å€¼
 			memcpy_s(&arTaskList[i], sizeof(STR_DBO_CL_SERCIVR_GET_TASKLIST), &taskItem, sizeof(STR_DBO_CL_SERCIVR_GET_TASKLIST));
 
 			m_AccountsDBModule->MoveToNext();
@@ -976,13 +976,13 @@ bool CDataBaseEngineSink::On_DBO_Service_GetTaskList(DWORD dwUserID, DWORD dwCon
 
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_SERVICE_GET_TASK_LIST, dwContextID, arTaskList, nTaskNum*sizeof(STR_DBO_CL_SERCIVR_GET_TASKLIST));
 
-	//TODO ÔÚºóÃæÊ¹ÓÃµÄÊ±ºòÇå¿Õ
+	//TODO åœ¨åé¢ä½¿ç”¨çš„æ—¶å€™æ¸…ç©º
 	/*delete [] arTaskList;*/
 
 	return true;
 }
 
-//ÁìÈ¡ÈÎÎñ½±Àø
+//é¢†å–ä»»åŠ¡å¥–åŠ±
 bool CDataBaseEngineSink::On_DBR_Service_GetTaskReward(DWORD dwContextID, void * pData, WORD wDataSize)
 {
 	if (sizeof(STR_DBR_CL_SERCIVR_GET_TASK_REWARD) < wDataSize)
@@ -992,22 +992,22 @@ bool CDataBaseEngineSink::On_DBR_Service_GetTaskReward(DWORD dwContextID, void *
 
 	STR_DBR_CL_SERCIVR_GET_TASK_REWARD* pDbReq = (STR_DBR_CL_SERCIVR_GET_TASK_REWARD*)pData;
 
-	m_AccountsDBAide.ResetParameter();
+	m_AccountsDBModule.ResetParameter();
 
-	m_AccountsDBAide.AddParameter(TEXT("@dwUserID"), pDbReq->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("@wTaskID"), pDbReq->wTaskID);
+	m_AccountsDBModule.AddParameter(TEXT("@dwUserID"), pDbReq->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("@wTaskID"), pDbReq->wTaskID);
 
-	//Êä³ö±äÁ¿
+	//è¾“å‡ºå˜é‡
 	WCHAR szDescribe[128]=L"";
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribe,sizeof(szDescribe),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribe,sizeof(szDescribe),adParamOutput);
 
-	//Ö´ĞĞ²éÑ¯
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_Service_GetTaskReward"), true);		//²éÑ¯Êı¾İ¿â[QPAccountsDB]ÖĞµÄAccountsTaskStatus±í£¬¸üĞÂÊı¾İ¿âÖĞµÄGameScoreInfo±í
-	//½á¹û´¦Àí
+	//æ‰§è¡ŒæŸ¥è¯¢
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_Service_GetTaskReward"), true);		//æŸ¥è¯¢æ•°æ®åº“[QPAccountsDB]ä¸­çš„AccountsTaskStatusè¡¨ï¼Œæ›´æ–°æ•°æ®åº“ä¸­çš„GameScoreInfoè¡¨
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
 	m_AccountsDBModule->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
-	//ÁìÈ¡ÈÎÎñ½±Àø·µ»Ø
+	//é¢†å–ä»»åŠ¡å¥–åŠ±è¿”å›
 	On_DBO_Service_GetTaskReward(pDbReq->wTaskID, dwContextID, lResultCode, CW2CT(DBVarValue.bstrVal));
 
 
@@ -1015,25 +1015,25 @@ bool CDataBaseEngineSink::On_DBR_Service_GetTaskReward(DWORD dwContextID, void *
 
 }
 
-//ÁìÈ¡ÈÎÎñ½±Àø·µ»Ø
+//é¢†å–ä»»åŠ¡å¥–åŠ±è¿”å›
 bool CDataBaseEngineSink::On_DBO_Service_GetTaskReward(DWORD dwUserID, DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString)
 {
 	if(dwErrorCode == DB_SUCCESS)
 	{
-		//»ñÈ¡¸üĞÂÓÃ»§½ğ±Ò·¿¿¨×êÊ¯
+		//è·å–æ›´æ–°ç”¨æˆ·é‡‘å¸æˆ¿å¡é’»çŸ³
 		STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO UserScoreInfo;
 		ZeroMemory(&UserScoreInfo,sizeof(STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO));
 
 		UserScoreInfo.dwUserID = dwUserID;
-		UserScoreInfo.lGold = m_AccountsDBAide.GetValue_LONG(TEXT("Gold"));
-		UserScoreInfo.lOpenRoomCard = m_AccountsDBAide.GetValue_LONG(TEXT("OpenRoomCard"));
-		UserScoreInfo.lDiamond = m_AccountsDBAide.GetValue_LONG(TEXT("Diamond"));
+		UserScoreInfo.lGold = m_AccountsDBModule.GetValue_LONG(TEXT("Gold"));
+		UserScoreInfo.lOpenRoomCard = m_AccountsDBModule.GetValue_LONG(TEXT("OpenRoomCard"));
+		UserScoreInfo.lDiamond = m_AccountsDBModule.GetValue_LONG(TEXT("Diamond"));
 
-		//·¢ËÍ×Ê²ú¸üĞÂÏûÏ¢
+		//å‘é€èµ„äº§æ›´æ–°æ¶ˆæ¯
 		g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_USER_QUERY_SCORE_INFO, dwContextID, &UserScoreInfo, sizeof(STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO));
 	}
 
-	//ÊÕµ½ÈÎÎñ½±Àø
+	//æ”¶åˆ°ä»»åŠ¡å¥–åŠ±
 	STR_DBO_CL_SERCIVR_GET_TASK_REWARD result;
 	ZeroMemory(&result,sizeof(result));
 	result.lResultCode = dwErrorCode;
@@ -1044,7 +1044,7 @@ bool CDataBaseEngineSink::On_DBO_Service_GetTaskReward(DWORD dwUserID, DWORD dwC
 	return true;
 }
 
-//ÇëÇó³é½±
+//è¯·æ±‚æŠ½å¥–
 bool CDataBaseEngineSink::On_DBR_Service_RequestLottery(DWORD dwContextID, void * pData, WORD wDataSize)
 {
 
@@ -1055,20 +1055,20 @@ bool CDataBaseEngineSink::On_DBR_Service_RequestLottery(DWORD dwContextID, void 
 
 	STR_DBR_CL_SERCIVR_REQUEST_LOTTERY* pDbReq = (STR_DBR_CL_SERCIVR_REQUEST_LOTTERY*)pData;
 
-	//»ñÈ¡Ò»¸ö1-100µÄËæ»úÊı
+	//è·å–ä¸€ä¸ª1-100çš„éšæœºæ•°
 	srand((unsigned int)time(NULL)) ;
 	int index = rand() % 100 + 1;
 
-	m_AccountsDBAide.ResetParameter();
-	m_AccountsDBAide.AddParameter(TEXT("@UserID"), pDbReq->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("@Rand"), index);
-	//Êä³ö±äÁ¿
+	m_AccountsDBModule.ResetParameter();
+	m_AccountsDBModule.AddParameter(TEXT("@UserID"), pDbReq->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("@Rand"), index);
+	//è¾“å‡ºå˜é‡
 	WCHAR szDescribe[128]=L"";
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribe,sizeof(szDescribe),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribe,sizeof(szDescribe),adParamOutput);
 
-	//Ö´ĞĞ²éÑ¯,Ö´ĞĞ³é½±
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_Service_RequestLottery"), true);		//²éÑ¯Êı¾İ¿â[QPAccountsDB]µÄLotteryList±í£¬Ö´ĞĞ³é½±²Ù×÷£»ÓÎÏ··şÒ²ÓĞ¸öÇëÇó³é½±£»
-	//½á¹û´¦Àí
+	//æ‰§è¡ŒæŸ¥è¯¢,æ‰§è¡ŒæŠ½å¥–
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_Service_RequestLottery"), true);		//æŸ¥è¯¢æ•°æ®åº“[QPAccountsDB]çš„LotteryListè¡¨ï¼Œæ‰§è¡ŒæŠ½å¥–æ“ä½œï¼›æ¸¸æˆæœä¹Ÿæœ‰ä¸ªè¯·æ±‚æŠ½å¥–ï¼›
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
 	m_AccountsDBModule->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
@@ -1077,22 +1077,22 @@ bool CDataBaseEngineSink::On_DBR_Service_RequestLottery(DWORD dwContextID, void 
 	return true;
 }
 
-//ÇëÇó³é½±·µ»Ø
+//è¯·æ±‚æŠ½å¥–è¿”å›
 bool CDataBaseEngineSink::On_DBO_Service_RequestLottery(DWORD dwUserID, DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString)
 {
-	//¹¹ÔìÊı¾İ
+	//æ„é€ æ•°æ®
 	STR_DBO_CL_SERCIVR_REQUEST_LOTTERY LotteryResult;
 	ZeroMemory(&LotteryResult, sizeof(STR_DBO_CL_SERCIVR_REQUEST_LOTTERY));
 
-	//ÏûÏ¢ÃèÊö
+	//æ¶ˆæ¯æè¿°
 	LotteryResult.lResultCode = dwErrorCode;
 	lstrcpyn(LotteryResult.szDescribeString, pszErrorString, CountArray(LotteryResult.szDescribeString));
 
-	//Ö´ĞĞ³É¹¦
+	//æ‰§è¡ŒæˆåŠŸ
 	if(dwErrorCode == DB_SUCCESS)
 	{
-		//Êı¾İ¿â1-6¶ÔÓ¦¿Í»§¶Ë0-5£¬Êı¾İ¿â7-11¶ÔÓ¦¿Í»§¶Ë7-11£¬¿Í»§¶Ë6´ú±íÎ´ÖĞ½±£¬Êı¾İ¿âÎ´´æ´¢
-		LotteryResult.byIndex = m_AccountsDBAide.GetValue_INT(TEXT("RandIndex"));
+		//æ•°æ®åº“1-6å¯¹åº”å®¢æˆ·ç«¯0-5ï¼Œæ•°æ®åº“7-11å¯¹åº”å®¢æˆ·ç«¯7-11ï¼Œå®¢æˆ·ç«¯6ä»£è¡¨æœªä¸­å¥–ï¼Œæ•°æ®åº“æœªå­˜å‚¨
+		LotteryResult.byIndex = m_AccountsDBModule.GetValue_INT(TEXT("RandIndex"));
 		if ( LotteryResult.byIndex >=1 && LotteryResult.byIndex <= 11 )
 		{
 			if ( LotteryResult.byIndex <= 6 )
@@ -1100,42 +1100,42 @@ bool CDataBaseEngineSink::On_DBO_Service_RequestLottery(DWORD dwUserID, DWORD dw
 				LotteryResult.byIndex = LotteryResult.byIndex - 1;
 			}
 
-			//·¢ËÍ³é½±½á¹û
+			//å‘é€æŠ½å¥–ç»“æœ
 			g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_SERVICE_REQUEST_LOTTERY, dwContextID, &LotteryResult, sizeof(STR_DBO_CL_SERCIVR_REQUEST_LOTTERY));
 
 		}
-		else		//Î´ÖĞ½±·µ»Ø6
+		else		//æœªä¸­å¥–è¿”å›6
 		{
-			//¸³Öµ
+			//èµ‹å€¼
 			LotteryResult.byIndex = 6;
 
-			//·¢ËÍ³é½±½á¹û
+			//å‘é€æŠ½å¥–ç»“æœ
 			g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_SERVICE_REQUEST_LOTTERY, dwContextID, &LotteryResult, sizeof(STR_DBO_CL_SERCIVR_REQUEST_LOTTERY));
 		}	
 	}
-	else	//Ê§°Ü£¬Ö±½Ó·¢ËÍ³é½±½á¹û
+	else	//å¤±è´¥ï¼Œç›´æ¥å‘é€æŠ½å¥–ç»“æœ
 	{
 		g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_SERVICE_REQUEST_LOTTERY, dwContextID, &LotteryResult, sizeof(STR_DBO_CL_SERCIVR_REQUEST_LOTTERY));
 	}
 
-	//¹¹Ôì²Æ¸»±ä¸üÊı¾İ
+	//æ„é€ è´¢å¯Œå˜æ›´æ•°æ®
 	STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO UserScoreInfo;
 	ZeroMemory(&UserScoreInfo,sizeof(STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO));
 
 	UserScoreInfo.dwUserID = dwUserID;
-	UserScoreInfo.lGold = m_AccountsDBAide.GetValue_LONG(TEXT("Gold"));
-	UserScoreInfo.lOpenRoomCard = m_AccountsDBAide.GetValue_LONG(TEXT("OpenRoomCard"));
-	UserScoreInfo.lDiamond = m_AccountsDBAide.GetValue_LONG(TEXT("Diamond"));
-	UserScoreInfo.lRewardCard = m_AccountsDBAide.GetValue_LONG(TEXT("RewardCard"));
-	UserScoreInfo.lScore = m_AccountsDBAide.GetValue_LONG(TEXT("Score"));
+	UserScoreInfo.lGold = m_AccountsDBModule.GetValue_LONG(TEXT("Gold"));
+	UserScoreInfo.lOpenRoomCard = m_AccountsDBModule.GetValue_LONG(TEXT("OpenRoomCard"));
+	UserScoreInfo.lDiamond = m_AccountsDBModule.GetValue_LONG(TEXT("Diamond"));
+	UserScoreInfo.lRewardCard = m_AccountsDBModule.GetValue_LONG(TEXT("RewardCard"));
+	UserScoreInfo.lScore = m_AccountsDBModule.GetValue_LONG(TEXT("Score"));
 
-	//·¢ËÍ²Æ¸»±ä¸üÏûÏ¢
+	//å‘é€è´¢å¯Œå˜æ›´æ¶ˆæ¯
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_USER_QUERY_SCORE_INFO, dwContextID, &UserScoreInfo, sizeof(STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO));
 
 	return true;
 }
 
-//pure´óÌü ÅÅĞĞ°ñ 
+//pureå¤§å… æ’è¡Œæ¦œ 
 bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_STANDING_LIST(DWORD dwContextID, void * pData, WORD wDataSize)
 {
 	if (sizeof(STR_SUB_CL_SERVICE_PURE_STANDING_LIST) != wDataSize)
@@ -1145,14 +1145,14 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_STANDING_LIST(DWORD dwContextID
 
 	STR_SUB_CL_SERVICE_PURE_STANDING_LIST* pDbReq = (STR_SUB_CL_SERVICE_PURE_STANDING_LIST*)pData;
 
-	m_AccountsDBAide.ResetParameter();
-	m_AccountsDBAide.AddParameter(TEXT("mystery"), _MYSTERY);
-	m_AccountsDBAide.AddParameter(TEXT("dwUserID"), pDbReq->dwUserID);
+	m_AccountsDBModule.ResetParameter();
+	m_AccountsDBModule.AddParameter(TEXT("mystery"), _MYSTERY);
+	m_AccountsDBModule.AddParameter(TEXT("dwUserID"), pDbReq->dwUserID);
 
-	//Ö´ĞĞ²éÑ¯,Ö´ĞĞ³é½±
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_STANDING_LIST"), true);		//²éÑ¯Êı¾İ¿â[QPAccountsDB]µÄLotteryList±í£¬Ö´ĞĞ³é½±²Ù×÷£»ÓÎÏ··şÒ²ÓĞ¸öÇëÇó³é½±£»
+	//æ‰§è¡ŒæŸ¥è¯¢,æ‰§è¡ŒæŠ½å¥–
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_STANDING_LIST"), true);		//æŸ¥è¯¢æ•°æ®åº“[QPAccountsDB]çš„LotteryListè¡¨ï¼Œæ‰§è¡ŒæŠ½å¥–æ“ä½œï¼›æ¸¸æˆæœä¹Ÿæœ‰ä¸ªè¯·æ±‚æŠ½å¥–ï¼›
 
-	//ÁĞ±í·¢ËÍ
+	//åˆ—è¡¨å‘é€
 	WORD wPacketSize=0;
 	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
 	wPacketSize=0;
@@ -1162,29 +1162,29 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_STANDING_LIST(DWORD dwContextID
 
 	while (m_AccountsDBModule->IsRecordsetEnd()==false)
 	{
-		//·¢ËÍĞÅÏ¢
+		//å‘é€ä¿¡æ¯
 		if ((wPacketSize+sizeof(STR_CMD_LC_SERVICE_PURE_STANDING_LIST))>sizeof(cbBuffer))
 		{
 			g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_PURE_STANDING_LIST,dwContextID,cbBuffer,wPacketSize);
 			wPacketSize=0;
 		}
-		//¶ÁÈ¡ĞÅÏ¢
+		//è¯»å–ä¿¡æ¯
 		pDBO=(STR_CMD_LC_SERVICE_PURE_STANDING_LIST *)(cbBuffer+wPacketSize);
-		pDBO->byRanking = m_AccountsDBAide.GetValue_BYTE(TEXT("Ranking"));
-		pDBO->dwUserID=m_AccountsDBAide.GetValue_DWORD(TEXT("UserID"));
-		pDBO->dwLoveLiness=m_AccountsDBAide.GetValue_DWORD(TEXT("LoveLiness"));
-		m_AccountsDBAide.GetValue_String(TEXT("NickName"),pDBO->szNickName,CountArray(pDBO->szNickName));
-		m_AccountsDBAide.GetValue_String(TEXT("HeadUrl"),pDBO->szHeadUrl,CountArray(pDBO->szHeadUrl));
+		pDBO->byRanking = m_AccountsDBModule.GetValue_BYTE(TEXT("Ranking"));
+		pDBO->dwUserID=m_AccountsDBModule.GetValue_DWORD(TEXT("UserID"));
+		pDBO->dwLoveLiness=m_AccountsDBModule.GetValue_DWORD(TEXT("LoveLiness"));
+		m_AccountsDBModule.GetValue_String(TEXT("NickName"),pDBO->szNickName,CountArray(pDBO->szNickName));
+		m_AccountsDBModule.GetValue_String(TEXT("HeadUrl"),pDBO->szHeadUrl,CountArray(pDBO->szHeadUrl));
 
 		if(pDBO->dwUserID == pDbReq->dwUserID)
 		{
 			DBOFinish.dwRanking = pDBO->byRanking;
 			DBOFinish.dwLoveLiness = pDBO->dwLoveLiness;
 		}
-		//ÉèÖÃÎ»ÒÆ
+		//è®¾ç½®ä½ç§»
 		wPacketSize+=sizeof(STR_CMD_LC_SERVICE_PURE_STANDING_LIST);
 
-		//ÒÆ¶¯¼ÇÂ¼
+		//ç§»åŠ¨è®°å½•
 		m_AccountsDBModule->MoveToNext();
 	}
 	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_PURE_STANDING_LIST,dwContextID,cbBuffer,wPacketSize);
@@ -1194,7 +1194,7 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_STANDING_LIST(DWORD dwContextID
 	return true;
 }
 
-//pure´óÌü ´ó¾ÖÕ½¼¨ 
+//pureå¤§å… å¤§å±€æˆ˜ç»© 
 bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_RECORD_LIST(DWORD dwContextID, void * pData, WORD wDataSize)
 {
 	if (sizeof(STR_SUB_CL_SERVICE_PURE_RECORD_LIST) != wDataSize)
@@ -1204,18 +1204,18 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_RECORD_LIST(DWORD dwContextID, 
 
 	STR_SUB_CL_SERVICE_PURE_RECORD_LIST* pDbReq = (STR_SUB_CL_SERVICE_PURE_RECORD_LIST*)pData;
 
-#pragma region ´ó¾ÖĞÅÏ¢
-	m_TreasureDBAide.ResetParameter();
-	m_TreasureDBAide.AddParameter(TEXT("dwUserID"), pDbReq->dwUserID);
-	m_TreasureDBAide.AddParameter(TEXT("dwClubID"), pDbReq->dwClubID);
-	m_TreasureDBAide.AddParameter(TEXT("tmQueryStartData"), pDbReq->tmQueryStartData);
-	m_TreasureDBAide.AddParameter(TEXT("byMask"), pDbReq->byMask);
-	//m_TreasureDBAide.AddParameter(TEXT("tmQueryEndData"), pDbReq->tmQueryEndData);
+#pragma region å¤§å±€ä¿¡æ¯
+	m_TreasureDBModule.ResetParameter();
+	m_TreasureDBModule.AddParameter(TEXT("dwUserID"), pDbReq->dwUserID);
+	m_TreasureDBModule.AddParameter(TEXT("dwClubID"), pDbReq->dwClubID);
+	m_TreasureDBModule.AddParameter(TEXT("tmQueryStartData"), pDbReq->tmQueryStartData);
+	m_TreasureDBModule.AddParameter(TEXT("byMask"), pDbReq->byMask);
+	//m_TreasureDBModule.AddParameter(TEXT("tmQueryEndData"), pDbReq->tmQueryEndData);
 
-	//Ö´ĞĞ²éÑ¯,Ö´ĞĞ³é½±
-	LONG lResultCode = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_RECORD_LIST"), true);
+	//æ‰§è¡ŒæŸ¥è¯¢,æ‰§è¡ŒæŠ½å¥–
+	LONG lResultCode = m_TreasureDBModule.ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_RECORD_LIST"), true);
 
-	//ÁĞ±í·¢ËÍ
+	//åˆ—è¡¨å‘é€
 	WORD wPacketSize=0;
 	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
 	wPacketSize=0;
@@ -1223,16 +1223,16 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_RECORD_LIST(DWORD dwContextID, 
 
 	while ((lResultCode == DB_SUCCESS) && (m_TreasureDBModule->IsRecordsetEnd()==false))
 	{
-		//·¢ËÍĞÅÏ¢
+		//å‘é€ä¿¡æ¯
 		if ((wPacketSize+sizeof(STR_CMD_LC_SERVICE_PURE_RECORD_LIST))>sizeof(cbBuffer))
 		{
 			g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_PURE_RECORD_LIST,dwContextID,cbBuffer,wPacketSize);
 			wPacketSize=0;
 		}
-		//¶ÁÈ¡ĞÅÏ¢
+		//è¯»å–ä¿¡æ¯
 		pDBO=(STR_CMD_LC_SERVICE_PURE_RECORD_LIST *)(cbBuffer+wPacketSize);
-		BYTE gameMode = m_TreasureDBAide.GetValue_BYTE(TEXT("ModeID"));
-		//0·¿¿¨ 1¾º¼¼  2½ğ±Ò  3·¿¿¨½ğ±Ò
+		BYTE gameMode = m_TreasureDBModule.GetValue_BYTE(TEXT("ModeID"));
+		//0æˆ¿å¡ 1ç«æŠ€  2é‡‘å¸  3æˆ¿å¡é‡‘å¸
 		if(0 == gameMode)
 		{
 			pDBO->byMask = 1;
@@ -1242,12 +1242,12 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_RECORD_LIST(DWORD dwContextID, 
 			pDBO->byMask = 2;
 		}
 
-		pDBO->dwDrawID = m_TreasureDBAide.GetValue_DWORD(TEXT("DrawID"));
-		m_TreasureDBAide.GetValue_String(TEXT("KindName"),pDBO->szKindName,CountArray(pDBO->szKindName));
-		pDBO->dwTableID=m_TreasureDBAide.GetValue_DWORD(TEXT("TableID"));
+		pDBO->dwDrawID = m_TreasureDBModule.GetValue_DWORD(TEXT("DrawID"));
+		m_TreasureDBModule.GetValue_String(TEXT("KindName"),pDBO->szKindName,CountArray(pDBO->szKindName));
+		pDBO->dwTableID=m_TreasureDBModule.GetValue_DWORD(TEXT("TableID"));
 		SYSTEMTIME timeStartTime,tiemEndTime;
-		m_TreasureDBAide.GetValue_SystemTime(TEXT("StartTime"), timeStartTime);
-		m_TreasureDBAide.GetValue_SystemTime(TEXT("EndTime"), tiemEndTime);
+		m_TreasureDBModule.GetValue_SystemTime(TEXT("StartTime"), timeStartTime);
+		m_TreasureDBModule.GetValue_SystemTime(TEXT("EndTime"), tiemEndTime);
 
 		CString temp;
 		temp.Format(TEXT("%d/%d/%d %d:%d:%d - %d:%d:%d"),
@@ -1258,28 +1258,28 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_RECORD_LIST(DWORD dwContextID, 
 
 		memcpy(pDBO->szTime, temp, sizeof(TCHAR)*128);
 
-		//ÉèÖÃÎ»ÒÆ
+		//è®¾ç½®ä½ç§»
 		wPacketSize+=sizeof(STR_CMD_LC_SERVICE_PURE_RECORD_LIST);
 
-		//ÒÆ¶¯¼ÇÂ¼
+		//ç§»åŠ¨è®°å½•
 		m_TreasureDBModule->MoveToNext();
 	}
 	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_PURE_RECORD_LIST,dwContextID,cbBuffer,wPacketSize);
 
 #pragma endregion
 
-#pragma region ´ó¾ÖÉÏµÄÍæ¼ÒĞÅÏ¢
-	m_TreasureDBAide.ResetParameter();
-	m_TreasureDBAide.AddParameter(TEXT("dwUserID"), pDbReq->dwUserID);
-	m_TreasureDBAide.AddParameter(TEXT("dwClubID"), pDbReq->dwClubID);
-	m_TreasureDBAide.AddParameter(TEXT("tmQueryStartData"), pDbReq->tmQueryStartData);
-	m_TreasureDBAide.AddParameter(TEXT("byMask"), pDbReq->byMask);
-	//m_TreasureDBAide.AddParameter(TEXT("tmQueryEndData"), pDbReq->tmQueryEndData);
+#pragma region å¤§å±€ä¸Šçš„ç©å®¶ä¿¡æ¯
+	m_TreasureDBModule.ResetParameter();
+	m_TreasureDBModule.AddParameter(TEXT("dwUserID"), pDbReq->dwUserID);
+	m_TreasureDBModule.AddParameter(TEXT("dwClubID"), pDbReq->dwClubID);
+	m_TreasureDBModule.AddParameter(TEXT("tmQueryStartData"), pDbReq->tmQueryStartData);
+	m_TreasureDBModule.AddParameter(TEXT("byMask"), pDbReq->byMask);
+	//m_TreasureDBModule.AddParameter(TEXT("tmQueryEndData"), pDbReq->tmQueryEndData);
 
-	//Ö´ĞĞ²éÑ¯,Ö´ĞĞ³é½±
-	LONG lResultCode2 = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_RECORD_LIST_PLAYINFO"), true);
+	//æ‰§è¡ŒæŸ¥è¯¢,æ‰§è¡ŒæŠ½å¥–
+	LONG lResultCode2 = m_TreasureDBModule.ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_RECORD_LIST_PLAYINFO"), true);
 
-	//ÁĞ±í·¢ËÍ
+	//åˆ—è¡¨å‘é€
 	WORD wPacketSize2=0;
 	BYTE cbBuffer2[MAX_ASYNCHRONISM_DATA/10];
 	wPacketSize2=0;
@@ -1287,31 +1287,31 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_RECORD_LIST(DWORD dwContextID, 
 
 	while ((lResultCode2 == DB_SUCCESS ) && (m_TreasureDBModule->IsRecordsetEnd()==false))
 	{
-		//·¢ËÍĞÅÏ¢
+		//å‘é€ä¿¡æ¯
 		if ((wPacketSize2+sizeof(STR_CMD_LC_SERVICE_PURE_RECORD_LIST_PLAYERINFO))>sizeof(cbBuffer2))
 		{
 			g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_PURE_RECORD_LIST_PINFO,dwContextID,cbBuffer2,wPacketSize2);
 			wPacketSize2=0;
 		}
-		//¶ÁÈ¡ĞÅÏ¢
+		//è¯»å–ä¿¡æ¯
 		pDBO2=(STR_CMD_LC_SERVICE_PURE_RECORD_LIST_PLAYERINFO*)(cbBuffer2+wPacketSize2);
-		pDBO2->dwDrawID = m_TreasureDBAide.GetValue_DWORD(TEXT("DrawID"));
-		pDBO2->dwUserID = m_TreasureDBAide.GetValue_DWORD(TEXT("UserID"));
-		m_TreasureDBAide.GetValue_String(TEXT("NickName"),pDBO2->szNickName,CountArray(pDBO2->szNickName));
-		m_TreasureDBAide.GetValue_String(TEXT("HeadUrl"),pDBO2->szHeadUrl,CountArray(pDBO2->szHeadUrl));
-		pDBO2->lScore=m_TreasureDBAide.GetValue_LONGLONG(TEXT("Score"));
+		pDBO2->dwDrawID = m_TreasureDBModule.GetValue_DWORD(TEXT("DrawID"));
+		pDBO2->dwUserID = m_TreasureDBModule.GetValue_DWORD(TEXT("UserID"));
+		m_TreasureDBModule.GetValue_String(TEXT("NickName"),pDBO2->szNickName,CountArray(pDBO2->szNickName));
+		m_TreasureDBModule.GetValue_String(TEXT("HeadUrl"),pDBO2->szHeadUrl,CountArray(pDBO2->szHeadUrl));
+		pDBO2->lScore=m_TreasureDBModule.GetValue_LONGLONG(TEXT("Score"));
 
-		//ÉèÖÃÎ»ÒÆ
+		//è®¾ç½®ä½ç§»
 		wPacketSize2+=sizeof(STR_CMD_LC_SERVICE_PURE_RECORD_LIST_PLAYERINFO);
 
-		//ÒÆ¶¯¼ÇÂ¼
+		//ç§»åŠ¨è®°å½•
 		m_TreasureDBModule->MoveToNext();
 	}
 	if (wPacketSize2>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_PURE_RECORD_LIST_PINFO,dwContextID,cbBuffer2,wPacketSize2);
 
 #pragma endregion
 
-#pragma region ´ó¾ÖĞÅÏ¢½áÊø
+#pragma region å¤§å±€ä¿¡æ¯ç»“æŸ
 	STR_CMD_LC_SERVICE_PURE_RECORD_LIST_FINIST DBOFinish;
 	DBOFinish.byMask = 1;
 
@@ -1322,7 +1322,7 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_RECORD_LIST(DWORD dwContextID, 
 
 }
 
-//pure´óÌü Ğ¡¾ÖÕ½¼¨ 
+//pureå¤§å… å°å±€æˆ˜ç»© 
 bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_XJ_RECORD_LIST(DWORD dwContextID, void * pData, WORD wDataSize)
 {
 	if (sizeof(STR_SUB_CL_SERVICE_PURE_XJ_RECORD_LIST) != wDataSize)
@@ -1332,14 +1332,14 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_XJ_RECORD_LIST(DWORD dwContextI
 
 	STR_SUB_CL_SERVICE_PURE_XJ_RECORD_LIST* pDbReq = (STR_SUB_CL_SERVICE_PURE_XJ_RECORD_LIST*)pData;
 
-#pragma region Ğ¡¾ÖĞÅÏ¢
-	m_TreasureDBAide.ResetParameter();
-	m_TreasureDBAide.AddParameter(TEXT("dwDrawID"), pDbReq->dwDrawID);
+#pragma region å°å±€ä¿¡æ¯
+	m_TreasureDBModule.ResetParameter();
+	m_TreasureDBModule.AddParameter(TEXT("dwDrawID"), pDbReq->dwDrawID);
 
-	//Ö´ĞĞ²éÑ¯
-	LONG lResultCode = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_XJ_RECORD_LIST"), true);
+	//æ‰§è¡ŒæŸ¥è¯¢
+	LONG lResultCode = m_TreasureDBModule.ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_XJ_RECORD_LIST"), true);
 
-	//ÁĞ±í·¢ËÍ
+	//åˆ—è¡¨å‘é€
 	WORD wPacketSize=0;
 	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
 	wPacketSize=0;
@@ -1349,35 +1349,35 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_XJ_RECORD_LIST(DWORD dwContextI
 	{
 		while (m_TreasureDBModule->IsRecordsetEnd()==false)
 		{
-			//·¢ËÍĞÅÏ¢
+			//å‘é€ä¿¡æ¯
 			if ((wPacketSize+sizeof(STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST))>sizeof(cbBuffer))
 			{
 				g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_PURE_XJ_RECORD_LIST,dwContextID,cbBuffer,wPacketSize);
 				wPacketSize=0;
 			}
-			//¶ÁÈ¡ĞÅÏ¢
+			//è¯»å–ä¿¡æ¯
 			pDBO=(STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST *)(cbBuffer+wPacketSize);
-			pDBO->bRoundCount = m_TreasureDBAide.GetValue_BYTE(TEXT("RoundCount"));
-			pDBO->dwRecordID = m_TreasureDBAide.GetValue_DWORD(TEXT("RoundID"));
+			pDBO->bRoundCount = m_TreasureDBModule.GetValue_BYTE(TEXT("RoundCount"));
+			pDBO->dwRecordID = m_TreasureDBModule.GetValue_DWORD(TEXT("RoundID"));
 
-			//ÉèÖÃÎ»ÒÆ
+			//è®¾ç½®ä½ç§»
 			wPacketSize+=sizeof(STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST);
 
-			//ÒÆ¶¯¼ÇÂ¼
+			//ç§»åŠ¨è®°å½•
 			m_TreasureDBModule->MoveToNext();
 		}
 		if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_PURE_XJ_RECORD_LIST,dwContextID,cbBuffer,wPacketSize);
 	}
 #pragma endregion
 
-#pragma region Ğ¡¾ÖÉÏµÄÍæ¼ÒĞÅÏ¢
-	m_TreasureDBAide.ResetParameter();
-	m_TreasureDBAide.AddParameter(TEXT("dwDrawID"), pDbReq->dwDrawID);
+#pragma region å°å±€ä¸Šçš„ç©å®¶ä¿¡æ¯
+	m_TreasureDBModule.ResetParameter();
+	m_TreasureDBModule.AddParameter(TEXT("dwDrawID"), pDbReq->dwDrawID);
 
-	//Ö´ĞĞ²éÑ¯,Ö´ĞĞ³é½±
-	LONG lResultCode2 = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_XJ_RECORD_LIST_PLAYINFO"), true);
+	//æ‰§è¡ŒæŸ¥è¯¢,æ‰§è¡ŒæŠ½å¥–
+	LONG lResultCode2 = m_TreasureDBModule.ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_XJ_RECORD_LIST_PLAYINFO"), true);
 
-	//ÁĞ±í·¢ËÍ
+	//åˆ—è¡¨å‘é€
 	WORD wPacketSize2=0;
 	BYTE cbBuffer2[MAX_ASYNCHRONISM_DATA/10];
 	STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_PLAYERINFO * pDBO2=NULL;
@@ -1386,30 +1386,30 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_XJ_RECORD_LIST(DWORD dwContextI
 	{
 		while (m_TreasureDBModule->IsRecordsetEnd()==false)
 		{
-			//·¢ËÍĞÅÏ¢
+			//å‘é€ä¿¡æ¯
 			if ((wPacketSize2+sizeof(STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_PLAYERINFO))>sizeof(cbBuffer2))
 			{
 				g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_PURE_XJ_RECORD_LIST_PINFO,dwContextID,cbBuffer2,static_cast<WORD>(wPacketSize2));
 				wPacketSize2=0;
 			}
-			//¶ÁÈ¡ĞÅÏ¢
+			//è¯»å–ä¿¡æ¯
 			pDBO2=(STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_PLAYERINFO*)(cbBuffer2+wPacketSize2);
-			pDBO2->bRoundCount = m_TreasureDBAide.GetValue_BYTE(TEXT("RoundCount"));
-			pDBO2->dwUserID = m_TreasureDBAide.GetValue_DWORD(TEXT("UserID"));
-			m_TreasureDBAide.GetValue_String(TEXT("NickName"),pDBO2->szNickName,CountArray(pDBO2->szNickName));
-			pDBO2->lScore=m_TreasureDBAide.GetValue_LONGLONG(TEXT("Score"));
+			pDBO2->bRoundCount = m_TreasureDBModule.GetValue_BYTE(TEXT("RoundCount"));
+			pDBO2->dwUserID = m_TreasureDBModule.GetValue_DWORD(TEXT("UserID"));
+			m_TreasureDBModule.GetValue_String(TEXT("NickName"),pDBO2->szNickName,CountArray(pDBO2->szNickName));
+			pDBO2->lScore=m_TreasureDBModule.GetValue_LONGLONG(TEXT("Score"));
 
-			//ÉèÖÃÎ»ÒÆ
+			//è®¾ç½®ä½ç§»
 			wPacketSize2+=sizeof(STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_PLAYERINFO);
 
-			//ÒÆ¶¯¼ÇÂ¼
+			//ç§»åŠ¨è®°å½•
 			m_TreasureDBModule->MoveToNext();
 		}
 		if (wPacketSize2>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_PURE_XJ_RECORD_LIST_PINFO,dwContextID,cbBuffer2,wPacketSize2);
 	}
 #pragma endregion
 
-#pragma region Ğ¡¾ÖĞÅÏ¢½áÊø
+#pragma region å°å±€ä¿¡æ¯ç»“æŸ
 	STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_FINISH DBOFinish;
 	DBOFinish.byMask = 1;
 
@@ -1420,7 +1420,7 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_XJ_RECORD_LIST(DWORD dwContextI
 	return true;
 }
 
-//Ğ¡¾ÖÂ¼Ïñ»Ø·Å
+//å°å±€å½•åƒå›æ”¾
 bool CDataBaseEngineSink::On_DBR_CL_Service_XJRecordPlayback(DWORD dwContextID, void * pData, WORD wDataSize)
 {
 	if (sizeof(STR_DBR_CL_SERVICE_XJ_RECORD_PLAYBACK) != wDataSize)
@@ -1430,33 +1430,33 @@ bool CDataBaseEngineSink::On_DBR_CL_Service_XJRecordPlayback(DWORD dwContextID, 
 
 	STR_DBR_CL_SERVICE_XJ_RECORD_PLAYBACK* pDbReq = (STR_DBR_CL_SERVICE_XJ_RECORD_PLAYBACK*)pData;
 
-	//ÊäÈë²ÎÊı
-	m_TreasureDBAide.ResetParameter();
-	m_TreasureDBAide.AddParameter(TEXT("@dwRoundID"), pDbReq->dwRecordID);
+	//è¾“å…¥å‚æ•°
+	m_TreasureDBModule.ResetParameter();
+	m_TreasureDBModule.AddParameter(TEXT("@dwRoundID"), pDbReq->dwRecordID);
 
-	//Êä³ö±äÁ¿
+	//è¾“å‡ºå˜é‡
 	WCHAR szDescribe[128] = L"";
-	m_TreasureDBAide.AddParameterOutput(TEXT("@strErrorDescribe"), szDescribe, sizeof(szDescribe), adParamOutput);
+	m_TreasureDBModule.AddParameterOutput(TEXT("@strErrorDescribe"), szDescribe, sizeof(szDescribe), adParamOutput);
 
-	//Ö´ĞĞ²éÑ¯
-	LONG lResultCode = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CL_GETVIDEORECORD"), true);
+	//æ‰§è¡ŒæŸ¥è¯¢
+	LONG lResultCode = m_TreasureDBModule.ExecuteProcess(TEXT("GSP_CL_GETVIDEORECORD"), true);
 	if (lResultCode == DB_SUCCESS)
 	{
-		//½á¹û´¦Àí
+		//ç»“æœå¤„ç†
 		CDBVarValue DBVarValue;
 		m_TreasureDBModule->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
-		//¹¹ÔìDBOÊı¾İ
+		//æ„é€ DBOæ•°æ®
 		STR_DBO_LC_SERVICE_XJ_RECORD_PLAYBACK DBO;
 		ZeroMemory(&DBO, sizeof(STR_DBO_LC_SERVICE_XJ_RECORD_PLAYBACK));
 
-		//»ñÈ¡Â¼ÏñÊı¾İ
+		//è·å–å½•åƒæ•°æ®
 		TCHAR szData[2*LEN_MAX_RECORD_SIZE];
-		m_TreasureDBAide.GetValue_String(TEXT("VideoData"), szData, CountArray(szData));
+		m_TreasureDBModule.GetValue_String(TEXT("VideoData"), szData, CountArray(szData));
 		StrToBin(szData, DBO.cbRecordData, 0, LEN_MAX_RECORD_SIZE*2-1);
 
-		DBO.dwDataSize = m_TreasureDBAide.GetValue_DWORD(TEXT("VideoSize"));
-		DBO.wCurrentCount =  m_TreasureDBAide.GetValue_WORD(TEXT("CurrentRound"));
+		DBO.dwDataSize = m_TreasureDBModule.GetValue_DWORD(TEXT("VideoSize"));
+		DBO.wCurrentCount =  m_TreasureDBModule.GetValue_WORD(TEXT("CurrentRound"));
 
 		g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_XJ_RECORD_PLAYBACK, dwContextID, &DBO, sizeof(STR_DBO_LC_SERVICE_XJ_RECORD_PLAYBACK));
 
@@ -1466,7 +1466,7 @@ bool CDataBaseEngineSink::On_DBR_CL_Service_XJRecordPlayback(DWORD dwContextID, 
 	return true;
 }
 
-//¿Í·şÏûÏ¢
+//å®¢æœæ¶ˆæ¯
 bool CDataBaseEngineSink::On_DBR_CL_SERVICE_CUSTOMER_MESSEGE(DWORD dwContextID, void * pData, WORD wDataSize)
 {
 
@@ -1477,22 +1477,22 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_CUSTOMER_MESSEGE(DWORD dwContextID, 
 
 	STR_DBR_CL_SERVICE_CUSTOMER_MESSEGE* pDbReq = (STR_DBR_CL_SERVICE_CUSTOMER_MESSEGE*)pData;
 
-	//ÊäÈë²ÎÊı
-	m_PlatformDBAide.ResetParameter();
-	m_PlatformDBAide.AddParameter(TEXT("@FirmID"), _MYSTERY);
-	m_PlatformDBAide.AddParameter(TEXT("@MessageType"), pDbReq->cbMessegeFlag);
+	//è¾“å…¥å‚æ•°
+	m_PlatformDBModule.ResetParameter();
+	m_PlatformDBModule.AddParameter(TEXT("@FirmID"), _MYSTERY);
+	m_PlatformDBModule.AddParameter(TEXT("@MessageType"), pDbReq->cbMessegeFlag);
 
-	//Ö´ĞĞ²éÑ¯
-	LONG lResultCode = m_PlatformDBAide.ExecuteProcess(TEXT("GSP_GP_GET_SERVICE_MESSAGE"), true);
+	//æ‰§è¡ŒæŸ¥è¯¢
+	LONG lResultCode = m_PlatformDBModule.ExecuteProcess(TEXT("GSP_GP_GET_SERVICE_MESSAGE"), true);
 	if (lResultCode == DB_SUCCESS)
 	{
-		//¹¹ÔìDBOÊı¾İ
+		//æ„é€ DBOæ•°æ®
 		STR_DBO_LC_SERVICE_CUSTOMER_MESSEGE DBO;
 		ZeroMemory(&DBO, sizeof(STR_DBO_LC_SERVICE_CUSTOMER_MESSEGE));
 
-		//»ñÈ¡Â¼ÏñÊı¾İ
-		m_PlatformDBAide.GetValue_String(TEXT("MessageText"), DBO.szMessege, CountArray(DBO.szMessege));
-		DBO.cbMessegeFlag = m_PlatformDBAide.GetValue_BYTE(TEXT("MessageType"));
+		//è·å–å½•åƒæ•°æ®
+		m_PlatformDBModule.GetValue_String(TEXT("MessageText"), DBO.szMessege, CountArray(DBO.szMessege));
+		DBO.cbMessegeFlag = m_PlatformDBModule.GetValue_BYTE(TEXT("MessageType"));
 
 		g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_CUSTOMER_MESSEGE, dwContextID, &DBO, sizeof(STR_DBO_LC_SERVICE_CUSTOMER_MESSEGE));
 	}
@@ -1501,7 +1501,7 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_CUSTOMER_MESSEGE(DWORD dwContextID, 
 	return true;
 }
 
-//ÇëÇó½ğ±Ò´óÌüĞÅÏ¢ 
+//è¯·æ±‚é‡‘å¸å¤§å…ä¿¡æ¯ 
 bool CDataBaseEngineSink::On_DBR_CL_SERVICE_GOLD_INFO(DWORD dwContextID, void * pData, WORD wDataSize)
 {
 	if (sizeof(STR_SUB_CL_SERVICE_GOLD_INFO) != wDataSize)
@@ -1511,17 +1511,17 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_GOLD_INFO(DWORD dwContextID, void * 
 
 	STR_SUB_CL_SERVICE_GOLD_INFO* pDbReq = (STR_SUB_CL_SERVICE_GOLD_INFO*)pData;
 
-#pragma region ÇëÇó½ğ±Ò´óÌüĞÅÏ¢
-	m_TreasureDBAide.ResetParameter();
-	m_TreasureDBAide.AddParameter(TEXT("dwUserID"), pDbReq->dwUserID);
-	m_TreasureDBAide.AddParameter(TEXT("dwModID"), pDbReq->dwModID);
-	m_TreasureDBAide.AddParameter(TEXT("dwKindID"), pDbReq->dwKindID);
-	m_TreasureDBAide.AddParameter(TEXT("mystery"), _MYSTERY);
+#pragma region è¯·æ±‚é‡‘å¸å¤§å…ä¿¡æ¯
+	m_TreasureDBModule.ResetParameter();
+	m_TreasureDBModule.AddParameter(TEXT("dwUserID"), pDbReq->dwUserID);
+	m_TreasureDBModule.AddParameter(TEXT("dwModID"), pDbReq->dwModID);
+	m_TreasureDBModule.AddParameter(TEXT("dwKindID"), pDbReq->dwKindID);
+	m_TreasureDBModule.AddParameter(TEXT("mystery"), _MYSTERY);
 
-	//Ö´ĞĞ²éÑ¯
-	LONG lResultCode = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CL_SERVICE_GOLD_INFO"), true);
+	//æ‰§è¡ŒæŸ¥è¯¢
+	LONG lResultCode = m_TreasureDBModule.ExecuteProcess(TEXT("GSP_CL_SERVICE_GOLD_INFO"), true);
 
-	//ÁĞ±í·¢ËÍ
+	//åˆ—è¡¨å‘é€
 	WORD wPacketSize=0;
 	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
 	wPacketSize=0;
@@ -1529,30 +1529,30 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_GOLD_INFO(DWORD dwContextID, void * 
 
 	while ((lResultCode == DB_SUCCESS) && m_TreasureDBModule->IsRecordsetEnd()==false)
 	{
-		//·¢ËÍĞÅÏ¢
+		//å‘é€ä¿¡æ¯
 		if ((wPacketSize+sizeof(STR_CMD_LC_SERVICE_GOLD_INFO))>sizeof(cbBuffer))
 		{
 			g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_GOLD_INFO,dwContextID,cbBuffer,wPacketSize);
 			wPacketSize=0;
 		}
-		//¶ÁÈ¡ĞÅÏ¢
+		//è¯»å–ä¿¡æ¯
 		pDBO=(STR_CMD_LC_SERVICE_GOLD_INFO *)(cbBuffer+wPacketSize);
-		pDBO->byGoldMod = m_TreasureDBAide.GetValue_BYTE(TEXT("GoldMod"));
-		pDBO->dwScore = m_TreasureDBAide.GetValue_DWORD(TEXT("GoldScore"));
-		pDBO->dwGold = m_TreasureDBAide.GetValue_DWORD(TEXT("Gold"));
-		pDBO->dwServiceGold = m_TreasureDBAide.GetValue_DWORD(TEXT("ServiceGold"));
+		pDBO->byGoldMod = m_TreasureDBModule.GetValue_BYTE(TEXT("GoldMod"));
+		pDBO->dwScore = m_TreasureDBModule.GetValue_DWORD(TEXT("GoldScore"));
+		pDBO->dwGold = m_TreasureDBModule.GetValue_DWORD(TEXT("Gold"));
+		pDBO->dwServiceGold = m_TreasureDBModule.GetValue_DWORD(TEXT("ServiceGold"));
 
-		//ÉèÖÃÎ»ÒÆ
+		//è®¾ç½®ä½ç§»
 		wPacketSize+=sizeof(STR_CMD_LC_SERVICE_GOLD_INFO);
 
-		//ÒÆ¶¯¼ÇÂ¼
+		//ç§»åŠ¨è®°å½•
 		m_TreasureDBModule->MoveToNext();
 	}
 	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_GOLD_INFO,dwContextID,cbBuffer,wPacketSize);
 
 #pragma endregion
 
-#pragma region ÇëÇó½ğ±Ò´óÌüĞÅÏ¢ ½áÊø
+#pragma region è¯·æ±‚é‡‘å¸å¤§å…ä¿¡æ¯ ç»“æŸ
 	STR_CMD_LC_SERVICE_GOLD_INFO_FINISH DBOFinish;
 	DBOFinish.byMask = 1;
 
@@ -1564,7 +1564,7 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_GOLD_INFO(DWORD dwContextID, void * 
 }
 
 
-//ĞŞ¸Ä¸öÈË×ÊÁÏ
+//ä¿®æ”¹ä¸ªäººèµ„æ–™
 bool CDataBaseEngineSink::On_DBR_Service_ModifyPersonalInfo(DWORD dwContextID, void * pData, WORD wDataSize)
 {
 
@@ -1575,91 +1575,91 @@ bool CDataBaseEngineSink::On_DBR_Service_ModifyPersonalInfo(DWORD dwContextID, v
 
 	STR_SUB_CL_SERVICE_MODIFY_PERSONAL_INFO* pDbReq = (STR_SUB_CL_SERVICE_MODIFY_PERSONAL_INFO*)pData;
 
-	//ÊäÈë²ÎÊı
-	m_AccountsDBAide.ResetParameter();
-	m_AccountsDBAide.AddParameter(TEXT("@UserID"), pDbReq->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("@OldLogonPassword"), pDbReq->szOldLogonPassword);
-	m_AccountsDBAide.AddParameter(TEXT("@NewLogonPassword"), pDbReq->szNewLogonPassword);		
-	m_AccountsDBAide.AddParameter(TEXT("@NickName"), pDbReq->szNickName);
-	m_AccountsDBAide.AddParameter(TEXT("@Gender"), pDbReq->cbGender);
-	m_AccountsDBAide.AddParameter(TEXT("@HeadImageUrl"), pDbReq->szHeadImageUrl);
-	m_AccountsDBAide.AddParameter(TEXT("@Signature"), pDbReq->szSignature);
-	m_AccountsDBAide.AddParameter(TEXT("@RealName"), pDbReq->szRealName);
-	m_AccountsDBAide.AddParameter(TEXT("@IDCardNum"), pDbReq->szIDCardNum);
-	m_AccountsDBAide.AddParameter(TEXT("@PhoneNum"), pDbReq->szPhoneNum);
-	m_AccountsDBAide.AddParameter(TEXT("@ProxyUserID"), pDbReq->dwProxyUserID);		//TODO ´úÀíIDÔÚÊı¾İ¿âÖĞÔİÊ±Î´Ôö¼Ó£¬ºóÃæÔö¼Ó
+	//è¾“å…¥å‚æ•°
+	m_AccountsDBModule.ResetParameter();
+	m_AccountsDBModule.AddParameter(TEXT("@UserID"), pDbReq->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("@OldLogonPassword"), pDbReq->szOldLogonPassword);
+	m_AccountsDBModule.AddParameter(TEXT("@NewLogonPassword"), pDbReq->szNewLogonPassword);		
+	m_AccountsDBModule.AddParameter(TEXT("@NickName"), pDbReq->szNickName);
+	m_AccountsDBModule.AddParameter(TEXT("@Gender"), pDbReq->cbGender);
+	m_AccountsDBModule.AddParameter(TEXT("@HeadImageUrl"), pDbReq->szHeadImageUrl);
+	m_AccountsDBModule.AddParameter(TEXT("@Signature"), pDbReq->szSignature);
+	m_AccountsDBModule.AddParameter(TEXT("@RealName"), pDbReq->szRealName);
+	m_AccountsDBModule.AddParameter(TEXT("@IDCardNum"), pDbReq->szIDCardNum);
+	m_AccountsDBModule.AddParameter(TEXT("@PhoneNum"), pDbReq->szPhoneNum);
+	m_AccountsDBModule.AddParameter(TEXT("@ProxyUserID"), pDbReq->dwProxyUserID);		//TODO ä»£ç†IDåœ¨æ•°æ®åº“ä¸­æš‚æ—¶æœªå¢åŠ ï¼Œåé¢å¢åŠ 
 
-	//Êä³ö±äÁ¿
+	//è¾“å‡ºå˜é‡
 	WCHAR szDescribe[128] = L"";
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"), szDescribe, sizeof(szDescribe), adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"), szDescribe, sizeof(szDescribe), adParamOutput);
 
-	//Ö´ĞĞ²éÑ¯
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_Service_ModifyPersonalInfo"), true);
+	//æ‰§è¡ŒæŸ¥è¯¢
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_Service_ModifyPersonalInfo"), true);
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
 	m_AccountsDBModule->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
-	//´¦Àí
+	//å¤„ç†
 	On_DBO_Service_ModifyPersonalInfo(dwContextID, lResultCode, CW2CT(DBVarValue.bstrVal));
 
 
 	return true;
 }
 
-//ĞŞ¸Ä¸öÈË×ÊÁÏ·µ»Ø
+//ä¿®æ”¹ä¸ªäººèµ„æ–™è¿”å›
 bool CDataBaseEngineSink::On_DBO_Service_ModifyPersonalInfo(DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString)
 {
-	//¸öÈËĞÅÏ¢
+	//ä¸ªäººä¿¡æ¯
 	STR_DBO_CL_MODIFY_PERSONL_INFO PersonalInfo;
 	ZeroMemory(&PersonalInfo, sizeof(PersonalInfo));
 
-	//Êı¾İ¸³Öµ
+	//æ•°æ®èµ‹å€¼
 	PersonalInfo.lResultCode = dwErrorCode;
 	lstrcpyn(PersonalInfo.szDescribeString, pszErrorString, CountArray(PersonalInfo.szDescribeString));
 
-	//·¢ËÍ×Ê²ú¸üĞÂÏûÏ¢
+	//å‘é€èµ„äº§æ›´æ–°æ¶ˆæ¯
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_SERVICE_MODIFY_PERSONAL_INFO, dwContextID, &PersonalInfo, sizeof(STR_DBO_CL_MODIFY_PERSONL_INFO));
 
 	return true;
 }
 
-//³äÖµĞÅÏ¢
+//å……å€¼ä¿¡æ¯
 bool CDataBaseEngineSink::On_DBR_Other_RechargeInfo( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	ASSERT(wDataSize==sizeof(STR_DBR_CL_OTHER_RECHARGE_INFO));
 	if (wDataSize!=sizeof(STR_DBR_CL_OTHER_RECHARGE_INFO)) return false;
 
-	//ÇëÇó´¦Àí
+	//è¯·æ±‚å¤„ç†
 	STR_DBR_CL_OTHER_RECHARGE_INFO * pUserRequest=(STR_DBR_CL_OTHER_RECHARGE_INFO *)pData;
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.ResetParameter();
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.ResetParameter();
 
-	//½á¹û´¦Àí
-	LONG lResultCode=m_AccountsDBAide.ExecuteProcess(TEXT("GSP_GP_UserRechangeInfo"),true);
+	//ç»“æœå¤„ç†
+	LONG lResultCode=m_AccountsDBModule.ExecuteProcess(TEXT("GSP_GP_UserRechangeInfo"),true);
 
-	On_DBO_Other_RechargeInfo(dwContextID, lResultCode, TEXT("Êı¾İ¿â´¦Àí³ö´í!"));
+	On_DBO_Other_RechargeInfo(dwContextID, lResultCode, TEXT("æ•°æ®åº“å¤„ç†å‡ºé”™!"));
 
 
 	return true;
 }
 
-//³äÖµĞÅÏ¢·µ»Ø
+//å……å€¼ä¿¡æ¯è¿”å›
 bool CDataBaseEngineSink::On_DBO_Other_RechargeInfo(DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString)
 {
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	if (dwErrorCode == DB_SUCCESS)
 	{
-		//¹¹ÔìÊı¾İ
+		//æ„é€ æ•°æ®
 		STR_DBO_CL_OTHER_RECHARGE_INFO RechangeInfo;
 		ZeroMemory( &RechangeInfo, sizeof(RechangeInfo));
 
-		RechangeInfo.dwMinMoney = m_AccountsDBAide.GetValue_LONGLONG(TEXT("MinMoney"));
-		RechangeInfo.dwChangeScale = m_AccountsDBAide.GetValue_UINT(TEXT("ChangeScale"));
+		RechangeInfo.dwMinMoney = m_AccountsDBModule.GetValue_LONGLONG(TEXT("MinMoney"));
+		RechangeInfo.dwChangeScale = m_AccountsDBModule.GetValue_UINT(TEXT("ChangeScale"));
 
-		//·¢ËÍÊı¾İ
+		//å‘é€æ•°æ®
 		g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_USER_RECHARGE_INFO, dwContextID, &RechangeInfo, sizeof(RechangeInfo));
 	}
 	else
@@ -1669,190 +1669,190 @@ bool CDataBaseEngineSink::On_DBO_Other_RechargeInfo(DWORD dwContextID, DWORD dwE
 		wRequestID.MainCommand = MDM_GIFT;
 		wRequestID.SubCommand  = SUB_CL_OTHERS_RECHARGE_INFO;
 
-		//´íÎóĞÅÏ¢
+		//é”™è¯¯ä¿¡æ¯
 		On_DBO_CommonOperateResult(dwContextID, dwErrorCode, pszErrorString,wRequestID);
 	}
 
 	return true;
 }
 
-//¶Ò»»µÀ¾ßĞÅÏ¢
+//å…‘æ¢é“å…·ä¿¡æ¯
 bool CDataBaseEngineSink::On_DBR_Other_ExchangeInfo( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	ASSERT(wDataSize==sizeof(STR_DBR_CL_OTHER_EXCHANGE_INFO));
 	if (wDataSize!=sizeof(STR_DBR_CL_OTHER_EXCHANGE_INFO)) return false;
 
-	//ÇëÇó´¦Àí
+	//è¯·æ±‚å¤„ç†
 	STR_DBR_CL_OTHER_EXCHANGE_INFO * pUserRequest=(STR_DBR_CL_OTHER_EXCHANGE_INFO *)pData;
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.ResetParameter();
-	m_AccountsDBAide.AddParameter(TEXT("@UserID"),pUserRequest->dwUserID);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.ResetParameter();
+	m_AccountsDBModule.AddParameter(TEXT("@UserID"),pUserRequest->dwUserID);
 
-	//½á¹û´¦Àí
-	LONG lResultCode=m_AccountsDBAide.ExecuteProcess(TEXT("GSP_GP_UserExchangeInfo"),true);
+	//ç»“æœå¤„ç†
+	LONG lResultCode=m_AccountsDBModule.ExecuteProcess(TEXT("GSP_GP_UserExchangeInfo"),true);
 
-	On_DBO_Other_ExchangeInfo(dwContextID, lResultCode, TEXT("Êı¾İ¿â´íÎó!"));
+	On_DBO_Other_ExchangeInfo(dwContextID, lResultCode, TEXT("æ•°æ®åº“é”™è¯¯!"));
 
 	return true;
 }
 
-//¶Ò»»µÀ¾ßĞÅÏ¢·µ»Ø
+//å…‘æ¢é“å…·ä¿¡æ¯è¿”å›
 bool CDataBaseEngineSink::On_DBO_Other_ExchangeInfo(DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString)
 {
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	if (dwErrorCode == DB_SUCCESS)
 	{
 		STR_DBO_CL_OTHER_EXCHANGE_INFO ExchangeInfo;
 		ZeroMemory( &ExchangeInfo, sizeof(ExchangeInfo));
 
-		ExchangeInfo.dwMinMoney = m_AccountsDBAide.GetValue_LONGLONG(TEXT("MinMoney"));
-		ExchangeInfo.dwChangeScale = m_AccountsDBAide.GetValue_UINT(TEXT("ChangeScale"));
-		ExchangeInfo.dwBankMoney = m_AccountsDBAide.GetValue_LONGLONG(TEXT("BankMoney"));
-		ExchangeInfo.dwWithdrawals = m_AccountsDBAide.GetValue_LONGLONG(TEXT("Withdrawals"));
+		ExchangeInfo.dwMinMoney = m_AccountsDBModule.GetValue_LONGLONG(TEXT("MinMoney"));
+		ExchangeInfo.dwChangeScale = m_AccountsDBModule.GetValue_UINT(TEXT("ChangeScale"));
+		ExchangeInfo.dwBankMoney = m_AccountsDBModule.GetValue_LONGLONG(TEXT("BankMoney"));
+		ExchangeInfo.dwWithdrawals = m_AccountsDBModule.GetValue_LONGLONG(TEXT("Withdrawals"));
 
-		//·¢ËÍÊı¾İ
+		//å‘é€æ•°æ®
 		g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_USER_EXCHANGE_INFO,dwContextID,&ExchangeInfo,sizeof(ExchangeInfo));
 	}
 	else
 	{
-		//´íÎó´¦Àí
+		//é”™è¯¯å¤„ç†
 		DBR_CommandSource wRequestID ;
 		ZeroMemory(&wRequestID,sizeof(wRequestID));
 		wRequestID.MainCommand = MDM_GIFT;
 		wRequestID.SubCommand  = SUB_CL_OTHERS_EXCHANGE_INFO;
 
-		On_DBO_CommonOperateResult(dwContextID, dwErrorCode, TEXT("Êı¾İ¿â³ö´í!"), wRequestID);
+		On_DBO_CommonOperateResult(dwContextID, dwErrorCode, TEXT("æ•°æ®åº“å‡ºé”™!"), wRequestID);
 	}
 
 	return true;
 }
 
-#pragma region Æô¶¯ÃüÁî
-//¼ÓÔØÁĞ±í
+#pragma region å¯åŠ¨å‘½ä»¤
+//åŠ è½½åˆ—è¡¨
 bool CDataBaseEngineSink::OnRequestLoadGameList(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	WORD wPacketSize=0;
 	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
 
-	//¼ÓÔØÀàĞÍ
-	m_PlatformDBAide.ResetParameter();
+	//åŠ è½½ç±»å‹
+	m_PlatformDBModule.ResetParameter();
 
-	m_PlatformDBAide.ExecuteProcess(TEXT("GSP_GP_LoadGameTypeItem"),true);
+	m_PlatformDBModule.ExecuteProcess(TEXT("GSP_GP_LoadGameTypeItem"),true);
 
-	//·¢ËÍÖÖÀà
+	//å‘é€ç§ç±»
 	wPacketSize=0;
 	tagGameType * pGameType=NULL;
 	while (m_PlatformDBModule->IsRecordsetEnd()==false)
 	{
-		//·¢ËÍĞÅÏ¢
+		//å‘é€ä¿¡æ¯
 		if ((wPacketSize+sizeof(tagGameType))>sizeof(cbBuffer))
 		{
 			g_AttemperEngineSink->OnEventDataBaseResult(DBO_GP_GAME_TYPE_ITEM,dwContextID,cbBuffer,wPacketSize);
 			wPacketSize=0;
 		}
 
-		//¶ÁÈ¡ĞÅÏ¢
+		//è¯»å–ä¿¡æ¯
 		pGameType=(tagGameType *)(cbBuffer+wPacketSize);
-		pGameType->wTypeID=m_PlatformDBAide.GetValue_WORD(TEXT("TypeID"));
-		m_PlatformDBAide.GetValue_String(TEXT("TypeName"),pGameType->szTypeName,CountArray(pGameType->szTypeName));
+		pGameType->wTypeID=m_PlatformDBModule.GetValue_WORD(TEXT("TypeID"));
+		m_PlatformDBModule.GetValue_String(TEXT("TypeName"),pGameType->szTypeName,CountArray(pGameType->szTypeName));
 
-		//ÉèÖÃÎ»ÒÆ
+		//è®¾ç½®ä½ç§»
 		wPacketSize+=sizeof(tagGameType);
 
-		//ÒÆ¶¯¼ÇÂ¼
+		//ç§»åŠ¨è®°å½•
 		m_PlatformDBModule->MoveToNext();
 	}
 	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_GP_GAME_TYPE_ITEM,dwContextID,cbBuffer,wPacketSize);
 
-	//¶ÁÈ¡ÀàĞÍ
-	m_PlatformDBAide.ResetParameter();
+	//è¯»å–ç±»å‹
+	m_PlatformDBModule.ResetParameter();
 
-	m_PlatformDBAide.ExecuteProcess(TEXT("GSP_GP_LoadGameKindItem"),true);
+	m_PlatformDBModule.ExecuteProcess(TEXT("GSP_GP_LoadGameKindItem"),true);
 
-	//·¢ËÍÀàĞÍ
+	//å‘é€ç±»å‹
 	wPacketSize=0;
 	tagGameKind * pGameKind=NULL;
 	while (m_PlatformDBModule->IsRecordsetEnd()==false)
 	{
-		//·¢ËÍĞÅÏ¢
+		//å‘é€ä¿¡æ¯
 		if ((wPacketSize+sizeof(tagGameKind))>sizeof(cbBuffer))
 		{
 			g_AttemperEngineSink->OnEventDataBaseResult(DBO_GP_GAME_KIND_ITEM,dwContextID,cbBuffer,wPacketSize);
 			wPacketSize=0;
 		}
 
-		//¶ÁÈ¡ĞÅÏ¢
+		//è¯»å–ä¿¡æ¯
 		pGameKind=(tagGameKind *)(cbBuffer+wPacketSize);
-		pGameKind->wKindID=m_PlatformDBAide.GetValue_WORD(TEXT("KindID"));
-		pGameKind->wTypeID=m_PlatformDBAide.GetValue_WORD(TEXT("TypeID"));
-		m_PlatformDBAide.GetValue_String(TEXT("KindName"),pGameKind->szKindName,CountArray(pGameKind->szKindName));
+		pGameKind->wKindID=m_PlatformDBModule.GetValue_WORD(TEXT("KindID"));
+		pGameKind->wTypeID=m_PlatformDBModule.GetValue_WORD(TEXT("TypeID"));
+		m_PlatformDBModule.GetValue_String(TEXT("KindName"),pGameKind->szKindName,CountArray(pGameKind->szKindName));
 
-		//ÉèÖÃÎ»ÒÆ
+		//è®¾ç½®ä½ç§»
 		wPacketSize+=sizeof(tagGameKind);
 
-		//ÒÆ¶¯¼ÇÂ¼
+		//ç§»åŠ¨è®°å½•
 		m_PlatformDBModule->MoveToNext();
 	}
 	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_GP_GAME_KIND_ITEM,dwContextID,cbBuffer,wPacketSize);
 
-	//¶ÁÈ¡½Úµã
-	m_PlatformDBAide.ResetParameter();
+	//è¯»å–èŠ‚ç‚¹
+	m_PlatformDBModule.ResetParameter();
 
-	m_PlatformDBAide.ExecuteProcess(TEXT("GSP_GP_LoadGameNodeItem"),true);
+	m_PlatformDBModule.ExecuteProcess(TEXT("GSP_GP_LoadGameNodeItem"),true);
 
-	//·¢ËÍ½Úµã
+	//å‘é€èŠ‚ç‚¹
 	wPacketSize=0;
 	tagGameNode * pGameNode=NULL;
 	while (m_PlatformDBModule->IsRecordsetEnd()==false)
 	{
-		//·¢ËÍĞÅÏ¢
+		//å‘é€ä¿¡æ¯
 		if ((wPacketSize+sizeof(tagGameNode))>sizeof(cbBuffer))
 		{
 			g_AttemperEngineSink->OnEventDataBaseResult(DBO_GP_GAME_NODE_ITEM,dwContextID,cbBuffer,wPacketSize);
 			wPacketSize=0;
 		}
 
-		//¶ÁÈ¡ĞÅÏ¢
+		//è¯»å–ä¿¡æ¯
 		pGameNode=(tagGameNode *)(cbBuffer+wPacketSize);
-		pGameNode->wKindID=m_PlatformDBAide.GetValue_WORD(TEXT("KindID"));
-		pGameNode->wNodeID=m_PlatformDBAide.GetValue_WORD(TEXT("NodeID"));
-		m_PlatformDBAide.GetValue_String(TEXT("NodeName"),pGameNode->szNodeName,CountArray(pGameNode->szNodeName));
+		pGameNode->wKindID=m_PlatformDBModule.GetValue_WORD(TEXT("KindID"));
+		pGameNode->wNodeID=m_PlatformDBModule.GetValue_WORD(TEXT("NodeID"));
+		m_PlatformDBModule.GetValue_String(TEXT("NodeName"),pGameNode->szNodeName,CountArray(pGameNode->szNodeName));
 
-		//ÉèÖÃÎ»ÒÆ
+		//è®¾ç½®ä½ç§»
 		wPacketSize+=sizeof(tagGameNode);
 
-		//ÒÆ¶¯¼ÇÂ¼
+		//ç§»åŠ¨è®°å½•
 		m_PlatformDBModule->MoveToNext();
 	}
 	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_GP_GAME_NODE_ITEM,dwContextID,cbBuffer,wPacketSize);
 
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	DBO_GP_GameListResult GameListResult;
 	ZeroMemory(&GameListResult,sizeof(GameListResult));
 
-	//ÉèÖÃ±äÁ¿
+	//è®¾ç½®å˜é‡
 	GameListResult.cbSuccess=TRUE;
 
-	//·¢ËÍÏûÏ¢
+	//å‘é€æ¶ˆæ¯
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_GP_GAME_LIST_RESULT,dwContextID,&GameListResult,sizeof(GameListResult));
 
 	return true;
 
 }
 
-//ÔÚÏßÍ³¼Æ -- ·¢¸øÊı¾İ¿â
+//åœ¨çº¿ç»Ÿè®¡ -- å‘ç»™æ•°æ®åº“
 bool CDataBaseEngineSink::OnRequestOnLineCountInfo(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
 
 	if (wDataSize != sizeof(DBR_GP_OnLineCountInfo)) return false;
 
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	DBR_GP_OnLineCountInfo * pOnLineCountInfo=(DBR_GP_OnLineCountInfo *)pData;
 
-	//¹¹ÔìĞÅÏ¢
+	//æ„é€ ä¿¡æ¯
 	TCHAR szOnLineCountGame[2048]=TEXT("");
 	for (WORD i=0; i<pOnLineCountInfo->dwGameCount; i++)
 	{
@@ -1864,57 +1864,56 @@ bool CDataBaseEngineSink::OnRequestOnLineCountInfo(DWORD dwContextID, VOID * pDa
 	}
 
 
-	//¹¹Ôì²ÎÊı
-	m_PlatformDBAide.ResetParameter();
-	m_PlatformDBAide.AddParameter(TEXT("@byCompanyID"),_MYSTERY);
-	m_PlatformDBAide.AddParameter(TEXT("@dwGameCount"),pOnLineCountInfo->dwGameCount);
-	m_PlatformDBAide.AddParameter(TEXT("@dwOnLineCountSum"),pOnLineCountInfo->dwOnLineCountSum);
-	m_PlatformDBAide.AddParameter(TEXT("@strOnLineCountGame"),szOnLineCountGame);
+	//æ„é€ å‚æ•°
+	m_PlatformDBModule.ResetParameter();
+	m_PlatformDBModule.AddParameter(TEXT("@byCompanyID"),_MYSTERY);
+	m_PlatformDBModule.AddParameter(TEXT("@dwGameCount"),pOnLineCountInfo->dwGameCount);
+	m_PlatformDBModule.AddParameter(TEXT("@dwOnLineCountSum"),pOnLineCountInfo->dwOnLineCountSum);
+	m_PlatformDBModule.AddParameter(TEXT("@strOnLineCountGame"),szOnLineCountGame);
 
-	//Ö´ĞĞÃüÁî
-	m_PlatformDBAide.ExecuteProcess(TEXT("GSP_GP_OnLineCountInfo"),false);
+	//æ‰§è¡Œå‘½ä»¤
+	m_PlatformDBModule.ExecuteProcess(TEXT("GSP_GP_OnLineCountInfo"),false);
 
 	return true;
 
 }
 
-//¼ÓÔØÅÜÂíµÆÏûÏ¢
+//åŠ è½½è·‘é©¬ç¯æ¶ˆæ¯
 bool CDataBaseEngineSink::On_DBR_UPDATA_MARQUEE(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
+	//æ„é€ å‚æ•°
+	m_PlatformDBModule.ResetParameter();
+	m_PlatformDBModule.AddParameter(TEXT("@byCompanyID"),_MYSTERY);
 
-	//¹¹Ôì²ÎÊı
-	m_PlatformDBAide.ResetParameter();
-	m_PlatformDBAide.AddParameter(TEXT("@byCompanyID"),_MYSTERY);
+	//æ‰§è¡Œå‘½ä»¤
+	long lResultCode = m_PlatformDBModule.ExecuteProcess(TEXT("GSP_GP_UPDATA_MARQUEE"),true);
 
-	//Ö´ĞĞÃüÁî
-	long lResultCode = m_PlatformDBAide.ExecuteProcess(TEXT("GSP_GP_UPDATA_MARQUEE"),true);
-
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	WORD wPacketSize=0;
 	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
 	STR_DBO_UPDATA_MARQUEE * pDbo=NULL;
 	while ((lResultCode == DB_SUCCESS) && (m_PlatformDBModule->IsRecordsetEnd()==false))
 	{
-		//·¢ËÍĞÅÏ¢
+		//å‘é€ä¿¡æ¯
 		if ((wPacketSize+sizeof(STR_DBO_UPDATA_MARQUEE))>sizeof(cbBuffer))
 		{
 			g_AttemperEngineSink->OnEventDataBaseResult(DBO_UPDATA_MARQUEE,dwContextID,cbBuffer,wPacketSize);
 			wPacketSize=0;
 		}
 
-		//¶ÁÈ¡ĞÅÏ¢
+		//è¯»å–ä¿¡æ¯
 		pDbo=(STR_DBO_UPDATA_MARQUEE *)(cbBuffer+wPacketSize);
-		pDbo->byMask  = 1; //ĞÂÔöÊı¾İ
-		pDbo->dwMarqueeID  =  m_PlatformDBAide.GetValue_DWORD(TEXT("MarqueeID"));
-		pDbo->dwMaruqeeTime = m_PlatformDBAide.GetValue_DWORD(TEXT("MaruqeeTime"));
-		m_PlatformDBAide.GetValue_SystemTime(TEXT("StartTime"), pDbo->timeStartTime);
-		m_PlatformDBAide.GetValue_SystemTime(TEXT("EndTime"), pDbo->timeEndTime);
-		m_PlatformDBAide.GetValue_String(TEXT("MarqueeMsg"),pDbo->szMarqueeMsg,CountArray(pDbo->szMarqueeMsg));
+		pDbo->byMask  = 1; //æ–°å¢æ•°æ®
+		pDbo->dwMarqueeID  =  m_PlatformDBModule.GetValue_DWORD(TEXT("MarqueeID"));
+		pDbo->dwMaruqeeTime = m_PlatformDBModule.GetValue_DWORD(TEXT("MaruqeeTime"));
+		m_PlatformDBModule.GetValue_SystemTime(TEXT("StartTime"), pDbo->timeStartTime);
+		m_PlatformDBModule.GetValue_SystemTime(TEXT("EndTime"), pDbo->timeEndTime);
+		m_PlatformDBModule.GetValue_String(TEXT("MarqueeMsg"),pDbo->szMarqueeMsg,CountArray(pDbo->szMarqueeMsg));
 
-		//ÉèÖÃÎ»ÒÆ
+		//è®¾ç½®ä½ç§»
 		wPacketSize+=sizeof(STR_DBO_UPDATA_MARQUEE);
 
-		//ÒÆ¶¯¼ÇÂ¼
+		//ç§»åŠ¨è®°å½•
 		m_PlatformDBModule->MoveToNext();
 	}
 	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_UPDATA_MARQUEE,dwContextID,cbBuffer,wPacketSize);
@@ -1927,83 +1926,82 @@ bool CDataBaseEngineSink::On_DBR_UPDATA_MARQUEE(DWORD dwContextID, VOID * pData,
 
 #pragma endregion
 
-//²éÑ¯ÓÃ»§½ğ±Ò·¿¿¨
+//æŸ¥è¯¢ç”¨æˆ·é‡‘å¸æˆ¿å¡
 bool CDataBaseEngineSink::On_DBR_QueryScoreInfo(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	ASSERT(wDataSize==sizeof(STR_DBR_CL_SERCIVR_QUERY_SCORE_INFO));
 	if (wDataSize!=sizeof(STR_DBR_CL_SERCIVR_QUERY_SCORE_INFO)) return false;
 
-	//ÇëÇó´¦Àí
+	//è¯·æ±‚å¤„ç†
 	STR_DBR_CL_SERCIVR_QUERY_SCORE_INFO * pQueryScoreInfo =(STR_DBR_CL_SERCIVR_QUERY_SCORE_INFO *)pData;
 
-	//¹¹Ôì²ÎÊı
-	m_TreasureDBAide.ResetParameter();
-	m_TreasureDBAide.AddParameter(TEXT("@dwUserID"),pQueryScoreInfo->dwUserID);
+	//æ„é€ å‚æ•°
+	m_TreasureDBModule.ResetParameter();
+	m_TreasureDBModule.AddParameter(TEXT("@dwUserID"),pQueryScoreInfo->dwUserID);
 
-	//Ö´ĞĞ²éÑ¯
-	LONG lResultCode=m_TreasureDBAide.ExecuteProcess(TEXT("GSP_CL_Service_GetUserScoreInfo"),true);
+	//æ‰§è¡ŒæŸ¥è¯¢
+	LONG lResultCode=m_TreasureDBModule.ExecuteProcess(TEXT("GSP_CL_Service_GetUserScoreInfo"),true);
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	On_DBO_QueryScoreInfo(dwContextID,lResultCode,NULL,false);
 
 	return true;
 
 }
 
-//²éÑ¯½ğ±Ò·¿¿¨·µ»Ø
+//æŸ¥è¯¢é‡‘å¸æˆ¿å¡è¿”å›
 VOID CDataBaseEngineSink::On_DBO_QueryScoreInfo(DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString, bool bMobileClient)
 {
-	//¹¹ÔìÊı¾İ
+	//æ„é€ æ•°æ®
 	STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO UserScoreInfo;
 	ZeroMemory(&UserScoreInfo,sizeof(UserScoreInfo));
 
-	//ÃèÊöĞÅÏ¢
+	//æè¿°ä¿¡æ¯
 	UserScoreInfo.lResultCode = dwErrorCode;
 	lstrcpyn(UserScoreInfo.szDescribeString, pszErrorString, CountArray(UserScoreInfo.szDescribeString));
 
 	if (dwErrorCode==DB_SUCCESS)
 	{
-		//¹¹Ôì±äÁ¿
-		UserScoreInfo.dwUserID = m_TreasureDBAide.GetValue_DWORD(TEXT("UserID"));
-		UserScoreInfo.lGold = m_TreasureDBAide.GetValue_LONGLONG(TEXT("Gold"));
-		UserScoreInfo.lOpenRoomCard = m_TreasureDBAide.GetValue_LONGLONG(TEXT("OpenRoomCard"));
-		UserScoreInfo.lDiamond = m_TreasureDBAide.GetValue_LONGLONG(TEXT("Diamond"));
+		//æ„é€ å˜é‡
+		UserScoreInfo.dwUserID = m_TreasureDBModule.GetValue_DWORD(TEXT("UserID"));
+		UserScoreInfo.lGold = m_TreasureDBModule.GetValue_LONGLONG(TEXT("Gold"));
+		UserScoreInfo.lOpenRoomCard = m_TreasureDBModule.GetValue_LONGLONG(TEXT("OpenRoomCard"));
+		UserScoreInfo.lDiamond = m_TreasureDBModule.GetValue_LONGLONG(TEXT("Diamond"));
 
-		//·¢ËÍ½á¹û
+		//å‘é€ç»“æœ
 		g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_USER_QUERY_SCORE_INFO,dwContextID,&UserScoreInfo,sizeof(STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO));
 	}
 	else
 	{
-		//·¢ËÍ½á¹û
+		//å‘é€ç»“æœ
 		g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_USER_QUERY_SCORE_INFO,dwContextID,&UserScoreInfo,sizeof(STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO));
 	}
 
 	return;
 }
 
-//ÓÃ»§SocketÁ¬½Ó¹Ø±Õ
+//ç”¨æˆ·Socketè¿æ¥å…³é—­
 bool CDataBaseEngineSink::On_DBR_GP_QUIT(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
 
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize!=sizeof(DBR_GP_UserQuitInfo)) return false;
 
 	DBR_GP_UserQuitInfo* groupInfo = (DBR_GP_UserQuitInfo*)pData;
-	//¹¹Ôì²ÎÊı
-	m_PlatformDBAide.ResetParameter();
+	//æ„é€ å‚æ•°
+	m_PlatformDBModule.ResetParameter();
 
-	m_PlatformDBAide.AddParameter(TEXT("@dwUserID"),groupInfo->dwUserID);
-	m_PlatformDBAide.AddParameter(TEXT("@byOnlineMask"),groupInfo->byOnlineMask);
+	m_PlatformDBModule.AddParameter(TEXT("@dwUserID"),groupInfo->dwUserID);
+	m_PlatformDBModule.AddParameter(TEXT("@byOnlineMask"),groupInfo->byOnlineMask);
 
-	//Ö´ĞĞÊä³ö
-	m_PlatformDBAide.ExecuteProcess(TEXT("GSP_CL_Quit"),true);	
+	//æ‰§è¡Œè¾“å‡º
+	m_PlatformDBModule.ExecuteProcess(TEXT("GSP_CL_Quit"),true);	
 
 	return true;
 }
 
-//¸üĞÂÅÅĞĞ°ñÓÃ»§ĞÅÏ¢
+//æ›´æ–°æ’è¡Œæ¦œç”¨æˆ·ä¿¡æ¯
 bool CDataBaseEngineSink::OnDBUpdateRankUserItem(DWORD dwContextID, void * pData, WORD wDataSize)
 {
 	if (sizeof(DBR_GP_UserRankItem) < wDataSize)
@@ -2013,21 +2011,21 @@ bool CDataBaseEngineSink::OnDBUpdateRankUserItem(DWORD dwContextID, void * pData
 
 	DBR_GP_UserRankItem* pDbReq = (DBR_GP_UserRankItem*)pData;
 
-	m_AccountsDBAide.ResetParameter();
+	m_AccountsDBModule.ResetParameter();
 
-	m_AccountsDBAide.AddParameter(TEXT("@dwUserID"), pDbReq->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("@wRankNum"), pDbReq->byRankNum);
-	m_AccountsDBAide.AddParameter(TEXT("@wReceived"), pDbReq->byReceived);
-	m_AccountsDBAide.AddParameter(TEXT("@dwCount"), pDbReq->dwCount);
-	m_AccountsDBAide.AddParameter(TEXT("@wIndex"), pDbReq->byIndex);
+	m_AccountsDBModule.AddParameter(TEXT("@dwUserID"), pDbReq->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("@wRankNum"), pDbReq->byRankNum);
+	m_AccountsDBModule.AddParameter(TEXT("@wReceived"), pDbReq->byReceived);
+	m_AccountsDBModule.AddParameter(TEXT("@dwCount"), pDbReq->dwCount);
+	m_AccountsDBModule.AddParameter(TEXT("@wIndex"), pDbReq->byIndex);
 
-	//Êä³ö±äÁ¿
+	//è¾“å‡ºå˜é‡
 	WCHAR szDescribe[128]=L"";
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribe,sizeof(szDescribe),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribe,sizeof(szDescribe),adParamOutput);
 
-	//Ö´ĞĞ²éÑ¯
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_GP_UpdateRankUserItem"), true);
-	//½á¹û´¦Àí
+	//æ‰§è¡ŒæŸ¥è¯¢
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_GP_UpdateRankUserItem"), true);
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
 	m_AccountsDBModule->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
@@ -2040,7 +2038,7 @@ bool CDataBaseEngineSink::OnDBUpdateRankUserItem(DWORD dwContextID, void * pData
 }
 
 
-//»ñÈ¡ÅÅĞĞ°ñĞÅÏ¢
+//è·å–æ’è¡Œæ¦œä¿¡æ¯
 bool CDataBaseEngineSink::OnDBReadRankList(DWORD dwContextID, void * pData, WORD wDataSize)
 {
 	if (sizeof(RankManager) != wDataSize && NULL != pData)
@@ -2049,11 +2047,11 @@ bool CDataBaseEngineSink::OnDBReadRankList(DWORD dwContextID, void * pData, WORD
 	}
 
 	RankManager* pRankManager = (RankManager*)pData;
-	m_AccountsDBAide.ResetParameter();
+	m_AccountsDBModule.ResetParameter();
 	return true;
 }
 
-//ÁìÈ¡ÈÎÎñ½±Àø
+//é¢†å–ä»»åŠ¡å¥–åŠ±
 bool CDataBaseEngineSink::OnReceiveRankReward(DWORD dwContextID, void * pData, WORD wDataSize)
 {
 	if (sizeof(STR_DBR_CL_SERCIVR_GET_RANK_REWARD) < wDataSize)
@@ -2063,37 +2061,37 @@ bool CDataBaseEngineSink::OnReceiveRankReward(DWORD dwContextID, void * pData, W
 
 	STR_DBR_CL_SERCIVR_GET_RANK_REWARD* pDbReq = (STR_DBR_CL_SERCIVR_GET_RANK_REWARD*)pData;
 
-	m_AccountsDBAide.ResetParameter();
+	m_AccountsDBModule.ResetParameter();
 
-	m_AccountsDBAide.AddParameter(TEXT("@dwUserID"), pDbReq->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("@byIndex"), pDbReq->byIndex);
+	m_AccountsDBModule.AddParameter(TEXT("@dwUserID"), pDbReq->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("@byIndex"), pDbReq->byIndex);
 
-	//Êä³ö±äÁ¿
+	//è¾“å‡ºå˜é‡
 	WCHAR szDescribe[128]=L"";
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribe,sizeof(szDescribe),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribe,sizeof(szDescribe),adParamOutput);
 
-	//Ö´ĞĞ²éÑ¯
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_GP_GetRankReward"), true);
-	//½á¹û´¦Àí
+	//æ‰§è¡ŒæŸ¥è¯¢
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_GP_GetRankReward"), true);
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
 	m_AccountsDBModule->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
 	if(lResultCode == DB_SUCCESS)
 	{
-		//»ñÈ¡¸üĞÂÓÃ»§½ğ±Ò·¿¿¨×êÊ¯
+		//è·å–æ›´æ–°ç”¨æˆ·é‡‘å¸æˆ¿å¡é’»çŸ³
 		STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO UserScoreInfo;
 		ZeroMemory(&UserScoreInfo,sizeof(STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO));
 
 		UserScoreInfo.dwUserID = pDbReq->dwUserID;
-		UserScoreInfo.lGold = m_AccountsDBAide.GetValue_LONG(TEXT("@Gold"));
-		UserScoreInfo.lOpenRoomCard = m_AccountsDBAide.GetValue_LONG(TEXT("@OpenRoomCard"));
-		UserScoreInfo.lDiamond = m_AccountsDBAide.GetValue_LONG(TEXT("@Diamond"));
+		UserScoreInfo.lGold = m_AccountsDBModule.GetValue_LONG(TEXT("@Gold"));
+		UserScoreInfo.lOpenRoomCard = m_AccountsDBModule.GetValue_LONG(TEXT("@OpenRoomCard"));
+		UserScoreInfo.lDiamond = m_AccountsDBModule.GetValue_LONG(TEXT("@Diamond"));
 
-		//·¢ËÍ×Ê²ú¸üĞÂÏûÏ¢
+		//å‘é€èµ„äº§æ›´æ–°æ¶ˆæ¯
 		g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_USER_QUERY_SCORE_INFO,dwContextID,&UserScoreInfo,sizeof(STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO));
 	}
 
-	//ÊÕµ½ÈÎÎñ½±Àø
+	//æ”¶åˆ°ä»»åŠ¡å¥–åŠ±
 	STR_DBO_CL_SERCIVR_GET_TASK_REWARD result;
 	ZeroMemory(&result,sizeof(result));
 	result.lResultCode = lResultCode;
@@ -2103,7 +2101,7 @@ bool CDataBaseEngineSink::OnReceiveRankReward(DWORD dwContextID, void * pData, W
 	return true;
 }
 
-//ĞŞ¸ÄÓÃ»§²Æ¸»ĞÅÏ¢
+//ä¿®æ”¹ç”¨æˆ·è´¢å¯Œä¿¡æ¯
 bool CDataBaseEngineSink::OnModifyUserInsure(DWORD dwContextID, void * pData, WORD wDataSize)
 {
 	if (sizeof(DBR_GP_ModifyUserInsure) < wDataSize)
@@ -2113,45 +2111,45 @@ bool CDataBaseEngineSink::OnModifyUserInsure(DWORD dwContextID, void * pData, WO
 
 	DBR_GP_ModifyUserInsure* pDbReq = (DBR_GP_ModifyUserInsure*)pData;
 
-	m_TreasureDBAide.ResetParameter();
+	m_TreasureDBModule.ResetParameter();
 
-	m_TreasureDBAide.AddParameter(TEXT("@dwUserID"), pDbReq->dwUserID);
-	m_TreasureDBAide.AddParameter(TEXT("@lGold"), pDbReq->lGold);
-	m_TreasureDBAide.AddParameter(TEXT("@lOpenRoomCard"), pDbReq->lOpenRoomCard);
-	m_TreasureDBAide.AddParameter(TEXT("@lDiamond"), pDbReq->lDiamond);
-	m_TreasureDBAide.AddParameter(TEXT("@lRewardCard"), pDbReq->lRewardCard);
-	m_TreasureDBAide.AddParameter(TEXT("@lScore"), pDbReq->lScore);
+	m_TreasureDBModule.AddParameter(TEXT("@dwUserID"), pDbReq->dwUserID);
+	m_TreasureDBModule.AddParameter(TEXT("@lGold"), pDbReq->lGold);
+	m_TreasureDBModule.AddParameter(TEXT("@lOpenRoomCard"), pDbReq->lOpenRoomCard);
+	m_TreasureDBModule.AddParameter(TEXT("@lDiamond"), pDbReq->lDiamond);
+	m_TreasureDBModule.AddParameter(TEXT("@lRewardCard"), pDbReq->lRewardCard);
+	m_TreasureDBModule.AddParameter(TEXT("@lScore"), pDbReq->lScore);
 
-	//Êä³ö±äÁ¿
+	//è¾“å‡ºå˜é‡
 	WCHAR szDescribe[128]=L"";
-	m_TreasureDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribe,sizeof(szDescribe),adParamOutput);
+	m_TreasureDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribe,sizeof(szDescribe),adParamOutput);
 
-	//Ö´ĞĞ²éÑ¯
-	LONG lResultCode = m_TreasureDBAide.ExecuteProcess(TEXT("GSP_GP_GetRankReward"), true);
-	//½á¹û´¦Àí
+	//æ‰§è¡ŒæŸ¥è¯¢
+	LONG lResultCode = m_TreasureDBModule.ExecuteProcess(TEXT("GSP_GP_GetRankReward"), true);
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
 	m_AccountsDBModule->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
 	if(lResultCode == DB_SUCCESS)
 	{
-		//»ñÈ¡¸üĞÂÓÃ»§½ğ±Ò·¿¿¨×êÊ¯
+		//è·å–æ›´æ–°ç”¨æˆ·é‡‘å¸æˆ¿å¡é’»çŸ³
 		STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO UserScoreInfo;
 		ZeroMemory(&UserScoreInfo,sizeof(STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO));
 
 		UserScoreInfo.dwUserID = pDbReq->dwUserID;
-		UserScoreInfo.lGold = m_AccountsDBAide.GetValue_LONG(TEXT("@Gold"));
-		UserScoreInfo.lOpenRoomCard = m_AccountsDBAide.GetValue_LONG(TEXT("@OpenRoomCard"));
-		UserScoreInfo.lDiamond = m_AccountsDBAide.GetValue_LONG(TEXT("@Diamond"));
-		UserScoreInfo.lRewardCard = m_AccountsDBAide.GetValue_LONG(TEXT("@RewardCard"));
-		UserScoreInfo.lScore = m_AccountsDBAide.GetValue_LONG(TEXT("@Score"));
+		UserScoreInfo.lGold = m_AccountsDBModule.GetValue_LONG(TEXT("@Gold"));
+		UserScoreInfo.lOpenRoomCard = m_AccountsDBModule.GetValue_LONG(TEXT("@OpenRoomCard"));
+		UserScoreInfo.lDiamond = m_AccountsDBModule.GetValue_LONG(TEXT("@Diamond"));
+		UserScoreInfo.lRewardCard = m_AccountsDBModule.GetValue_LONG(TEXT("@RewardCard"));
+		UserScoreInfo.lScore = m_AccountsDBModule.GetValue_LONG(TEXT("@Score"));
 
-		//·¢ËÍ²Æ¸»±ä¸üÏûÏ¢
+		//å‘é€è´¢å¯Œå˜æ›´æ¶ˆæ¯
 		g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_USER_QUERY_SCORE_INFO,dwContextID,&UserScoreInfo,sizeof(STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO));
 	}
 	return true;
 }
 
-//ÏòÆäËûÓÃ»§ÔùËÍµÀ¾ß
+//å‘å…¶ä»–ç”¨æˆ·èµ é€é“å…·
 bool CDataBaseEngineSink::On_DBR_CL_GIFT_GIVE_PROPS(DWORD dwContextID, void * pData, WORD wDataSize)
 {
 	if (sizeof(STR_SUB_CL_GIFT_GIVE_PROPS) != wDataSize)
@@ -2161,20 +2159,20 @@ bool CDataBaseEngineSink::On_DBR_CL_GIFT_GIVE_PROPS(DWORD dwContextID, void * pD
 
 	STR_SUB_CL_GIFT_GIVE_PROPS* pDbReq = (STR_SUB_CL_GIFT_GIVE_PROPS*)pData;
 
-	m_AccountsDBAide.ResetParameter();
-	m_AccountsDBAide.AddParameter(TEXT("@dwSrcUserID"), pDbReq->dwSrcUserID);
-	m_AccountsDBAide.AddParameter(TEXT("@dwDstUserID"), pDbReq->dwDstUserID);
-	m_AccountsDBAide.AddParameter(TEXT("@dwPropsID"), pDbReq->dwPropsID);
-	m_AccountsDBAide.AddParameter(TEXT("@dwCount"), pDbReq->dwCount);
+	m_AccountsDBModule.ResetParameter();
+	m_AccountsDBModule.AddParameter(TEXT("@dwSrcUserID"), pDbReq->dwSrcUserID);
+	m_AccountsDBModule.AddParameter(TEXT("@dwDstUserID"), pDbReq->dwDstUserID);
+	m_AccountsDBModule.AddParameter(TEXT("@dwPropsID"), pDbReq->dwPropsID);
+	m_AccountsDBModule.AddParameter(TEXT("@dwCount"), pDbReq->dwCount);
 
-	//Êä³ö±äÁ¿
+	//è¾“å‡ºå˜é‡
 	TCHAR szDescribe[128]=TEXT("");
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribe,sizeof(szDescribe),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribe,sizeof(szDescribe),adParamOutput);
 
-	//Ö´ĞĞ²éÑ¯
-	long lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_GIFT_GIVE_PROPS"), true);
+	//æ‰§è¡ŒæŸ¥è¯¢
+	long lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_GIFT_GIVE_PROPS"), true);
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
 	m_AccountsDBModule->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
@@ -2185,59 +2183,59 @@ bool CDataBaseEngineSink::On_DBR_CL_GIFT_GIVE_PROPS(DWORD dwContextID, void * pD
 	if(lResultCode == DB_SUCCESS)
 	{
 		CMD.dwPropsID = pDbReq->dwPropsID;
-		CMD.dwCount = m_AccountsDBAide.GetValue_DWORD(TEXT("GoodsCount"));
-		CMD.dwLoveness = m_AccountsDBAide.GetValue_DWORD(TEXT("Loveness"));
+		CMD.dwCount = m_AccountsDBModule.GetValue_DWORD(TEXT("GoodsCount"));
+		CMD.dwLoveness = m_AccountsDBModule.GetValue_DWORD(TEXT("Loveness"));
 
 		STR_CMD_LC_GIFT_GIVE_PROPS_SHOW DBO;
 		DBO.dwTargetID = pDbReq->dwDstUserID;
 		lstrcpyn( DBO.szDescribeString, CW2CT(DBVarValue.bstrVal), CountArray(DBO.szDescribeString));
 
-		//·¢ËÍDBO
+		//å‘é€DBO
 		g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_GIFT_GIVE_PROPS_SHOW,dwContextID,&DBO,sizeof(DBO));
 	}
 
-	//·¢ËÍDBO
+	//å‘é€DBO
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_GIFT_GIVE_PROPS,dwContextID,&CMD,sizeof(CMD));
 	return true;
 }
 
-#pragma region MDM_LOGON µÇÂ¼Ä£¿é
-/***************************** µÇÂ¼´¦Àí*******************************************/
-//ÕÊºÅµÇÂ¼
+#pragma region MDM_LOGON ç™»å½•æ¨¡å—
+/***************************** ç™»å½•å¤„ç†*******************************************/
+//å¸å·ç™»å½•
 bool CDataBaseEngineSink::On_DBR_Logon_Accounts(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize!=sizeof(STR_DBR_CL_LOGON_ACCOUNTS)) return false;
 
-	//ÇëÇó´¦Àí
+	//è¯·æ±‚å¤„ç†
 	STR_DBR_CL_LOGON_ACCOUNTS * pDBRLogonAccounts=(STR_DBR_CL_LOGON_ACCOUNTS *)pData;
 
-	//SocketÅĞ¶Ï
+	//Socketåˆ¤æ–­
 	tagBindParameter * pBindParameter=(tagBindParameter *)pDBRLogonAccounts->pBindParameter;
 	if (pBindParameter->dwSocketID!=dwContextID) return true;
 
-	//×ª»¯µØÖ·
+	//è½¬åŒ–åœ°å€
 	TCHAR szClientAddr[16]=TEXT("");
 	BYTE * pClientAddr=(BYTE *)&pBindParameter->dwClientAddr;
 	_sntprintf_s(szClientAddr,CountArray(szClientAddr),TEXT("%d.%d.%d.%d"),pClientAddr[0],pClientAddr[1],pClientAddr[2],pClientAddr[3]);
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.ResetParameter();
-	m_AccountsDBAide.AddParameter(TEXT("@mystery"),_MYSTERY);
-	m_AccountsDBAide.AddParameter(TEXT("@strAccounts"),pDBRLogonAccounts->szAccounts);
-	m_AccountsDBAide.AddParameter(TEXT("@strPassword"),pDBRLogonAccounts->szPassword);
-	m_AccountsDBAide.AddParameter(TEXT("@strClientIP"),szClientAddr);
-	m_AccountsDBAide.AddParameter(TEXT("@strMachineID"),pDBRLogonAccounts->szMachineID);
-	m_AccountsDBAide.AddParameter(TEXT("@ProxyID"),pDBRLogonAccounts->dwProxyID);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.ResetParameter();
+	m_AccountsDBModule.AddParameter(TEXT("@mystery"),_MYSTERY);
+	m_AccountsDBModule.AddParameter(TEXT("@strAccounts"),pDBRLogonAccounts->szAccounts);
+	m_AccountsDBModule.AddParameter(TEXT("@strPassword"),pDBRLogonAccounts->szPassword);
+	m_AccountsDBModule.AddParameter(TEXT("@strClientIP"),szClientAddr);
+	m_AccountsDBModule.AddParameter(TEXT("@strMachineID"),pDBRLogonAccounts->szMachineID);
+	m_AccountsDBModule.AddParameter(TEXT("@ProxyID"),pDBRLogonAccounts->dwProxyID);
 
-	//Êä³ö²ÎÊıssss
+	//è¾“å‡ºå‚æ•°ssss
 	TCHAR szDescribeString[128]=TEXT("");
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-	//Ö´ĞĞ²éÑ¯
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_Logon_Accounts"),true);
+	//æ‰§è¡ŒæŸ¥è¯¢
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_Logon_Accounts"),true);
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
 	m_AccountsDBModule->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
@@ -2245,113 +2243,113 @@ bool CDataBaseEngineSink::On_DBR_Logon_Accounts(DWORD dwContextID, VOID * pData,
 	return true;
 }
 
-//ÕËºÅµÇÂ¼·µ»Ø
+//è´¦å·ç™»å½•è¿”å›
 bool CDataBaseEngineSink::On_DBO_Logon_Accounts(DWORD dwContextID, DWORD dwResultCode, LPCTSTR pszErrorString)
 {
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	STR_CMD_LC_LOGON_PLATFORM DBOLogonAccount;
 	ZeroMemory(&DBOLogonAccount,sizeof(DBOLogonAccount));
 
-	//µÇÂ¼³É¹¦»ñÈ¡ĞÅÏ¢
+	//ç™»å½•æˆåŠŸè·å–ä¿¡æ¯
 	if(DB_SUCCESS == dwResultCode)
 	{
-		/* *****************************    ÓÃ»§ĞÅÏ¢     ****************************/
-		//ÓÃ»§±êÖ¾
-		DBOLogonAccount.dwUserID=m_AccountsDBAide.GetValue_DWORD(TEXT("UserID"));
-		//ÓÃ»§êÇ³Æ
-		m_AccountsDBAide.GetValue_String(TEXT("NickName"),DBOLogonAccount.szNickName,CountArray(DBOLogonAccount.szNickName));
-		//ÓÃ»§ĞÔ±ğ
-		DBOLogonAccount.cbGender=m_AccountsDBAide.GetValue_BYTE(TEXT("Gender"));
-		//Í·ÏñË÷Òı
-		m_AccountsDBAide.GetValue_String(TEXT("HeadUrl"),DBOLogonAccount.szHeadUrl,CountArray(DBOLogonAccount.szHeadUrl));
-		//¸öĞÔÇ©Ãû
-		m_AccountsDBAide.GetValue_String(TEXT("MySignature"),DBOLogonAccount.szMySignature,CountArray(DBOLogonAccount.szMySignature));
+		/* *****************************    ç”¨æˆ·ä¿¡æ¯     ****************************/
+		//ç”¨æˆ·æ ‡å¿—
+		DBOLogonAccount.dwUserID=m_AccountsDBModule.GetValue_DWORD(TEXT("UserID"));
+		//ç”¨æˆ·æ˜µç§°
+		m_AccountsDBModule.GetValue_String(TEXT("NickName"),DBOLogonAccount.szNickName,CountArray(DBOLogonAccount.szNickName));
+		//ç”¨æˆ·æ€§åˆ«
+		DBOLogonAccount.cbGender=m_AccountsDBModule.GetValue_BYTE(TEXT("Gender"));
+		//å¤´åƒç´¢å¼•
+		m_AccountsDBModule.GetValue_String(TEXT("HeadUrl"),DBOLogonAccount.szHeadUrl,CountArray(DBOLogonAccount.szHeadUrl));
+		//ä¸ªæ€§ç­¾å
+		m_AccountsDBModule.GetValue_String(TEXT("MySignature"),DBOLogonAccount.szMySignature,CountArray(DBOLogonAccount.szMySignature));
 
-		//ÓÃ»§Ôª±¦
-		DBOLogonAccount.dwUserDiamond=m_AccountsDBAide.GetValue_LONGLONG(TEXT("UserDiamond"));
-		//ÓÃ»§½±ÅÆ
-		DBOLogonAccount.dwUserMedal=m_AccountsDBAide.GetValue_DWORD(TEXT("UserMedal"));
-		//¾­ÑéÊıÖµ
-		DBOLogonAccount.byLevel=m_AccountsDBAide.GetValue_BYTE(TEXT("UserLevel"));
-		//ÓÃ»§÷ÈÁ¦
-		DBOLogonAccount.dwLoveLiness=m_AccountsDBAide.GetValue_DWORD(TEXT("LoveLiness"));
+		//ç”¨æˆ·å…ƒå®
+		DBOLogonAccount.dwUserDiamond=m_AccountsDBModule.GetValue_LONGLONG(TEXT("UserDiamond"));
+		//ç”¨æˆ·å¥–ç‰Œ
+		DBOLogonAccount.dwUserMedal=m_AccountsDBModule.GetValue_DWORD(TEXT("UserMedal"));
+		//ç»éªŒæ•°å€¼
+		DBOLogonAccount.byLevel=m_AccountsDBModule.GetValue_BYTE(TEXT("UserLevel"));
+		//ç”¨æˆ·é­…åŠ›
+		DBOLogonAccount.dwLoveLiness=m_AccountsDBModule.GetValue_DWORD(TEXT("LoveLiness"));
 
-		//¹ÜÀíÔ±µÈ¼¶
-		DBOLogonAccount.cbMasterOrder=m_AccountsDBAide.GetValue_BYTE(TEXT("MasterOrder"));
-		//»áÔ±µÈ¼¶
-		DBOLogonAccount.cbMemberOrder=m_AccountsDBAide.GetValue_BYTE(TEXT("MemberOrder"));
-		//»áÔ±µ½ÆÚÊ±¼ä
-		m_AccountsDBAide.GetValue_SystemTime(TEXT("MemberOverDate"),DBOLogonAccount.MemberOverDate);
+		//ç®¡ç†å‘˜ç­‰çº§
+		DBOLogonAccount.cbMasterOrder=m_AccountsDBModule.GetValue_BYTE(TEXT("MasterOrder"));
+		//ä¼šå‘˜ç­‰çº§
+		DBOLogonAccount.cbMemberOrder=m_AccountsDBModule.GetValue_BYTE(TEXT("MemberOrder"));
+		//ä¼šå‘˜åˆ°æœŸæ—¶é—´
+		m_AccountsDBModule.GetValue_SystemTime(TEXT("MemberOverDate"),DBOLogonAccount.MemberOverDate);
 
-		//ÕæÊµĞÕÃû
-		m_AccountsDBAide.GetValue_String(TEXT("IdentityName"),DBOLogonAccount.szIdentityName,CountArray(DBOLogonAccount.szIdentityName));
-		//Éí·İÖ¤ºÅ
-		m_AccountsDBAide.GetValue_String(TEXT("IdentityNum"),DBOLogonAccount.szIdentityNum,CountArray(DBOLogonAccount.szIdentityNum));
-		//ÊÖ»úºÅÂë
-		m_AccountsDBAide.GetValue_String(TEXT("MobilePhone"),DBOLogonAccount.szMobilePhone,CountArray(DBOLogonAccount.szMobilePhone));
-		/* *****************************    ÕËºÅĞÅÏ¢     ****************************/
-		//×îºóµÇÂ¼µØÖ·
-		m_AccountsDBAide.GetValue_String(TEXT("LastLogonIP"),DBOLogonAccount.szLasLogonIp,CountArray(DBOLogonAccount.szLasLogonIp));
-		//×îºóÉÏÏßÊ±¼ä 
-		m_AccountsDBAide.GetValue_SystemTime(TEXT("LastLogonDate"),DBOLogonAccount.LasLogonDate);
+		//çœŸå®å§“å
+		m_AccountsDBModule.GetValue_String(TEXT("IdentityName"),DBOLogonAccount.szIdentityName,CountArray(DBOLogonAccount.szIdentityName));
+		//èº«ä»½è¯å·
+		m_AccountsDBModule.GetValue_String(TEXT("IdentityNum"),DBOLogonAccount.szIdentityNum,CountArray(DBOLogonAccount.szIdentityNum));
+		//æ‰‹æœºå·ç 
+		m_AccountsDBModule.GetValue_String(TEXT("MobilePhone"),DBOLogonAccount.szMobilePhone,CountArray(DBOLogonAccount.szMobilePhone));
+		/* *****************************    è´¦å·ä¿¡æ¯     ****************************/
+		//æœ€åç™»å½•åœ°å€
+		m_AccountsDBModule.GetValue_String(TEXT("LastLogonIP"),DBOLogonAccount.szLasLogonIp,CountArray(DBOLogonAccount.szLasLogonIp));
+		//æœ€åä¸Šçº¿æ—¶é—´ 
+		m_AccountsDBModule.GetValue_SystemTime(TEXT("LastLogonDate"),DBOLogonAccount.LasLogonDate);
 
-		/* *****************************    ¸½¼ÓÊı¾İ     ****************************/
-		//ÓÃ»§»ı·Ö
-		DBOLogonAccount.lUserScore = m_AccountsDBAide.GetValue_LONGLONG(TEXT("UserScore"));
-		//ÓÃ»§ÓÎÏ·±Ò
-		DBOLogonAccount.lUserGold = m_AccountsDBAide.GetValue_LONGLONG(TEXT("UserGold"));
-		//ÓÃ»§·¿¿¨
-		DBOLogonAccount.lOpenRoomCard = m_AccountsDBAide.GetValue_LONGLONG(TEXT("UserRoomCard"));
+		/* *****************************    é™„åŠ æ•°æ®     ****************************/
+		//ç”¨æˆ·ç§¯åˆ†
+		DBOLogonAccount.lUserScore = m_AccountsDBModule.GetValue_LONGLONG(TEXT("UserScore"));
+		//ç”¨æˆ·æ¸¸æˆå¸
+		DBOLogonAccount.lUserGold = m_AccountsDBModule.GetValue_LONGLONG(TEXT("UserGold"));
+		//ç”¨æˆ·æˆ¿å¡
+		DBOLogonAccount.lOpenRoomCard = m_AccountsDBModule.GetValue_LONGLONG(TEXT("UserRoomCard"));
 	}
 
-	//¹¹ÔìÊı¾İ
+	//æ„é€ æ•°æ®
 	DBOLogonAccount.dwResultCode=dwResultCode;
 	lstrcpyn(DBOLogonAccount.szDescribeString,pszErrorString,CountArray(DBOLogonAccount.szDescribeString));
 
-	//·¢ËÍ½á¹û
+	//å‘é€ç»“æœ
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_LOGON_ACCOUNTS,dwContextID,&DBOLogonAccount, sizeof(DBOLogonAccount));
 
 	return true;
 }
 
-//×¢²á´¦Àí
+//æ³¨å†Œå¤„ç†
 bool CDataBaseEngineSink::On_DBR_Logon_Register(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize!=sizeof(STR_DBR_CL_LOGON_REGISTER)) return false;
 
-	//ÇëÇó´¦Àí
+	//è¯·æ±‚å¤„ç†
 	STR_DBR_CL_LOGON_REGISTER * pDBRLogonRegister=(STR_DBR_CL_LOGON_REGISTER *)pData;
 
-	//SocketÅĞ¶Ï
+	//Socketåˆ¤æ–­
 	tagBindParameter * pBindParameter=(tagBindParameter *)pDBRLogonRegister->pBindParameter;
 	if (pBindParameter->dwSocketID!=dwContextID) return true;
 
-	//×ª»¯µØÖ·
+	//è½¬åŒ–åœ°å€
 	TCHAR szClientAddr[16]=TEXT("");
 	BYTE * pClientAddr=(BYTE *)&pBindParameter->dwClientAddr;
 	_sntprintf_s(szClientAddr,CountArray(szClientAddr),TEXT("%d.%d.%d.%d"),pClientAddr[0],pClientAddr[1],pClientAddr[2],pClientAddr[3]);
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.ResetParameter();
-	m_AccountsDBAide.AddParameter(TEXT("@byMYSTERY"), _MYSTERY);
-	m_AccountsDBAide.AddParameter(TEXT("@strAccounts"),pDBRLogonRegister->szAccounts);
-	m_AccountsDBAide.AddParameter(TEXT("@strPassword"),pDBRLogonRegister->szPassword);
-	m_AccountsDBAide.AddParameter(TEXT("@strNickName"),pDBRLogonRegister->szNickName);
-	m_AccountsDBAide.AddParameter(TEXT("@cbGender"),pDBRLogonRegister->cbGender);
-	m_AccountsDBAide.AddParameter(TEXT("@strClientIP"),szClientAddr);
-	m_AccountsDBAide.AddParameter(TEXT("@strMobilePhone"),pDBRLogonRegister->strMobilePhone);
-	m_AccountsDBAide.AddParameter(TEXT("@strMachineID"),pDBRLogonRegister->szMachineID);
-	m_AccountsDBAide.AddParameter(TEXT("@dwProxyID"),pDBRLogonRegister->dwProxyID);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.ResetParameter();
+	m_AccountsDBModule.AddParameter(TEXT("@byMYSTERY"), _MYSTERY);
+	m_AccountsDBModule.AddParameter(TEXT("@strAccounts"),pDBRLogonRegister->szAccounts);
+	m_AccountsDBModule.AddParameter(TEXT("@strPassword"),pDBRLogonRegister->szPassword);
+	m_AccountsDBModule.AddParameter(TEXT("@strNickName"),pDBRLogonRegister->szNickName);
+	m_AccountsDBModule.AddParameter(TEXT("@cbGender"),pDBRLogonRegister->cbGender);
+	m_AccountsDBModule.AddParameter(TEXT("@strClientIP"),szClientAddr);
+	m_AccountsDBModule.AddParameter(TEXT("@strMobilePhone"),pDBRLogonRegister->strMobilePhone);
+	m_AccountsDBModule.AddParameter(TEXT("@strMachineID"),pDBRLogonRegister->szMachineID);
+	m_AccountsDBModule.AddParameter(TEXT("@dwProxyID"),pDBRLogonRegister->dwProxyID);
 
-	//Êä³ö²ÎÊı
+	//è¾“å‡ºå‚æ•°
 	TCHAR szDescribeString[128]=TEXT("");
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-	//Ö´ĞĞ²éÑ¯
-	LONG lResultCode=m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_Logon_Register"),true);
+	//æ‰§è¡ŒæŸ¥è¯¢
+	LONG lResultCode=m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_Logon_Register"),true);
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
 	m_AccountsDBModule->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 	On_DBO_Logon_Accounts(dwContextID,lResultCode,CW2CT(DBVarValue.bstrVal));
@@ -2359,45 +2357,45 @@ bool CDataBaseEngineSink::On_DBR_Logon_Register(DWORD dwContextID, VOID * pData,
 	return true;
 }
 
-//Æ½Ì¨µÇÂ¼
+//å¹³å°ç™»å½•
 bool CDataBaseEngineSink::On_DBR_Logon_Platform(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	ASSERT(wDataSize==sizeof(STR_DBR_CL_LOGON_PLATFORM));
 	if (wDataSize!=sizeof(STR_DBR_CL_LOGON_PLATFORM)) return false;
 
-	//ÇëÇó´¦Àí
+	//è¯·æ±‚å¤„ç†
 	STR_DBR_CL_LOGON_PLATFORM * pDBRLogonPlatform=(STR_DBR_CL_LOGON_PLATFORM *)pData;
 
-	//SocketÅĞ¶Ï
+	//Socketåˆ¤æ–­
 	tagBindParameter * pBindParameter=(tagBindParameter *)pDBRLogonPlatform->pBindParameter;
 	if (pBindParameter->dwSocketID!=dwContextID) return true;
 
-	//×ª»¯µØÖ·
+	//è½¬åŒ–åœ°å€
 	TCHAR szClientAddr[16]=TEXT("");
 	BYTE * pClientAddr=(BYTE *)&pBindParameter->dwClientAddr;
 	_sntprintf_s(szClientAddr,CountArray(szClientAddr),TEXT("%d.%d.%d.%d"),pClientAddr[0],pClientAddr[1],pClientAddr[2],pClientAddr[3]);
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.ResetParameter();
-	m_AccountsDBAide.AddParameter(TEXT("@byMystery"), _MYSTERY);
-	m_AccountsDBAide.AddParameter(TEXT("@strOpenID"), pDBRLogonPlatform->szOpenID);
-	m_AccountsDBAide.AddParameter(TEXT("@szUnionID"), pDBRLogonPlatform->szUnionID);
-	m_AccountsDBAide.AddParameter(TEXT("@strNickName"), pDBRLogonPlatform->szNickName);
-	m_AccountsDBAide.AddParameter(TEXT("@cbGender"), pDBRLogonPlatform->cbGender);
-	m_AccountsDBAide.AddParameter(TEXT("@strHeadUrl"), pDBRLogonPlatform->strHeadUrl);
-	m_AccountsDBAide.AddParameter(TEXT("@strMachineID"), pDBRLogonPlatform->szMachineID);
-	m_AccountsDBAide.AddParameter(TEXT("@strClientIP"), szClientAddr);
-	m_AccountsDBAide.AddParameter(TEXT("@dwProxyID"), pDBRLogonPlatform->dwProxyID);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.ResetParameter();
+	m_AccountsDBModule.AddParameter(TEXT("@byMystery"), _MYSTERY);
+	m_AccountsDBModule.AddParameter(TEXT("@strOpenID"), pDBRLogonPlatform->szOpenID);
+	m_AccountsDBModule.AddParameter(TEXT("@szUnionID"), pDBRLogonPlatform->szUnionID);
+	m_AccountsDBModule.AddParameter(TEXT("@strNickName"), pDBRLogonPlatform->szNickName);
+	m_AccountsDBModule.AddParameter(TEXT("@cbGender"), pDBRLogonPlatform->cbGender);
+	m_AccountsDBModule.AddParameter(TEXT("@strHeadUrl"), pDBRLogonPlatform->strHeadUrl);
+	m_AccountsDBModule.AddParameter(TEXT("@strMachineID"), pDBRLogonPlatform->szMachineID);
+	m_AccountsDBModule.AddParameter(TEXT("@strClientIP"), szClientAddr);
+	m_AccountsDBModule.AddParameter(TEXT("@dwProxyID"), pDBRLogonPlatform->dwProxyID);
 
-	//Êä³ö²ÎÊı
+	//è¾“å‡ºå‚æ•°
 	TCHAR szDescribeString[128]=TEXT("");
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-	//Ö´ĞĞ²éÑ¯			
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_Logon_Platform"),true);
+	//æ‰§è¡ŒæŸ¥è¯¢			
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_Logon_Platform"),true);
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
 	m_AccountsDBModule->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
@@ -2406,70 +2404,70 @@ bool CDataBaseEngineSink::On_DBR_Logon_Platform(DWORD dwContextID, VOID * pData,
 	return true;
 }
 
-//Æ½Ì¨µÇÂ¼·µ»Ø
+//å¹³å°ç™»å½•è¿”å›
 bool CDataBaseEngineSink::On_DBO_Logon_Platform(DWORD dwContextID, DWORD dwResultCode, LPCTSTR pszErrorString)
 {
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	STR_CMD_LC_LOGON_PLATFORM DBOLogonPlatform;
 	ZeroMemory(&DBOLogonPlatform,sizeof(DBOLogonPlatform));
 
-	//µÇÂ¼³É¹¦»ñÈ¡ĞÅÏ¢
+	//ç™»å½•æˆåŠŸè·å–ä¿¡æ¯
 	if(DB_SUCCESS == dwResultCode)
 	{
-		/* *****************************    ÓÃ»§ĞÅÏ¢     ****************************/
-		//ÓÃ»§±êÖ¾
-		DBOLogonPlatform.dwUserID=m_AccountsDBAide.GetValue_DWORD(TEXT("UserID"));
-		//ÓÃ»§êÇ³Æ
-		m_AccountsDBAide.GetValue_String(TEXT("NickName"),DBOLogonPlatform.szNickName,CountArray(DBOLogonPlatform.szNickName));
-		//ÓÃ»§ĞÔ±ğ
-		DBOLogonPlatform.cbGender=m_AccountsDBAide.GetValue_BYTE(TEXT("Gender"));
-		//Í·ÏñË÷Òı
-		m_AccountsDBAide.GetValue_String(TEXT("HeadUrl"),DBOLogonPlatform.szHeadUrl,CountArray(DBOLogonPlatform.szHeadUrl));
-		//¸öĞÔÇ©Ãû
-		m_AccountsDBAide.GetValue_String(TEXT("MySignature"),DBOLogonPlatform.szMySignature,CountArray(DBOLogonPlatform.szMySignature));
+		/* *****************************    ç”¨æˆ·ä¿¡æ¯     ****************************/
+		//ç”¨æˆ·æ ‡å¿—
+		DBOLogonPlatform.dwUserID=m_AccountsDBModule.GetValue_DWORD(TEXT("UserID"));
+		//ç”¨æˆ·æ˜µç§°
+		m_AccountsDBModule.GetValue_String(TEXT("NickName"),DBOLogonPlatform.szNickName,CountArray(DBOLogonPlatform.szNickName));
+		//ç”¨æˆ·æ€§åˆ«
+		DBOLogonPlatform.cbGender=m_AccountsDBModule.GetValue_BYTE(TEXT("Gender"));
+		//å¤´åƒç´¢å¼•
+		m_AccountsDBModule.GetValue_String(TEXT("HeadUrl"),DBOLogonPlatform.szHeadUrl,CountArray(DBOLogonPlatform.szHeadUrl));
+		//ä¸ªæ€§ç­¾å
+		m_AccountsDBModule.GetValue_String(TEXT("MySignature"),DBOLogonPlatform.szMySignature,CountArray(DBOLogonPlatform.szMySignature));
 
-		//ÓÃ»§Ôª±¦
-		DBOLogonPlatform.dwUserDiamond=m_AccountsDBAide.GetValue_LONGLONG(TEXT("UserDiamond"));
-		//ÓÃ»§½±ÅÆ
-		DBOLogonPlatform.dwUserMedal=m_AccountsDBAide.GetValue_DWORD(TEXT("UserMedal"));
-		//¾­ÑéÊıÖµ
-		DBOLogonPlatform.byLevel=m_AccountsDBAide.GetValue_BYTE(TEXT("UserLevel"));
-		//ÓÃ»§÷ÈÁ¦
-		DBOLogonPlatform.dwLoveLiness=m_AccountsDBAide.GetValue_DWORD(TEXT("LoveLiness"));
+		//ç”¨æˆ·å…ƒå®
+		DBOLogonPlatform.dwUserDiamond=m_AccountsDBModule.GetValue_LONGLONG(TEXT("UserDiamond"));
+		//ç”¨æˆ·å¥–ç‰Œ
+		DBOLogonPlatform.dwUserMedal=m_AccountsDBModule.GetValue_DWORD(TEXT("UserMedal"));
+		//ç»éªŒæ•°å€¼
+		DBOLogonPlatform.byLevel=m_AccountsDBModule.GetValue_BYTE(TEXT("UserLevel"));
+		//ç”¨æˆ·é­…åŠ›
+		DBOLogonPlatform.dwLoveLiness=m_AccountsDBModule.GetValue_DWORD(TEXT("LoveLiness"));
 
-		//¹ÜÀíÔ±µÈ¼¶
-		DBOLogonPlatform.cbMasterOrder=m_AccountsDBAide.GetValue_BYTE(TEXT("MasterOrder"));
-		//»áÔ±µÈ¼¶
-		DBOLogonPlatform.cbMemberOrder=m_AccountsDBAide.GetValue_BYTE(TEXT("MemberOrder"));
-		//»áÔ±µ½ÆÚÊ±¼ä
-		m_AccountsDBAide.GetValue_SystemTime(TEXT("MemberOverDate"),DBOLogonPlatform.MemberOverDate);
+		//ç®¡ç†å‘˜ç­‰çº§
+		DBOLogonPlatform.cbMasterOrder=m_AccountsDBModule.GetValue_BYTE(TEXT("MasterOrder"));
+		//ä¼šå‘˜ç­‰çº§
+		DBOLogonPlatform.cbMemberOrder=m_AccountsDBModule.GetValue_BYTE(TEXT("MemberOrder"));
+		//ä¼šå‘˜åˆ°æœŸæ—¶é—´
+		m_AccountsDBModule.GetValue_SystemTime(TEXT("MemberOverDate"),DBOLogonPlatform.MemberOverDate);
 
-		//ÕæÊµĞÕÃû
-		m_AccountsDBAide.GetValue_String(TEXT("IdentityName"),DBOLogonPlatform.szIdentityName,CountArray(DBOLogonPlatform.szIdentityName));
-		//Éí·İÖ¤ºÅ
-		m_AccountsDBAide.GetValue_String(TEXT("IdentityNum"),DBOLogonPlatform.szIdentityNum,CountArray(DBOLogonPlatform.szIdentityNum));
-		//ÊÖ»úºÅÂë
-		m_AccountsDBAide.GetValue_String(TEXT("MobilePhone"),DBOLogonPlatform.szMobilePhone,CountArray(DBOLogonPlatform.szMobilePhone));
-		/* *****************************    ÕËºÅĞÅÏ¢     ****************************/
-		//×îºóµÇÂ¼µØÖ·
-		m_AccountsDBAide.GetValue_String(TEXT("LastLogonIP"),DBOLogonPlatform.szLasLogonIp,CountArray(DBOLogonPlatform.szLasLogonIp));
-		//×îºóÉÏÏßÊ±¼ä
-		m_AccountsDBAide.GetValue_SystemTime(TEXT("LastLogonDate"),DBOLogonPlatform.LasLogonDate);
+		//çœŸå®å§“å
+		m_AccountsDBModule.GetValue_String(TEXT("IdentityName"),DBOLogonPlatform.szIdentityName,CountArray(DBOLogonPlatform.szIdentityName));
+		//èº«ä»½è¯å·
+		m_AccountsDBModule.GetValue_String(TEXT("IdentityNum"),DBOLogonPlatform.szIdentityNum,CountArray(DBOLogonPlatform.szIdentityNum));
+		//æ‰‹æœºå·ç 
+		m_AccountsDBModule.GetValue_String(TEXT("MobilePhone"),DBOLogonPlatform.szMobilePhone,CountArray(DBOLogonPlatform.szMobilePhone));
+		/* *****************************    è´¦å·ä¿¡æ¯     ****************************/
+		//æœ€åç™»å½•åœ°å€
+		m_AccountsDBModule.GetValue_String(TEXT("LastLogonIP"),DBOLogonPlatform.szLasLogonIp,CountArray(DBOLogonPlatform.szLasLogonIp));
+		//æœ€åä¸Šçº¿æ—¶é—´
+		m_AccountsDBModule.GetValue_SystemTime(TEXT("LastLogonDate"),DBOLogonPlatform.LasLogonDate);
 
-		/* *****************************    ¸½¼ÓÊı¾İ     ****************************/
-		//ÓÃ»§»ı·Ö TODONOW Êı¾İ¿âÈ±ÉÙ¸Ã×Ö¶Î
-		//DBOLogonPlatform.lUserScore = m_AccountsDBAide.GetValue_LONGLONG(TEXT("UserScore"));
-		//ÓÃ»§ÓÎÏ·±Ò
-		DBOLogonPlatform.lUserGold = m_AccountsDBAide.GetValue_LONGLONG(TEXT("UserGold"));
-		//ÓÃ»§·¿¿¨
-		DBOLogonPlatform.lOpenRoomCard = m_AccountsDBAide.GetValue_LONGLONG(TEXT("OpenRoomCard"));
+		/* *****************************    é™„åŠ æ•°æ®     ****************************/
+		//ç”¨æˆ·ç§¯åˆ† TODONOW æ•°æ®åº“ç¼ºå°‘è¯¥å­—æ®µ
+		//DBOLogonPlatform.lUserScore = m_AccountsDBModule.GetValue_LONGLONG(TEXT("UserScore"));
+		//ç”¨æˆ·æ¸¸æˆå¸
+		DBOLogonPlatform.lUserGold = m_AccountsDBModule.GetValue_LONGLONG(TEXT("UserGold"));
+		//ç”¨æˆ·æˆ¿å¡
+		DBOLogonPlatform.lOpenRoomCard = m_AccountsDBModule.GetValue_LONGLONG(TEXT("OpenRoomCard"));
 	}
 
-	//¹¹ÔìÊı¾İ
+	//æ„é€ æ•°æ®
 	DBOLogonPlatform.dwResultCode=dwResultCode;
 	lstrcpyn(DBOLogonPlatform.szDescribeString,pszErrorString,CountArray(DBOLogonPlatform.szDescribeString));
 
-	//·¢ËÍ½á¹û
+	//å‘é€ç»“æœ
 	WORD wDataSize=CountStringBuffer(DBOLogonPlatform.szDescribeString);
 	WORD wHeadSize=sizeof(DBOLogonPlatform)-sizeof(DBOLogonPlatform.szDescribeString);
 
@@ -2478,64 +2476,64 @@ bool CDataBaseEngineSink::On_DBO_Logon_Platform(DWORD dwContextID, DWORD dwResul
 }
 
 #pragma endregion
-//Ö÷ÏûÏ¢ºÅ6-ÆäËûÏûÏ¢£º¹«ÓÃ²Ù×÷½á¹û
+//ä¸»æ¶ˆæ¯å·6-å…¶ä»–æ¶ˆæ¯ï¼šå…¬ç”¨æ“ä½œç»“æœ
 VOID CDataBaseEngineSink::On_DBO_CommonOperateResult( DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString, DBR_CommandSource wRequestID )
 {
-	//±äÁ¿¶¨Òå
+	//å˜é‡å®šä¹‰
 	DBO_GP_OperateCommand OperateResult;
 	ZeroMemory(&OperateResult,sizeof(OperateResult));
 
-	//¹¹ÔìÊı¾İ
+	//æ„é€ æ•°æ®
 	OperateResult.lResultCode=dwErrorCode;
 	lstrcpyn(OperateResult.szDescribeString,pszErrorString,CountArray(OperateResult.szDescribeString));
 	OperateResult.mCommand.MainCommand = wRequestID.MainCommand;
 	OperateResult.mCommand.SubCommand = wRequestID.SubCommand;
 
-	//·¢ËÍ½á¹û
+	//å‘é€ç»“æœ
 	WORD wDataSize=CountStringBuffer(OperateResult.szDescribeString);
 	WORD wHeadSize=sizeof(OperateResult)-sizeof(OperateResult.szDescribeString);
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_USER_COMMAND_RESULT,dwContextID,&OperateResult,wHeadSize+wDataSize);
 
 	return;
 }
-#pragma region MDM_CLUB ÅÆÓÑÈ¦(°æ±¾2)
-//²éÑ¯ÅÆÓÑÈ¦ÁĞ±í
+#pragma region MDM_CLUB ç‰Œå‹åœˆ(ç‰ˆæœ¬2)
+//æŸ¥è¯¢ç‰Œå‹åœˆåˆ—è¡¨
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_ALL_CLUB_INFO_LIST(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize!=sizeof(STR_SUB_CL_CLUB_ALL_CLUB_INFO_LIST)) return false;
 	STR_SUB_CL_CLUB_ALL_CLUB_INFO_LIST *pDbr = (STR_SUB_CL_CLUB_ALL_CLUB_INFO_LIST *)pData;
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
 
-	m_AccountsDBAide.AddParameter(TEXT("@UserID"),pDbr->dwUserID);
-	m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_ALL_CLUB_INFO_LIST"),true);
+	m_AccountsDBModule.AddParameter(TEXT("@UserID"),pDbr->dwUserID);
+	m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_ALL_CLUB_INFO_LIST"),true);
 
-	//ÁĞ±í·¢ËÍ
+	//åˆ—è¡¨å‘é€
 	WORD wPacketSize=0;
 	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
 	wPacketSize=0;
 	STR_CMD_LC_CLUB_ALL_CLUB_INFO_LIST * pCMD=NULL;
 	while (m_AccountsDBModule->IsRecordsetEnd()==false)
 	{
-		//·¢ËÍĞÅÏ¢
+		//å‘é€ä¿¡æ¯
 		if ((wPacketSize+sizeof(STR_CMD_LC_CLUB_ALL_CLUB_INFO_LIST))>sizeof(cbBuffer))
 		{
 			g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_ALL_CLUB_INFO_LIST,dwContextID,cbBuffer,wPacketSize);
 			wPacketSize=0;
 		}
 
-		//¶ÁÈ¡ĞÅÏ¢
+		//è¯»å–ä¿¡æ¯
 		pCMD=(STR_CMD_LC_CLUB_ALL_CLUB_INFO_LIST *)(cbBuffer+wPacketSize);
-		pCMD->dwClubID=m_AccountsDBAide.GetValue_DWORD(TEXT("ClubID"));	
-		m_AccountsDBAide.GetValue_String(TEXT("ClubName"),pCMD->szClubName,CountArray(pCMD->szClubName));
-		pCMD->byClubRole=m_AccountsDBAide.GetValue_BYTE(TEXT("ClubRole"));
+		pCMD->dwClubID=m_AccountsDBModule.GetValue_DWORD(TEXT("ClubID"));	
+		m_AccountsDBModule.GetValue_String(TEXT("ClubName"),pCMD->szClubName,CountArray(pCMD->szClubName));
+		pCMD->byClubRole=m_AccountsDBModule.GetValue_BYTE(TEXT("ClubRole"));
 
-		//ÉèÖÃÎ»ÒÆ
+		//è®¾ç½®ä½ç§»
 		wPacketSize+=sizeof(STR_CMD_LC_CLUB_ALL_CLUB_INFO_LIST);
 
-		//ÒÆ¶¯¼ÇÂ¼
+		//ç§»åŠ¨è®°å½•
 		m_AccountsDBModule->MoveToNext();
 	}
 	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_ALL_CLUB_INFO_LIST,dwContextID,cbBuffer,wPacketSize);
@@ -2545,10 +2543,10 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ALL_CLUB_INFO_LIST(DWORD dwContextID, V
 	return true;
 }
 
-//²éÑ¯Ö¸¶¨ÅÆÓÑÈ¦·¿¼äÁĞ±í
+//æŸ¥è¯¢æŒ‡å®šç‰Œå‹åœˆæˆ¿é—´åˆ—è¡¨
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_LIST(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize!=sizeof(STR_DBR_CL_CLUB_ROOM_LIST)) return false;
 
 	STR_DBR_CL_CLUB_ROOM_LIST *pDBR = (STR_DBR_CL_CLUB_ROOM_LIST*) pData;
@@ -2556,68 +2554,68 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_LIST(DWORD dwContextID, VOID * pDa
 	STR_DBR_CL_CLUB_ROOM_LIST DBR;
 	DBR.dwClubID = pDBR->dwClubID;
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.AddParameter(TEXT("@ClubID"),DBR.dwClubID);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.AddParameter(TEXT("@ClubID"),DBR.dwClubID);
 
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_LIST"),true);
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_LIST"),true);
 
-	//ÁĞ±í·¢ËÍ
-	//±äÁ¿¶¨Òå
+	//åˆ—è¡¨å‘é€
+	//å˜é‡å®šä¹‰
 	WORD wPacketSize=0;
 	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
 	wPacketSize=0;
 	STR_CMD_LC_CLUB_ROOM_LIST * pDBO=NULL;
 	while ((lResultCode == DB_SUCCESS) && (m_AccountsDBModule->IsRecordsetEnd()==false))
 	{
-		//·¢ËÍĞÅÏ¢
+		//å‘é€ä¿¡æ¯
 		if ((wPacketSize+sizeof(STR_CMD_LC_CLUB_ROOM_LIST))>sizeof(cbBuffer))
 		{
 			g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_ROOM_LIST,dwContextID,cbBuffer,wPacketSize);
 			wPacketSize=0;
 		}
 
-		//¶ÁÈ¡ĞÅÏ¢
+		//è¯»å–ä¿¡æ¯
 		pDBO=(STR_CMD_LC_CLUB_ROOM_LIST *)(cbBuffer+wPacketSize);
-		pDBO->dwRoomID=m_AccountsDBAide.GetValue_DWORD(TEXT("RoomID"));
-		DWORD dwGameID =m_AccountsDBAide.GetValue_DWORD(TEXT("GameID"));
+		pDBO->dwRoomID=m_AccountsDBModule.GetValue_DWORD(TEXT("RoomID"));
+		DWORD dwGameID =m_AccountsDBModule.GetValue_DWORD(TEXT("GameID"));
 		pDBO->dwKindID = (dwGameID >> 16);
 
-		BYTE byMode = m_AccountsDBAide.GetValue_BYTE(TEXT("ModeID"));
+		BYTE byMode = m_AccountsDBModule.GetValue_BYTE(TEXT("ModeID"));
 		pDBO->byGoldOrFK = 1;
-		if(0 == byMode) //·¿¿¨³¡  ÊÇ¾ãÀÖ²¿ÖĞµÄ·¿¿¨³É
+		if(0 == byMode) //æˆ¿å¡åœº  æ˜¯ä¿±ä¹éƒ¨ä¸­çš„æˆ¿å¡æˆ
 		{
 			pDBO->byGoldOrFK = 1;
 		}
-		else if(3 == byMode) //·¿¿¨½ğ±Ò³¡  ÊÇ¾ãÀÖ²¿ÖĞ½ğ±Ò³¡
+		else if(3 == byMode) //æˆ¿å¡é‡‘å¸åœº  æ˜¯ä¿±ä¹éƒ¨ä¸­é‡‘å¸åœº
 		{
 			pDBO->byGoldOrFK = 2;
 		}
 
-		m_AccountsDBAide.GetValue_String(TEXT("KindName"),pDBO->szKindName,CountArray(pDBO->szKindName));
-		m_AccountsDBAide.GetValue_String(TEXT("RoomName"),pDBO->szRoomName,CountArray(pDBO->szRoomName));
+		m_AccountsDBModule.GetValue_String(TEXT("KindName"),pDBO->szKindName,CountArray(pDBO->szKindName));
+		m_AccountsDBModule.GetValue_String(TEXT("RoomName"),pDBO->szRoomName,CountArray(pDBO->szRoomName));
 
-		pDBO->wPlayerNum=m_AccountsDBAide.GetValue_WORD(TEXT("PlayerNum"));
-		m_AccountsDBAide.GetValue_String(TEXT("RoomRule"),pDBO->szRoomRule,CountArray(pDBO->szRoomRule));
-		pDBO->byAllRound=m_AccountsDBAide.GetValue_BYTE(TEXT("AllRound"));
-		pDBO->byChairNum=m_AccountsDBAide.GetValue_BYTE(TEXT("ChairNum"));
+		pDBO->wPlayerNum=m_AccountsDBModule.GetValue_WORD(TEXT("PlayerNum"));
+		m_AccountsDBModule.GetValue_String(TEXT("RoomRule"),pDBO->szRoomRule,CountArray(pDBO->szRoomRule));
+		pDBO->byAllRound=m_AccountsDBModule.GetValue_BYTE(TEXT("AllRound"));
+		pDBO->byChairNum=m_AccountsDBModule.GetValue_BYTE(TEXT("ChairNum"));
 
-		pDBO->bDissolve=m_AccountsDBAide.GetValue_BYTE(TEXT("DissolveMinute"));
-		pDBO->dwDissolveTime=m_AccountsDBAide.GetValue_DWORD(TEXT("DissolveMinute"));
+		pDBO->bDissolve=m_AccountsDBModule.GetValue_BYTE(TEXT("DissolveMinute"));
+		pDBO->dwDissolveTime=m_AccountsDBModule.GetValue_DWORD(TEXT("DissolveMinute"));
 
-		pDBO->dwAmount=m_AccountsDBAide.GetValue_DWORD(TEXT("ServiceGold"));
-		pDBO->dwOwnerPercentage=m_AccountsDBAide.GetValue_DWORD(TEXT("Revenue"));
+		pDBO->dwAmount=m_AccountsDBModule.GetValue_DWORD(TEXT("ServiceGold"));
+		pDBO->dwOwnerPercentage=m_AccountsDBModule.GetValue_DWORD(TEXT("Revenue"));
 
-		pDBO->byMask=m_AccountsDBAide.GetValue_BYTE(TEXT("Mask"));
-		pDBO->dwDizhu=m_AccountsDBAide.GetValue_DWORD(TEXT("Dizhu"));
-		pDBO->dwGold=m_AccountsDBAide.GetValue_DWORD(TEXT("Gold"));
+		pDBO->byMask=m_AccountsDBModule.GetValue_BYTE(TEXT("Mask"));
+		pDBO->dwDizhu=m_AccountsDBModule.GetValue_DWORD(TEXT("Dizhu"));
+		pDBO->dwGold=m_AccountsDBModule.GetValue_DWORD(TEXT("Gold"));
 
-		//ÉèÖÃÎ»ÒÆ
+		//è®¾ç½®ä½ç§»
 		wPacketSize+=sizeof(STR_CMD_LC_CLUB_ROOM_LIST);
 
-		//ÒÆ¶¯¼ÇÂ¼
+		//ç§»åŠ¨è®°å½•
 		m_AccountsDBModule->MoveToNext();
 	}
 	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_ROOM_LIST,dwContextID,cbBuffer,wPacketSize);
@@ -2627,53 +2625,53 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_LIST(DWORD dwContextID, VOID * pDa
 	return true;
 }
 
-//²éÑ¯Î´ÂúÔ±, Ëæ»úÅÆÓÑÈ¦(×î´ó9¸ö)
+//æŸ¥è¯¢æœªæ»¡å‘˜, éšæœºç‰Œå‹åœˆ(æœ€å¤§9ä¸ª)
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_RANDOM_CLUB_LIST(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize!=sizeof(STR_SUB_CL_CLUB_RANDOM_CLUB_LIST)) return false;
 	STR_SUB_CL_CLUB_RANDOM_CLUB_LIST *pDBR = (STR_SUB_CL_CLUB_RANDOM_CLUB_LIST*) pData;
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.AddParameter(TEXT("@Mystery"),_MYSTERY);
-	m_AccountsDBAide.AddParameter(TEXT("@UserID"),pDBR->dwUserID);
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.AddParameter(TEXT("@Mystery"),_MYSTERY);
+	m_AccountsDBModule.AddParameter(TEXT("@UserID"),pDBR->dwUserID);
 
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_RANDOM_CLUB_LIST"),true);
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_RANDOM_CLUB_LIST"),true);
 
-	//ÁĞ±í·¢ËÍ
+	//åˆ—è¡¨å‘é€
 	WORD wPacketSize=0;
 	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
 	wPacketSize=0;
 	STR_CMD_LC_CLUB_RANDOM_CLUB_LIST * pDBO=NULL;
 	while (m_AccountsDBModule->IsRecordsetEnd()==false)
 	{
-		//·¢ËÍĞÅÏ¢
+		//å‘é€ä¿¡æ¯
 		if ((wPacketSize+sizeof(STR_CMD_LC_CLUB_RANDOM_CLUB_LIST))>sizeof(cbBuffer))
 		{
 			g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_RANDOM_CLUB_LIST,dwContextID,cbBuffer,wPacketSize);
 			wPacketSize=0;
 		}
 
-		//¶ÁÈ¡ĞÅÏ¢
+		//è¯»å–ä¿¡æ¯
 		pDBO=(STR_CMD_LC_CLUB_RANDOM_CLUB_LIST *)(cbBuffer+wPacketSize);
-		pDBO->dwClubID = m_AccountsDBAide.GetValue_DWORD(TEXT("ClubID"));
-		m_AccountsDBAide.GetValue_String(TEXT("ClubName"),pDBO->szClubName,CountArray(pDBO->szClubName));
-		pDBO->dwMajorKindID=m_AccountsDBAide.GetValue_DWORD(TEXT("MajorKindID"));
-		//TODONOW ManiorKindID ĞèÒª×ª»»
+		pDBO->dwClubID = m_AccountsDBModule.GetValue_DWORD(TEXT("ClubID"));
+		m_AccountsDBModule.GetValue_String(TEXT("ClubName"),pDBO->szClubName,CountArray(pDBO->szClubName));
+		pDBO->dwMajorKindID=m_AccountsDBModule.GetValue_DWORD(TEXT("MajorKindID"));
+		//TODONOW ManiorKindID éœ€è¦è½¬æ¢
 		//KINDID
-		pDBO->byClubLevel=m_AccountsDBAide.GetValue_BYTE(TEXT("ClubLevel"));
-		pDBO->wMemberNum=m_AccountsDBAide.GetValue_WORD(TEXT("MemberNum"));
-		m_AccountsDBAide.GetValue_String(TEXT("Notice"),pDBO->szNotice,CountArray(pDBO->szNotice));
-		m_AccountsDBAide.GetValue_String(TEXT("Message"),pDBO->szMessage,CountArray(pDBO->szMessage));
-		pDBO->dwClubOwner=m_AccountsDBAide.GetValue_DWORD(TEXT("ClubOwner"));
-		m_AccountsDBAide.GetValue_String(TEXT("ClubOwnerName"),pDBO->szClubOwnerName,CountArray(pDBO->szClubOwnerName));
+		pDBO->byClubLevel=m_AccountsDBModule.GetValue_BYTE(TEXT("ClubLevel"));
+		pDBO->wMemberNum=m_AccountsDBModule.GetValue_WORD(TEXT("MemberNum"));
+		m_AccountsDBModule.GetValue_String(TEXT("Notice"),pDBO->szNotice,CountArray(pDBO->szNotice));
+		m_AccountsDBModule.GetValue_String(TEXT("Message"),pDBO->szMessage,CountArray(pDBO->szMessage));
+		pDBO->dwClubOwner=m_AccountsDBModule.GetValue_DWORD(TEXT("ClubOwner"));
+		m_AccountsDBModule.GetValue_String(TEXT("ClubOwnerName"),pDBO->szClubOwnerName,CountArray(pDBO->szClubOwnerName));
 
-		//ÉèÖÃÎ»ÒÆ
+		//è®¾ç½®ä½ç§»
 		wPacketSize+=sizeof(STR_CMD_LC_CLUB_RANDOM_CLUB_LIST);
 
-		//ÒÆ¶¯¼ÇÂ¼
+		//ç§»åŠ¨è®°å½•
 		m_AccountsDBModule->MoveToNext();
 	}
 	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_RANDOM_CLUB_LIST,dwContextID,cbBuffer,wPacketSize);
@@ -2683,32 +2681,32 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_RANDOM_CLUB_LIST(DWORD dwContextID, VOI
 	return true;
 }
 
-//ÉêÇë¼ÓÈëÅÆÓÑÈ¦
+//ç”³è¯·åŠ å…¥ç‰Œå‹åœˆ
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_JOIN_CLUB(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_SUB_CL_CLUB_JOIN_CLUB)) return false;
 	STR_SUB_CL_CLUB_JOIN_CLUB *pDbr = (STR_SUB_CL_CLUB_JOIN_CLUB*)pData;
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.AddParameter(TEXT("@Mystery"),_MYSTERY);
-	m_AccountsDBAide.AddParameter(TEXT("@UserID"),pDbr->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("@ClubID"),pDbr->dwClubID);
-	m_AccountsDBAide.AddParameter(TEXT("@Note"),pDbr->szNote);
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.AddParameter(TEXT("@Mystery"),_MYSTERY);
+	m_AccountsDBModule.AddParameter(TEXT("@UserID"),pDbr->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("@ClubID"),pDbr->dwClubID);
+	m_AccountsDBModule.AddParameter(TEXT("@Note"),pDbr->szNote);
 
-	//Êä³ö²ÎÊı
+	//è¾“å‡ºå‚æ•°
 	TCHAR szDescribeString[128]=TEXT("");
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_JOIN_CLUB"),true);
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_JOIN_CLUB"),true);
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
-	m_AccountsDBAide.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
+	m_AccountsDBModule.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
-	//½á¹¹Ìå¹¹Ôì
+	//ç»“æ„ä½“æ„é€ 
 	STR_CMD_LC_CLUB_JOIN_CLUB CMD;
 	ZeroMemory(&CMD, sizeof(CMD));
 	CMD.lResultCode = lResultCode;
@@ -2717,15 +2715,15 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_JOIN_CLUB(DWORD dwContextID, VOID * pDa
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_JOIN_CLUB,dwContextID,&CMD,sizeof(CMD));
 
 
-	/* ÉêÇë¼ÓÈëÅÆÓÑÈ¦ ¹ã²¥ */
+	/* ç”³è¯·åŠ å…¥ç‰Œå‹åœˆ å¹¿æ’­ */
 	if(lResultCode == DB_SUCCESS)
 	{
 		STR_SUB_CL_CLUB_JOIN_CLUB_BDCAST CMD2;
 		CMD2.dwClubID = pDbr->dwClubID;
-		CMD2.dwApplicantNum = m_AccountsDBAide.GetValue_DWORD(TEXT("ApplicantNum"));
+		CMD2.dwApplicantNum = m_AccountsDBModule.GetValue_DWORD(TEXT("ApplicantNum"));
 
-		//Èç¹ûÊÇ×Ô¶¯¼ÓÈë¾ãÀÖ²¿, ÔòÍ¨Öª¿Í»§¶ËË¢ĞÂ
-		BYTE byMask = m_AccountsDBAide.GetValue_BYTE(TEXT("mask"));
+		//å¦‚æœæ˜¯è‡ªåŠ¨åŠ å…¥ä¿±ä¹éƒ¨, åˆ™é€šçŸ¥å®¢æˆ·ç«¯åˆ·æ–°
+		BYTE byMask = m_AccountsDBModule.GetValue_BYTE(TEXT("mask"));
 		if(1 == byMask )
 		{
 			STR_CMD_LC_CLUB_LIST_RE CMD3;
@@ -2738,32 +2736,32 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_JOIN_CLUB(DWORD dwContextID, VOID * pDa
 	return true;
 }
 
-//ÅÆÓÑÈ¦¹«¸æ
+//ç‰Œå‹åœˆå…¬å‘Š
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_NOTICE(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_SUB_CL_CLUB_NOTICE)) return false;
 	STR_SUB_CL_CLUB_NOTICE* pDbr = (STR_SUB_CL_CLUB_NOTICE*) pData;
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
-	m_AccountsDBAide.AddParameter(TEXT("Notice"),pDbr->szNotice);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.AddParameter(TEXT("UserID"),pDbr->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
+	m_AccountsDBModule.AddParameter(TEXT("Notice"),pDbr->szNotice);
 
-	//Êä³ö²ÎÊı
+	//è¾“å‡ºå‚æ•°
 	TCHAR szDescribeString[128]=TEXT("");
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_NOTICE"),true);
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_NOTICE"),true);
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
-	m_AccountsDBAide.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
+	m_AccountsDBModule.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
-	//½á¹¹Ìå¹¹Ôì
+	//ç»“æ„ä½“æ„é€ 
 	STR_CMD_LC_CLUB_NOTICE CMD;
 	ZeroMemory(&CMD, sizeof(CMD));
 	CMD.lResultCode = lResultCode;
@@ -2773,32 +2771,32 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_NOTICE(DWORD dwContextID, VOID * pData,
 	return true;
 }
 
-//ÅÆÓÑÈ¦¼ò½é
+//ç‰Œå‹åœˆç®€ä»‹
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_MESSAGE(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_SUB_CL_CLUB_MESSAGE)) return false;
 	STR_SUB_CL_CLUB_MESSAGE* pDbr = (STR_SUB_CL_CLUB_MESSAGE*) pData;
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
-	m_AccountsDBAide.AddParameter(TEXT("Message"),pDbr->szMessage);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.AddParameter(TEXT("UserID"),pDbr->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
+	m_AccountsDBModule.AddParameter(TEXT("Message"),pDbr->szMessage);
 
-	//Êä³ö²ÎÊı
+	//è¾“å‡ºå‚æ•°
 	TCHAR szDescribeString[128]=TEXT("");
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_MESSAGE"),true);
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_MESSAGE"),true);
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
-	m_AccountsDBAide.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
+	m_AccountsDBModule.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
-	//½á¹¹Ìå¹¹Ôì
+	//ç»“æ„ä½“æ„é€ 
 	STR_CMD_LC_CLUB_MESSAGE CMD;
 	ZeroMemory(&CMD, sizeof(CMD));
 	CMD.lResultCode = lResultCode;
@@ -2808,70 +2806,70 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_MESSAGE(DWORD dwContextID, VOID * pData
 	return true;
 }
 
-//¹±Ï×·¿¿¨
+//è´¡çŒ®æˆ¿å¡
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_CONTRIBUTE_FK(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_SUB_CL_CLUB_CONTRIBUTE_FK)) return false;
 	STR_SUB_CL_CLUB_CONTRIBUTE_FK* pDbr = (STR_SUB_CL_CLUB_CONTRIBUTE_FK*) pData;
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
-	m_AccountsDBAide.AddParameter(TEXT("FK"),pDbr->dwFK);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.AddParameter(TEXT("UserID"),pDbr->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
+	m_AccountsDBModule.AddParameter(TEXT("FK"),pDbr->dwFK);
 
-	//Êä³ö²ÎÊı
+	//è¾“å‡ºå‚æ•°
 	TCHAR szDescribeString[128]=TEXT("");
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_CONTRIBUTE_FK"),true);
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_CONTRIBUTE_FK"),true);
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
-	m_AccountsDBAide.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
+	m_AccountsDBModule.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
-	//½á¹¹Ìå¹¹Ôì
+	//ç»“æ„ä½“æ„é€ 
 	STR_CMD_LC_CLUB_CONTRIBUTE_FK CMD;
 	ZeroMemory(&CMD, sizeof(CMD));
 	CMD.lResultCode = lResultCode;
 	lstrcpyn(CMD.szDescribe,CW2CT(DBVarValue.bstrVal),CountArray(CMD.szDescribe));
-	CMD.dwClubFK=m_AccountsDBAide.GetValue_DWORD(TEXT("ClubFK"));
+	CMD.dwClubFK=m_AccountsDBModule.GetValue_DWORD(TEXT("ClubFK"));
 
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_CONTRIBUTE_FK,dwContextID,&CMD,sizeof(CMD));
 	return true;
 }
 
-//ÅÆÓÑÈ¦ÉèÖÃ
+//ç‰Œå‹åœˆè®¾ç½®
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_AUTO_AGREE(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_SUB_CL_CLUB_AUTO_AGREE)) return false;
 	STR_SUB_CL_CLUB_AUTO_AGREE* pDbr = (STR_SUB_CL_CLUB_AUTO_AGREE*) pData;
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
-	m_AccountsDBAide.AddParameter(TEXT("AutoAgree"),pDbr->byAutoAgree);
-	m_AccountsDBAide.AddParameter(TEXT("Sex"),pDbr->bySex);
-	m_AccountsDBAide.AddParameter(TEXT("Level"),pDbr->wLevel);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.AddParameter(TEXT("UserID"),pDbr->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
+	m_AccountsDBModule.AddParameter(TEXT("AutoAgree"),pDbr->byAutoAgree);
+	m_AccountsDBModule.AddParameter(TEXT("Sex"),pDbr->bySex);
+	m_AccountsDBModule.AddParameter(TEXT("Level"),pDbr->wLevel);
 
-	//Êä³ö²ÎÊı
+	//è¾“å‡ºå‚æ•°
 	TCHAR szDescribeString[128]=TEXT("");
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_AUTO_AGREE"),true);
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_AUTO_AGREE"),true);
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
-	m_AccountsDBAide.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
+	m_AccountsDBModule.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
-	//½á¹¹Ìå¹¹Ôì
+	//ç»“æ„ä½“æ„é€ 
 	STR_CMD_LC_CLUB_AUTO_AGREE CMD;
 	ZeroMemory(&CMD, sizeof(CMD));
 	CMD.lResultCode = lResultCode;
@@ -2881,33 +2879,33 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_AUTO_AGREE(DWORD dwContextID, VOID * pD
 	return true;
 }
 
-//ÑûÇëËûÈË¼ÓÈëÅÆÓÑÈ¦
+//é‚€è¯·ä»–äººåŠ å…¥ç‰Œå‹åœˆ
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_INVITE(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_SUB_CL_CLUB_INVITE)) return false;
 	STR_SUB_CL_CLUB_INVITE* pDbr = (STR_SUB_CL_CLUB_INVITE*) pData;
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.AddParameter(TEXT("Mystery"),_MYSTERY);
-	m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
-	m_AccountsDBAide.AddParameter(TEXT("TagID"),pDbr->dwTagID);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.AddParameter(TEXT("Mystery"),_MYSTERY);
+	m_AccountsDBModule.AddParameter(TEXT("UserID"),pDbr->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
+	m_AccountsDBModule.AddParameter(TEXT("TagID"),pDbr->dwTagID);
 
-	//Êä³ö²ÎÊı
+	//è¾“å‡ºå‚æ•°
 	TCHAR szDescribeString[128]=TEXT("");
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_INVITE"),true);
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_INVITE"),true);
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
-	m_AccountsDBAide.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
+	m_AccountsDBModule.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
-	//½á¹¹Ìå¹¹Ôì
+	//ç»“æ„ä½“æ„é€ 
 	STR_CMD_LC_CLUB_INVITE CMD;
 	ZeroMemory(&CMD, sizeof(CMD));
 	CMD.lResultCode = lResultCode;
@@ -2916,7 +2914,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_INVITE(DWORD dwContextID, VOID * pData,
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_INVITE,dwContextID,&CMD,sizeof(CMD));
 
 
-	/* ±»ÑûÇëÈËµÄÌáĞÑ */
+	/* è¢«é‚€è¯·äººçš„æé†’ */
 	STR_CMD_LC_CLUB_INVITE_REMIND CMD2;
 	CMD2.dwTagID = pDbr->dwTagID;
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_INVITE_REMIND,dwContextID,&CMD2,sizeof(CMD2));
@@ -2924,32 +2922,32 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_INVITE(DWORD dwContextID, VOID * pData,
 	return true;
 }
 
-//±»ÑûÇëÈË»Ø¸´
+//è¢«é‚€è¯·äººå›å¤
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_INVITE_RESULT(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_SUB_CL_CLUB_INVITE_RESULT)) return false;
 	STR_SUB_CL_CLUB_INVITE_RESULT* pDbr = (STR_SUB_CL_CLUB_INVITE_RESULT*) pData;
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
-	m_AccountsDBAide.AddParameter(TEXT("Agree"),pDbr->byAgree);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.AddParameter(TEXT("UserID"),pDbr->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
+	m_AccountsDBModule.AddParameter(TEXT("Agree"),pDbr->byAgree);
 
-	//Êä³ö²ÎÊı
+	//è¾“å‡ºå‚æ•°
 	TCHAR szDescribeString[128]=TEXT("");
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_INVITE_RESULT"),true);
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_INVITE_RESULT"),true);
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
-	m_AccountsDBAide.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
+	m_AccountsDBModule.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
-	//½á¹¹Ìå¹¹Ôì
+	//ç»“æ„ä½“æ„é€ 
 	STR_CMD_LC_CLUB_INVITE_RESULT CMD;
 	ZeroMemory(&CMD, sizeof(CMD));
 	CMD.lResultCode = lResultCode;
@@ -2960,53 +2958,53 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_INVITE_RESULT(DWORD dwContextID, VOID *
 	return true;
 }
 
-//±»ÑûÇëÈË²é¿´×Ô¼ºµÄÑûÇëÁĞ±í
+//è¢«é‚€è¯·äººæŸ¥çœ‹è‡ªå·±çš„é‚€è¯·åˆ—è¡¨
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_INQUERY_LIST(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_SUB_CL_CLUB_INQUERY_LIST)) return false;
 	STR_SUB_CL_CLUB_INQUERY_LIST* pDbr = (STR_SUB_CL_CLUB_INQUERY_LIST*) pData;
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.AddParameter(TEXT("UserID"),pDbr->dwUserID);
 
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_INQUERY_LIST"),true);
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_INQUERY_LIST"),true);
 
-	//·¢ËÍÁĞ±í
+	//å‘é€åˆ—è¡¨
 	WORD wPacketSize=0;
 	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
 	wPacketSize=0;
 	STR_CMD_LC_CLUB_INQUERY_LIST * pDBO=NULL;
 	while (m_AccountsDBModule->IsRecordsetEnd()==false)
 	{
-		//·¢ËÍĞÅÏ¢
+		//å‘é€ä¿¡æ¯
 		if ((wPacketSize+sizeof(STR_CMD_LC_CLUB_INQUERY_LIST))>sizeof(cbBuffer))
 		{
 			g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_INQUERY_LIST,dwContextID,cbBuffer,wPacketSize);
 			wPacketSize=0;
 		}
 
-		//¶ÁÈ¡ĞÅÏ¢
+		//è¯»å–ä¿¡æ¯
 		pDBO=(STR_CMD_LC_CLUB_INQUERY_LIST *)(cbBuffer+wPacketSize);
-		pDBO->dwClubID = m_AccountsDBAide.GetValue_DWORD(TEXT("ClubID"));
-		m_AccountsDBAide.GetValue_String(TEXT("ClubName"),pDBO->szClubName,CountArray(pDBO->szClubName));
-		pDBO->dwMajorKindID=m_AccountsDBAide.GetValue_DWORD(TEXT("MajorKindID"));
-		//TODONOW ManiorKindID ĞèÒª×ª»»
+		pDBO->dwClubID = m_AccountsDBModule.GetValue_DWORD(TEXT("ClubID"));
+		m_AccountsDBModule.GetValue_String(TEXT("ClubName"),pDBO->szClubName,CountArray(pDBO->szClubName));
+		pDBO->dwMajorKindID=m_AccountsDBModule.GetValue_DWORD(TEXT("MajorKindID"));
+		//TODONOW ManiorKindID éœ€è¦è½¬æ¢
 		//KINDID
-		pDBO->byClubLevel=m_AccountsDBAide.GetValue_BYTE(TEXT("ClubLevel"));
-		pDBO->wMemberNum=m_AccountsDBAide.GetValue_WORD(TEXT("MemberNum"));
-		m_AccountsDBAide.GetValue_String(TEXT("Notice"),pDBO->szNotice,CountArray(pDBO->szNotice));
-		m_AccountsDBAide.GetValue_String(TEXT("Message"),pDBO->szMessage,CountArray(pDBO->szMessage));
-		pDBO->dwClubOwner=m_AccountsDBAide.GetValue_DWORD(TEXT("ClubOwner"));
-		m_AccountsDBAide.GetValue_String(TEXT("ClubOwnerName"),pDBO->szClubOwnerName,CountArray(pDBO->szClubOwnerName));
+		pDBO->byClubLevel=m_AccountsDBModule.GetValue_BYTE(TEXT("ClubLevel"));
+		pDBO->wMemberNum=m_AccountsDBModule.GetValue_WORD(TEXT("MemberNum"));
+		m_AccountsDBModule.GetValue_String(TEXT("Notice"),pDBO->szNotice,CountArray(pDBO->szNotice));
+		m_AccountsDBModule.GetValue_String(TEXT("Message"),pDBO->szMessage,CountArray(pDBO->szMessage));
+		pDBO->dwClubOwner=m_AccountsDBModule.GetValue_DWORD(TEXT("ClubOwner"));
+		m_AccountsDBModule.GetValue_String(TEXT("ClubOwnerName"),pDBO->szClubOwnerName,CountArray(pDBO->szClubOwnerName));
 
-		//ÉèÖÃÎ»ÒÆ
+		//è®¾ç½®ä½ç§»
 		wPacketSize+=sizeof(STR_CMD_LC_CLUB_INQUERY_LIST);
 
-		//ÒÆ¶¯¼ÇÂ¼
+		//ç§»åŠ¨è®°å½•
 		m_AccountsDBModule->MoveToNext();
 	}
 	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_INQUERY_LIST,dwContextID,cbBuffer,wPacketSize);
@@ -3015,49 +3013,49 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_INQUERY_LIST(DWORD dwContextID, VOID * 
 	return true;
 }
 
-//ÉêÇëÈËÁĞ±í
+//ç”³è¯·äººåˆ—è¡¨
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_APPLICANT_LIST(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_SUB_CL_CLUB_APPLICANT_LIST)) return false;
 	STR_SUB_CL_CLUB_APPLICANT_LIST* pDbr = (STR_SUB_CL_CLUB_APPLICANT_LIST*) pData;
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.AddParameter(TEXT("UserID"),pDbr->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
 
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_APPLICANT_LIST"),true);
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_APPLICANT_LIST"),true);
 
-	//·¢ËÍÁĞ±í
+	//å‘é€åˆ—è¡¨
 	WORD wPacketSize=0;
 	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
 	wPacketSize=0;
 	STR_CMD_LC_CLUB_APPLICANT_LIST * pDBO=NULL;
 	while (m_AccountsDBModule->IsRecordsetEnd()==false)
 	{
-		//·¢ËÍĞÅÏ¢
+		//å‘é€ä¿¡æ¯
 		if ((wPacketSize+sizeof(STR_CMD_LC_CLUB_APPLICANT_LIST))>sizeof(cbBuffer))
 		{
 			g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_APPLICANT_LIST,dwContextID,cbBuffer,wPacketSize);
 			wPacketSize=0;
 		}
 
-		//¶ÁÈ¡ĞÅÏ¢
+		//è¯»å–ä¿¡æ¯
 		pDBO=(STR_CMD_LC_CLUB_APPLICANT_LIST *)(cbBuffer+wPacketSize);
-		pDBO->dwUserID = m_AccountsDBAide.GetValue_DWORD(TEXT("UserID"));
-		m_AccountsDBAide.GetValue_String(TEXT("UserName"),pDBO->szUserName,CountArray(pDBO->szUserName));
-		pDBO->byUserSex=m_AccountsDBAide.GetValue_BYTE(TEXT("UserSex"));
-		pDBO->byUserLevel=m_AccountsDBAide.GetValue_BYTE(TEXT("UserLevel"));
-		m_AccountsDBAide.GetValue_String(TEXT("Note"),pDBO->szNote,CountArray(pDBO->szNote));
-		m_AccountsDBAide.GetValue_String(TEXT("HeadUrl"),pDBO->szHeadUrl,CountArray(pDBO->szHeadUrl));
+		pDBO->dwUserID = m_AccountsDBModule.GetValue_DWORD(TEXT("UserID"));
+		m_AccountsDBModule.GetValue_String(TEXT("UserName"),pDBO->szUserName,CountArray(pDBO->szUserName));
+		pDBO->byUserSex=m_AccountsDBModule.GetValue_BYTE(TEXT("UserSex"));
+		pDBO->byUserLevel=m_AccountsDBModule.GetValue_BYTE(TEXT("UserLevel"));
+		m_AccountsDBModule.GetValue_String(TEXT("Note"),pDBO->szNote,CountArray(pDBO->szNote));
+		m_AccountsDBModule.GetValue_String(TEXT("HeadUrl"),pDBO->szHeadUrl,CountArray(pDBO->szHeadUrl));
 
-		//ÉèÖÃÎ»ÒÆ
+		//è®¾ç½®ä½ç§»
 		wPacketSize+=sizeof(STR_CMD_LC_CLUB_APPLICANT_LIST);
 
-		//ÒÆ¶¯¼ÇÂ¼
+		//ç§»åŠ¨è®°å½•
 		m_AccountsDBModule->MoveToNext();
 	}
 	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_APPLICANT_LIST,dwContextID,cbBuffer,wPacketSize);
@@ -3066,40 +3064,40 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_APPLICANT_LIST(DWORD dwContextID, VOID 
 	return true;
 }
 
-//Ö°ÎñÈÎÃâ
+//èŒåŠ¡ä»»å…
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_APPOINTMENT(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_SUB_CL_CLUB_APPOINTMENT)) return false;
 	STR_SUB_CL_CLUB_APPOINTMENT* pDbr = (STR_SUB_CL_CLUB_APPOINTMENT*) pData;
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
-	m_AccountsDBAide.AddParameter(TEXT("TagID"),pDbr->dwTagID);
-	m_AccountsDBAide.AddParameter(TEXT("Action"),pDbr->byAction);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.AddParameter(TEXT("UserID"),pDbr->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
+	m_AccountsDBModule.AddParameter(TEXT("TagID"),pDbr->dwTagID);
+	m_AccountsDBModule.AddParameter(TEXT("Action"),pDbr->byAction);
 
-	//Êä³ö²ÎÊı
+	//è¾“å‡ºå‚æ•°
 	TCHAR szDescribeString[128]=TEXT("");
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_APPOINTMENT"),true);
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_APPOINTMENT"),true);
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
-	m_AccountsDBAide.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
+	m_AccountsDBModule.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
-	//·¢ËÍ·µ»Ø
+	//å‘é€è¿”å›
 	STR_CMD_LC_CLUB_APPOINTMENT CMD;
 	ZeroMemory(&CMD, sizeof(CMD));
 	CMD.lResultCode = lResultCode;
 	lstrcpyn(CMD.szDescribe,CW2CT(DBVarValue.bstrVal),CountArray(CMD.szDescribe));
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_APPOINTMENT,dwContextID,&CMD,sizeof(CMD));
 
-	//·¢ËÍÌáĞÑ
+	//å‘é€æé†’
 	STR_CMD_LC_CLUB_APPOINTMENT_NOTE CMD2;
 	CMD2.byAction = pDbr->byAction;
 	CMD2.dwUserID = pDbr->dwTagID;
@@ -3109,40 +3107,40 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_APPOINTMENT(DWORD dwContextID, VOID * p
 	return true;
 }
 
-//¹¤»áÕ½¼¨Í³¼Æ
+//å·¥ä¼šæˆ˜ç»©ç»Ÿè®¡
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_RECORD_LIST(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_SUB_CL_CLUB_RECORD_LIST)) return false;
 	STR_SUB_CL_CLUB_RECORD_LIST *pDbr = (STR_SUB_CL_CLUB_RECORD_LIST * )pData;
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
-	m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("dwClubID"),pDbr->dwClubID);
-	m_AccountsDBAide.AddParameter(TEXT("tmQueryStartData"),pDbr->tmQueryStartData);
-	m_AccountsDBAide.AddParameter(TEXT("tmQueryEndData"),pDbr->tmQueryEndData);
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
+	m_AccountsDBModule.AddParameter(TEXT("UserID"),pDbr->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("dwClubID"),pDbr->dwClubID);
+	m_AccountsDBModule.AddParameter(TEXT("tmQueryStartData"),pDbr->tmQueryStartData);
+	m_AccountsDBModule.AddParameter(TEXT("tmQueryEndData"),pDbr->tmQueryEndData);
 
-	LONG lResultCode2 = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_RECORD_LIST"),true);
+	LONG lResultCode2 = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_RECORD_LIST"),true);
 
-	//·¢ËÍÁĞ±í
+	//å‘é€åˆ—è¡¨
 	WORD wPacketSize=0;
 	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
 	wPacketSize=0;
 	STR_CMD_LC_CLUB_RECORD_LIST * pDBO=NULL;
 	while ( (lResultCode2 == DB_SUCCESS) && (m_AccountsDBModule->IsRecordsetEnd()==false))
 	{
-		//·¢ËÍĞÅÏ¢
+		//å‘é€ä¿¡æ¯
 		if ((wPacketSize+sizeof(STR_CMD_LC_CLUB_RECORD_LIST))>sizeof(cbBuffer))
 		{
 			g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_RECORD_LIST,dwContextID,cbBuffer,wPacketSize);
 			wPacketSize=0;
 		}
 
-		//¶ÁÈ¡ĞÅÏ¢
+		//è¯»å–ä¿¡æ¯
 		pDBO=(STR_CMD_LC_CLUB_RECORD_LIST *)(cbBuffer+wPacketSize);
-		BYTE gameMode  = m_AccountsDBAide.GetValue_BYTE(TEXT("ModeID"));
-		//0·¿¿¨  1¾º¼¼  2½ğ±Ò 3·¿¿¨½ğ±Ò
+		BYTE gameMode  = m_AccountsDBModule.GetValue_BYTE(TEXT("ModeID"));
+		//0æˆ¿å¡  1ç«æŠ€  2é‡‘å¸ 3æˆ¿å¡é‡‘å¸
 		if(0 == gameMode)
 		{
 			pDBO->byMask = 1;
@@ -3152,63 +3150,63 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_RECORD_LIST(DWORD dwContextID, VOID * p
 			pDBO->byMask = 2;
 		}
 
-		pDBO->dwUserID=m_AccountsDBAide.GetValue_DWORD(TEXT("UserID"));
+		pDBO->dwUserID=m_AccountsDBModule.GetValue_DWORD(TEXT("UserID"));
 
-		m_AccountsDBAide.GetValue_String(TEXT("NickName"),pDBO->szNickName,CountArray(pDBO->szNickName));
-		m_AccountsDBAide.GetValue_String(TEXT("HeadUrl"),pDBO->szHeadUrl,CountArray(pDBO->szHeadUrl));
+		m_AccountsDBModule.GetValue_String(TEXT("NickName"),pDBO->szNickName,CountArray(pDBO->szNickName));
+		m_AccountsDBModule.GetValue_String(TEXT("HeadUrl"),pDBO->szHeadUrl,CountArray(pDBO->szHeadUrl));
 
-		pDBO->dwAllCount = m_AccountsDBAide.GetValue_DWORD(TEXT("AllCount"));
-		pDBO->lAllScore=m_AccountsDBAide.GetValue_LONGLONG(TEXT("AllScore"));
-		pDBO->dwWinCount = m_AccountsDBAide.GetValue_DWORD(TEXT("WinCount"));
-		pDBO->lWinScore=m_AccountsDBAide.GetValue_LONGLONG(TEXT("WinScore"));
+		pDBO->dwAllCount = m_AccountsDBModule.GetValue_DWORD(TEXT("AllCount"));
+		pDBO->lAllScore=m_AccountsDBModule.GetValue_LONGLONG(TEXT("AllScore"));
+		pDBO->dwWinCount = m_AccountsDBModule.GetValue_DWORD(TEXT("WinCount"));
+		pDBO->lWinScore=m_AccountsDBModule.GetValue_LONGLONG(TEXT("WinScore"));
 
-		//ÉèÖÃÎ»ÒÆ
+		//è®¾ç½®ä½ç§»
 		wPacketSize+=sizeof(STR_CMD_LC_CLUB_RECORD_LIST);
 
-		//ÒÆ¶¯¼ÇÂ¼
+		//ç§»åŠ¨è®°å½•
 		m_AccountsDBModule->MoveToNext();
 	}
 	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_RECORD_LIST,dwContextID,cbBuffer,wPacketSize);
 
-	//·¢ËÍ½áÊø
+	//å‘é€ç»“æŸ
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_RECORD_FINISH,dwContextID,NULL,0);
 
 	return true;
 }
 
-//ÅÆÓÑÈ¦ÁÄÌì
+//ç‰Œå‹åœˆèŠå¤©
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_CHAT(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_SUB_CL_CLUB_CHAT)) return false;
 	STR_SUB_CL_CLUB_CHAT *pDbr = (STR_SUB_CL_CLUB_CHAT * )pData;
 
-	/* 1. »ñÈ¡·¢ÑÔÕßµÄĞÅÏ¢ */
+	/* 1. è·å–å‘è¨€è€…çš„ä¿¡æ¯ */
 	TCHAR szTempUserNickName[32] = TEXT("");
 	TCHAR szTempHeadUrl[256] = TEXT("");
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
-	m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
+	m_AccountsDBModule.AddParameter(TEXT("UserID"),pDbr->dwUserID);
 
-	LONG lResultCode2 = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_CHAT_GETINFO"),true);
+	LONG lResultCode2 = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_CHAT_GETINFO"),true);
 
 	if(lResultCode2 != DB_SUCCESS)
 	{
 		return true;
 	}
-	m_AccountsDBAide.GetValue_String(TEXT("UserNickName"), szTempUserNickName,CountArray(szTempUserNickName));
-	m_AccountsDBAide.GetValue_String(TEXT("HeadUrl"),szTempHeadUrl,CountArray(szTempHeadUrl));
+	m_AccountsDBModule.GetValue_String(TEXT("UserNickName"), szTempUserNickName,CountArray(szTempUserNickName));
+	m_AccountsDBModule.GetValue_String(TEXT("HeadUrl"),szTempHeadUrl,CountArray(szTempHeadUrl));
 
-	/* 2.·¢ËÍ¸ø¾ãÀÖ²¿ËùÓĞÔÚÏßµÄÈË */
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
-	m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
+	/* 2.å‘é€ç»™ä¿±ä¹éƒ¨æ‰€æœ‰åœ¨çº¿çš„äºº */
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
+	m_AccountsDBModule.AddParameter(TEXT("UserID"),pDbr->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
 
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_CHAT"),true);
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_CHAT"),true);
 
-	//·¢ËÍÁĞ±í
+	//å‘é€åˆ—è¡¨
 	WORD wPacketSize=0;
 	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
 	wPacketSize=0;
@@ -3216,18 +3214,18 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_CHAT(DWORD dwContextID, VOID * pData, W
 
 	while (m_AccountsDBModule->IsRecordsetEnd()==false && lResultCode == DB_SUCCESS)
 	{
-		//·¢ËÍĞÅÏ¢
+		//å‘é€ä¿¡æ¯
 		if ((wPacketSize+sizeof(STR_CMD_LC_CLUB_CHAT_BDCAST))>sizeof(cbBuffer))
 		{
 			g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CHAT_ALL_BDCAST,dwContextID,cbBuffer,wPacketSize);
 			wPacketSize=0;
 		}
 
-		//¶ÁÈ¡ĞÅÏ¢
+		//è¯»å–ä¿¡æ¯
 		pDBO=(STR_CMD_LC_CLUB_CHAT_BDCAST *)(cbBuffer+wPacketSize);
-		pDBO->dwTagID = m_AccountsDBAide.GetValue_DWORD(TEXT("UserID"));
+		pDBO->dwTagID = m_AccountsDBModule.GetValue_DWORD(TEXT("UserID"));
 
-		//ÁÄÌì·¢ÆğÈËµÄĞÅÏ¢
+		//èŠå¤©å‘èµ·äººçš„ä¿¡æ¯
 		pDBO->byChatMode = pDbr->byChatMode;
 		pDBO->dwClubID = pDbr->dwClubID;
 		memcpy(pDBO->szChat, pDbr->szChat, sizeof(pDBO->szChat));
@@ -3235,10 +3233,10 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_CHAT(DWORD dwContextID, VOID * pData, W
 		memcpy(pDBO->szUserNickName, szTempUserNickName, sizeof(pDBO->szUserNickName));
 		memcpy(pDBO->szHeadUrl, szTempHeadUrl, sizeof(pDBO->szHeadUrl));
 
-		//ÉèÖÃÎ»ÒÆ
+		//è®¾ç½®ä½ç§»
 		wPacketSize+=sizeof(STR_CMD_LC_CLUB_CHAT_BDCAST);
 
-		//ÒÆ¶¯¼ÇÂ¼
+		//ç§»åŠ¨è®°å½•
 		m_AccountsDBModule->MoveToNext();
 	}
 	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CHAT_ALL_BDCAST,dwContextID,cbBuffer,wPacketSize);
@@ -3246,36 +3244,36 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_CHAT(DWORD dwContextID, VOID * pData, W
 	STR_CMD_LC_CLUB_CHAT CMD2;
 	CMD2.byChatMode = pDbr->byChatMode;
 	CMD2.lResultCode = lResultCode;
-	memcpy(CMD2.szDescribe, TEXT("·¢ËÍÊ§°Ü, ÉÔºóÖØÊÔ"), sizeof(CMD2));
+	memcpy(CMD2.szDescribe, TEXT("å‘é€å¤±è´¥, ç¨åé‡è¯•"), sizeof(CMD2));
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CHAT_ALL,dwContextID,&CMD2, sizeof(CMD2));
 	return true;
 }
 
-//ÊÀ½çÁÄÌì
+//ä¸–ç•ŒèŠå¤©
 bool CDataBaseEngineSink::On_DBR_CL_WORD_CHAT(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_SUB_CL_CLUB_CHAT)) return false;
 	STR_SUB_CL_CLUB_CHAT *pDbr = (STR_SUB_CL_CLUB_CHAT * )pData;
 
-	/* 1. »ñÈ¡·¢ÑÔÕßµÄĞÅÏ¢ */
+	/* 1. è·å–å‘è¨€è€…çš„ä¿¡æ¯ */
 	TCHAR szTempUserNickName[32] = TEXT("");
 	TCHAR szTempHeadUrl[256] = TEXT("");
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
-	m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
+	m_AccountsDBModule.AddParameter(TEXT("UserID"),pDbr->dwUserID);
 
-	LONG lResultCode2 = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_CHAT_GETINFO"),true);
+	LONG lResultCode2 = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_CHAT_GETINFO"),true);
 
 	if(lResultCode2 != DB_SUCCESS)
 	{
 		return true;
 	}
-	m_AccountsDBAide.GetValue_String(TEXT("UserNickName"), szTempUserNickName,CountArray(szTempUserNickName));
-	m_AccountsDBAide.GetValue_String(TEXT("HeadUrl"),szTempHeadUrl,CountArray(szTempHeadUrl));
+	m_AccountsDBModule.GetValue_String(TEXT("UserNickName"), szTempUserNickName,CountArray(szTempUserNickName));
+	m_AccountsDBModule.GetValue_String(TEXT("HeadUrl"),szTempHeadUrl,CountArray(szTempHeadUrl));
 
-	/* 2. ÁÄÌì¹ã²¥ ·¢ËÍ¸ø¸ÃµÇÂ¼·şËùÓĞÔÚÏßµÄÈË */
+	/* 2. èŠå¤©å¹¿æ’­ å‘é€ç»™è¯¥ç™»å½•æœæ‰€æœ‰åœ¨çº¿çš„äºº */
 	STR_CMD_LC_CLUB_CHAT_BDCAST CMD3;
 	CMD3.byChatMode = pDbr->byChatMode;
 	CMD3.dwClubID = 0;
@@ -3285,41 +3283,41 @@ bool CDataBaseEngineSink::On_DBR_CL_WORD_CHAT(DWORD dwContextID, VOID * pData, W
 	memcpy(CMD3.szChat, pDbr->szChat, sizeof(CMD3.szChat));
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CHAT_ALL_BDCAST,dwContextID,&CMD3, sizeof(CMD3));
 
-	/* 3. ÁÄÌì·µ»Ø */
+	/* 3. èŠå¤©è¿”å› */
 	STR_CMD_LC_CLUB_CHAT CMD2;
 	CMD2.byChatMode = pDbr->byChatMode;
 	CMD2.lResultCode = lResultCode2;
-	memcpy(CMD2.szDescribe, TEXT("·¢ËÍÊ§°Ü, ÉÔºóÖØÊÔ"), sizeof(CMD2));
+	memcpy(CMD2.szDescribe, TEXT("å‘é€å¤±è´¥, ç¨åé‡è¯•"), sizeof(CMD2));
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CHAT_ALL,dwContextID,&CMD2, sizeof(CMD2));
 	return true;
 }
 
-//ÏµÍ³ÁÄÌì -- TODONOW ÔİÊ±²»´¦Àí¸ÃÂß¼­
+//ç³»ç»ŸèŠå¤© -- TODONOW æš‚æ—¶ä¸å¤„ç†è¯¥é€»è¾‘
 bool CDataBaseEngineSink::On_DBR_CL_SYSTEM_CHAT(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_SUB_CL_CLUB_CHAT)) return false;
 	STR_SUB_CL_CLUB_CHAT *pDbr = (STR_SUB_CL_CLUB_CHAT * )pData;
 
-	/* 1. »ñÈ¡·¢ÑÔÕßµÄĞÅÏ¢ */
+	/* 1. è·å–å‘è¨€è€…çš„ä¿¡æ¯ */
 	TCHAR szTempUserNickName[32] = TEXT("");
 	TCHAR szTempHeadUrl[256] = TEXT("");
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
-	m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
+	m_AccountsDBModule.AddParameter(TEXT("UserID"),pDbr->dwUserID);
 
-	LONG lResultCode2 = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_CHAT_GETINFO"),true);
+	LONG lResultCode2 = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_CHAT_GETINFO"),true);
 
 	if(lResultCode2 != DB_SUCCESS)
 	{
 		return true;
 	}
-	m_AccountsDBAide.GetValue_String(TEXT("UserNickName"), szTempUserNickName,CountArray(szTempUserNickName));
-	m_AccountsDBAide.GetValue_String(TEXT("HeadUrl"),szTempHeadUrl,CountArray(szTempHeadUrl));
+	m_AccountsDBModule.GetValue_String(TEXT("UserNickName"), szTempUserNickName,CountArray(szTempUserNickName));
+	m_AccountsDBModule.GetValue_String(TEXT("HeadUrl"),szTempHeadUrl,CountArray(szTempHeadUrl));
 
 
-	/* 2. ÁÄÌì¹ã²¥ ·¢ËÍ¸ø¸ÃµÇÂ¼·şËùÓĞÔÚÏßµÄÈË */
+	/* 2. èŠå¤©å¹¿æ’­ å‘é€ç»™è¯¥ç™»å½•æœæ‰€æœ‰åœ¨çº¿çš„äºº */
 	/*
 	STR_CMD_LC_CLUB_CHAT_BDCAST CMD3;
 	CMD3.byChatMode = pDbr->byChatMode;
@@ -3331,41 +3329,41 @@ bool CDataBaseEngineSink::On_DBR_CL_SYSTEM_CHAT(DWORD dwContextID, VOID * pData,
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_WORD_CHAT_BDCAST,dwContextID,&CMD3, sizeof(CMD3));
 	*/
 
-	/* 3. ÁÄÌì·µ»Ø */
+	/* 3. èŠå¤©è¿”å› */
 	STR_CMD_LC_CLUB_CHAT CMD2;
 	CMD2.byChatMode = pDbr->byChatMode;
 	CMD2.lResultCode = lResultCode2;
-	memcpy(CMD2.szDescribe, TEXT("·¢ËÍÊ§°Ü, ÉÔºóÖØÊÔ"), sizeof(CMD2));
+	memcpy(CMD2.szDescribe, TEXT("å‘é€å¤±è´¥, ç¨åé‡è¯•"), sizeof(CMD2));
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CHAT_ALL,dwContextID,&CMD2, sizeof(CMD2));
 
 	return true;
 }
 
-//Ë½ÃÜÁÄÌì
+//ç§å¯†èŠå¤©
 bool CDataBaseEngineSink::On_DBR_CL_SECRET_CHAT(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_SUB_CL_CLUB_CHAT)) return false;
 	STR_SUB_CL_CLUB_CHAT *pDbr = (STR_SUB_CL_CLUB_CHAT * )pData;
 
-	/* 1. »ñÈ¡·¢ÑÔÕßµÄĞÅÏ¢ */
+	/* 1. è·å–å‘è¨€è€…çš„ä¿¡æ¯ */
 	TCHAR szTempUserNickName[32] = TEXT("");
 	TCHAR szTempHeadUrl[256] = TEXT("");
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
-	m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
+	m_AccountsDBModule.AddParameter(TEXT("UserID"),pDbr->dwUserID);
 
-	LONG lResultCode2 = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_CHAT_GETINFO"),true);
+	LONG lResultCode2 = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_CHAT_GETINFO"),true);
 
 	if(lResultCode2 != DB_SUCCESS)
 	{
 		return true;
 	}
-	m_AccountsDBAide.GetValue_String(TEXT("UserNickName"), szTempUserNickName,CountArray(szTempUserNickName));
-	m_AccountsDBAide.GetValue_String(TEXT("HeadUrl"),szTempHeadUrl,CountArray(szTempHeadUrl));
+	m_AccountsDBModule.GetValue_String(TEXT("UserNickName"), szTempUserNickName,CountArray(szTempUserNickName));
+	m_AccountsDBModule.GetValue_String(TEXT("HeadUrl"),szTempHeadUrl,CountArray(szTempHeadUrl));
 
-	/* 2. ÁÄÌì¹ã²¥ ·¢ËÍ¸ø¸ÃµÇÂ¼·şËùÓĞÔÚÏßµÄÈË */
+	/* 2. èŠå¤©å¹¿æ’­ å‘é€ç»™è¯¥ç™»å½•æœæ‰€æœ‰åœ¨çº¿çš„äºº */
 	STR_CMD_LC_CLUB_CHAT_BDCAST CMD3;
 	CMD3.byChatMode = pDbr->byChatMode;
 	CMD3.dwClubID = 0;
@@ -3377,32 +3375,32 @@ bool CDataBaseEngineSink::On_DBR_CL_SECRET_CHAT(DWORD dwContextID, VOID * pData,
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CHAT_ALL_BDCAST,dwContextID,&CMD3, sizeof(CMD3));
 
 
-	/* 3. ÁÄÌì·µ»Ø */
+	/* 3. èŠå¤©è¿”å› */
 	STR_CMD_LC_CLUB_CHAT CMD2;
 	CMD2.byChatMode = pDbr->byChatMode;
 	CMD2.lResultCode = lResultCode2;
-	memcpy(CMD2.szDescribe, TEXT("·¢ËÍÊ§°Ü, ÉÔºóÖØÊÔ"), sizeof(CMD2));
+	memcpy(CMD2.szDescribe, TEXT("å‘é€å¤±è´¥, ç¨åé‡è¯•"), sizeof(CMD2));
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CHAT_ALL,dwContextID,&CMD2, sizeof(CMD2));
 
 	return true;
 }
 
-//ÅÆÓÑÈ¦ÖÃ¶¥
+//ç‰Œå‹åœˆç½®é¡¶
 bool CDataBaseEngineSink::On_DBR_CL_STICKY_POST(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_DBR_CL_CLUB_STICKY_POST)) return false;
 	STR_DBR_CL_CLUB_STICKY_POST *pDbr = (STR_DBR_CL_CLUB_STICKY_POST * )pData;
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
-	m_AccountsDBAide.AddParameter(TEXT("dwUserID"),pDbr->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("dwClubID"),pDbr->dwClubID);
-	m_AccountsDBAide.AddParameter(TEXT("dwStickyMark"),pDbr->cbTopFlag);
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
+	m_AccountsDBModule.AddParameter(TEXT("dwUserID"),pDbr->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("dwClubID"),pDbr->dwClubID);
+	m_AccountsDBModule.AddParameter(TEXT("dwStickyMark"),pDbr->cbTopFlag);
 
-	LONG lResultCode2 = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_STICK"),true);
+	LONG lResultCode2 = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_STICK"),true);
 
-	//¹¹ÔìDBOÊı¾İ
+	//æ„é€ DBOæ•°æ®
 	STR_DBO_LC_CLUB_STICKY_POST DBO;
 	ZeroMemory(&DBO, sizeof(STR_DBO_LC_CLUB_STICKY_POST));
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_STICKY_POST, dwContextID, &DBO, sizeof(DBO));
@@ -3410,50 +3408,50 @@ bool CDataBaseEngineSink::On_DBR_CL_STICKY_POST(DWORD dwContextID, VOID * pData,
 	return true;
 }
 
-//Íæ¼ÒÀë¿ª¾ãÀÖ²¿·¿¼ä
+//ç©å®¶ç¦»å¼€ä¿±ä¹éƒ¨æˆ¿é—´
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_USER_LEAVE(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_SUB_CL_CLUB_ROOM_USER_LEAVE)) return false;
 	STR_SUB_CL_CLUB_ROOM_USER_LEAVE* pDbr = (STR_SUB_CL_CLUB_ROOM_USER_LEAVE*) pData;
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("RoomID"),pDbr->dwClubRoomID);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.AddParameter(TEXT("UserID"),pDbr->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("RoomID"),pDbr->dwClubRoomID);
 
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_USER_LEAVE"),true);
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_USER_LEAVE"),true);
 
 	return true;
 }
 
-//·¿¼äÉèÖÃ
+//æˆ¿é—´è®¾ç½®
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_SETTING(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_SUB_CL_CLUB_ROOM_SETTING)) return false;
 	STR_SUB_CL_CLUB_ROOM_SETTING* pDbr = (STR_SUB_CL_CLUB_ROOM_SETTING*) pData;
 
-#pragma region 1. »ñÈ¡Ö®Ç°µÄ·¿¼ä¹æÔò, ²¢ÇÒ¹¹ÔìĞÂµÄ·¿¼ä¹æÔò
-	//Êı¾İ¿â´«Èë²ÎÊı
-	m_AccountsDBAide.ResetParameter();
-	m_AccountsDBAide.AddParameter(TEXT("@dwClubRoomID"), pDbr->dwRoomID);
+#pragma region 1. è·å–ä¹‹å‰çš„æˆ¿é—´è§„åˆ™, å¹¶ä¸”æ„é€ æ–°çš„æˆ¿é—´è§„åˆ™
+	//æ•°æ®åº“ä¼ å…¥å‚æ•°
+	m_AccountsDBModule.ResetParameter();
+	m_AccountsDBModule.AddParameter(TEXT("@dwClubRoomID"), pDbr->dwRoomID);
 
-	//Ö´ĞĞ²éÑ¯
-	LONG lResultCode1 = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_SETTING_QUERY_INFO"), true);
+	//æ‰§è¡ŒæŸ¥è¯¢
+	LONG lResultCode1 = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_SETTING_QUERY_INFO"), true);
 
 	if(lResultCode1 != DB_SUCCESS)
 	{
 		return false ;
 	}
 
-	//»ñÈ¡µ½Êı¾İ
+	//è·å–åˆ°æ•°æ®
 	TCHAR szRealRoomRule[2048];
-	m_AccountsDBAide.GetValue_String(TEXT("RealRoomRule"), szRealRoomRule, sizeof(szRealRoomRule));
+	m_AccountsDBModule.GetValue_String(TEXT("RealRoomRule"), szRealRoomRule, sizeof(szRealRoomRule));
 
-	//¹¹ÔìĞÂµÄ·¿¼ä¹æÔò×Ö·û´®
+	//æ„é€ æ–°çš„æˆ¿é—´è§„åˆ™å­—ç¬¦ä¸²
 	STR_SUB_CG_USER_CREATE_ROOM strCreateRoom;
 	StrToBin(szRealRoomRule, strCreateRoom.CommonRule, 0, 255);
 	StrToBin(szRealRoomRule, strCreateRoom.SubGameRule, 256, 512);
@@ -3468,179 +3466,179 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_SETTING(DWORD dwContextID, VOID * 
 	pCfg->CellScore = pDbr->dwDizhu;
 	pCfg->dwLevelGold = pDbr->dwGold;
 
-	//ĞŞ¸Ä·¿¼äÃû×Ö -- ·¿¼äÃû×ÖÔÚSubGameRuleÖĞ
+	//ä¿®æ”¹æˆ¿é—´åå­— -- æˆ¿é—´åå­—åœ¨SubGameRuleä¸­
 	struct tagSubRule
 	{
-		TCHAR	szRoomNote[40]; //·¿¼ä¹æÔòËµÃ÷
-		TCHAR	szRoomName[16];	//·¿¼äÃû×Ö
+		TCHAR	szRoomNote[40]; //æˆ¿é—´è§„åˆ™è¯´æ˜
+		TCHAR	szRoomName[16];	//æˆ¿é—´åå­—
 	};
 	tagSubRule *pSub = (tagSubRule*)strCreateRoom.SubGameRule;
 	memcpy(pSub->szRoomName, pDbr->szRoomName, sizeof(pSub->szRoomName));
 
-	//16½øÖÆµÄ·¿¼ä¹æÔò 256¸ö×Ö½Ú
+	//16è¿›åˆ¶çš„æˆ¿é—´è§„åˆ™ 256ä¸ªå­—èŠ‚
 	CString strCommonRoomRule = toHexString(strCreateRoom.CommonRule, 128);
-	CString strSubRoomRule = toHexString(strCreateRoom.SubGameRule, 127); //ÉáÆú×îºóÒ»¸ö×Ö·û
+	CString strSubRoomRule = toHexString(strCreateRoom.SubGameRule, 127); //èˆå¼ƒæœ€åä¸€ä¸ªå­—ç¬¦
 	CString strRealRoomRule = strCommonRoomRule + strSubRoomRule;
 
 
 #pragma endregion
 
-#pragma region 2. ĞÂµÄÊı¾İ ´«µİ¸øÊı¾İ¿â
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
+#pragma region 2. æ–°çš„æ•°æ® ä¼ é€’ç»™æ•°æ®åº“
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("RoomID"),pDbr->dwRoomID);	
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.AddParameter(TEXT("UserID"),pDbr->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("RoomID"),pDbr->dwRoomID);	
 
-	//ÊıÖµ×ª»»
+	//æ•°å€¼è½¬æ¢
 	BYTE byModeID = 0;
-	if(1 == pDbr->byGoldOrFK)//¾ãÀÖ²¿µÄ·¿¿¨³¡ ¾ÍÊÇÆÕÍ¨·¿¿¨³¡
+	if(1 == pDbr->byGoldOrFK)//ä¿±ä¹éƒ¨çš„æˆ¿å¡åœº å°±æ˜¯æ™®é€šæˆ¿å¡åœº
 	{
 		byModeID  = 0;
 	}
-	else if( 2 == pDbr->byGoldOrFK)//¾ãÀÖ²¿µÄ½ğ±Ò³¡ ÆäÊµÊÇ ·¿¿¨½ğ±Ò³¡
+	else if( 2 == pDbr->byGoldOrFK)//ä¿±ä¹éƒ¨çš„é‡‘å¸åœº å…¶å®æ˜¯ æˆ¿å¡é‡‘å¸åœº
 	{
 		byModeID  = 3;
 	}
 
-	m_AccountsDBAide.AddParameter(TEXT("GoldOrFK"),byModeID);
-	m_AccountsDBAide.AddParameter(TEXT("Dissolve"),pDbr->bDissolve);
-	m_AccountsDBAide.AddParameter(TEXT("DissolveTime"),pDbr->dwDissolveTime);
-	m_AccountsDBAide.AddParameter(TEXT("Amount"),pDbr->dwAmount);
-	m_AccountsDBAide.AddParameter(TEXT("OwnerPercentage"),pDbr->dwOwnerPercentage);
-	m_AccountsDBAide.AddParameter(TEXT("dwDizhu"),pDbr->dwDizhu);
-	m_AccountsDBAide.AddParameter(TEXT("dwGold"),pDbr->dwGold);
-	m_AccountsDBAide.AddParameter(TEXT("byMask"),pDbr->byMask);
-	m_AccountsDBAide.AddParameter(TEXT("RoomName"),pDbr->szRoomName);
-	m_AccountsDBAide.AddParameter(TEXT("RealRoomRule"),strRealRoomRule);
+	m_AccountsDBModule.AddParameter(TEXT("GoldOrFK"),byModeID);
+	m_AccountsDBModule.AddParameter(TEXT("Dissolve"),pDbr->bDissolve);
+	m_AccountsDBModule.AddParameter(TEXT("DissolveTime"),pDbr->dwDissolveTime);
+	m_AccountsDBModule.AddParameter(TEXT("Amount"),pDbr->dwAmount);
+	m_AccountsDBModule.AddParameter(TEXT("OwnerPercentage"),pDbr->dwOwnerPercentage);
+	m_AccountsDBModule.AddParameter(TEXT("dwDizhu"),pDbr->dwDizhu);
+	m_AccountsDBModule.AddParameter(TEXT("dwGold"),pDbr->dwGold);
+	m_AccountsDBModule.AddParameter(TEXT("byMask"),pDbr->byMask);
+	m_AccountsDBModule.AddParameter(TEXT("RoomName"),pDbr->szRoomName);
+	m_AccountsDBModule.AddParameter(TEXT("RealRoomRule"),strRealRoomRule);
 
-	//Êä³ö²ÎÊı
+	//è¾“å‡ºå‚æ•°
 	TCHAR szDescribeString[128]=TEXT("");
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_SETTING"),true);
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_SETTING"),true);
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
-	m_AccountsDBAide.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
+	m_AccountsDBModule.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
-	//½á¹¹Ìå¹¹Ôì
+	//ç»“æ„ä½“æ„é€ 
 	STR_CMD_LC_CLUB_ROOM_SETTING CMD;
 	ZeroMemory(&CMD, sizeof(CMD));
 	CMD.lResultCode = lResultCode;
 	lstrcpyn(CMD.szDescribe,CW2CT(DBVarValue.bstrVal),CountArray(CMD.szDescribe));
 
-	CMD.dwRoomID=m_AccountsDBAide.GetValue_DWORD(TEXT("RoomID"));
+	CMD.dwRoomID=m_AccountsDBModule.GetValue_DWORD(TEXT("RoomID"));
 
-	//ÊıÖµ×ª»»
-	BYTE byResultModeID = m_AccountsDBAide.GetValue_BYTE(TEXT("ModeID"));;
-	if(0 == byResultModeID)//¾ãÀÖ²¿µÄ·¿¿¨³¡ ¾ÍÊÇÆÕÍ¨·¿¿¨³¡
+	//æ•°å€¼è½¬æ¢
+	BYTE byResultModeID = m_AccountsDBModule.GetValue_BYTE(TEXT("ModeID"));;
+	if(0 == byResultModeID)//ä¿±ä¹éƒ¨çš„æˆ¿å¡åœº å°±æ˜¯æ™®é€šæˆ¿å¡åœº
 	{
 		CMD.byGoldOrFK  = 1;
 	}
-	else if( 3 == byResultModeID)//¾ãÀÖ²¿µÄ½ğ±Ò³¡ ÆäÊµÊÇ ·¿¿¨½ğ±Ò³¡
+	else if( 3 == byResultModeID)//ä¿±ä¹éƒ¨çš„é‡‘å¸åœº å…¶å®æ˜¯ æˆ¿å¡é‡‘å¸åœº
 	{
 		CMD.byGoldOrFK  = 2;
 	}
 
-	CMD.dwDissolveTime=m_AccountsDBAide.GetValue_DWORD(TEXT("DissolveMinute"));
-	CMD.byDissolve= m_AccountsDBAide.GetValue_BYTE(TEXT("DissolveMinute"));
-	CMD.dwAmount=m_AccountsDBAide.GetValue_DWORD(TEXT("ServiceGold"));
-	CMD.dwOwnerPercentage=m_AccountsDBAide.GetValue_DWORD(TEXT("Revenue"));
+	CMD.dwDissolveTime=m_AccountsDBModule.GetValue_DWORD(TEXT("DissolveMinute"));
+	CMD.byDissolve= m_AccountsDBModule.GetValue_BYTE(TEXT("DissolveMinute"));
+	CMD.dwAmount=m_AccountsDBModule.GetValue_DWORD(TEXT("ServiceGold"));
+	CMD.dwOwnerPercentage=m_AccountsDBModule.GetValue_DWORD(TEXT("Revenue"));
 	CMD.byMask = pDbr->byMask;
 	CMD.dwDizhu = pDbr->dwDizhu;
 	CMD.dwGold = pDbr->dwGold;
-	m_AccountsDBAide.GetValue_String(TEXT("RoomName"), CMD.szRoomName,CountArray(CMD.szRoomName));
+	m_AccountsDBModule.GetValue_String(TEXT("RoomName"), CMD.szRoomName,CountArray(CMD.szRoomName));
 
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_ROOM_SETTING,dwContextID,&CMD,sizeof(CMD));
 #pragma endregion
 	return true;
 }
 
-//ÇëÇó·¿¼äÉèÖÃ
+//è¯·æ±‚æˆ¿é—´è®¾ç½®
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_QUERY_SETTING(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_SUB_CL_CLUB_ROOM_QUERY_SETTING)) return false;
 	STR_SUB_CL_CLUB_ROOM_QUERY_SETTING* pDbr = (STR_SUB_CL_CLUB_ROOM_QUERY_SETTING*) pData;
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("RoomID"),pDbr->dwRoomID);	
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.AddParameter(TEXT("UserID"),pDbr->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("RoomID"),pDbr->dwRoomID);	
 
-	//Êä³ö²ÎÊı
+	//è¾“å‡ºå‚æ•°
 	TCHAR szDescribeString[128]=TEXT("");
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_QUERY_SETTING"),true);
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_QUERY_SETTING"),true);
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
-	m_AccountsDBAide.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
+	m_AccountsDBModule.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
-	//½á¹¹Ìå¹¹Ôì
+	//ç»“æ„ä½“æ„é€ 
 	STR_CMD_LC_CLUB_ROOM_QUERY_SETTING CMD;
 	ZeroMemory(&CMD, sizeof(CMD));
 	CMD.lResultCode = lResultCode;
 	lstrcpyn(CMD.szDescribe,CW2CT(DBVarValue.bstrVal),CountArray(CMD.szDescribe));
 
-	CMD.dwRoomID=m_AccountsDBAide.GetValue_DWORD(TEXT("RoomID"));
+	CMD.dwRoomID=m_AccountsDBModule.GetValue_DWORD(TEXT("RoomID"));
 
-	//ÊıÖµ×ª»»
-	BYTE byResultModeID = m_AccountsDBAide.GetValue_BYTE(TEXT("ModeID"));;
-	if(0 == byResultModeID)//¾ãÀÖ²¿µÄ·¿¿¨³¡ ¾ÍÊÇÆÕÍ¨·¿¿¨³¡
+	//æ•°å€¼è½¬æ¢
+	BYTE byResultModeID = m_AccountsDBModule.GetValue_BYTE(TEXT("ModeID"));;
+	if(0 == byResultModeID)//ä¿±ä¹éƒ¨çš„æˆ¿å¡åœº å°±æ˜¯æ™®é€šæˆ¿å¡åœº
 	{
 		CMD.byGoldOrFK  = 1;
 	}
-	else if( 3 == byResultModeID)//¾ãÀÖ²¿µÄ½ğ±Ò³¡ ÆäÊµÊÇ ·¿¿¨½ğ±Ò³¡
+	else if( 3 == byResultModeID)//ä¿±ä¹éƒ¨çš„é‡‘å¸åœº å…¶å®æ˜¯ æˆ¿å¡é‡‘å¸åœº
 	{
 		CMD.byGoldOrFK  = 2;
 	}
 
-	CMD.dwDissolveTime=m_AccountsDBAide.GetValue_DWORD(TEXT("DissolveMinute"));
-	CMD.byDissolve= m_AccountsDBAide.GetValue_BYTE(TEXT("DissolveMinute"));
-	CMD.dwAmount=m_AccountsDBAide.GetValue_DWORD(TEXT("ServiceGold"));
-	CMD.dwOwnerPercentage=m_AccountsDBAide.GetValue_DWORD(TEXT("Revenue"));
-	CMD.byMask = m_AccountsDBAide.GetValue_BYTE(TEXT("Mask"));
-	CMD.dwDizhu = m_AccountsDBAide.GetValue_DWORD(TEXT("Dizhu"));
-	CMD.dwGold = m_AccountsDBAide.GetValue_DWORD(TEXT("Gold"));
-	m_AccountsDBAide.GetValue_String(TEXT("RoomName"), CMD.szRoomName,CountArray(CMD.szRoomName));
+	CMD.dwDissolveTime=m_AccountsDBModule.GetValue_DWORD(TEXT("DissolveMinute"));
+	CMD.byDissolve= m_AccountsDBModule.GetValue_BYTE(TEXT("DissolveMinute"));
+	CMD.dwAmount=m_AccountsDBModule.GetValue_DWORD(TEXT("ServiceGold"));
+	CMD.dwOwnerPercentage=m_AccountsDBModule.GetValue_DWORD(TEXT("Revenue"));
+	CMD.byMask = m_AccountsDBModule.GetValue_BYTE(TEXT("Mask"));
+	CMD.dwDizhu = m_AccountsDBModule.GetValue_DWORD(TEXT("Dizhu"));
+	CMD.dwGold = m_AccountsDBModule.GetValue_DWORD(TEXT("Gold"));
+	m_AccountsDBModule.GetValue_String(TEXT("RoomName"), CMD.szRoomName,CountArray(CMD.szRoomName));
 
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_ROOM_QUERY_SETTING,dwContextID,&CMD,sizeof(CMD));
 	return true;
 }
 
 
-//½âÉ¢·¿¼äÇëÇó
+//è§£æ•£æˆ¿é—´è¯·æ±‚
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_DISSOLVE(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_SUB_CL_CLUB_ROOM_DISSOLVE)) return false;
 	STR_SUB_CL_CLUB_ROOM_DISSOLVE* pDbr = (STR_SUB_CL_CLUB_ROOM_DISSOLVE*) pData;
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
-	m_AccountsDBAide.AddParameter(TEXT("RoomID"),pDbr->dwClubRoomID);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.AddParameter(TEXT("UserID"),pDbr->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
+	m_AccountsDBModule.AddParameter(TEXT("RoomID"),pDbr->dwClubRoomID);
 
-	//Êä³ö²ÎÊı
+	//è¾“å‡ºå‚æ•°
 	TCHAR szDescribeString[128]=TEXT("");
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_DISSOLVE"),true);
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_DISSOLVE"),true);
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
-	m_AccountsDBAide.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
+	m_AccountsDBModule.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
-	//½á¹¹Ìå¹¹Ôì
+	//ç»“æ„ä½“æ„é€ 
 	STR_CMD_LC_CLUB_ROOM_DISSOLVE CMD;
 	ZeroMemory(&CMD, sizeof(CMD));
 	CMD.lResultCode = lResultCode;
@@ -3650,41 +3648,41 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_DISSOLVE(DWORD dwContextID, VOID *
 	return true;
 }
 
-//½âÉ¢×À×ÓÇëÇó
+//è§£æ•£æ¡Œå­è¯·æ±‚
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_TABLE_DISSOLVE(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_SUB_CL_CLUB_TABLE_DISSOLVE)) return false;
 	STR_SUB_CL_CLUB_TABLE_DISSOLVE* pDbr = (STR_SUB_CL_CLUB_TABLE_DISSOLVE*) pData;
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
-	m_AccountsDBAide.AddParameter(TEXT("RoomID"),pDbr->dwClubRoomID);
-	m_AccountsDBAide.AddParameter(TEXT("TableID"),pDbr->dwTableID);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.AddParameter(TEXT("UserID"),pDbr->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
+	m_AccountsDBModule.AddParameter(TEXT("RoomID"),pDbr->dwClubRoomID);
+	m_AccountsDBModule.AddParameter(TEXT("TableID"),pDbr->dwTableID);
 
-	//Êä³ö²ÎÊı
+	//è¾“å‡ºå‚æ•°
 	TCHAR szDescribeString[128]=TEXT("");
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_TABLE_DISSOLVE"),true);
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_TABLE_DISSOLVE"),true);
 
 	if(lResultCode == DB_SUCCESS)
 	{
-		//·µ»Ø½á¹¹Ìå³õÊ¼»¯
+		//è¿”å›ç»“æ„ä½“åˆå§‹åŒ–
 		STR_CMD_LC_CLUB_TABLE_DISSOLVE CMD;
 		ZeroMemory(&CMD, sizeof(CMD));
 
-		//½á¹û´¦Àí
+		//ç»“æœå¤„ç†
 		CDBVarValue DBVarValue;
-		m_AccountsDBAide.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
+		m_AccountsDBModule.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 		lstrcpyn(CMD.szDescribe,CW2CT(DBVarValue.bstrVal),CountArray(CMD.szDescribe));
 
-		CMD.byMask = m_AccountsDBAide.GetValue_BYTE(TEXT("Mask"));
-		CMD.dwGameID = m_AccountsDBAide.GetValue_DWORD(TEXT("GameID"));
+		CMD.byMask = m_AccountsDBModule.GetValue_BYTE(TEXT("Mask"));
+		CMD.dwGameID = m_AccountsDBModule.GetValue_DWORD(TEXT("GameID"));
 		CMD.dwTableID = pDbr->dwTableID;
 
 		CMD.lResultCode = lResultCode;
@@ -3697,31 +3695,31 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_TABLE_DISSOLVE(DWORD dwContextID, VOID 
 	return true;
 }
 
-//½âÉ¢ÅÆÓÑÈ¦
+//è§£æ•£ç‰Œå‹åœˆ
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_DISS_CLUB(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_SUB_CL_CLUB_DISS_CLUB)) return false;
 	STR_SUB_CL_CLUB_DISS_CLUB* pDbr = (STR_SUB_CL_CLUB_DISS_CLUB*) pData;
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.AddParameter(TEXT("UserID"),pDbr->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.AddParameter(TEXT("UserID"),pDbr->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("ClubID"),pDbr->dwClubID);
 
-	//Êä³ö²ÎÊı
+	//è¾“å‡ºå‚æ•°
 	TCHAR szDescribeString[128]=TEXT("");
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_DISS_CLUB"),true);
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_DISS_CLUB"),true);
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
-	m_AccountsDBAide.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
+	m_AccountsDBModule.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
-	//½á¹¹Ìå¹¹Ôì
+	//ç»“æ„ä½“æ„é€ 
 	STR_CMD_LC_CLUB_DISS_CLUB CMD;
 	ZeroMemory(&CMD, sizeof(CMD));
 	CMD.lResultCode = lResultCode;
@@ -3731,38 +3729,38 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_DISS_CLUB(DWORD dwContextID, VOID * pDa
 	return true;
 }
 
-//´´½¨ÅÆÓÑÈ¦
+//åˆ›å»ºç‰Œå‹åœˆ
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_CREATE_CLUB(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	ASSERT(wDataSize==sizeof(STR_DBR_CL_CLUB_CREATE_CLUB));
 	if (wDataSize!=sizeof(STR_DBR_CL_CLUB_CREATE_CLUB)) return false;
 
 	STR_DBR_CL_CLUB_CREATE_CLUB *pDBR = (STR_DBR_CL_CLUB_CREATE_CLUB*) pData;
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.AddParameter(TEXT("@Mystery"),_MYSTERY);
-	m_AccountsDBAide.AddParameter(TEXT("@UserID"),pDBR->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("@ClubName"),pDBR->szClubName);
-	m_AccountsDBAide.AddParameter(TEXT("@MajorKindID"),pDBR->dwMajorKindID);
-	m_AccountsDBAide.AddParameter(TEXT("@MinorKindID"), pDBR->szMinorKindID);
-	m_AccountsDBAide.AddParameter(TEXT("@szNotice"), pDBR->szNotice);
-	m_AccountsDBAide.AddParameter(TEXT("@szMessag"), pDBR->szMessag);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.AddParameter(TEXT("@Mystery"),_MYSTERY);
+	m_AccountsDBModule.AddParameter(TEXT("@UserID"),pDBR->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("@ClubName"),pDBR->szClubName);
+	m_AccountsDBModule.AddParameter(TEXT("@MajorKindID"),pDBR->dwMajorKindID);
+	m_AccountsDBModule.AddParameter(TEXT("@MinorKindID"), pDBR->szMinorKindID);
+	m_AccountsDBModule.AddParameter(TEXT("@szNotice"), pDBR->szNotice);
+	m_AccountsDBModule.AddParameter(TEXT("@szMessag"), pDBR->szMessag);
 
-	//Êä³ö²ÎÊı
+	//è¾“å‡ºå‚æ•°
 	TCHAR szDescribeString[128]=TEXT("");
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_CREATE_CLUB"),true);
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_CREATE_CLUB"),true);
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
-	m_AccountsDBAide.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
+	m_AccountsDBModule.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
-	//½á¹¹Ìå¹¹Ôì
+	//ç»“æ„ä½“æ„é€ 
 	STR_CMD_LC_CLUB_CREATE_CLUB CMD;
 	ZeroMemory(&CMD, sizeof(CMD));
 	CMD.lResultCode = lResultCode;
@@ -3770,79 +3768,79 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_CREATE_CLUB(DWORD dwContextID, VOID * p
 
 	if(lResultCode == DB_SUCCESS)
 	{
-		CMD.dwClubID =m_AccountsDBAide.GetValue_DWORD(TEXT("ClubID"));
-		CMD.byClubLevel=m_AccountsDBAide.GetValue_BYTE(TEXT("ClubLevel"));
-		CMD.dwFK=m_AccountsDBAide.GetValue_BYTE(TEXT("FK"));
+		CMD.dwClubID =m_AccountsDBModule.GetValue_DWORD(TEXT("ClubID"));
+		CMD.byClubLevel=m_AccountsDBModule.GetValue_BYTE(TEXT("ClubLevel"));
+		CMD.dwFK=m_AccountsDBModule.GetValue_BYTE(TEXT("FK"));
 	}
 
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_CREATE_CLUB,dwContextID,&CMD,sizeof(CMD));
 	return true;
 }
 
-//ÉêÇë¼ÓÈë·¿¼ä
+//ç”³è¯·åŠ å…¥æˆ¿é—´
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_JOIN_ROOM(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize!=sizeof(STR_SUB_CL_CLUB_JOIN_ROOM)) return false;
 
 	STR_SUB_CL_CLUB_JOIN_ROOM * pDBbr = (STR_SUB_CL_CLUB_JOIN_ROOM*)pData;
 
 	STR_CMD_LC_CLUB_JOIN_ROOM CMD1;
 
-#pragma region ×À×ÓÁĞ±í
-	/* µÚÒ»²½ ×À×ÓÁĞ±í */
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
+#pragma region æ¡Œå­åˆ—è¡¨
+	/* ç¬¬ä¸€æ­¥ æ¡Œå­åˆ—è¡¨ */
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.AddParameter(TEXT("@UserID"),pDBbr->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("@RoomID"),pDBbr->dwRoomID);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.AddParameter(TEXT("@UserID"),pDBbr->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("@RoomID"),pDBbr->dwRoomID);
 
-	//Êä³ö²ÎÊı
+	//è¾“å‡ºå‚æ•°
 	TCHAR szDescribeString[128]=TEXT("");
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-	long ResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_JOIN_ROOM_TABLE"),true);
+	long ResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_JOIN_ROOM_TABLE"),true);
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
 	m_AccountsDBModule->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
 	CMD1.lResultCode = ResultCode;
 	lstrcpyn(CMD1.szDescribe, CW2CT(DBVarValue.bstrVal), CountArray(CMD1.szDescribe));
 
-	//ÁĞ±í·¢ËÍ
+	//åˆ—è¡¨å‘é€
 	WORD wPacketSize=0;
 	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
 	wPacketSize=0;
 	STR_CMD_LC_CLUB_TABLE_LIST * pDBO=NULL;
 	while ((ResultCode == DB_SUCCESS) && (m_AccountsDBModule->IsRecordsetEnd()==false ))
 	{
-		//·¢ËÍĞÅÏ¢
+		//å‘é€ä¿¡æ¯
 		if ((wPacketSize+sizeof(STR_CMD_LC_CLUB_TABLE_LIST))>sizeof(cbBuffer))
 		{
 			g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_TABLE_LIST_TABLE,dwContextID,cbBuffer,wPacketSize);
 			wPacketSize=0;
 		}
 
-		//¶ÁÈ¡ĞÅÏ¢
+		//è¯»å–ä¿¡æ¯
 		pDBO=(STR_CMD_LC_CLUB_TABLE_LIST *)(cbBuffer+wPacketSize);
 
-		pDBO->dwClubRoomID  = m_AccountsDBAide.GetValue_DWORD(TEXT("RoomID"));
-		pDBO->dwTableID=m_AccountsDBAide.GetValue_DWORD(TEXT("TableID"));
-		pDBO->dwClubID = m_AccountsDBAide.GetValue_DWORD(TEXT("ClubID"));
-		pDBO->byMask = m_AccountsDBAide.GetValue_BYTE(TEXT("IsOwner"));
+		pDBO->dwClubRoomID  = m_AccountsDBModule.GetValue_DWORD(TEXT("RoomID"));
+		pDBO->dwTableID=m_AccountsDBModule.GetValue_DWORD(TEXT("TableID"));
+		pDBO->dwClubID = m_AccountsDBModule.GetValue_DWORD(TEXT("ClubID"));
+		pDBO->byMask = m_AccountsDBModule.GetValue_BYTE(TEXT("IsOwner"));
 
-		pDBO->TableState=m_AccountsDBAide.GetValue_DWORD(TEXT("TableState"));
-		pDBO->LockState=m_AccountsDBAide.GetValue_DWORD(TEXT("LockState"));
-		pDBO->CurrentRound=m_AccountsDBAide.GetValue_DWORD(TEXT("CurrentRound"));
-		pDBO->dwOwnerID=m_AccountsDBAide.GetValue_DWORD(TEXT("OwnerID"));
+		pDBO->TableState=m_AccountsDBModule.GetValue_DWORD(TEXT("TableState"));
+		pDBO->LockState=m_AccountsDBModule.GetValue_DWORD(TEXT("LockState"));
+		pDBO->CurrentRound=m_AccountsDBModule.GetValue_DWORD(TEXT("CurrentRound"));
+		pDBO->dwOwnerID=m_AccountsDBModule.GetValue_DWORD(TEXT("OwnerID"));
 		pDBO->byDel = 0;
 
-		//ÉèÖÃÎ»ÒÆ
+		//è®¾ç½®ä½ç§»
 		wPacketSize+=sizeof(STR_CMD_LC_CLUB_TABLE_LIST);
 
-		//ÒÆ¶¯¼ÇÂ¼
+		//ç§»åŠ¨è®°å½•
 		m_AccountsDBModule->MoveToNext();
 	}
 	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_TABLE_LIST_TABLE,dwContextID,cbBuffer,wPacketSize);
@@ -3850,108 +3848,108 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_JOIN_ROOM(DWORD dwContextID, VOID * pDa
 #pragma endregion
 
 
-#pragma region Íæ¼ÒÁĞ±í
-	/* µÚ¶ş²½ Íæ¼ÒÁĞ±í */
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
+#pragma region ç©å®¶åˆ—è¡¨
+	/* ç¬¬äºŒæ­¥ ç©å®¶åˆ—è¡¨ */
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.AddParameter(TEXT("@UserID"),pDBbr->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("@RoomID"),pDBbr->dwRoomID);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.AddParameter(TEXT("@UserID"),pDBbr->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("@RoomID"),pDBbr->dwRoomID);
 
-	//Êä³ö²ÎÊı
+	//è¾“å‡ºå‚æ•°
 	TCHAR szDescribeString2[128]=TEXT("");
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString2),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString2),adParamOutput);
 
-	long ResultCode2 = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_JOIN_ROOM_USER"),true);
+	long ResultCode2 = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_JOIN_ROOM_USER"),true);
 
-	//ÁĞ±í·¢ËÍ
+	//åˆ—è¡¨å‘é€
 	WORD wPacketSize2=0;
 	BYTE cbBuffer2[MAX_ASYNCHRONISM_DATA/10];
 	wPacketSize2=0;
 	STR_CMD_LC_CLUB_TABLE_USER_LIST * pDBO2=NULL;
 	while ((m_AccountsDBModule->IsRecordsetEnd()==false) && (ResultCode2 == DB_SUCCESS))
 	{
-		//·¢ËÍĞÅÏ¢
+		//å‘é€ä¿¡æ¯
 		if ((wPacketSize2+sizeof(STR_CMD_LC_CLUB_TABLE_USER_LIST))>sizeof(cbBuffer2))
 		{
 			g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_TABLE_LIST_USER,dwContextID,cbBuffer2,wPacketSize2);
 			wPacketSize2=0;
 		}
 
-		//¶ÁÈ¡ĞÅÏ¢
+		//è¯»å–ä¿¡æ¯
 		pDBO2=(STR_CMD_LC_CLUB_TABLE_USER_LIST *)(cbBuffer2+wPacketSize2);
-		pDBO2->dwClubRoomID=m_AccountsDBAide.GetValue_DWORD(TEXT("ClubRoomID"));
-		pDBO2->dwUserID=m_AccountsDBAide.GetValue_DWORD(TEXT("UserID"));
-		m_AccountsDBAide.GetValue_String(TEXT("UserName"),pDBO2->szUserName,CountArray(pDBO2->szUserName));
-		pDBO2->bySex=m_AccountsDBAide.GetValue_BYTE(TEXT("Sex"));
-		pDBO2->wLevel=m_AccountsDBAide.GetValue_WORD(TEXT("UserLevel"));
-		m_AccountsDBAide.GetValue_String(TEXT("HeadUrl"),pDBO2->szHeadUrl,CountArray(pDBO2->szHeadUrl));
-		pDBO2->byClubRole=m_AccountsDBAide.GetValue_BYTE(TEXT("ClubRole"));
-		pDBO2->byClubReputation=m_AccountsDBAide.GetValue_BYTE(TEXT("ClubReputation"));
-		pDBO2->dwTableID=m_AccountsDBAide.GetValue_DWORD(TEXT("TableID"));
-		pDBO2->byChairID=m_AccountsDBAide.GetValue_BYTE(TEXT("ChairID"));
+		pDBO2->dwClubRoomID=m_AccountsDBModule.GetValue_DWORD(TEXT("ClubRoomID"));
+		pDBO2->dwUserID=m_AccountsDBModule.GetValue_DWORD(TEXT("UserID"));
+		m_AccountsDBModule.GetValue_String(TEXT("UserName"),pDBO2->szUserName,CountArray(pDBO2->szUserName));
+		pDBO2->bySex=m_AccountsDBModule.GetValue_BYTE(TEXT("Sex"));
+		pDBO2->wLevel=m_AccountsDBModule.GetValue_WORD(TEXT("UserLevel"));
+		m_AccountsDBModule.GetValue_String(TEXT("HeadUrl"),pDBO2->szHeadUrl,CountArray(pDBO2->szHeadUrl));
+		pDBO2->byClubRole=m_AccountsDBModule.GetValue_BYTE(TEXT("ClubRole"));
+		pDBO2->byClubReputation=m_AccountsDBModule.GetValue_BYTE(TEXT("ClubReputation"));
+		pDBO2->dwTableID=m_AccountsDBModule.GetValue_DWORD(TEXT("TableID"));
+		pDBO2->byChairID=m_AccountsDBModule.GetValue_BYTE(TEXT("ChairID"));
 		pDBO2->byDel = 0;
 
-		//ÉèÖÃÎ»ÒÆ
+		//è®¾ç½®ä½ç§»
 		wPacketSize2+=sizeof(STR_CMD_LC_CLUB_TABLE_USER_LIST);
 
-		//ÒÆ¶¯¼ÇÂ¼
+		//ç§»åŠ¨è®°å½•
 		m_AccountsDBModule->MoveToNext();
 	}
 	if (wPacketSize2>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_TABLE_LIST_USER,dwContextID,cbBuffer2,wPacketSize2);
 
 #pragma endregion
 
-#pragma region ·¿¼äÈËÊı
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
-	m_AccountsDBAide.AddParameter(TEXT("@RoomID"),pDBbr->dwRoomID);
+#pragma region æˆ¿é—´äººæ•°
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
+	m_AccountsDBModule.AddParameter(TEXT("@RoomID"),pDBbr->dwRoomID);
 
-	ResultCode2 = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_JOIN_ROOM_USER_NUM"),true);
+	ResultCode2 = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_JOIN_ROOM_USER_NUM"),true);
 
 	if(ResultCode2 == DB_SUCCESS)
 	{
-		CMD1.dwPlayerNum = m_AccountsDBAide.GetValue_DWORD(TEXT("PlayerNum"));
+		CMD1.dwPlayerNum = m_AccountsDBModule.GetValue_DWORD(TEXT("PlayerNum"));
 	}
 
 #pragma endregion
 
-	/* µÚÈı²½ ¼ÓÈë·¿¼ä·µ»Ø*/
-	//client ²»ÒÀÀµ´ÎÏûÏ¢ºÅË¢ĞÂ½çÃæ
+	/* ç¬¬ä¸‰æ­¥ åŠ å…¥æˆ¿é—´è¿”å›*/
+	//client ä¸ä¾èµ–æ¬¡æ¶ˆæ¯å·åˆ·æ–°ç•Œé¢
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_JOIN_ROOM, dwContextID, &CMD1, sizeof(CMD1));
 
 	return true;
 }
 
 
-//ÈºÖ÷|¹ÜÀí¶ÔÉêÇëÏûÏ¢µÄ´ğ¸´(Í¬Òâ|¾Ü¾ø)
+//ç¾¤ä¸»|ç®¡ç†å¯¹ç”³è¯·æ¶ˆæ¯çš„ç­”å¤(åŒæ„|æ‹’ç»)
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_APPLICANT_RESULT(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize != sizeof(STR_SUB_CL_CLUB_APPLICANT_RESULT)) return false;
 
 	STR_SUB_CL_CLUB_APPLICANT_RESULT *pDBR = (STR_SUB_CL_CLUB_APPLICANT_RESULT*) pData;
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.AddParameter(TEXT("@UserID"),pDBR->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("@CludID"),pDBR->dwCludID);
-	m_AccountsDBAide.AddParameter(TEXT("@Result"),pDBR->dwResult);
-	m_AccountsDBAide.AddParameter(TEXT("@TagID"),pDBR->dwTagID);
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.AddParameter(TEXT("@UserID"),pDBR->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("@CludID"),pDBR->dwCludID);
+	m_AccountsDBModule.AddParameter(TEXT("@Result"),pDBR->dwResult);
+	m_AccountsDBModule.AddParameter(TEXT("@TagID"),pDBR->dwTagID);
 
-	//Êä³ö²ÎÊı
+	//è¾“å‡ºå‚æ•°
 	TCHAR szDescribeString[128]=TEXT("");
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_APPLICANT_RESULT"),true);
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_APPLICANT_RESULT"),true);
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
-	m_AccountsDBAide.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
+	m_AccountsDBModule.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
-	//½á¹¹Ìå¹¹Ôì
+	//ç»“æ„ä½“æ„é€ 
 	STR_CMD_LC_CLUB_APPLICANT_RESULT CMD;
 	ZeroMemory(&CMD, sizeof(CMD));
 	CMD.lResultCode = lResultCode;
@@ -3959,36 +3957,36 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_APPLICANT_RESULT(DWORD dwContextID, VOI
 
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_APPLICANT_RESULT,dwContextID,&CMD,sizeof(CMD));
 
-	//TODONOWW ¹ÜÀíÔ±Í¬ÒâÖ®ºó ĞèÒªÍ¨Öª¿Í»§¶ËÖ¸¶¨Íæ¼ÒÊµÊ±Ë¢ĞÂ½çÃæ
+	//TODONOWW ç®¡ç†å‘˜åŒæ„ä¹‹å éœ€è¦é€šçŸ¥å®¢æˆ·ç«¯æŒ‡å®šç©å®¶å®æ—¶åˆ·æ–°ç•Œé¢
 	return true;
 }
 
-//ÓÃ»§ÍË³öÇëÇó
+//ç”¨æˆ·é€€å‡ºè¯·æ±‚
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_QUIT(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize!=sizeof(STR_SUB_CL_CLUB_QUIT)) return false;
 
 	STR_SUB_CL_CLUB_QUIT *pDBR = (STR_SUB_CL_CLUB_QUIT*) pData;
 
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.AddParameter(TEXT("@UserID"),pDBR->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("@ClubID"),pDBR->dwClubID);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.AddParameter(TEXT("@UserID"),pDBR->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("@ClubID"),pDBR->dwClubID);
 
-	//Êä³ö²ÎÊı
+	//è¾“å‡ºå‚æ•°
 	TCHAR szDescribeString[128]=TEXT("");
-	m_AccountsDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
+	m_AccountsDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_QUIT"),true);
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_QUIT"),true);
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
-	m_AccountsDBAide.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
+	m_AccountsDBModule.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
-	//½á¹¹Ìå¹¹Ôì
+	//ç»“æ„ä½“æ„é€ 
 	STR_CMD_LC_CLUB_QUIT DBO;
 	ZeroMemory(&DBO, sizeof(DBO));
 	DBO.lResultCode = lResultCode;
@@ -3998,87 +3996,87 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_QUIT(DWORD dwContextID, VOID * pData, W
 	return true;
 }
 
-//ÇëÇó³ÉÔ±Êı¾İ
+//è¯·æ±‚æˆå‘˜æ•°æ®
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_MEMBER_MANAGER(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ£Ñé²ÎÊı
+	//æ ¡éªŒå‚æ•°
 	if (wDataSize!=sizeof(STR_SUB_CL_CLUB_MEMBER_MANAGER)) return false;
 	STR_SUB_CL_CLUB_MEMBER_MANAGER *pDBR = (STR_SUB_CL_CLUB_MEMBER_MANAGER*) pData;
 
-	/* ¶ÁÈ¡¹¤»áÊı¾İ */
-	m_AccountsDBAide.ResetParameter();
+	/* è¯»å–å·¥ä¼šæ•°æ® */
+	m_AccountsDBModule.ResetParameter();
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.AddParameter(TEXT("@UserID"),pDBR->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("@ClubID"),pDBR->dwClubID);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.AddParameter(TEXT("@UserID"),pDBR->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("@ClubID"),pDBR->dwClubID);
 
-	LONG lResultCode2 =  m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_DATA"),true);
+	LONG lResultCode2 =  m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_DATA"),true);
 
 	if(DB_SUCCESS == lResultCode2)
 	{
 		STR_CMD_LC_CLUB_DATA CMD1;
-		m_AccountsDBAide.GetValue_String(TEXT("ClubName"),CMD1.szClubName,CountArray(CMD1.szClubName));
-		m_AccountsDBAide.GetValue_String(TEXT("ClubOwnerName"),CMD1.szClubOwnerName,CountArray(CMD1.szClubOwnerName));
-		CMD1.dwClubID =m_AccountsDBAide.GetValue_DWORD(TEXT("ClubID"));
-		CMD1.dwClubOwner =m_AccountsDBAide.GetValue_DWORD(TEXT("ClubOwner"));
-		CMD1.dwMajorKindID =m_AccountsDBAide.GetValue_DWORD(TEXT("MajorKindID"));
+		m_AccountsDBModule.GetValue_String(TEXT("ClubName"),CMD1.szClubName,CountArray(CMD1.szClubName));
+		m_AccountsDBModule.GetValue_String(TEXT("ClubOwnerName"),CMD1.szClubOwnerName,CountArray(CMD1.szClubOwnerName));
+		CMD1.dwClubID =m_AccountsDBModule.GetValue_DWORD(TEXT("ClubID"));
+		CMD1.dwClubOwner =m_AccountsDBModule.GetValue_DWORD(TEXT("ClubOwner"));
+		CMD1.dwMajorKindID =m_AccountsDBModule.GetValue_DWORD(TEXT("MajorKindID"));
 		//TODONOW dwMinorKindID
-		CMD1.byClubLevel =m_AccountsDBAide.GetValue_BYTE(TEXT("ClubLevel"));
-		CMD1.wMemberNum =m_AccountsDBAide.GetValue_WORD(TEXT("MemberNum"));
-		m_AccountsDBAide.GetValue_String(TEXT("Notice"),CMD1.szNotice,CountArray(CMD1.szNotice));
-		m_AccountsDBAide.GetValue_String(TEXT("Message"),CMD1.szMessage,CountArray(CMD1.szMessage));
-		CMD1.dwFK =m_AccountsDBAide.GetValue_DWORD(TEXT("FK"));
-		CMD1.byApplyNum =m_AccountsDBAide.GetValue_BYTE(TEXT("ApplyNum"));
-		CMD1.byAutoAgree =m_AccountsDBAide.GetValue_BYTE(TEXT("AutoAgree"));
-		CMD1.bySex =m_AccountsDBAide.GetValue_BYTE(TEXT("Sex"));
-		CMD1.wLevel =m_AccountsDBAide.GetValue_WORD(TEXT("Level"));
+		CMD1.byClubLevel =m_AccountsDBModule.GetValue_BYTE(TEXT("ClubLevel"));
+		CMD1.wMemberNum =m_AccountsDBModule.GetValue_WORD(TEXT("MemberNum"));
+		m_AccountsDBModule.GetValue_String(TEXT("Notice"),CMD1.szNotice,CountArray(CMD1.szNotice));
+		m_AccountsDBModule.GetValue_String(TEXT("Message"),CMD1.szMessage,CountArray(CMD1.szMessage));
+		CMD1.dwFK =m_AccountsDBModule.GetValue_DWORD(TEXT("FK"));
+		CMD1.byApplyNum =m_AccountsDBModule.GetValue_BYTE(TEXT("ApplyNum"));
+		CMD1.byAutoAgree =m_AccountsDBModule.GetValue_BYTE(TEXT("AutoAgree"));
+		CMD1.bySex =m_AccountsDBModule.GetValue_BYTE(TEXT("Sex"));
+		CMD1.wLevel =m_AccountsDBModule.GetValue_WORD(TEXT("Level"));
 
 		g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_DATA,dwContextID,&CMD1,sizeof(CMD1));
 	}
-	else //Èç¹û¹¤»á»ù±¾ĞÅÏ¢¶ÁÈ¡Ê§°Ü, ºóÃæµÄ³ÉÔ±Ò²²»ĞèÒª¶ÁÈ¡ÁË
+	else //å¦‚æœå·¥ä¼šåŸºæœ¬ä¿¡æ¯è¯»å–å¤±è´¥, åé¢çš„æˆå‘˜ä¹Ÿä¸éœ€è¦è¯»å–äº†
 	{
 		return true;
 	}
 
-	/* ³ÉÔ±Êı¾İ·µ»Ø */
-	//¼ÓÔØÀàĞÍ
-	m_AccountsDBAide.ResetParameter();
+	/* æˆå‘˜æ•°æ®è¿”å› */
+	//åŠ è½½ç±»å‹
+	m_AccountsDBModule.ResetParameter();
 
-	//¹¹Ôì²ÎÊı
-	m_AccountsDBAide.AddParameter(TEXT("@UserID"),pDBR->dwUserID);
-	m_AccountsDBAide.AddParameter(TEXT("@ClubID"),pDBR->dwClubID);
+	//æ„é€ å‚æ•°
+	m_AccountsDBModule.AddParameter(TEXT("@UserID"),pDBR->dwUserID);
+	m_AccountsDBModule.AddParameter(TEXT("@ClubID"),pDBR->dwClubID);
 
-	LONG lResultCode = m_AccountsDBAide.ExecuteProcess(TEXT("GSP_CL_CLUB_MEMBER_MANAGER"),true);
+	LONG lResultCode = m_AccountsDBModule.ExecuteProcess(TEXT("GSP_CL_CLUB_MEMBER_MANAGER"),true);
 
-	//ÁĞ±í·¢ËÍ
+	//åˆ—è¡¨å‘é€
 	WORD wPacketSize=0;
 	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
 	wPacketSize=0;
 	STR_CMD_LC_CLUB_MEMBER_MANAGER * pCMD=NULL;
 	while ((lResultCode == DB_SUCCESS) && (m_AccountsDBModule->IsRecordsetEnd()==false))
 	{
-		//·¢ËÍĞÅÏ¢
+		//å‘é€ä¿¡æ¯
 		if ((wPacketSize+sizeof(STR_CMD_LC_CLUB_MEMBER_MANAGER))>sizeof(cbBuffer))
 		{
 			g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_MEMBER_MANAGER,dwContextID,cbBuffer,wPacketSize);
 			wPacketSize=0;
 		}
 
-		//¶ÁÈ¡ĞÅÏ¢
+		//è¯»å–ä¿¡æ¯
 		pCMD=(STR_CMD_LC_CLUB_MEMBER_MANAGER *)(cbBuffer+wPacketSize);
 
-		pCMD->dwUserID =m_AccountsDBAide.GetValue_DWORD(TEXT("UserID"));
-		m_AccountsDBAide.GetValue_String(TEXT("NickName"),pCMD->szUserName,CountArray(pCMD->szUserName));
-		pCMD->byClubRole =m_AccountsDBAide.GetValue_BYTE(TEXT("RoleID"));
-		pCMD->byUserLevel =m_AccountsDBAide.GetValue_BYTE(TEXT("UserLevel"));
-		pCMD->byClubReputation =m_AccountsDBAide.GetValue_BYTE(TEXT("ClubReputation"));
-		pCMD->byUserState =m_AccountsDBAide.GetValue_BYTE(TEXT("IsOnline"));
-		m_AccountsDBAide.GetValue_String(TEXT("HeadUrl"),pCMD->szHeadUrl,CountArray(pCMD->szHeadUrl));
+		pCMD->dwUserID =m_AccountsDBModule.GetValue_DWORD(TEXT("UserID"));
+		m_AccountsDBModule.GetValue_String(TEXT("NickName"),pCMD->szUserName,CountArray(pCMD->szUserName));
+		pCMD->byClubRole =m_AccountsDBModule.GetValue_BYTE(TEXT("RoleID"));
+		pCMD->byUserLevel =m_AccountsDBModule.GetValue_BYTE(TEXT("UserLevel"));
+		pCMD->byClubReputation =m_AccountsDBModule.GetValue_BYTE(TEXT("ClubReputation"));
+		pCMD->byUserState =m_AccountsDBModule.GetValue_BYTE(TEXT("IsOnline"));
+		m_AccountsDBModule.GetValue_String(TEXT("HeadUrl"),pCMD->szHeadUrl,CountArray(pCMD->szHeadUrl));
 
-		//ÉèÖÃÎ»ÒÆ
+		//è®¾ç½®ä½ç§»
 		wPacketSize+=sizeof(STR_CMD_LC_CLUB_MEMBER_MANAGER);
 
-		//ÒÆ¶¯¼ÇÂ¼
+		//ç§»åŠ¨è®°å½•
 		m_AccountsDBModule->MoveToNext();
 	}
 	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_MEMBER_MANAGER,dwContextID,cbBuffer,wPacketSize);
@@ -4088,49 +4086,49 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_MEMBER_MANAGER(DWORD dwContextID, VOID 
 
 #pragma endregion
 
-#pragma region MDM_SHOP ÉÌ³ÇµÀ¾ß
-//DBR && DBO²éÑ¯ÉÌ³Ç
+#pragma region MDM_SHOP å•†åŸé“å…·
+//DBR && DBOæŸ¥è¯¢å•†åŸ
 bool CDataBaseEngineSink::On_DBR_CL_SHOP_QUERY(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize!=sizeof(STR_DBR_CL_SHOP_QUERY)) return false;
 	STR_DBR_CL_SHOP_QUERY *pDBR = (STR_DBR_CL_SHOP_QUERY*) pData;
 
-	//¼ÓÔØÀàĞÍ
-	m_PlatformDBAide.ResetParameter();
+	//åŠ è½½ç±»å‹
+	m_PlatformDBModule.ResetParameter();
 
-	m_PlatformDBAide.AddParameter(TEXT("@Mystery"),_MYSTERY);
-	m_PlatformDBAide.AddParameter(TEXT("@GoodsType"),pDBR->byGoodsType);
-	m_PlatformDBAide.AddParameter(TEXT("@UserID"),pDBR->dwUserID);
+	m_PlatformDBModule.AddParameter(TEXT("@Mystery"),_MYSTERY);
+	m_PlatformDBModule.AddParameter(TEXT("@GoodsType"),pDBR->byGoodsType);
+	m_PlatformDBModule.AddParameter(TEXT("@UserID"),pDBR->dwUserID);
 
-	LONG lResultCode  = m_PlatformDBAide.ExecuteProcess(TEXT("GSP_CL_SHOP_QUERY"),true);
+	LONG lResultCode  = m_PlatformDBModule.ExecuteProcess(TEXT("GSP_CL_SHOP_QUERY"),true);
 
-	//ÁĞ±í·¢ËÍ
-	//±äÁ¿¶¨Òå
+	//åˆ—è¡¨å‘é€
+	//å˜é‡å®šä¹‰
 	WORD wPacketSize=0;
 	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
 	wPacketSize=0;
 	STR_DBO_CL_SHOP_QUERY * pDBO=NULL;
 	while ((lResultCode == DB_SUCCESS) && (m_PlatformDBModule->IsRecordsetEnd()==false))
 	{
-		//·¢ËÍĞÅÏ¢
+		//å‘é€ä¿¡æ¯
 		if ((wPacketSize+sizeof(STR_DBO_CL_SHOP_QUERY))>sizeof(cbBuffer))
 		{
 			g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_SHOP_QUERY,dwContextID,cbBuffer,wPacketSize);
 			wPacketSize=0;
 		}
 
-		//¶ÁÈ¡ĞÅÏ¢
+		//è¯»å–ä¿¡æ¯
 		pDBO=(STR_DBO_CL_SHOP_QUERY *)(cbBuffer+wPacketSize);
-		pDBO->dwGoodsID=m_PlatformDBAide.GetValue_DWORD(TEXT("GoodsID"));
-		pDBO->byDiscount=m_PlatformDBAide.GetValue_BYTE(TEXT("Discount"));
-		pDBO->dbSpreadScore=m_PlatformDBAide.GetValue_DWORD(TEXT("SpreadScore"));
-		pDBO->dwPrice=m_PlatformDBAide.GetValue_DWORD(TEXT("Price"));
+		pDBO->dwGoodsID=m_PlatformDBModule.GetValue_DWORD(TEXT("GoodsID"));
+		pDBO->byDiscount=m_PlatformDBModule.GetValue_BYTE(TEXT("Discount"));
+		pDBO->dbSpreadScore=m_PlatformDBModule.GetValue_DWORD(TEXT("SpreadScore"));
+		pDBO->dwPrice=m_PlatformDBModule.GetValue_DWORD(TEXT("Price"));
 
-		//ÉèÖÃÎ»ÒÆ
+		//è®¾ç½®ä½ç§»
 		wPacketSize+=sizeof(STR_DBO_CL_SHOP_QUERY);
 
-		//ÒÆ¶¯¼ÇÂ¼
+		//ç§»åŠ¨è®°å½•
 		m_PlatformDBModule->MoveToNext();
 	}
 	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_SHOP_QUERY,dwContextID,cbBuffer,wPacketSize);
@@ -4140,10 +4138,10 @@ bool CDataBaseEngineSink::On_DBR_CL_SHOP_QUERY(DWORD dwContextID, VOID * pData, 
 	return true;
 }
 
-//DBR && DBO×êÊ¯¹ºÂòµÀ¾ß
+//DBR && DBOé’»çŸ³è´­ä¹°é“å…·
 bool CDataBaseEngineSink::On_DBR_CL_SHOP_DIAMOND(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize!=sizeof(STR_SUB_CL_SHOP_DIAMOND)) return false;
 
 	STR_SUB_CL_SHOP_DIAMOND *pDBR = (STR_SUB_CL_SHOP_DIAMOND*) pData;
@@ -4156,29 +4154,29 @@ bool CDataBaseEngineSink::On_DBR_CL_SHOP_DIAMOND(DWORD dwContextID, VOID * pData
 	DBR.dwTargetID = pDBR->dwTargetID;
 	DBR.dwGoodsNum = pDBR->dwGoodsNum;
 
-	//¼ÓÔØÀàĞÍ
-	m_PlatformDBAide.ResetParameter();
+	//åŠ è½½ç±»å‹
+	m_PlatformDBModule.ResetParameter();
 
-	//¹¹Ôì²ÎÊı
-	m_PlatformDBAide.AddParameter(TEXT("@Mystery"),_MYSTERY);
-	m_PlatformDBAide.AddParameter(TEXT("@Shopper"),DBR.dwShopper);
-	m_PlatformDBAide.AddParameter(TEXT("@GoodsType"),DBR.byGoodsType);
-	m_PlatformDBAide.AddParameter(TEXT("@GoodsID"),DBR.dwGoodsID);
-	m_PlatformDBAide.AddParameter(TEXT("@Mask"),DBR.byMask);
-	m_PlatformDBAide.AddParameter(TEXT("@TargetID"), DBR.dwTargetID);
-	m_PlatformDBAide.AddParameter(TEXT("@GoodsNum"), DBR.dwGoodsNum);
+	//æ„é€ å‚æ•°
+	m_PlatformDBModule.AddParameter(TEXT("@Mystery"),_MYSTERY);
+	m_PlatformDBModule.AddParameter(TEXT("@Shopper"),DBR.dwShopper);
+	m_PlatformDBModule.AddParameter(TEXT("@GoodsType"),DBR.byGoodsType);
+	m_PlatformDBModule.AddParameter(TEXT("@GoodsID"),DBR.dwGoodsID);
+	m_PlatformDBModule.AddParameter(TEXT("@Mask"),DBR.byMask);
+	m_PlatformDBModule.AddParameter(TEXT("@TargetID"), DBR.dwTargetID);
+	m_PlatformDBModule.AddParameter(TEXT("@GoodsNum"), DBR.dwGoodsNum);
 
-	//Êä³ö²ÎÊı
+	//è¾“å‡ºå‚æ•°
 	TCHAR szDescribeString[128]=TEXT("");
-	m_PlatformDBAide.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
+	m_PlatformDBModule.AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
-	LONG lResultCode = m_PlatformDBAide.ExecuteProcess(TEXT("GSP_CL_SHOP_BUY"),true);
+	LONG lResultCode = m_PlatformDBModule.ExecuteProcess(TEXT("GSP_CL_SHOP_BUY"),true);
 
-	//½á¹û´¦Àí
+	//ç»“æœå¤„ç†
 	CDBVarValue DBVarValue;
-	m_PlatformDBAide.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
+	m_PlatformDBModule.GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
-	//½á¹¹Ìå¹¹Ôì
+	//ç»“æ„ä½“æ„é€ 
 	STR_DBO_CL_SHOP_DIAMOND DBO;
 	ZeroMemory(&DBO, sizeof(DBO));
 	DBO.lResultCode = lResultCode;
@@ -4188,10 +4186,10 @@ bool CDataBaseEngineSink::On_DBR_CL_SHOP_DIAMOND(DWORD dwContextID, VOID * pData
 	return true;
 }
 
-//DBR && DBO±³°üÎïÆ·²éÑ¯
+//DBR && DBOèƒŒåŒ…ç‰©å“æŸ¥è¯¢
 bool CDataBaseEngineSink::On_DBR_CL_BAG_QUERY(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
-	//Ğ§Ñé²ÎÊı
+	//æ•ˆéªŒå‚æ•°
 	if (wDataSize!=sizeof(STR_DBR_CL_BAG_QUERY)) return false;
 
 	STR_DBR_CL_BAG_QUERY *pDBR = (STR_DBR_CL_BAG_QUERY*) pData;
@@ -4199,55 +4197,55 @@ bool CDataBaseEngineSink::On_DBR_CL_BAG_QUERY(DWORD dwContextID, VOID * pData, W
 	STR_DBR_CL_BAG_QUERY DBR;
 	DBR.dwUserID = pDBR->dwUserID;
 
-	//¼ÓÔØÀàĞÍ
-	m_PlatformDBAide.ResetParameter();
-	//¹¹Ôì²ÎÊı
-	m_PlatformDBAide.AddParameter(TEXT("@UserID"),DBR.dwUserID);
+	//åŠ è½½ç±»å‹
+	m_PlatformDBModule.ResetParameter();
+	//æ„é€ å‚æ•°
+	m_PlatformDBModule.AddParameter(TEXT("@UserID"),DBR.dwUserID);
 
-	LONG lResultCode = m_PlatformDBAide.ExecuteProcess(TEXT("GSP_CL_BAG_QUERY"),true);
+	LONG lResultCode = m_PlatformDBModule.ExecuteProcess(TEXT("GSP_CL_BAG_QUERY"),true);
 
-	//ÁĞ±í·¢ËÍ
+	//åˆ—è¡¨å‘é€
 	WORD wPacketSize=0;
 	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
 	wPacketSize=0;
 	STR_DBO_CL_BAG_QUERY * pDBO=NULL;
 	while ((DB_SUCCESS == lResultCode) && (m_PlatformDBModule->IsRecordsetEnd()==false))
 	{
-		//·¢ËÍĞÅÏ¢
+		//å‘é€ä¿¡æ¯
 		if ((wPacketSize+sizeof(STR_DBO_CL_BAG_QUERY))>sizeof(cbBuffer))
 		{
 			g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_BAG_QUERY,dwContextID,cbBuffer,wPacketSize);
 			wPacketSize=0;
 		}
 
-		//¶ÁÈ¡ĞÅÏ¢
+		//è¯»å–ä¿¡æ¯
 		pDBO=(STR_DBO_CL_BAG_QUERY *)(cbBuffer+wPacketSize);
-		pDBO->dwGoodsID = m_PlatformDBAide.GetValue_DWORD(TEXT("GoodsID"));
-		pDBO->dwGoodsNum = m_PlatformDBAide.GetValue_DWORD(TEXT("GoodsNum"));
-		pDBO->byGoodsType = m_PlatformDBAide.GetValue_BYTE(TEXT("GoodsType"));
+		pDBO->dwGoodsID = m_PlatformDBModule.GetValue_DWORD(TEXT("GoodsID"));
+		pDBO->dwGoodsNum = m_PlatformDBModule.GetValue_DWORD(TEXT("GoodsNum"));
+		pDBO->byGoodsType = m_PlatformDBModule.GetValue_BYTE(TEXT("GoodsType"));
 
-		//ÉèÖÃÎ»ÒÆ
+		//è®¾ç½®ä½ç§»
 		wPacketSize+=sizeof(STR_DBO_CL_BAG_QUERY);
 
-		//ÒÆ¶¯¼ÇÂ¼
+		//ç§»åŠ¨è®°å½•
 		m_PlatformDBModule->MoveToNext();
 	}
 	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_BAG_QUERY,dwContextID,cbBuffer,wPacketSize);
 
 
-	//¼ÓÔØÀàĞÍ
-	m_PlatformDBAide.ResetParameter();
-	//¹¹Ôì²ÎÊı
-	m_PlatformDBAide.AddParameter(TEXT("@UserID"),DBR.dwUserID);
+	//åŠ è½½ç±»å‹
+	m_PlatformDBModule.ResetParameter();
+	//æ„é€ å‚æ•°
+	m_PlatformDBModule.AddParameter(TEXT("@UserID"),DBR.dwUserID);
 
-	lResultCode = m_PlatformDBAide.ExecuteProcess(TEXT("GSP_CL_BAG_QUERY_LOVENESS"),true);
+	lResultCode = m_PlatformDBModule.ExecuteProcess(TEXT("GSP_CL_BAG_QUERY_LOVENESS"),true);
 
 	STR_CMD_LC_BAG_FINISH CMD2;
 	ZeroMemory(&CMD2, sizeof(CMD2));
 
 	if(DB_SUCCESS == lResultCode)
 	{
-		CMD2.dwLoveness = m_PlatformDBAide.GetValue_DWORD(TEXT("Loveness"));
+		CMD2.dwLoveness = m_PlatformDBModule.GetValue_DWORD(TEXT("Loveness"));
 	}
 
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_BAG_FINISH, dwContextID, &CMD2, sizeof(CMD2));
@@ -4255,7 +4253,7 @@ bool CDataBaseEngineSink::On_DBR_CL_BAG_QUERY(DWORD dwContextID, VOID * pData, W
 	return true;
 }
 
-// byteÊı×é×ªÎª string  TODONOW ÔİÊ±·ÅÔÚÕâÀï´¦Àí
+// byteæ•°ç»„è½¬ä¸º string  TODONOW æš‚æ—¶æ”¾åœ¨è¿™é‡Œå¤„ç†
 const CString toHexString(const byte * input, const int datasize)
 {
 	CString output;
@@ -4272,7 +4270,7 @@ const CString toHexString(const byte * input, const int datasize)
 	return output;
 } 
 
-// string ×ªÎªbyteÊı×é  TODONOW ÔİÊ±·ÅÔÚÕâÀï´¦Àí
+// string è½¬ä¸ºbyteæ•°ç»„  TODONOW æš‚æ—¶æ”¾åœ¨è¿™é‡Œå¤„ç†
 int StrToBin(TCHAR* inWord, BYTE* OutBin, int source_len_begin, int source_len_end)
 {
 	TCHAR t2;
@@ -4351,11 +4349,11 @@ int StrToBin(TCHAR* inWord, BYTE* OutBin, int source_len_begin, int source_len_e
 
 		count = (t-source_len_begin)/2;
 
-		if((t % 2) == 0) //¸ßÎ»
+		if((t % 2) == 0) //é«˜ä½
 		{
 			OutBin[count] = intTemp<<4;
 		}
-		else if((t % 2) == 1) //µÍÎ»
+		else if((t % 2) == 1) //ä½ä½
 		{
 			OutBin[count] += intTemp;
 		}

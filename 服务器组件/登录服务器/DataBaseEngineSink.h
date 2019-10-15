@@ -5,314 +5,311 @@
 
 
 //////////////////////////////////////////////////////////////////////////////////
-//1¡¢¼Ì³ÐÄÚºËµÄÊý¾Ý¿âÀà
-//2¡¢´¦ÀíÓÎÏ··þºÍµÇÂ½·þ·¢À´µÄÊý¾Ý¿âÏûÏ¢
+//1ã€ç»§æ‰¿å†…æ ¸çš„æ•°æ®åº“ç±»
+//2ã€å¤„ç†æ¸¸æˆæœå’Œç™»é™†æœå‘æ¥çš„æ•°æ®åº“æ¶ˆæ¯
 //////////////////////////////////////////////////////////////////////////////////
 
-//Êý¾Ý¿âÀà
+//æ•°æ®åº“ç±»
 class CDataBaseEngineSink : public IDataBaseEngineSink
 {
-	//ÓÑÔª¶¨Òå
+	//å‹å…ƒå®šä¹‰
 	friend class CServiceUnits;
 
-	//ÓÃ»§Êý¾Ý¿â
+	//ç”¨æˆ·æ•°æ®åº“
 protected:
-	CDataBaseAide					m_AccountsDBAide;					//ÓÃ»§Êý¾Ý¿â
-	CDataBaseHelper					m_AccountsDBModule;					//ÓÃ»§Êý¾Ý¿â
+	CDataBaseHelper					m_AccountsDBModule;					//ç”¨æˆ·æ•°æ®åº“
 
-	//ÓÎÏ·±ÒÊý¾Ý¿â
+	//æ¸¸æˆå¸æ•°æ®åº“
 protected:
-	CDataBaseAide					m_TreasureDBAide;					//ÓÎÏ·±ÒÊý¾Ý¿â
-	CDataBaseHelper					m_TreasureDBModule;					//ÓÎÏ·±ÒÊý¾Ý¿â
+	CDataBaseHelper					m_TreasureDBModule;					//æ¸¸æˆå¸æ•°æ®åº“
 
-	//Æ½Ì¨Êý¾Ý¿â
+	//å¹³å°æ•°æ®åº“
 protected:
-	CDataBaseAide					m_PlatformDBAide;					//Æ½Ì¨Êý¾Ý¿â
-	CDataBaseHelper					m_PlatformDBModule;					//Æ½Ì¨Êý¾Ý¿â
+	CDataBaseHelper					m_PlatformDBModule;					//å¹³å°æ•°æ®åº“
 
-	//º¯Êý¶¨Òå
+	//å‡½æ•°å®šä¹‰
 public:
-	//¹¹Ôìº¯Êý
+	//æž„é€ å‡½æ•°
 	CDataBaseEngineSink();
-	//Îö¹¹º¯Êý
+	//æžæž„å‡½æ•°
 	virtual ~CDataBaseEngineSink(){};
 
-	//»ù´¡½Ó¿Ú
+	//åŸºç¡€æŽ¥å£
 public:
-	//ÊÍ·Å¶ÔÏó
+	//é‡Šæ”¾å¯¹è±¡
 	virtual VOID Release() { return; }
-	//½Ó¿Ú²éÑ¯
+	//æŽ¥å£æŸ¥è¯¢
 	virtual VOID * QueryInterface(REFGUID Guid, DWORD dwQueryVer);
 
-	//ÏµÍ³ÊÂ¼þ
+	//ç³»ç»Ÿäº‹ä»¶
 public:
-	//Æô¶¯ÊÂ¼þ
+	//å¯åŠ¨äº‹ä»¶
 	virtual bool OnDataBaseEngineStart(IUnknownEx * pIUnknownEx);
-	//Í£Ö¹ÊÂ¼þ
+	//åœæ­¢äº‹ä»¶
 	virtual bool OnDataBaseEngineConclude(IUnknownEx * pIUnknownEx);
 
-	//ÄÚºËÊÂ¼þ
+	//å†…æ ¸äº‹ä»¶
 public:
-	//ÇëÇóÊÂ¼þ
+	//è¯·æ±‚äº‹ä»¶
 	virtual bool OnDataBaseEngineRequest(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize);
 
-#pragma region  MDM_LOGON µÇÂ½Ä£¿é
-	/* **************************¡¾MAIN:1    MDM_LOGON    µÇÂ½¡¿*************************************/
+#pragma region  MDM_LOGON ç™»é™†æ¨¡å—
+	/* **************************ã€MAIN:1    MDM_LOGON    ç™»é™†ã€‘*************************************/
 protected:
-	//ÕÊºÅµÇÂ¼
+	//å¸å·ç™»å½•
 	bool On_DBR_Logon_Accounts(DWORD dwContextID, VOID * pData, WORD wDataSize);
 	bool On_DBO_Logon_Accounts(DWORD dwContextID, DWORD dwResuleCode, LPCTSTR pszErrorString);
-	//ÕÊºÅ×¢²á
+	//å¸å·æ³¨å†Œ
 	bool On_DBR_Logon_Register(DWORD dwContextID, VOID * pData, WORD wDataSize);
-	//Æ½Ì¨µÇÂ¼
+	//å¹³å°ç™»å½•
 	bool On_DBR_Logon_Platform(DWORD dwContextID, VOID * pData, WORD wDataSize);
 	bool On_DBO_Logon_Platform(DWORD dwContextID, DWORD dwResuleCode, LPCTSTR pszErrorString);
 
-	//±ä¸üÓÃ»§²Æ¸»	TODO µÇÂ½½±Àø + ÀÏÍæ¼Ò½±Àø
+	//å˜æ›´ç”¨æˆ·è´¢å¯Œ	TODO ç™»é™†å¥–åŠ± + è€çŽ©å®¶å¥–åŠ±
 	bool OnModifyUserInsure(DWORD dwContextID, void * pData, WORD wDataSize);
 
 #pragma endregion
 
-#pragma region MDM_SERVICE ÓÃ»§·þÎñ
-	/* **************************¡¾MAIN:3    MDM_SERVICE    ·þÎñ¡¿*************************************/
+#pragma region MDM_SERVICE ç”¨æˆ·æœåŠ¡
+	/* **************************ã€MAIN:3    MDM_SERVICE    æœåŠ¡ã€‘*************************************/
 protected:
-	//Íæ¼Ò·´À¡
+	//çŽ©å®¶åé¦ˆ
 	bool On_DBR_Service_UserFeedback(DWORD dwContextID, VOID * pData, WORD wDataSize);
-	//Íæ¼Ò·´À¡·µ»Ø
+	//çŽ©å®¶åé¦ˆè¿”å›ž
 	bool On_DBO_Service_UserFeedback(DWORD dwContextID, DWORD dwResultCode, LPCTSTR pszErrorString);
 
-	//Ë¢ÐÂÓÃ»§ÐÅÏ¢
+	//åˆ·æ–°ç”¨æˆ·ä¿¡æ¯
 	bool On_DBR_Service_RefreshUserInfo(DWORD dwContextID, VOID * pData, WORD wDataSize);
-	//Ë¢ÐÂÓÃ»§ÐÅÏ¢·µ»Ø
+	//åˆ·æ–°ç”¨æˆ·ä¿¡æ¯è¿”å›ž
 	bool On_DBO_Service_RefreshUserInfo(DWORD dwContextID, DWORD dwResultCode, LPCTSTR pszErrorString);
 
-	//²éÑ¯¿ª·¿ÐÅÏ¢ÁÐ±í
+	//æŸ¥è¯¢å¼€æˆ¿ä¿¡æ¯åˆ—è¡¨
 	bool On_DBR_Service_QueryRoomList(DWORD dwContextID, void * pData, WORD wDataSize);
-	//²éÑ¯¿ª·¿ÐÅÏ¢ÁÐ±í·µ»Ø
+	//æŸ¥è¯¢å¼€æˆ¿ä¿¡æ¯åˆ—è¡¨è¿”å›ž
 	bool On_DBO_Service_QueryRoomList(DWORD dwContextID, DWORD dwResultCode);
 
-	//»ñÈ¡¸»ºÀ°ñ
+	//èŽ·å–å¯Œè±ªæ¦œ
 	bool On_DBR_Service_GetRichList(DWORD dwContextID, void * pData, WORD wDataSize);
-	//»ñÈ¡¸»ºÀ°ñ·µ»Ø
+	//èŽ·å–å¯Œè±ªæ¦œè¿”å›ž
 	bool On_DBO_Service_GetRichList(DWORD dwContextID, DWORD dwResultCode);
 
-	//»ñÈ¡ÓÃ»§Â¼ÏñÁÐ±í£¨´ó¾Ö£©
+	//èŽ·å–ç”¨æˆ·å½•åƒåˆ—è¡¨ï¼ˆå¤§å±€ï¼‰
 	bool On_DBR_Service_GetUserRecordList(DWORD dwContextID, void * pData, WORD wDataSize);
-	//»ñÈ¡ÓÃ»§Â¼ÏñÁÐ±í·µ»Ø
+	//èŽ·å–ç”¨æˆ·å½•åƒåˆ—è¡¨è¿”å›ž
 	bool On_DBO_Service_GetUserRecordList(DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString);
 
-	//»ñÈ¡Ö¸¶¨IDÂ¼Ïñ£¨Ð¡¾Ö£©
+	//èŽ·å–æŒ‡å®šIDå½•åƒï¼ˆå°å±€ï¼‰
 	bool On_DBR_Service_GetSpecifiRecord(DWORD dwContextID, void * pData, WORD wDataSize);
-	//»ñÈ¡Ö¸¶¨IDÂ¼Ïñ·µ»Ø
+	//èŽ·å–æŒ‡å®šIDå½•åƒè¿”å›ž
 	bool On_DBO_Service_GetSpecificRecord(DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString);
 
-	//»ñÈ¡ÔÚÏß½±Àø
+	//èŽ·å–åœ¨çº¿å¥–åŠ±
 	bool On_DBR_Service_OnlineReward(DWORD dwContextID, void * pData, WORD wDataSize);
-	//»ñÈ¡ÔÚÏß½±Àø·µ»Ø
+	//èŽ·å–åœ¨çº¿å¥–åŠ±è¿”å›ž
 	bool On_DBO_Service_OnlineReward(DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString);
 
-	//»ñÈ¡ÈÎÎñÁÐ±í
+	//èŽ·å–ä»»åŠ¡åˆ—è¡¨
 	bool On_DBR_Service_GetTaskList(DWORD dwContextID, void * pData, WORD wDataSize);
-	//»ñÈ¡ÈÎÎñÁÐ±í·µ»Ø
+	//èŽ·å–ä»»åŠ¡åˆ—è¡¨è¿”å›ž
 	bool On_DBO_Service_GetTaskList(DWORD dwUserID, DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString);
 
-	//ÁìÈ¡ÈÎÎñ½±Àø
+	//é¢†å–ä»»åŠ¡å¥–åŠ±
 	bool On_DBR_Service_GetTaskReward(DWORD dwContextID, void * pData, WORD wDataSize);
-	//ÁìÈ¡ÈÎÎñ½±Àø·µ»Ø
+	//é¢†å–ä»»åŠ¡å¥–åŠ±è¿”å›ž
 	bool On_DBO_Service_GetTaskReward(DWORD dwUserID, DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString);
 
-	//ÇëÇó³é½±
+	//è¯·æ±‚æŠ½å¥–
 	bool On_DBR_Service_RequestLottery(DWORD dwContextID, void * pData, WORD wDataSize);
-	//ÇëÇó³é½±·µ»Ø
+	//è¯·æ±‚æŠ½å¥–è¿”å›ž
 	bool On_DBO_Service_RequestLottery(DWORD dwUserID, DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString);
 	
-	//pure´óÌüÅÅÐÐ°ñ ²éÑ¯
+	//pureå¤§åŽ…æŽ’è¡Œæ¦œ æŸ¥è¯¢
 	bool On_DBR_CL_SERVICE_PURE_STANDING_LIST(DWORD dwContextID, void * pData, WORD wDataSize);
 
-	//pure´ó¾ÖÕ½¼¨ ²éÑ¯
+	//pureå¤§å±€æˆ˜ç»© æŸ¥è¯¢
 	bool On_DBR_CL_SERVICE_PURE_RECORD_LIST(DWORD dwContextID, void * pData, WORD wDataSize);
 
-	//pureÐ¡¾ÖÕ½¼¨ ²éÑ¯
+	//pureå°å±€æˆ˜ç»© æŸ¥è¯¢
 	bool On_DBR_CL_SERVICE_PURE_XJ_RECORD_LIST(DWORD dwContextID, void * pData, WORD wDataSize);
 
-	//Ð¡¾ÖÂ¼Ïñ»Ø·Å
+	//å°å±€å½•åƒå›žæ”¾
 	bool On_DBR_CL_Service_XJRecordPlayback(DWORD dwContextID, void * pData, WORD wDataSize);
 
-	//¿Í·þÏûÏ¢
+	//å®¢æœæ¶ˆæ¯
 	bool On_DBR_CL_SERVICE_CUSTOMER_MESSEGE(DWORD dwContextID, void * pData, WORD wDataSize);
 	
-	//ÇëÇó½ð±Ò´óÌüÐÅÏ¢
+	//è¯·æ±‚é‡‘å¸å¤§åŽ…ä¿¡æ¯
 	bool On_DBR_CL_SERVICE_GOLD_INFO(DWORD dwContextID, void * pData, WORD wDataSize);
 	
-	//ÐÞ¸Ä¸öÈË×ÊÁÏ
+	//ä¿®æ”¹ä¸ªäººèµ„æ–™
 	bool On_DBR_Service_ModifyPersonalInfo(DWORD dwContextID, void * pData, WORD wDataSize);
-	//ÐÞ¸Ä¸öÈË×ÊÁÏ·µ»Ø
+	//ä¿®æ”¹ä¸ªäººèµ„æ–™è¿”å›ž
 	bool On_DBO_Service_ModifyPersonalInfo(DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString);
 
-	//²éÑ¯²¢¸üÐÂÓÃ»§½ð±Ò·¿¿¨£¨Ö»ÒªÉæ¼°½ð±Ò·¿¿¨µÈ¸Ä±äµÄÏûÏ¢¶¼ÒªÓÃµ½Õâ¸öº¯Êý£¬ÔÝÊ±·ÅÔÚÕâÀïÃæ£©
+	//æŸ¥è¯¢å¹¶æ›´æ–°ç”¨æˆ·é‡‘å¸æˆ¿å¡ï¼ˆåªè¦æ¶‰åŠé‡‘å¸æˆ¿å¡ç­‰æ”¹å˜çš„æ¶ˆæ¯éƒ½è¦ç”¨åˆ°è¿™ä¸ªå‡½æ•°ï¼Œæš‚æ—¶æ”¾åœ¨è¿™é‡Œé¢ï¼‰
 	bool On_DBR_QueryScoreInfo(DWORD dwContextID, VOID * pData, WORD wDataSize);
-	//²éÑ¯½ð±Ò·¿¿¨·µ»Ø£¨ÅÆÓÑÈ¦ + ÔùËÍµÀ¾ßÊ±µ÷ÓÃ£©
+	//æŸ¥è¯¢é‡‘å¸æˆ¿å¡è¿”å›žï¼ˆç‰Œå‹åœˆ + èµ é€é“å…·æ—¶è°ƒç”¨ï¼‰
 	VOID On_DBO_QueryScoreInfo(DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString, bool bMobileClient);
 
-	//ÓÃ»§SocketÁ¬½Ó¹Ø±Õ
+	//ç”¨æˆ·Socketè¿žæŽ¥å…³é—­
 	bool On_DBR_GP_QUIT(DWORD dwContextID, VOID * pData, WORD wDataSize); 
 	
 #pragma endregion
 
-#pragma region MDM_GIFT ÀñÎïµÀ¾ß
-	/* **************************¡¾MAIN:5    MDM_GIFT    ÀñÎïµÀ¾ß¡¿*************************************/
+#pragma region MDM_GIFT ç¤¼ç‰©é“å…·
+	/* **************************ã€MAIN:5    MDM_GIFT    ç¤¼ç‰©é“å…·ã€‘*************************************/
 protected:
-	//ÏòÆäËûÓÃ»§ÔùËÍµÀ¾ß
+	//å‘å…¶ä»–ç”¨æˆ·èµ é€é“å…·
 	bool On_DBR_CL_GIFT_GIVE_PROPS(DWORD dwContextID, void * pData, WORD wDataSize);
 
 #pragma endregion
 
-	//³äÖµÐÅÏ¢
+	//å……å€¼ä¿¡æ¯
 	bool On_DBR_Other_RechargeInfo(DWORD dwContextID, VOID * pData, WORD wDataSize);
-	//³äÖµÐÅÏ¢·µ»Ø
+	//å……å€¼ä¿¡æ¯è¿”å›ž
 	bool On_DBO_Other_RechargeInfo(DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString);
 
-	//¶Ò»»µÀ¾ßÐÅÏ¢
+	//å…‘æ¢é“å…·ä¿¡æ¯
 	bool On_DBR_Other_ExchangeInfo(DWORD dwContextID, VOID * pData, WORD wDataSize);
-	//¶Ò»»µÀ¾ßÐÅÏ¢·µ»Ø
+	//å…‘æ¢é“å…·ä¿¡æ¯è¿”å›ž
 	bool On_DBO_Other_ExchangeInfo(DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString);
 
-	//ÏûÏ¢ºÅ6£º¹«ÓÃ²Ù×÷Ê§°Ü½á¹û
+	//æ¶ˆæ¯å·6ï¼šå…¬ç”¨æ“ä½œå¤±è´¥ç»“æžœ
 	VOID On_DBO_CommonOperateResult( DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString, DBR_CommandSource wRequestID );
 
-	// **************************·þÎñÆ÷×ÔÉíµÄÅÅÐÐ°ñÀàµÄÏìÓ¦º¯Êý **************************
+	// **************************æœåŠ¡å™¨è‡ªèº«çš„æŽ’è¡Œæ¦œç±»çš„å“åº”å‡½æ•° **************************
 protected:
-	//¸üÐÂÅÅÐÐ°ñÓÃ»§ÐÅÏ¢
+	//æ›´æ–°æŽ’è¡Œæ¦œç”¨æˆ·ä¿¡æ¯
 	bool OnDBUpdateRankUserItem(DWORD dwContextID, void * pData, WORD wDataSize);
-	//»ñÈ¡ÅÅÐÐ°ñÐÅÏ¢
+	//èŽ·å–æŽ’è¡Œæ¦œä¿¡æ¯
 	bool OnDBReadRankList(DWORD dwContextID, void * pData, WORD wDataSize);
-	//ÁìÈ¡ÅÅÐÐ°ñ½±Àø
+	//é¢†å–æŽ’è¡Œæ¦œå¥–åŠ±
 	bool OnReceiveRankReward(DWORD dwContextID, void * pData, WORD wDataSize);
 
-#pragma region Æô¶¯ÃüÁî
-	//Æô¶¯ÃüÁî
+#pragma region å¯åŠ¨å‘½ä»¤
+	//å¯åŠ¨å‘½ä»¤
 protected:
-	//¼ÓÔØÁÐ±í
+	//åŠ è½½åˆ—è¡¨
 	bool OnRequestLoadGameList(DWORD dwContextID, VOID * pData, WORD wDataSize);
-	//ÔÚÏßÐÅÏ¢
+	//åœ¨çº¿ä¿¡æ¯
 	bool OnRequestOnLineCountInfo(DWORD dwContextID, VOID * pData, WORD wDataSize);
-	//¼ÓÔØÅÜÂíµÆÏûÏ¢
+	//åŠ è½½è·‘é©¬ç¯æ¶ˆæ¯
 	bool On_DBR_UPDATA_MARQUEE(DWORD dwContextID, VOID * pData, WORD wDataSize);
 #pragma endregion
 
-#pragma region MDM_CLUB ÅÆÓÑÈ¦(°æ±¾2)
+#pragma region MDM_CLUB ç‰Œå‹åœˆ(ç‰ˆæœ¬2)
 protected:
-	//²éÑ¯ÅÆÓÑÈ¦ÁÐ±í
+	//æŸ¥è¯¢ç‰Œå‹åœˆåˆ—è¡¨
 	bool On_DBR_CL_CLUB_ALL_CLUB_INFO_LIST(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
-	//²éÑ¯Ö¸¶¨ÅÆÓÑÈ¦·¿¼äÁÐ±í
+	//æŸ¥è¯¢æŒ‡å®šç‰Œå‹åœˆæˆ¿é—´åˆ—è¡¨
 	bool On_DBR_CL_CLUB_ROOM_LIST(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
-	//²éÑ¯Î´ÂúÔ±, Ëæ»úÅÆÓÑÈ¦(×î´ó9¸ö)
+	//æŸ¥è¯¢æœªæ»¡å‘˜, éšæœºç‰Œå‹åœˆ(æœ€å¤§9ä¸ª)
 	bool On_DBR_CL_CLUB_RANDOM_CLUB_LIST(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
-	//ÉêÇë¼ÓÈëÅÆÓÑÈ¦
+	//ç”³è¯·åŠ å…¥ç‰Œå‹åœˆ
 	bool On_DBR_CL_CLUB_JOIN_CLUB(DWORD dwContextID, VOID * pData, WORD wDataSize);
 		
-	//½âÉ¢ÅÆÓÑÈ¦
+	//è§£æ•£ç‰Œå‹åœˆ
 	bool On_DBR_CL_CLUB_DISS_CLUB(DWORD dwContextID, VOID * pData, WORD wDataSize);
 	
-	//·¿¼äÉèÖÃ
+	//æˆ¿é—´è®¾ç½®
 	bool On_DBR_CL_CLUB_ROOM_SETTING(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
-	//ÇëÇó·¿¼äÉèÖÃ
+	//è¯·æ±‚æˆ¿é—´è®¾ç½®
 	bool On_DBR_CL_CLUB_ROOM_QUERY_SETTING(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
-	//½âÉ¢·¿¼äÇëÇó
+	//è§£æ•£æˆ¿é—´è¯·æ±‚
 	bool On_DBR_CL_CLUB_ROOM_DISSOLVE(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
-	//½âÉ¢×À×ÓÇëÇó
+	//è§£æ•£æ¡Œå­è¯·æ±‚
 	bool On_DBR_CL_CLUB_TABLE_DISSOLVE(DWORD dwContextID, VOID * pData, WORD wDataSize);
 	
-	//Íæ¼ÒÀë¿ª¾ãÀÖ²¿·¿¼ä
+	//çŽ©å®¶ç¦»å¼€ä¿±ä¹éƒ¨æˆ¿é—´
 	bool On_DBR_CL_CLUB_ROOM_USER_LEAVE(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
-	//ÅÆÓÑÈ¦¹«¸æ
+	//ç‰Œå‹åœˆå…¬å‘Š
 	bool On_DBR_CL_CLUB_NOTICE(DWORD dwContextID, VOID * pData, WORD wDataSize);
 	
-	//ÅÆÓÑÈ¦¼ò½é
+	//ç‰Œå‹åœˆç®€ä»‹
 	bool On_DBR_CL_CLUB_MESSAGE(DWORD dwContextID, VOID * pData, WORD wDataSize);
 	
-	//¹±Ï×·¿¿¨
+	//è´¡çŒ®æˆ¿å¡
 	bool On_DBR_CL_CLUB_CONTRIBUTE_FK(DWORD dwContextID, VOID * pData, WORD wDataSize);
 	
-	//ÅÆÓÑÈ¦ÉèÖÃ
+	//ç‰Œå‹åœˆè®¾ç½®
 	bool On_DBR_CL_CLUB_AUTO_AGREE(DWORD dwContextID, VOID * pData, WORD wDataSize);
 	
-	//ÑûÇëËûÈË¼ÓÈëÅÆÓÑÈ¦
+	//é‚€è¯·ä»–äººåŠ å…¥ç‰Œå‹åœˆ
 	bool On_DBR_CL_CLUB_INVITE(DWORD dwContextID, VOID * pData, WORD wDataSize);
 	
-	//ÑûÇëËûÈË¼ÓÈëÅÆÓÑÈ¦
+	//é‚€è¯·ä»–äººåŠ å…¥ç‰Œå‹åœˆ
 	bool On_DBR_CL_CLUB_INVITE_RESULT(DWORD dwContextID, VOID * pData, WORD wDataSize);
 	
-	//ÑûÇëËûÈË¼ÓÈëÅÆÓÑÈ¦
+	//é‚€è¯·ä»–äººåŠ å…¥ç‰Œå‹åœˆ
 	bool On_DBR_CL_CLUB_INQUERY_LIST(DWORD dwContextID, VOID * pData, WORD wDataSize);
 	
-	//ÉêÇëÈËÁÐ±í
+	//ç”³è¯·äººåˆ—è¡¨
 	bool On_DBR_CL_CLUB_APPLICANT_LIST(DWORD dwContextID, VOID * pData, WORD wDataSize);
 	
-	//Ö°ÎñÈÎÃâ
+	//èŒåŠ¡ä»»å…
 	bool On_DBR_CL_CLUB_APPOINTMENT(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
-	//ÅÆÓÑÈ¦ÁÄÌì
+	//ç‰Œå‹åœˆèŠå¤©
 	bool On_DBR_CL_CLUB_CHAT(DWORD dwContextID, VOID * pData, WORD wDataSize);
-	//ÊÀ½çÁÄÌì
+	//ä¸–ç•ŒèŠå¤©
 	bool On_DBR_CL_WORD_CHAT(DWORD dwContextID, VOID * pData, WORD wDataSize);
-	//ÏµÍ³ÁÄÌì
+	//ç³»ç»ŸèŠå¤©
 	bool On_DBR_CL_SYSTEM_CHAT(DWORD dwContextID, VOID * pData, WORD wDataSize);
-	//Ë½ÃÜÁÄÌì
+	//ç§å¯†èŠå¤©
 	bool On_DBR_CL_SECRET_CHAT(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
-	//ÅÆÓÑÈ¦ÖÃ¶¥
+	//ç‰Œå‹åœˆç½®é¡¶
 	bool On_DBR_CL_STICKY_POST(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
 
-	//¹¤»áÕ½¼¨Í³¼Æ
+	//å·¥ä¼šæˆ˜ç»©ç»Ÿè®¡
 	bool On_DBR_CL_CLUB_RECORD_LIST(DWORD dwContextID, VOID * pData, WORD wDataSize);
 	
-	//´´½¨ÅÆÓÑÈ¦
+	//åˆ›å»ºç‰Œå‹åœˆ
 	bool On_DBR_CL_CLUB_CREATE_CLUB(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
-	//ÉêÇë¼ÓÈë·¿¼ä
+	//ç”³è¯·åŠ å…¥æˆ¿é—´
 	bool On_DBR_CL_CLUB_JOIN_ROOM(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
-	//ÈºÖ÷|¹ÜÀí¶ÔÉêÇëÏûÏ¢µÄ´ð¸´(Í¬Òâ|¾Ü¾ø)
+	//ç¾¤ä¸»|ç®¡ç†å¯¹ç”³è¯·æ¶ˆæ¯çš„ç­”å¤(åŒæ„|æ‹’ç»)
 	bool On_DBR_CL_CLUB_APPLICANT_RESULT(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
-	//ÇëÇó³ÉÔ±Êý¾Ý
+	//è¯·æ±‚æˆå‘˜æ•°æ®
 	bool On_DBR_CL_CLUB_MEMBER_MANAGER(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
-	//Ìß³öÍË³öÇëÇó
+	//è¸¢å‡ºé€€å‡ºè¯·æ±‚
 	bool On_DBR_CL_CLUB_QUIT(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
 #pragma endregion
 
-#pragma region MDM_SHOP ÉÌ³ÇµÀ¾ß
+#pragma region MDM_SHOP å•†åŸŽé“å…·
 protected:
-	//²éÑ¯ÉÌ³Ç
+	//æŸ¥è¯¢å•†åŸŽ
 	bool On_DBR_CL_SHOP_QUERY(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
-	//½ðÇ®¹ºÂòµÀ¾ß
+	//é‡‘é’±è´­ä¹°é“å…·
 	bool On_DBR_CL_SHOP_MONEY(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
-	//×êÊ¯¹ºÂòµÀ¾ß
+	//é’»çŸ³è´­ä¹°é“å…·
 	bool On_DBR_CL_SHOP_DIAMOND(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
-	//±³°üÎïÆ·²éÑ¯
+	//èƒŒåŒ…ç‰©å“æŸ¥è¯¢
 	bool On_DBR_CL_BAG_QUERY(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
 #pragma endregion
 };
 
-// byteÊý×é×ªÎª string  TODONOW ÔÝÊ±·ÅÔÚÕâÀï´¦Àí
+// byteæ•°ç»„è½¬ä¸º string  TODONOW æš‚æ—¶æ”¾åœ¨è¿™é‡Œå¤„ç†
 const CString toHexString(const byte * input, const int datasize);
 
-// string ×ªÎªbyteÊý×é  TODONOW ÔÝÊ±·ÅÔÚÕâÀï´¦Àí
+// string è½¬ä¸ºbyteæ•°ç»„  TODONOW æš‚æ—¶æ”¾åœ¨è¿™é‡Œå¤„ç†
 int StrToBin(TCHAR* inWord, BYTE* OutBin, int source_len_begin, int source_len_end);
 
 //////////////////////////////////////////////////////////////////////////////////

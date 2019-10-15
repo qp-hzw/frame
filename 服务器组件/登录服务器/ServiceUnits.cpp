@@ -35,25 +35,22 @@ int CServiceUnits::InitializeService()
 	//创建组件
 	if ((m_TimerEngine.GetInterface()==NULL)&&(m_TimerEngine.CreateInstance()==false)) return 1;
 	if ((m_AttemperEngine.GetInterface()==NULL)&&(m_AttemperEngine.CreateInstance()==false)) return 2;
-	if ((m_DataBaseEngine.GetInterface()==NULL)&&(m_DataBaseEngine.CreateInstance()==false)) return 3;
 	if ((m_TCPNetworkEngine.GetInterface()==NULL)&&(m_TCPNetworkEngine.CreateInstance()==false)) return 4;
 	if ((m_TCPSocketEngine.GetInterface()==NULL)&&(m_TCPSocketEngine.CreateInstance()==false)) return 5;
 
 	//组件接口
 	IUnknownEx * pIAttemperEngine=m_AttemperEngine.GetInterface();
 	IUnknownEx * pIAttemperEngineSink=QUERY_OBJECT_INTERFACE(m_AttemperEngineSink,IUnknownEx);
+	IUnknownEx * pIDataBaseEngineSink=QUERY_OBJECT_INTERFACE(m_DataBaseEngineSink,IUnknownEx);
 
-	//设置AttemperEngine回调
+	//AttemperEngine设置 Attemper钩子
 	if (m_AttemperEngine->SetAttemperEngineSink(pIAttemperEngineSink)==false) return 6;
 
-	//数据库回调
-	IUnknownEx * pIDataBaseEngineSink[CountArray(m_DataBaseEngineSink)];
-	for (WORD i=0;i<CountArray(pIDataBaseEngineSink);i++) pIDataBaseEngineSink[i]=QUERY_OBJECT_INTERFACE(m_DataBaseEngineSink[i],IUnknownEx);
-	if (m_DataBaseEngine->SetDataBaseEngineSink(pIDataBaseEngineSink,CountArray(pIDataBaseEngineSink))==false) return 10;
+	//AttemperEngine设置 DB钩子
+	if (m_AttemperEngine->SetDataBaseEngineSink(pIDataBaseEngineSink)==false) return 7;
 
 	//AttemperEngine
 	m_AttemperEngineSink.m_pITimerEngine=m_TimerEngine.GetInterface();
-	m_AttemperEngineSink.m_pIDataBaseEngine=m_DataBaseEngine.GetInterface();
 	m_AttemperEngineSink.m_pITCPNetworkEngine=m_TCPNetworkEngine.GetInterface();
 	m_AttemperEngineSink.m_pITCPSocketEngine=m_TCPSocketEngine.GetInterface();
 
@@ -92,6 +89,7 @@ bool CServiceUnits::StartService()
 	//连接协调
 	if (m_TCPSocketEngine.GetInterface()!=NULL)
 	{
+		CLog::Log(log_error, "[socket::client] connect to center");
 		m_TCPSocketEngine.GetInterface()->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
 	}
 	
@@ -104,7 +102,6 @@ bool CServiceUnits::ConcludeService()
 	//停止服务
 	if (m_TimerEngine.GetInterface()!=NULL) m_TimerEngine->ConcludeService();
 	if (m_AttemperEngine.GetInterface()!=NULL) m_AttemperEngine->ConcludeService();
-	if (m_DataBaseEngine.GetInterface()!=NULL) m_DataBaseEngine->ConcludeService();
 	if (m_TCPNetworkEngine.GetInterface()!=NULL) m_TCPNetworkEngine->ConcludeService();
 	if (m_TCPSocketEngine.GetInterface()!=NULL) m_TCPSocketEngine->ConcludeService();
 	
@@ -132,12 +129,6 @@ int CServiceUnits::StartKernelService()
 		return 3;
 	}
 	
-	//数据引擎
-	if (m_DataBaseEngine->StartService()==false)
-	{
-		return 4;
-	}
-
 	return 0;
 }
 

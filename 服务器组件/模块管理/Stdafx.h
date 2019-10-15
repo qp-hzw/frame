@@ -50,7 +50,6 @@
 //模板文件
 #include "../../../../share/依赖项/全局定义/Array.h"
 #include "../../../../share/依赖项/全局定义/Module.h"
-#include "../../../../share/依赖项/全局定义/PacketAide.h"
 #include "../../全局定义/ServerRule.h"
 #include "../../全局定义/RightDefine.h"
 
@@ -67,7 +66,6 @@
 #include "../../../../share\依赖项\服务核心\WHService.h"
 
 #include "../../../../share\依赖项\内核引擎\KernelEngineHead.h"
-#include "../../../../share\依赖项\内核引擎\DataBaseAide.h"
 #include "../../../../share\依赖项\内核引擎\log.h"
 
 //////////////////////////////////////////////////////////////////////////////////
