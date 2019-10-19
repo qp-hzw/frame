@@ -22,8 +22,8 @@ class CServiceUnits : public CWnd
 {
 	//组件变量
 private:
-	CWHDataQueue					m_DataQueue;						//数据队列
-	CCriticalSection				m_CriticalSection;					//同步对象
+	//CWHDataQueue					m_DataQueue;						//数据队列
+	//CCriticalSection				m_CriticalSection;					//同步对象
 
 	//服务组件
 protected:
@@ -63,8 +63,13 @@ protected:
 	int StartKernelService();
 };
 
-extern CServiceUnits *			g_pServiceUnits;					//对象指针
+extern CServiceUnits               *g_pServiceUnits;                     
+extern IAttemperEngine			   *g_AttemperEngine;					//调度引擎
+extern ITCPNetworkEngine		   *g_TCPNetworkEngine;				    //socket::server
+extern ITCPSocketEngine			   *g_TCPSocketEngine;					//socker::client -- 目标服务器为 协调服
+extern ITimerEngine				   *g_TimerEngine;						//定时器
 
+ 
 //////////////////////////////////////////////////////////////////////////////////
 
 #endif

@@ -4,7 +4,6 @@
 #include "Stdafx.h"
 #include "AttemperEngineSink.h"
 #include "DataBaseEngineSink.h"
-#include "DBCorrespondManager.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -20,31 +19,20 @@ class CServiceUnits : public CWnd
 protected:
 	tagGameServiceAttrib			m_GameServiceAttrib;				//服务属性
 	tagGameServiceOption			m_GameServiceOption;				//服务配置
+	CGameServiceManagerHelper		m_GameServiceManager;				//子游戏模块 加载
 
-	//组件变量
-private:
-	CWHDataQueue					m_DataQueue;						//数据队列
-	CCriticalSection				m_CriticalSection;					//同步对象
+	//服务对象
+public:
+	ITimerEngine				    *m_TimerEngine;						//时间引擎
+	IAttemperEngine					*m_AttemperEngine;					//调度引擎
+	ITCPNetworkEngine				*m_TCPNetworkEngine;				//socket::server
+	ITCPSocketEngine				*m_TCPSocketEngine;					//socket::client -> 目标服务器 协调服
 
-	//服务组件
+	//回调对象
 public:
 	CAttemperEngineSink				m_AttemperEngineSink;				//调度钩子
-	CDataBaseEngineSink				m_RecordDataBaseSink[4];			//数据钩子
-	CDataBaseEngineSink				m_KernelDataBaseSink[4];			//数据钩子
+	CDataBaseEngineSink				m_DataBaseEngineSink;	  		    //数据钩子
 	
-	//数据组件
-public:
-	CDBCorrespondManager            m_DBCorrespondManager;				//协调管理
-	CDataBaseEngineHelper			m_RecordDataBaseEngine;				//数据引擎
-	CDataBaseEngineHelper			m_KernelDataBaseEngine;				//数据引擎
-
-	//内核组件
-public:
-	CTimerEngineHelper				m_TimerEngine;						//时间引擎
-	CAttemperEngineHelper			m_AttemperEngine;					//调度引擎
-	CTCPNetworkEngineHelper			m_TCPNetworkEngine;					//socket::server
-	CTCPSocketEngineHelper			m_TCPSocketEngine;					//socket::client -> 目标服务器 协调服
-	CGameServiceManagerHelper		m_GameServiceManager;				//子游戏模块 加载
 
 	//函数定义
 public:
@@ -76,6 +64,11 @@ protected:
 
 };
 
-extern   CServiceUnits *			g_pServiceUnits;					//对象指针
+extern CServiceUnits               *g_pServiceUnits;                     
+extern IAttemperEngine			   *g_AttemperEngine;					//调度引擎
+extern ITCPNetworkEngine		   *g_TCPNetworkEngine;				    //socket::server
+extern ITCPSocketEngine			   *g_TCPSocketEngine;					//socker::client -- 目标服务器为 协调服
+extern ITimerEngine				   *g_TimerEngine;						//定时器
+
 
 #endif

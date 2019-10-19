@@ -83,7 +83,6 @@ protected:
 	ITimerEngine *					m_pITimerEngine;					//时间引擎
 	ITableFrameSink	*				m_pITableFrameSink;					//桌子接口
 	IMainServiceFrame *				m_pIMainServiceFrame;				//服务接口
-	IAndroidUserManager *			m_pIAndroidUserManager;				//机器接口
 
 	//扩展接口
 protected:
@@ -92,12 +91,6 @@ protected:
 	ITableUserAction *				m_pIMatchTableAction;				//动作接口(比赛用)
 
 	ITCPSocketEngine *				m_pITCPSocketEngine;				//网络服务
-
-
-	//数据接口
-protected:
-	IDataBaseEngine *				m_pIKernelDataBaseEngine;			//内核数据
-	IDataBaseEngine *				m_pIRecordDataBaseEngine;			//记录数据
 
 	//配置信息
 protected:

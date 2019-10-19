@@ -2,7 +2,6 @@
 #define CMD_GAME_SERVER_HEAD_FILE
 
 #include "STR_CMD_GameServer.h"
-#pragma pack(1)
 
 /*
 ** 简要描述:  游戏服 与 其他进程的 消息

@@ -1,8 +1,6 @@
 #ifndef CMD_COMMOM_HEAD_FILE
 #define CMD_COMMOM_HEAD_FILE
 
-#pragma pack(1)
-
 //////////////////////////////////////////////////////////////////////////////////
 
 #define MDM_CM_SYSTEM				1000								//œµÕ≥√¸¡Ó

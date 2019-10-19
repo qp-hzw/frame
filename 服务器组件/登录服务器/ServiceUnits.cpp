@@ -3,10 +3,12 @@
 #include "ControlPacket.h"
 
 //////////////////////////////////////////////////////////////////////////////////
-
-//静态变量
-CServiceUnits *			g_pServiceUnits=NULL;			//对象指针
-
+//全局变量
+CServiceUnits              *g_pServiceUnits = NULL; 
+IAttemperEngine			   *g_AttemperEngine = NULL;					//调度引擎
+ITCPNetworkEngine		   *g_TCPNetworkEngine = NULL;				    //socket::server
+ITCPSocketEngine		   *g_TCPSocketEngine = NULL;					//socker::client -- 目标服务器为 协调服
+ITimerEngine			   *g_TimerEngine = NULL;						//定时器
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -28,10 +30,7 @@ CServiceUnits::~CServiceUnits()
 //配置组件
 int CServiceUnits::InitializeService()
 {
-	//设置服务器日志输出等级
-	bool bRet = CLog::Init("logon.log");
-
-	/***************************************************  各服务关联配置 *************************************************/
+	/***************************************************  创建服务 *************************************************/
 	//创建组件
 	m_AttemperEngine = static_cast<IAttemperEngine*>(CWHModule::AttemperEngine());
 	m_TCPNetworkEngine = static_cast<ITCPNetworkEngine*>(CWHModule::TCPNetworkEngine());
@@ -43,29 +42,33 @@ int CServiceUnits::InitializeService()
 	if(m_TCPSocketEngine == NULL) return 3;
 	if(m_TimerEngine == NULL) return 4;
 
-	//组件接口
+	g_AttemperEngine = m_AttemperEngine;
+	g_TCPNetworkEngine = m_TCPNetworkEngine;
+	g_TCPSocketEngine = m_TCPSocketEngine;
+	g_TimerEngine = m_TimerEngine;
+
+	//回调对象
 	IUnknownEx * pIAttemperEngineSink=QUERY_OBJECT_INTERFACE(m_AttemperEngineSink,IUnknownEx);
 	IUnknownEx * pIDataBaseEngineSink=QUERY_OBJECT_INTERFACE(m_DataBaseEngineSink,IUnknownEx);
 
+	/***************************************************  AttemperEngine 配置信息 *************************************************/
 	//AttemperEngine设置 Attemper钩子
 	if (m_AttemperEngine->SetAttemperEngineSink(pIAttemperEngineSink)==false) return 6;
 
 	//AttemperEngine设置 DB钩子
 	if (m_AttemperEngine->SetDataBaseEngineSink(pIDataBaseEngineSink)==false) return 7;
 
-	//AttemperEngine
-	m_AttemperEngineSink.m_pITimerEngine=m_TimerEngine;
-	m_AttemperEngineSink.m_pITCPNetworkEngine=m_TCPNetworkEngine;
-	m_AttemperEngineSink.m_pITCPSocketEngine=m_TCPSocketEngine;
-
-	/***************************************************  服务配置信息 *************************************************/
+	/***************************************************  socket::client 配置信息 *************************************************/
 	//协调服务（协调服务器）
 	if (m_TCPSocketEngine->SetServiceID(NETWORK_CORRESPOND)==false) return 11;
 
+	/***************************************************  socket::server 配置信息 *************************************************/
 	//配置网络
 	WORD wServicePort=PORT_LOGON;
 	if (m_TCPNetworkEngine->SetServiceParameter(wServicePort)==false) return 12;
 
+	/***************************************************  log 配置信息 *************************************************/
+	CLog::Init("logon.log");
 	return 0;
 }
 

@@ -63,25 +63,24 @@
 
 /*** Other ***/
 //消息定义
+#include "..\..\消息定义\CMD_Commom.h"
 #include "..\..\消息定义\CMD_Correspond.h"
 #include "..\..\消息定义\CMD_GameServer.h"
 #include "..\..\消息定义\CMD_LogonServer.h"
 
 //组件定义
-#include "..\..\服务器组件\游戏服务\GameServiceHead.h"
-#include "..\..\服务器组件\比赛服务\MatchServiceHead.h"
+#include "gameServiceHead.h"
 
 #include "../../../../share\依赖项\服务核心\ServiceCoreHead.h"
 #include "../../../../share\依赖项\服务核心\WHIniData.h"
 #include "../../../../share\依赖项\服务核心\WHDataLocker.h"
 #include "../../../../share\依赖项\服务核心\WHService.h"
 #include "../../../../share\依赖项\服务核心\WHEncrypt.h"
+#include "../../../../share\依赖项\服务核心\WHModule.h"
+#include "../../../../share\依赖项\全局定义\Struct.h"
 
 #include "../../../../share\依赖项\内核引擎\KernelEngineHead.h"
-#include "../../../../share\依赖项\内核引擎\log.h"
-
-#include "..\..\服务器组件\模块管理\ModuleManagerHead.h"
-
+#include "../../../../share\依赖项\服务核心\log.h"
 
 
 //////////////////////////////////////////////////////////////////////////////////

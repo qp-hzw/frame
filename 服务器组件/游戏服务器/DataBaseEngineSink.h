@@ -1,33 +1,16 @@
 #ifndef DATABASE_ENGINE_SINK_HEAD_FILE
 #define DATABASE_ENGINE_SINK_HEAD_FILE
 
-#pragma once
-
 #include "Stdafx.h"
 #include "DataBasePacket.h"
 
-//////////////////////////////////////////////////////////////////////////////////
-
 //数据库类
-class CDataBaseEngineSink : public IDataBaseEngineSink, public IGameDataBaseEngine
+class CDataBaseEngineSink : public IDataBaseEngineSink
 {
-	//友元定义
-	friend class CServiceUnits;
-
 	//游戏数据库
 protected:
-	CDataBaseAide					m_GameDBAide;						//游戏数据
-	CDataBaseHelper					m_GameDBModule;						//游戏数据
-
-	//游戏币数据库
-protected:
-	CDataBaseAide					m_TreasureDBAide;					//财富数据库
-	CDataBaseHelper					m_TreasureDBModule;					//财富数据库
-
-	//平台数据库
-protected:
-	CDataBaseAide					m_PlatformDBAide;					//平台数据库
-	CDataBaseHelper					m_PlatformDBModule;					//平台数据库
+	IDataBase					   *m_TreasureDB;					    //财富数据库
+	IDataBase					   *m_PlatformDB;					    //平台数据库
 
 	//配置变量
 protected:
@@ -37,7 +20,6 @@ protected:
 
 	//组件变量
 protected:
-	IDataBaseEngine *				m_pIDataBaseEngine;					//引擎接口
 	IGameServiceManager *			m_pIGameServiceManager;				//服务管理
 
 	//查询接口
@@ -76,10 +58,7 @@ public:
 	//获取对象
 	virtual VOID * GetDataBaseEngine(REFGUID Guid, DWORD dwQueryVer);
 
-	//功能接口
-public:
-	//投递结果
-	virtual bool PostGameDataBaseResult(WORD wRequestID, VOID * pData, WORD wDataSize);
+
 
 	//系统事件
 public:
@@ -90,12 +69,10 @@ public:
 
 	//内核事件
 public:
-	//时间事件
-	virtual bool OnDataBaseEngineTimer(DWORD dwTimerID, WPARAM dwBindParameter);
-	//控制事件
-	virtual bool OnDataBaseEngineControl(WORD wControlID, VOID * pData, WORD wDataSize);
 	//请求事件
 	virtual bool OnDataBaseEngineRequest(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize);
+
+
 
 	//主消息号1
 protected:

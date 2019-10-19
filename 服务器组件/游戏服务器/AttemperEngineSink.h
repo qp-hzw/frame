@@ -61,7 +61,6 @@ protected:
 protected:
 	CTableFrameArray				m_TableFrameArray;					//桌子数组
 	CServerUserManager				m_ServerUserManager;				//用户管理 在激活用户的时候赋值
-	CAndroidUserManager				m_AndroidUserManager;				//机器管理
 	CWaitDistributeList             m_WaitDistributeList;               //等待分配
 
 
@@ -73,15 +72,6 @@ protected:
 	ITCPNetworkEngine *				m_pITCPNetworkEngine;				//网络引擎
 	IGameServiceManager *			m_pIGameServiceManager;				//服务管理
 
-	//比赛服务
-public:
-	IGameMatchServiceManager		* m_pIGameMatchServiceManager;		//比赛管理接口
-
-	//数据引擎
-public:
-	IDataBaseEngine *				m_pIRecordDataBaseEngine;			//数据引擎
-	IDataBaseEngine *				m_pIKernelDataBaseEngine;			//数据引擎
-	IDBCorrespondManager *          m_pIDBCorrespondManager;            //数据协调
 
 	//房间控制值
 public:
@@ -291,8 +281,7 @@ protected:
 	//修改用户财富信息
 	bool On_CMD_GC_User_ModifyUserTreasure(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
-	//用户规则
-	bool On_SUB_CG_User_Rule(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+
 	//用户旁观
 	bool On_SUB_CG_User_Lookon(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//用户坐下

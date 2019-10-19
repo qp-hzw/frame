@@ -42,10 +42,6 @@ CAttemperEngineSink::CAttemperEngineSink()
 	m_pBindParameter=NULL;
 
 	//组件变量
-	m_pITimerEngine=NULL;
-	m_pITCPNetworkEngine=NULL;
-	m_pITCPSocketEngine=NULL;
-
 	m_pRankManager = NULL;
 
 	if(!g_AttemperEngineSink)
@@ -75,11 +71,11 @@ bool CAttemperEngineSink::OnAttemperEngineStart(IUnknownEx * pIUnknownEx)
 	ZeroMemory(m_pBindParameter,sizeof(tagBindParameter)*MAX_CONTENT);
 
 	//更新在线人数 -- 通知database
-	//m_pITimerEngine->SetTimer(IDI_COLLECT_ONLINE_INFO, TIME_COLLECT_ONLINE_INFO*1000L,TIMES_INFINITY,0);
+	//g_TimerEngine->SetTimer(IDI_COLLECT_ONLINE_INFO, TIME_COLLECT_ONLINE_INFO*1000L,TIMES_INFINITY,0);
 	//更新在线人数 -- 通知client
-	//m_pITimerEngine->SetTimer(IDI_UPDATA_ONLINE_COUNT,TIME_UPDATA_ONLINE_COUNT*1000L,TIMES_INFINITY, 0);
+	//g_TimerEngine->SetTimer(IDI_UPDATA_ONLINE_COUNT,TIME_UPDATA_ONLINE_COUNT*1000L,TIMES_INFINITY, 0);
 	//加载跑马灯消息
-	//m_pITimerEngine->SetTimer(IDI_UPDATA_MARQUEE,TIME_UPDATA_MARQUEE*1000L,1, 0);
+	//g_TimerEngine->SetTimer(IDI_UPDATA_MARQUEE,TIME_UPDATA_MARQUEE*1000L,1, 0);
 
 	//获取目录
 	TCHAR szPath[MAX_PATH]=TEXT("");
@@ -103,11 +99,6 @@ bool CAttemperEngineSink::OnAttemperEngineStart(IUnknownEx * pIUnknownEx)
 //停止事件
 bool CAttemperEngineSink::OnAttemperEngineConclude(IUnknownEx * pIUnknownEx)
 {
-	//组件变量
-	m_pITimerEngine=NULL;
-	m_pITCPNetworkEngine=NULL;
-	m_pITCPSocketEngine=NULL;
-
 	//删除数据
 	SafeDeleteArray(m_pBindParameter);
 
@@ -140,18 +131,18 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 	{
 	case IDI_LOAD_GAME_LIST:		//加载列表
 		{
-			m_pITimerEngine->KillTimer(IDI_LOAD_GAME_LIST);
+			g_TimerEngine->KillTimer(IDI_LOAD_GAME_LIST);
 			//加载列表
 			m_ServerListManager.DisuseKernelItem();
-			g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_GP_LOAD_GAME_LIST,0,NULL,0);
+			g_AttemperEngine->PostDataBaseRequest(DBR_GP_LOAD_GAME_LIST,0,NULL,0);
 
 			return true;
 		}
 	case IDI_CONNECT_CORRESPOND:	//连接协调
 		{
-			m_pITimerEngine->KillTimer(IDI_CONNECT_CORRESPOND);
+			g_TimerEngine->KillTimer(IDI_CONNECT_CORRESPOND);
 			//发起连接
-			m_pITCPSocketEngine->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
+			g_TCPSocketEngine->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
 
 			return true;
 		}
@@ -211,7 +202,7 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 			} while (ServerPosition!=NULL);
 
 			//发送请求
-			g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_GP_ONLINE_COUNT_INFO,0,&OnLineCountInfo,sizeof(OnLineCountInfo));
+			g_AttemperEngine->PostDataBaseRequest(DBR_GP_ONLINE_COUNT_INFO,0,&OnLineCountInfo,sizeof(OnLineCountInfo));
 
 			return true;
 		}
@@ -249,15 +240,15 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 				tagBindParameter * pBindParameter=(m_pBindParameter+i);
 				if ( pBindParameter && pBindParameter->dwUserID != 0 && pBindParameter->dwSocketID != 0)
 				{
-					m_pITCPNetworkEngine->SendData(pBindParameter->dwSocketID,MDM_LIST,CMD_LC_LIST_ROOM_ONLINE,&pServerOnLine, sizeof(pServerOnLine));
+					g_TCPNetworkEngine->SendData(pBindParameter->dwSocketID,MDM_LIST,CMD_LC_LIST_ROOM_ONLINE,&pServerOnLine, sizeof(pServerOnLine));
 				}
 			}
 			return true;
 		}
 	case IDI_UPDATA_MARQUEE:	//加载跑马灯消息
 		{
-			m_pITimerEngine->KillTimer(IDI_UPDATA_MARQUEE);
-			g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_UPDATA_MARQUEE,0,NULL,0);
+			g_TimerEngine->KillTimer(IDI_UPDATA_MARQUEE);
+			g_AttemperEngine->PostDataBaseRequest(DBR_UPDATA_MARQUEE,0,NULL,0);
 			return true;
 		}
 	case IDI_PLAY_MARQUEE:		//通知client滚动跑马灯消息   
@@ -286,7 +277,7 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 					{
 						s_MarqueeID = 0;
 						//最后一遍的时候 需要重启该定时器
-						m_pITimerEngine->SetTimer(IDI_PLAY_MARQUEE,3*1000L,1,0);
+						g_TimerEngine->SetTimer(IDI_PLAY_MARQUEE,3*1000L,1,0);
 						continue;
 					}
 				}
@@ -328,10 +319,10 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 				 //定时器间隔时间
 				 DWORD wTimerTime =  static_cast<DWORD> (10 + _tcslen(strMarquee.szMarqueeMsg)*0.45);
 				 wTimerTime += strMarquee.dwMaruqeeTime;
-				 m_pITimerEngine->SetTimer(IDI_PLAY_MARQUEE,wTimerTime*1000L,1,0);
+				 g_TimerEngine->SetTimer(IDI_PLAY_MARQUEE,wTimerTime*1000L,1,0);
 
 				 //发送数据
-				 m_pITCPNetworkEngine->SendDataBatch(MDM_SERVICE, CMD_LC_SERVICE_MARQUEE, &strMarquee, sizeof(strMarquee));
+				 g_TCPNetworkEngine->SendDataBatch(MDM_SERVICE, CMD_LC_SERVICE_MARQUEE, &strMarquee, sizeof(strMarquee));
 				 break;
 			}
 
@@ -774,7 +765,7 @@ bool CAttemperEngineSink::OnEventTCPNetworkShut(DWORD dwClientAddr, DWORD dwActi
 		{
 			quitInfo.byOnlineMask = 4;
 		}
-		g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_GP_LOGON_USER_STATE,dwSocketID, &quitInfo,sizeof(quitInfo));
+		g_AttemperEngine->PostDataBaseRequest(DBR_GP_LOGON_USER_STATE,dwSocketID, &quitInfo,sizeof(quitInfo));
 	}
 
 	//清除信息
@@ -881,7 +872,7 @@ bool CAttemperEngineSink::OnEventTCPSocketShut(WORD wServiceID, BYTE cbShutReaso
 	if (wServiceID==NETWORK_CORRESPOND)
 	{
 		//设置时间
-		m_pITimerEngine->SetTimer(IDI_CONNECT_CORRESPOND, TIME_CONNECT_CORRESPOND, 1, 0);
+		g_TimerEngine->SetTimer(IDI_CONNECT_CORRESPOND, TIME_CONNECT_CORRESPOND, 1, 0);
 		return true;
 	}
 
@@ -898,7 +889,7 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		if (nErrorCode!=0)
 		{
 			//设置时间
-			m_pITimerEngine->SetTimer(IDI_CONNECT_CORRESPOND, TIME_CONNECT_CORRESPOND, 1, 0);
+			g_TimerEngine->SetTimer(IDI_CONNECT_CORRESPOND, TIME_CONNECT_CORRESPOND, 1, 0);
 			return false;
 		}
 
@@ -914,7 +905,7 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		lstrcpyn(CPR.szServerAddr,TEXT("127.0.0.1"),CountArray(CPR.szServerAddr));
 
 		//发送数据
-		m_pITCPSocketEngine->SendData(MDM_REGISTER,CPR_LP_REGISTER_LOGON,&CPR,sizeof(CPR));
+		g_TCPSocketEngine->SendData(MDM_REGISTER,CPR_LP_REGISTER_LOGON,&CPR,sizeof(CPR));
 
 		return true;
 	}
@@ -1071,7 +1062,7 @@ bool CAttemperEngineSink::OnDBPCGameListResult(DWORD dwContextID, VOID * pData, 
 		CLog::Log(log_warn, "服务器列表加载失败，%ld 秒后将重新加载", TIME_RELOAD_LIST);
 
 		//设置时间
-		m_pITimerEngine->SetTimer(IDI_LOAD_GAME_LIST,TIME_RELOAD_LIST*1000L,1,0);
+		g_TimerEngine->SetTimer(IDI_LOAD_GAME_LIST,TIME_RELOAD_LIST*1000L,1,0);
 	}
 
 	return true;
@@ -1110,7 +1101,7 @@ bool CAttemperEngineSink::On_DBO_UPDATA_MARQUEE(DWORD dwContextID, VOID * pData,
 bool CAttemperEngineSink::On_DBO_UPDATA_MARQUEE_FINISH(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
 	//开启定时器,  通知客户端 滚动跑马灯
-	m_pITimerEngine->SetTimer(IDI_PLAY_MARQUEE,1*1000L,1, 0);
+	g_TimerEngine->SetTimer(IDI_PLAY_MARQUEE,1*1000L,1, 0);
 
 	return true;
 }
@@ -1135,7 +1126,7 @@ bool CAttemperEngineSink::OnTCPSocketMainRegister(WORD wSubCmdID, VOID * pData, 
 
 			//读取数据库 加载列表
 			m_ServerListManager.DisuseKernelItem();
-			g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_GP_LOAD_GAME_LIST,0,NULL,0);
+			g_AttemperEngine->PostDataBaseRequest(DBR_GP_LOAD_GAME_LIST,0,NULL,0);
 
 			//注册完成，在这里初始化排行榜
 			if(NULL == m_pRankManager)
@@ -1197,7 +1188,7 @@ bool CAttemperEngineSink::OnTCPSocketMainServiceInfo(WORD wSubCmdID, VOID * pDat
 			if(byRet == 2)
 			{
 				pGameServer->byMask = 0;
-				m_pITCPNetworkEngine->SendDataBatch(MDM_LIST, CMD_LC_LIST_ROOM, pGameServer, sizeof(tagGameServer));
+				g_TCPNetworkEngine->SendDataBatch(MDM_LIST, CMD_LC_LIST_ROOM, pGameServer, sizeof(tagGameServer));
 			}
 
 			return true;
@@ -1245,7 +1236,7 @@ bool CAttemperEngineSink::OnTCPSocketMainServiceInfo(WORD wSubCmdID, VOID * pDat
 			tagGameServer GameServer;
 			GameServer.wServerID = pServerRemove->dwServerID;
 			GameServer.byMask = 1; //删除标志
-			m_pITCPNetworkEngine->SendDataBatch(MDM_LIST, CMD_LC_LIST_ROOM, &GameServer, sizeof(tagGameServer));
+			g_TCPNetworkEngine->SendDataBatch(MDM_LIST, CMD_LC_LIST_ROOM, &GameServer, sizeof(tagGameServer));
 
 			return true;
 		}
@@ -1269,7 +1260,7 @@ bool CAttemperEngineSink::OnTCPSocketMainServiceInfo(WORD wSubCmdID, VOID * pDat
 				DBR_GP_UserQuitInfo quitInfo;
 				quitInfo.dwUserID = OfflineUser.dwUserID ;
 				quitInfo.byOnlineMask = 3;
-				g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_GP_LOGON_USER_STATE,0, &quitInfo,sizeof(quitInfo));
+				g_AttemperEngine->PostDataBaseRequest(DBR_GP_LOGON_USER_STATE,0, &quitInfo,sizeof(quitInfo));
 				
 			}else if(2 == OfflineUser.byMask)
 			{
@@ -1302,7 +1293,7 @@ bool CAttemperEngineSink::OnTCPSocketMainTransfer(WORD wSubCmdID, VOID * pData, 
 			if (wDataSize!=sizeof(STR_CMD_LC_CLUB_TABLE_LIST)) return true;
 
 			//发送通知 -- 全部客户端
-			m_pITCPNetworkEngine->SendDataBatch(MDM_CLUB,CMD_LC_CLUB_TABLE_LIST_TABLE,pData,wDataSize);
+			g_TCPNetworkEngine->SendDataBatch(MDM_CLUB,CMD_LC_CLUB_TABLE_LIST_TABLE,pData,wDataSize);
 			return true;
 		}
 	case CPO_PL_CLUB_PLAYER_INFO: //俱乐部玩家信息
@@ -1313,7 +1304,7 @@ bool CAttemperEngineSink::OnTCPSocketMainTransfer(WORD wSubCmdID, VOID * pData, 
 			if (wDataSize!=sizeof(STR_CMD_LC_CLUB_TABLE_USER_LIST)) return true;
 
 			//发送通知 -- 全部客户端
-			m_pITCPNetworkEngine->SendDataBatch(MDM_CLUB, CMD_LC_CLUB_TABLE_LIST_USER,pData,wDataSize);
+			g_TCPNetworkEngine->SendDataBatch(MDM_CLUB, CMD_LC_CLUB_TABLE_LIST_USER,pData,wDataSize);
 			return true;
 		}
 	case CPO_PL_CREATE_TABLE:	//创建桌子 查询可用的GameID
@@ -1327,7 +1318,7 @@ bool CAttemperEngineSink::OnTCPSocketMainTransfer(WORD wSubCmdID, VOID * pData, 
 			CMD.dwResultCode = pCPO->dwResultCode;
 			memcpy(CMD.szDescribeString, pCPO->szDescribeString, sizeof(CMD.szDescribeString));
 
-			m_pITCPNetworkEngine->SendData(pCPO->dwSocketID, MDM_GAME, CMD_LC_GAME_QUERY_GAMEID, &CMD, sizeof(CMD));
+			g_TCPNetworkEngine->SendData(pCPO->dwSocketID, MDM_GAME, CMD_LC_GAME_QUERY_GAMEID, &CMD, sizeof(CMD));
 			return true;
 		}
 	}
@@ -1349,7 +1340,7 @@ bool CAttemperEngineSink::OnTCPSocketMainWeb( WORD wSubCmdID, VOID * pData, WORD
 			m_MarqueeMsgListManager.RemoveAll();
 
 			//2. 重新读取数据库
-			g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_UPDATA_MARQUEE,0,NULL,0);
+			g_AttemperEngine->PostDataBaseRequest(DBR_UPDATA_MARQUEE,0,NULL,0);
 			return true;
 		}
 		case CPO_PL_WEB_SYSTEM_MESSAGE: //聊天消息 -- 系统消息
@@ -1368,7 +1359,7 @@ bool CAttemperEngineSink::OnTCPSocketMainWeb( WORD wSubCmdID, VOID * pData, WORD
 			memcpy(CMD.szUserNickName, TEXT("系统管理员"), sizeof(CMD.szUserNickName));
 			memcpy(CMD.szChat, pSub->szMessage, sizeof(CMD.szChat));
 
-			m_pITCPNetworkEngine->SendDataBatch(MDM_CLUB, CMD_LC_CLUB_CHAT_BDCAST, &CMD, sizeof(CMD));
+			g_TCPNetworkEngine->SendDataBatch(MDM_CLUB, CMD_LC_CLUB_CHAT_BDCAST, &CMD, sizeof(CMD));
 			return true;
 		}
 	}
@@ -1671,7 +1662,7 @@ bool CAttemperEngineSink::On_MDM_GAME(WORD wSubCmdID, VOID * pData, WORD wDataSi
 			CPR.dwKindID = pSub->dwKindID;
 			CPR.dwSocketID = dwSocketID;
 
-			m_pITCPSocketEngine->SendData(MDM_TRANSFER, CPR_LP_CREATE_TABLE, &CPR, sizeof(CPR));
+			g_TCPSocketEngine->SendData(MDM_TRANSFER, CPR_LP_CREATE_TABLE, &CPR, sizeof(CPR));
 
 			return true;
 		}
@@ -1714,7 +1705,7 @@ bool CAttemperEngineSink::On_SUB_CL_Logon_Accounts(VOID * pData, WORD wDataSize,
 	DBRLogonAccounts.dwProxyID = pSUBLogonAccounts->dwProxyID;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_LOGON_ACCOUNTS,dwSocketID,&DBRLogonAccounts,sizeof(DBRLogonAccounts));
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_LOGON_ACCOUNTS,dwSocketID,&DBRLogonAccounts,sizeof(DBRLogonAccounts));
 	return true;
 }
 
@@ -1732,7 +1723,7 @@ bool CAttemperEngineSink::On_CMD_LC_Logon_Account(DWORD dwContextID, VOID * pDat
 	if(DB_SUCCESS != pCMD->dwResultCode)
 	{
 		//发送数据
-		m_pITCPNetworkEngine->SendData(dwContextID, MDM_LOGON, CMD_LC_LOGON_ACCOUNTS, pCMD, sizeof(STR_CMD_LC_LOGON_PLATFORM));
+		g_TCPNetworkEngine->SendData(dwContextID, MDM_LOGON, CMD_LC_LOGON_ACCOUNTS, pCMD, sizeof(STR_CMD_LC_LOGON_PLATFORM));
 
 		return true;
 	}
@@ -1756,7 +1747,7 @@ bool CAttemperEngineSink::On_CMD_LC_Logon_Account(DWORD dwContextID, VOID * pDat
 	(m_pBindParameter+LOWORD(dwContextID))->dwUserID = pCMD->dwUserID;	//记录此连接的用户ID
 
 	//发送登录成功
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_LOGON, CMD_LC_LOGON_ACCOUNTS, pCMD, sizeof(STR_CMD_LC_LOGON_PLATFORM));
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_LOGON, CMD_LC_LOGON_ACCOUNTS, pCMD, sizeof(STR_CMD_LC_LOGON_PLATFORM));
 
 
 	//发送列表
@@ -1790,7 +1781,7 @@ void CAttemperEngineSink::CheckUserState_Logon(DWORD dwUserID, bool bIsExist)
 		quitInfo.dwUserID = dwUserID;
 		quitInfo.byOnlineMask =  1; //1大厅在线 ，2正在游戏，3游戏断线，4离线
 
-		g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_GP_LOGON_USER_STATE,0, &quitInfo,sizeof(quitInfo));
+		g_AttemperEngine->PostDataBaseRequest(DBR_GP_LOGON_USER_STATE,0, &quitInfo,sizeof(quitInfo));
 	}
 }
 
@@ -1828,7 +1819,7 @@ bool CAttemperEngineSink::On_SUB_CL_Logon_Register(VOID * pData, WORD wDataSize,
 	DBRLogonRegister.dwProxyID = pSUBLogonRegister->dwProxyID;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_LOGON_REGISTER,dwSocketID,&DBRLogonRegister,sizeof(DBRLogonRegister));
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_LOGON_REGISTER,dwSocketID,&DBRLogonRegister,sizeof(DBRLogonRegister));
 
 	return true;
 }
@@ -1865,7 +1856,7 @@ bool CAttemperEngineSink::On_SUB_CL_Logon_Platform(VOID * pData, WORD wDataSize,
 	DBRLogonPlatform.dwProxyID = pSUBLogonPlatform->dwProxyID;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_LOGON_PLATFORM, dwSocketID, &DBRLogonPlatform, sizeof(DBRLogonPlatform));
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_LOGON_PLATFORM, dwSocketID, &DBRLogonPlatform, sizeof(DBRLogonPlatform));
 
 	return true;}
 
@@ -1886,7 +1877,7 @@ bool CAttemperEngineSink::On_CMD_LC_Logon_Platform(DWORD dwContextID, VOID * pDa
 	//如果登录失败, 直接返回
 	if(DB_SUCCESS != pDBOLogonPlatform->dwResultCode)
 	{
-		m_pITCPNetworkEngine->SendData(dwContextID, MDM_LOGON, CMD_LC_LOGON_ACCOUNTS, &pCMDLogonPlatform, sizeof(STR_CMD_LC_LOGON_PLATFORM));
+		g_TCPNetworkEngine->SendData(dwContextID, MDM_LOGON, CMD_LC_LOGON_ACCOUNTS, &pCMDLogonPlatform, sizeof(STR_CMD_LC_LOGON_PLATFORM));
 		return true;
 	}
 
@@ -1909,7 +1900,7 @@ bool CAttemperEngineSink::On_CMD_LC_Logon_Platform(DWORD dwContextID, VOID * pDa
 	(m_pBindParameter+LOWORD(dwContextID))->dwUserID = pCMDLogonPlatform.dwUserID;//记录此连接的用户ID
 
 	//发送登录成功
-	m_pITCPNetworkEngine->SendData(dwContextID,MDM_LOGON,CMD_LC_LOGON_PLATFORM, &pCMDLogonPlatform, sizeof(STR_CMD_LC_LOGON_PLATFORM));
+	g_TCPNetworkEngine->SendData(dwContextID,MDM_LOGON,CMD_LC_LOGON_PLATFORM, &pCMDLogonPlatform, sizeof(STR_CMD_LC_LOGON_PLATFORM));
 
 	//发送列表
 	On_CMD_LC_List_Type(dwContextID);
@@ -1944,16 +1935,16 @@ bool CAttemperEngineSink::On_CMD_LC_Logon_RepeatLogon(DWORD UserID, DWORD dwCont
 
 			//提示当前用户账号已登录，无法登录
 			_snwprintf(pCMDLogonRepeatLogon.szDescribe, sizeof(pCMDLogonRepeatLogon.szDescribe), TEXT("账号已经在其它地方登录"));
-			m_pITCPNetworkEngine->SendData(p_tempBind->dwSocketID, MDM_LOGON, CMD_LC_LOGON_REPEAT_LOGON, &pCMDLogonRepeatLogon, sizeof(STR_CMD_LC_LOGON_REPEAT_LOGON));
+			g_TCPNetworkEngine->SendData(p_tempBind->dwSocketID, MDM_LOGON, CMD_LC_LOGON_REPEAT_LOGON, &pCMDLogonRepeatLogon, sizeof(STR_CMD_LC_LOGON_REPEAT_LOGON));
 
 
 			//提示已登录的用户
 			_snwprintf(pCMDLogonRepeatLogon.szDescribe, sizeof(pCMDLogonRepeatLogon.szDescribe), TEXT("账号在其它地方登录"));
-			m_pITCPNetworkEngine->SendData(dwContextID, MDM_LOGON, CMD_LC_LOGON_REPEAT_LOGON, &pCMDLogonRepeatLogon, sizeof(STR_CMD_LC_LOGON_REPEAT_LOGON));
+			g_TCPNetworkEngine->SendData(dwContextID, MDM_LOGON, CMD_LC_LOGON_REPEAT_LOGON, &pCMDLogonRepeatLogon, sizeof(STR_CMD_LC_LOGON_REPEAT_LOGON));
 
 			//关闭连接 --  关闭之前的连接
-			//m_pITCPNetworkEngine->ShutDownSocket(p_tempBind->dwSocketID);
-			m_pITCPNetworkEngine->CloseSocket(p_tempBind->dwSocketID);
+			//g_TCPNetworkEngine->ShutDownSocket(p_tempBind->dwSocketID);
+			g_TCPNetworkEngine->CloseSocket(p_tempBind->dwSocketID);
 			
 			//清空数据
 			WORD wBindIndex = LOWORD(i);
@@ -1988,7 +1979,7 @@ bool CAttemperEngineSink::On_CMD_LC_Logon_UpdateNotify(DWORD dwVersionCheck, DWO
 	UpdateNotify.cbUpdateNotify = ret;
 	UpdateNotify.dwCurrentServerVersion = serverFrameVersion;
 	//发送消息
-	m_pITCPNetworkEngine->SendData(dwSocketID, MDM_LOGON, CMD_LC_LOGON_UPDATE_NOTIFY, &UpdateNotify, sizeof(UpdateNotify));
+	g_TCPNetworkEngine->SendData(dwSocketID, MDM_LOGON, CMD_LC_LOGON_UPDATE_NOTIFY, &UpdateNotify, sizeof(UpdateNotify));
 
 	return true;
 }
@@ -2021,7 +2012,7 @@ bool CAttemperEngineSink::On_CMD_LC_Logon_Logon_Reward(DWORD dwContextID, SYSTEM
 		DBR_GP_ModifyUserInsure modifyUserInsure;
 		ZeroMemory(&modifyUserInsure,sizeof(DBR_GP_ModifyUserInsure));
 		modifyUserInsure.lOpenRoomCard = 50;
-		g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_GP_MODIFY_USER_INSURE, dwContextID, &modifyUserInsure, sizeof(DBR_GP_ModifyUserInsure));
+		g_AttemperEngine->PostDataBaseRequest(DBR_GP_MODIFY_USER_INSURE, dwContextID, &modifyUserInsure, sizeof(DBR_GP_ModifyUserInsure));
 
 		//老玩家奖励返回
 		STR_CMD_LC_LOGON_LOGON_REWARD OldBackReward;
@@ -2029,7 +2020,7 @@ bool CAttemperEngineSink::On_CMD_LC_Logon_Logon_Reward(DWORD dwContextID, SYSTEM
 		OldBackReward.dwRewardCount = 50;
 		lstrcpyn( OldBackReward.szDescribe,TEXT("欢迎回来，您已获得老玩家回归奖励50房卡!"),CountArray(OldBackReward.szDescribe));
 
-		m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_LOGON_LOGON_REWARD, &OldBackReward, sizeof(STR_CMD_LC_LOGON_LOGON_REWARD));
+		g_TCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_LOGON_LOGON_REWARD, &OldBackReward, sizeof(STR_CMD_LC_LOGON_LOGON_REWARD));
 	}
 	
 	return true;
@@ -2056,7 +2047,7 @@ VOID CAttemperEngineSink::On_CMD_LC_List_Type(DWORD dwSocketID)
 		//发送数据(防止数据太多，一批批发送)
 		if ((wSendSize+sizeof(tagGameType))>sizeof(cbDataBuffer))
 		{
-			m_pITCPNetworkEngine->SendData(dwSocketID,MDM_LIST,CMD_LC_LIST_TYPE,cbDataBuffer,wSendSize);
+			g_TCPNetworkEngine->SendData(dwSocketID,MDM_LIST,CMD_LC_LIST_TYPE,cbDataBuffer,wSendSize);
 			wSendSize=0;
 		}
 
@@ -2070,7 +2061,7 @@ VOID CAttemperEngineSink::On_CMD_LC_List_Type(DWORD dwSocketID)
 	}
 
 	//发送剩余
-	if (wSendSize>0) m_pITCPNetworkEngine->SendData(dwSocketID,MDM_LIST,CMD_LC_LIST_TYPE,cbDataBuffer,wSendSize);
+	if (wSendSize>0) g_TCPNetworkEngine->SendData(dwSocketID,MDM_LIST,CMD_LC_LIST_TYPE,cbDataBuffer,wSendSize);
 
 	return;
 }
@@ -2092,7 +2083,7 @@ VOID CAttemperEngineSink::On_CMD_LC_List_Kind(DWORD dwSocketID)
 		//发送数据
 		if ((wSendSize+sizeof(tagGameKind))>sizeof(cbDataBuffer))
 		{
-			m_pITCPNetworkEngine->SendData(dwSocketID, MDM_LIST, CMD_LC_LIST_KIND, cbDataBuffer,wSendSize);
+			g_TCPNetworkEngine->SendData(dwSocketID, MDM_LIST, CMD_LC_LIST_KIND, cbDataBuffer,wSendSize);
 			wSendSize=0;
 		}
 
@@ -2106,7 +2097,7 @@ VOID CAttemperEngineSink::On_CMD_LC_List_Kind(DWORD dwSocketID)
 	}
 
 	//发送剩余
-	if (wSendSize>0) m_pITCPNetworkEngine->SendData(dwSocketID, MDM_LIST, CMD_LC_LIST_KIND, cbDataBuffer, wSendSize);
+	if (wSendSize>0) g_TCPNetworkEngine->SendData(dwSocketID, MDM_LIST, CMD_LC_LIST_KIND, cbDataBuffer, wSendSize);
 
 	return;
 }
@@ -2128,7 +2119,7 @@ VOID CAttemperEngineSink::On_CMD_LC_List_Node(DWORD dwSocketID)
 		//发送数据
 		if ((wSendSize+sizeof(tagGameNode))>sizeof(cbDataBuffer))
 		{
-			m_pITCPNetworkEngine->SendData(dwSocketID,MDM_LIST,CMD_LC_LIST_NODE,cbDataBuffer,wSendSize);
+			g_TCPNetworkEngine->SendData(dwSocketID,MDM_LIST,CMD_LC_LIST_NODE,cbDataBuffer,wSendSize);
 			wSendSize=0;
 		}
 
@@ -2141,7 +2132,7 @@ VOID CAttemperEngineSink::On_CMD_LC_List_Node(DWORD dwSocketID)
 	}
 
 	//发送剩余
-	if (wSendSize>0) m_pITCPNetworkEngine->SendData(dwSocketID,MDM_LIST,CMD_LC_LIST_NODE,cbDataBuffer,wSendSize);
+	if (wSendSize>0) g_TCPNetworkEngine->SendData(dwSocketID,MDM_LIST,CMD_LC_LIST_NODE,cbDataBuffer,wSendSize);
 
 	return;
 }
@@ -2163,7 +2154,7 @@ VOID CAttemperEngineSink::On_CMD_LC_List_Room(DWORD dwSocketID)
 		//发送数据
 		if ((wSendSize+sizeof(tagGameServer))>sizeof(cbDataBuffer))
 		{
-			m_pITCPNetworkEngine->SendData(dwSocketID,MDM_LIST,CMD_LC_LIST_ROOM,cbDataBuffer,wSendSize);
+			g_TCPNetworkEngine->SendData(dwSocketID,MDM_LIST,CMD_LC_LIST_ROOM,cbDataBuffer,wSendSize);
 			wSendSize=0;
 		}
 
@@ -2178,7 +2169,7 @@ VOID CAttemperEngineSink::On_CMD_LC_List_Room(DWORD dwSocketID)
 
 	//发送剩余
 	if (wSendSize>0)
-		m_pITCPNetworkEngine->SendData(dwSocketID, MDM_LIST, CMD_LC_LIST_ROOM, cbDataBuffer, wSendSize);
+		g_TCPNetworkEngine->SendData(dwSocketID, MDM_LIST, CMD_LC_LIST_ROOM, cbDataBuffer, wSendSize);
 
 	return;
 }
@@ -2206,7 +2197,7 @@ bool CAttemperEngineSink::On_SUB_CL_Service_UserFeedBack(VOID * pData, WORD wDat
 	lstrcpyn(UserSuggestion.szFB_Content,pUserSuggestion->szFB_Content,CountArray(UserSuggestion.szFB_Content));
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_USER_FEEDBACK, dwSocketID, &UserSuggestion, sizeof(UserSuggestion));
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_USER_FEEDBACK, dwSocketID, &UserSuggestion, sizeof(UserSuggestion));
 
 	return true;
 }
@@ -2230,7 +2221,7 @@ bool CAttemperEngineSink::On_CMD_LC_Service_UserFeedBack( DWORD dwContextID, VOI
 
 	//发送数据
 	WORD wDataSize = sizeof(FeedBack);
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_USER_FEEDBACK, &FeedBack, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_USER_FEEDBACK, &FeedBack, wDataSize);
 
 	return true;
 }
@@ -2251,7 +2242,7 @@ bool CAttemperEngineSink::On_SUB_CL_Service_RefreshUserInfo(VOID * pData, WORD w
 	UserRequest.dwUserID = pUserRequest->dwUserID;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_REFRESH_USER_INFO, dwSocketID, &UserRequest, sizeof(UserRequest));
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_REFRESH_USER_INFO, dwSocketID, &UserRequest, sizeof(UserRequest));
 	return true;
 }
 
@@ -2273,7 +2264,7 @@ bool CAttemperEngineSink::On_CMD_LC_Service_RefreshUserInfo( DWORD dwContextID, 
 
 	//发送数据
 	WORD wDataSize = sizeof(STR_CMD_LC_SERVICE_REFRESH_INFO);
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_CL_SERVICE_REFRESH_USER_INFO, &UserInfo, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_CL_SERVICE_REFRESH_USER_INFO, &UserInfo, wDataSize);
 
 	return true;
 }
@@ -2291,7 +2282,7 @@ bool CAttemperEngineSink::On_SUB_CL_Service_QueryRoomList(VOID * pData, WORD wDa
 	GetTableInfoList.dwUserID = pTableInfoList->dwUserID;
 
 	//查询开房列表
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_QUERY_ROOM_LIST,dwSocketID,&GetTableInfoList,sizeof(STR_DBR_CL_SERCIVR_QUERY_ROOMLIST));
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_QUERY_ROOM_LIST,dwSocketID,&GetTableInfoList,sizeof(STR_DBR_CL_SERCIVR_QUERY_ROOMLIST));
 
 	return true;
 }
@@ -2308,7 +2299,7 @@ bool CAttemperEngineSink::On_CMD_LC_Service_QueryRoomList(DWORD dwContextID, VOI
 
 	memcpy(&TableInfo, pRecord, sizeof(STR_CMD_LC_SERVICE_QUERY_ROOMLIST));
 
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_QUERY_ROOM_LIST, &TableInfo, sizeof(STR_CMD_LC_SERVICE_QUERY_ROOMLIST));
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_QUERY_ROOM_LIST, &TableInfo, sizeof(STR_CMD_LC_SERVICE_QUERY_ROOMLIST));
 
 	return true;
 }
@@ -2323,7 +2314,7 @@ bool CAttemperEngineSink::On_SUB_CL_Service_GetRichList(VOID * pData, WORD wData
 		return false;
 	}
 	
-	return g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_GET_RICH_LIST, dwSocketID, pData, 0);
+	return g_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_GET_RICH_LIST, dwSocketID, pData, 0);
 }
 
 //获取富豪榜返回
@@ -2341,7 +2332,7 @@ bool CAttemperEngineSink::On_CMD_LC_Service_GetRichList( DWORD dwContextID, VOID
 
 	memcpy(&LotteryResult,pLotteryResult,sizeof(STR_DBO_CL_SERCIVR_GET_RICHLIST));		//修改bug，原来的sizeof里面不是这个结构体
 
-	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_GET_RICH_LIST, &LotteryResult, sizeof(STR_CMD_LC_SERVICE_GET_RICHLIST));
+	g_TCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_GET_RICH_LIST, &LotteryResult, sizeof(STR_CMD_LC_SERVICE_GET_RICHLIST));
 
 	return true;
 }
@@ -2359,7 +2350,7 @@ bool CAttemperEngineSink::On_SUB_CL_Service_GetUserRecordList(VOID * pData, WORD
 	GetRecordList.dwUserID = pGetRecordList->dwUserID;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_GET_USER_RECORD_LIST, dwSocketID, &GetRecordList, sizeof(STR_DBR_CL_SERCIVR_GET_RECORDLIST));
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_GET_USER_RECORD_LIST, dwSocketID, &GetRecordList, sizeof(STR_DBR_CL_SERCIVR_GET_RECORDLIST));
 
 	return true;
 }
@@ -2390,7 +2381,7 @@ bool CAttemperEngineSink::On_CMD_LC_Service_GetUserRecordList(DWORD dwContextID,
 	memcpy(Record.szGameTime, pRecord->szGameTime, sizeof(TCHAR)*30);
 	memcpy(Record.szTotalScore, pRecord->szTotalScore, sizeof(TCHAR)*50);
 
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_GET_DJ_RECORD_LIST, &Record, sizeof(STR_CMD_LC_SERVICE_GET_DJ_RECORDLIST));
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_GET_DJ_RECORD_LIST, &Record, sizeof(STR_CMD_LC_SERVICE_GET_DJ_RECORDLIST));
 
 	//_bstr_t b(pRecord->szData);
 	//char* output = b;
@@ -2406,7 +2397,7 @@ bool CAttemperEngineSink::On_CMD_LC_Service_GetUserRecordList(DWORD dwContextID,
 	//		memcpy(Record.szScore,pRecord->szScore,sizeof(TCHAR)*50);
 	//		memcpy(Record.szTotalScore,pRecord->szTotalScore,sizeof(TCHAR)*50);
 
-	//		m_pITCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_GET_DJ_RECORD_LIST, &Record, sizeof(STR_CMD_LC_SERVICE_GET_DJ_RECORDLIST));
+	//		g_TCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_GET_DJ_RECORD_LIST, &Record, sizeof(STR_CMD_LC_SERVICE_GET_DJ_RECORDLIST));
 
 	//	}
 	//	fclose(fp);
@@ -2431,7 +2422,7 @@ bool CAttemperEngineSink::On_SUB_CL_Service_GetSpecificRecord(VOID * pData, WORD
 	if ( 0 != GetRecordList.dwTableID )
 	{
 		//投递请求
-		g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_GET_SPECIFIC_RECORD,dwSocketID,&GetRecordList,sizeof(STR_DBR_CL_SERCIVR_GET_SPECIFIC_RECORD));
+		g_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_GET_SPECIFIC_RECORD,dwSocketID,&GetRecordList,sizeof(STR_DBR_CL_SERCIVR_GET_SPECIFIC_RECORD));
 	}
 
 	return true;
@@ -2447,7 +2438,7 @@ bool CAttemperEngineSink::On_CMD_LC_Service_GetSpecificRecord(DWORD dwContextID,
 	STR_CMD_LC_SERVICE_GET_XJ_RECORDLIST Record;
 	memcpy(&Record, pRecord, sizeof(STR_CMD_LC_SERVICE_GET_XJ_RECORDLIST));
 
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_GET_XJ_RECORD_LIST, &Record, sizeof(STR_CMD_LC_SERVICE_GET_XJ_RECORDLIST));
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_GET_XJ_RECORD_LIST, &Record, sizeof(STR_CMD_LC_SERVICE_GET_XJ_RECORDLIST));
 
 	return true;
 }
@@ -2466,7 +2457,7 @@ bool CAttemperEngineSink::On_SUB_CL_Service_OnlineReward(VOID * pData, WORD wDat
 
 	GetLogonReward.dwUserID = pGetLogonReward->dwUserID;
 
-	return g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_ONLINE_REWARD,dwSocketID,&GetLogonReward,sizeof(GetLogonReward));
+	return g_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_ONLINE_REWARD,dwSocketID,&GetLogonReward,sizeof(GetLogonReward));
 }
 
 //获取在线奖励返回
@@ -2485,7 +2476,7 @@ bool CAttemperEngineSink::On_CMD_LC_Service_OnlineReward( DWORD dwContextID, VOI
 	LotteryResult.byType = pLotteryResult->byType;
 	LotteryResult.dwCount = pLotteryResult->dwCount;
 	
-	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_ONLINE_REWARD, &LotteryResult, sizeof(STR_CMD_LC_SERVICE_ONLINE_REWARD));
+	g_TCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_ONLINE_REWARD, &LotteryResult, sizeof(STR_CMD_LC_SERVICE_ONLINE_REWARD));
 
 	return true;
 }
@@ -2507,7 +2498,7 @@ bool CAttemperEngineSink::On_SUB_CL_Service_GetTaskList(VOID * pData, WORD wData
 	memcpy(&GetTaskList,pGetTaskList,sizeof(GetTaskList));
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_GET_TASK_LIST,dwSocketID,&GetTaskList,sizeof(GetTaskList));
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_GET_TASK_LIST,dwSocketID,&GetTaskList,sizeof(GetTaskList));
 
 	return true;
 }
@@ -2552,7 +2543,7 @@ bool CAttemperEngineSink::On_CMD_LC_Service_GetTaskList( DWORD dwContextID, VOID
 		if ( (wSendSize+sizeof(STR_CMD_LC_SERVICE_GET_TASKLIST)) > sizeof(cbDataBuffer) )
 		{
 			//发送数据
-			m_pITCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_GET_TASK_LIST, cbDataBuffer, wSendSize);			
+			g_TCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_GET_TASK_LIST, cbDataBuffer, wSendSize);			
 			wSendSize=0;
 		}
 
@@ -2564,7 +2555,7 @@ bool CAttemperEngineSink::On_CMD_LC_Service_GetTaskList( DWORD dwContextID, VOID
 	//发送剩余
 	if (wSendSize>0) 	
 	{
-		m_pITCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_GET_TASK_LIST, cbDataBuffer, wSendSize);
+		g_TCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_GET_TASK_LIST, cbDataBuffer, wSendSize);
 	}
 
 	//释放内存		TODO 曾经报错过
@@ -2590,7 +2581,7 @@ bool CAttemperEngineSink::On_SUB_CL_Service_GetTaskReward(VOID * pData, WORD wDa
 	memcpy(&SetTaskDone,pSetTaskDone,sizeof(SetTaskDone));
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_GET_TASK_REWARD,dwSocketID,&SetTaskDone,sizeof(SetTaskDone));
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_GET_TASK_REWARD,dwSocketID,&SetTaskDone,sizeof(SetTaskDone));
 
 	return true;
 }
@@ -2609,7 +2600,7 @@ bool CAttemperEngineSink::On_CMD_LC_Service_GetTaskReward( DWORD dwContextID, VO
 	ZeroMemory(&TaskDone,sizeof(STR_CMD_LC_SERVICE_GET_TASK_REWARD));
 	memcpy(&TaskDone,pTaskDone,sizeof(STR_CMD_LC_SERVICE_GET_TASK_REWARD));
 
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_GET_TASK_REWARD, &TaskDone, sizeof(STR_CMD_LC_SERVICE_GET_TASK_REWARD));
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_GET_TASK_REWARD, &TaskDone, sizeof(STR_CMD_LC_SERVICE_GET_TASK_REWARD));
 
 	return true;
 }
@@ -2635,7 +2626,7 @@ bool CAttemperEngineSink::On_SUB_CL_Service_GetRankList(VOID * pData, WORD wData
 		tagRankInfo* item = ((RankManager*)m_pRankManager)->GetRankItemByIndex(pTaskList->byIndex,i);
 		if(item != NULL)
 		{
-			m_pITCPNetworkEngine->SendData(dwSocketID,MDM_SERVICE, CMD_LC_SERVICE_GET_RANK_LIST, item, sizeof(STR_CMD_LC_SERVICE_GET_RANKLIST));
+			g_TCPNetworkEngine->SendData(dwSocketID,MDM_SERVICE, CMD_LC_SERVICE_GET_RANK_LIST, item, sizeof(STR_CMD_LC_SERVICE_GET_RANKLIST));
 		}
 	}
 
@@ -2655,7 +2646,7 @@ bool CAttemperEngineSink::On_SUB_CL_Service_RequestLottery(VOID * pData, WORD wD
 	STR_DBR_CL_SERCIVR_REQUEST_LOTTERY QueryLottery;
 	memcpy(&QueryLottery,pGetRankReward,sizeof(STR_DBR_CL_SERCIVR_REQUEST_LOTTERY));
 
-	return g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_REQUEST_LOTTERY,dwSocketID,&QueryLottery,sizeof(STR_DBR_CL_SERCIVR_REQUEST_LOTTERY));
+	return g_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_REQUEST_LOTTERY,dwSocketID,&QueryLottery,sizeof(STR_DBR_CL_SERCIVR_REQUEST_LOTTERY));
 
 }
 
@@ -2679,7 +2670,7 @@ bool CAttemperEngineSink::On_CMD_LC_Service_RequestLottery( DWORD dwContextID, V
 	lstrcpyn(LotteryResult.szDescribeString, pLotteryResult->szDescribeString, CountArray(LotteryResult.szDescribeString));
 
 	//发送数据
-	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_REQUEST_LOTTERY, &LotteryResult, sizeof(STR_CMD_LC_SERVICE_REQUEST_LOTTERY));
+	g_TCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_REQUEST_LOTTERY, &LotteryResult, sizeof(STR_CMD_LC_SERVICE_REQUEST_LOTTERY));
 
 	return true;
 }
@@ -2691,7 +2682,7 @@ bool CAttemperEngineSink::On_SUB_CL_SERVICE_PURE_STANDING_LIST(VOID * pData, WOR
 	if(wDataSize!=sizeof(STR_SUB_CL_SERVICE_PURE_STANDING_LIST))
 		return false;
 
-	return g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_PURE_STANDING_LIST,dwSocketID,pData, wDataSize);
+	return g_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_PURE_STANDING_LIST,dwSocketID,pData, wDataSize);
 }
 //pure大厅排行版 返回
 bool CAttemperEngineSink::On_CMD_LC_SERVICE_PURE_STANDING_LIST( DWORD dwContextID, VOID * pData, WORD wDataSize )
@@ -2702,7 +2693,7 @@ bool CAttemperEngineSink::On_CMD_LC_SERVICE_PURE_STANDING_LIST( DWORD dwContextI
 		return false;
 
 	//发送数据
-	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_PURE_STANDING_LIST, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_PURE_STANDING_LIST, pData, wDataSize);
 
 	return true;
 }
@@ -2717,7 +2708,7 @@ bool CAttemperEngineSink::On_CMD_LC_SERVICE_PURE_STANDING_FINISH( DWORD dwContex
 	pLotteryResult->byMask = 1;
 
 	//发送数据
-	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_PURE_STANDING_FINISH, pLotteryResult, sizeof(STR_CMD_LC_SERVICE_PURE_STANDING_FINISH));
+	g_TCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_PURE_STANDING_FINISH, pLotteryResult, sizeof(STR_CMD_LC_SERVICE_PURE_STANDING_FINISH));
 
 	return true;
 }
@@ -2729,7 +2720,7 @@ bool CAttemperEngineSink::On_SUB_CL_SERVICE_PURE_RECORD_LIST(VOID * pData, WORD 
 	if(wDataSize!=sizeof(STR_SUB_CL_SERVICE_PURE_RECORD_LIST))
 		return false;
 
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_PURE_RECORD_LIST,dwSocketID,pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_PURE_RECORD_LIST,dwSocketID,pData, wDataSize);
 
 	return true;
 }
@@ -2742,7 +2733,7 @@ bool CAttemperEngineSink::On_CMD_LC_SERVICE_PURE_RECORD_LIST( DWORD dwContextID,
 		return false;
 
 	//发送数据
-	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_PURE_RECORD_LIST, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_PURE_RECORD_LIST, pData, wDataSize);
 
 	return true;
 }
@@ -2755,7 +2746,7 @@ bool CAttemperEngineSink::On_CMD_LC_SERVICE_PURE_RECORD_LIST_PINFO( DWORD dwCont
 		return false;
 
 	//发送数据
-	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_PURE_RECORD_LIST_PINFO, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_PURE_RECORD_LIST_PINFO, pData, wDataSize);
 
 	return true;
 }
@@ -2770,7 +2761,7 @@ bool CAttemperEngineSink::On_CMD_LC_SERVICE_PURE_RECORD_FINISH( DWORD dwContextI
 	pLotteryResult->byMask = 1;
 
 	//发送数据
-	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_PURE_RECORD_FINISH, pLotteryResult, sizeof(STR_CMD_LC_SERVICE_PURE_RECORD_LIST_FINIST));
+	g_TCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_PURE_RECORD_FINISH, pLotteryResult, sizeof(STR_CMD_LC_SERVICE_PURE_RECORD_LIST_FINIST));
 
 	return true;
 }
@@ -2782,7 +2773,7 @@ bool CAttemperEngineSink::On_SUB_CL_SERVICE_PURE_XJ_RECORD_LIST(VOID * pData, WO
 	if(wDataSize!=sizeof(STR_SUB_CL_SERVICE_PURE_XJ_RECORD_LIST))
 		return false;
 
-	return g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_PURE_XJ_RECORD_LIST,dwSocketID,pData, wDataSize);
+	return g_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_PURE_XJ_RECORD_LIST,dwSocketID,pData, wDataSize);
 }
 //pure小局战绩 返回
 bool CAttemperEngineSink::On_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST( DWORD dwContextID, VOID * pData, WORD wDataSize )
@@ -2795,7 +2786,7 @@ bool CAttemperEngineSink::On_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST( DWORD dwContext
 	STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST * pCMD = (STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST *) pData;
 
 	//发送数据
-	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_PURE_XJ_RECORD_LIST, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_PURE_XJ_RECORD_LIST, pData, wDataSize);
 
 	return true;
 }
@@ -2808,7 +2799,7 @@ bool CAttemperEngineSink::On_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_PINFO( DWORD dwC
 		return false;
 
 	//发送数据
-	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_PINFO, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_PINFO, pData, wDataSize);
 
 	return true;
 }
@@ -2823,7 +2814,7 @@ bool CAttemperEngineSink::On_CMD_LC_SERVICE_PURE_XJ_RECORD_FINISH( DWORD dwConte
 	pLotteryResult->byMask = 1;
 
 	//发送数据
-	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_PURE_XJ_RECORD_FINISH, pLotteryResult, sizeof(STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_FINISH));
+	g_TCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_PURE_XJ_RECORD_FINISH, pLotteryResult, sizeof(STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_FINISH));
 
 	return true;
 }
@@ -2843,7 +2834,7 @@ bool CAttemperEngineSink::On_SUB_CL_Service_XJRecordPlayback(VOID * pData, WORD 
 	ZeroMemory(&DBR, sizeof(STR_DBR_CL_SERVICE_XJ_RECORD_PLAYBACK));
 	DBR.dwRecordID = SUB->dwRecordID;
 
-	return g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_XJ_RECORD_PLAYBACK, dwSocketID, &DBR, wDataSize);
+	return g_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_XJ_RECORD_PLAYBACK, dwSocketID, &DBR, wDataSize);
 }
 //小局录像回放 返回
 bool CAttemperEngineSink::On_CMD_LC_Service_XJRecordPlayback( DWORD dwContextID, VOID * pData, WORD wDataSize )
@@ -2867,7 +2858,7 @@ bool CAttemperEngineSink::On_CMD_LC_Service_XJRecordPlayback( DWORD dwContextID,
 		CMD.cbfinish = (i==3) ? 1 : 0;
 
 		//发送数据
-		m_pITCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_XJ_RECORD_PLAYBACK, &CMD, sizeof(CMD));
+		g_TCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_XJ_RECORD_PLAYBACK, &CMD, sizeof(CMD));
 
 	}
 
@@ -2889,7 +2880,7 @@ bool CAttemperEngineSink::On_SUB_CL_SERVICE_CUSTOMER_MESSEGE(VOID * pData, WORD 
 	ZeroMemory(&DBR, sizeof(STR_DBR_CL_SERVICE_CUSTOMER_MESSEGE));
 	DBR.cbMessegeFlag = SUB->cbMessegeFlag;
 
-	return g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_CUSTOMER_MESSEGE, dwSocketID, &DBR, sizeof(DBR));
+	return g_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_CUSTOMER_MESSEGE, dwSocketID, &DBR, sizeof(DBR));
 }
 //客服消息 返回
 bool CAttemperEngineSink::On_CMD_LC_SERVICE_CUSTOMER_MESSEGE( DWORD dwContextID, VOID * pData, WORD wDataSize )
@@ -2908,7 +2899,7 @@ bool CAttemperEngineSink::On_CMD_LC_SERVICE_CUSTOMER_MESSEGE( DWORD dwContextID,
 	lstrcpyn(CMD.szMessege, pDBO->szMessege, CountArray(CMD.szMessege));
 
 	//发送数据
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_CUSTOMER_MESSEGE, &CMD, sizeof(STR_CMD_LC_SERVICE_CUSTOMER_MESSEGE));
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_CUSTOMER_MESSEGE, &CMD, sizeof(STR_CMD_LC_SERVICE_CUSTOMER_MESSEGE));
 
 	return true;
 }
@@ -2920,7 +2911,7 @@ bool CAttemperEngineSink::On_SUB_CL_SERVICE_GOLD_INFO(VOID * pData, WORD wDataSi
 	if(wDataSize!=sizeof(STR_SUB_CL_SERVICE_GOLD_INFO))
 		return false;
 
-	return g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_GOLD_INFO,dwSocketID,pData, wDataSize);
+	return g_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_GOLD_INFO,dwSocketID,pData, wDataSize);
 }
 //请求金币大厅信息 返回
 bool CAttemperEngineSink::On_CMD_LC_SERVICE_GOLD_INFO( DWORD dwContextID, VOID * pData, WORD wDataSize )
@@ -2931,7 +2922,7 @@ bool CAttemperEngineSink::On_CMD_LC_SERVICE_GOLD_INFO( DWORD dwContextID, VOID *
 		return false;
 
 	//发送数据
-	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_GOLD_INFO, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_GOLD_INFO, pData, wDataSize);
 
 	return true;
 }
@@ -2946,7 +2937,7 @@ bool CAttemperEngineSink::On_CMD_LC_SERVICE_GOLD_INFO_FINISH( DWORD dwContextID,
 	pLotteryResult->byMask = 1;
 
 	//发送数据
-	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_GOLD_INFO_FINISH, pLotteryResult, sizeof(STR_CMD_LC_SERVICE_GOLD_INFO_FINISH));
+	g_TCPNetworkEngine->SendData(dwContextID,MDM_SERVICE, CMD_LC_SERVICE_GOLD_INFO_FINISH, pLotteryResult, sizeof(STR_CMD_LC_SERVICE_GOLD_INFO_FINISH));
 
 	return true;
 }
@@ -2958,7 +2949,7 @@ bool CAttemperEngineSink::On_SUB_CL_Service_ModifyPersonalInfo(VOID * pData, WOR
 	if (wDataSize != sizeof(STR_SUB_CL_SERVICE_MODIFY_PERSONAL_INFO)) return false;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_MODIFY_PERSONAL_INFO, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_MODIFY_PERSONAL_INFO, dwSocketID, pData, wDataSize);
 
 	return true;
 }
@@ -2978,7 +2969,7 @@ bool CAttemperEngineSink::On_CMD_LC_Service_ModifyPersonalInfo( DWORD dwContextI
 	CopyMemory(&PersonalInfo, pModifyInfo, sizeof(PersonalInfo));
 
 	//发送数据
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_MODIFY_PERSONAL_INFO, &PersonalInfo, sizeof(STR_CMD_LC_SERVICE_MODIFY_PERSONL_INFO));
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_SERVICE_MODIFY_PERSONAL_INFO, &PersonalInfo, sizeof(STR_CMD_LC_SERVICE_MODIFY_PERSONL_INFO));
 
 	return true;
 }
@@ -3007,7 +2998,7 @@ bool CAttemperEngineSink::On_CMD_LC_Service_QueryScoreInfo(DWORD dwContextID, VO
 	ScoreInfo.lDiamond = pScoreInfo->lDiamond;
 
 	//发送数据
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_USER_QUERY_SCORE_INFO, &ScoreInfo, sizeof(STR_CMD_LC_QUERY_SCORE_INFO));
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_USER_QUERY_SCORE_INFO, &ScoreInfo, sizeof(STR_CMD_LC_QUERY_SCORE_INFO));
 
 	return true;
 }
@@ -3030,7 +3021,7 @@ bool CAttemperEngineSink::On_CMD_LC_CommonOperateResult( DWORD dwContextID, VOID
 
 	//发送数据
 	WORD wHeadSize=sizeof(OperateResult);
-	m_pITCPNetworkEngine->SendData(dwContextID,pOperate->mCommand.MainCommand,pOperate->mCommand.SubCommand,&OperateResult,wHeadSize);
+	g_TCPNetworkEngine->SendData(dwContextID,pOperate->mCommand.MainCommand,pOperate->mCommand.SubCommand,&OperateResult,wHeadSize);
 	return true;
 }
 
@@ -3048,7 +3039,7 @@ bool CAttemperEngineSink::OnDBRankRewardResult( DWORD dwContextID, VOID * pData,
 	ZeroMemory(&RankDone,sizeof(STR_CMD_LC_SERVICE_GET_RANK_REWARD));
 	memcpy(&RankDone,pRankDone,sizeof(STR_CMD_LC_SERVICE_GET_RANK_REWARD));
 
-	m_pITCPNetworkEngine->SendData(dwContextID,MDM_SERVICE,CMD_LC_SERVICE_GET_RANK_REWARD,&RankDone,sizeof(STR_CMD_LC_SERVICE_GET_RANK_REWARD));
+	g_TCPNetworkEngine->SendData(dwContextID,MDM_SERVICE,CMD_LC_SERVICE_GET_RANK_REWARD,&RankDone,sizeof(STR_CMD_LC_SERVICE_GET_RANK_REWARD));
 
 	return true;
 }
@@ -3071,7 +3062,7 @@ bool CAttemperEngineSink::On_SUB_CL_Other_ReChargeInfo(VOID * pData, WORD wDataS
 	UserRequest.dwUserID = pUserRequest->dwUserID;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_USER_RECHARGE_INFO,dwSocketID,&UserRequest,sizeof(UserRequest));
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_USER_RECHARGE_INFO,dwSocketID,&UserRequest,sizeof(UserRequest));
 	return true;
 }
 
@@ -3094,7 +3085,7 @@ bool CAttemperEngineSink::On_CMD_LC_Other_RechargeInfo( DWORD dwContextID, VOID 
 
 	//发送数据
 	WORD wHeadSize=sizeof(RechangeInfo);
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_OTHERS_RECHARGE_INFO, &RechangeInfo, wHeadSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_OTHERS_RECHARGE_INFO, &RechangeInfo, wHeadSize);
 	return true;
 }
 
@@ -3106,7 +3097,7 @@ bool CAttemperEngineSink::On_SUB_CL_GIFT_GIVE_PROPS(VOID * pData, WORD wDataSize
 	if(wDataSize!=sizeof(STR_SUB_CL_GIFT_GIVE_PROPS))
 		return false;
 
-	return g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_GIFT_GIVE_PROPS,dwSocketID, pData, wDataSize);
+	return g_AttemperEngine->PostDataBaseRequest(DBR_CL_GIFT_GIVE_PROPS,dwSocketID, pData, wDataSize);
 }
 
 //赠送道具返回
@@ -3116,7 +3107,7 @@ bool CAttemperEngineSink::On_CMD_LC_GIFT_GIVE_PROPS( DWORD dwContextID, VOID * p
 	if(wDataSize!=sizeof(STR_CMD_LC_GIFT_GIVE_PROPS))
 		return false;
 
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_GIFT, CMD_LC_GIFT_GIVE_PROPS, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_GIFT, CMD_LC_GIFT_GIVE_PROPS, pData, wDataSize);
 
 	return true;
 }
@@ -3139,7 +3130,7 @@ bool CAttemperEngineSink::On_CMD_LC_GIFT_GIVE_PROPS_SHOW( DWORD dwContextID, VOI
 			pBindParameter->dwUserID == pCMD->dwTargetID)
 		{
 			//通知用户
-			m_pITCPNetworkEngine->SendData(pBindParameter->dwSocketID, MDM_GIFT, CMD_LC_GIFT_GIVE_PROPS_SHOW, 
+			g_TCPNetworkEngine->SendData(pBindParameter->dwSocketID, MDM_GIFT, CMD_LC_GIFT_GIVE_PROPS_SHOW, 
 											pData, wDataSize);		
 		}
 	}
@@ -3169,7 +3160,7 @@ bool CAttemperEngineSink::On_SUB_CL_Other_ExchangeInfo(VOID * pData, WORD wDataS
 	UserRequest.dwUserID = pUserRequest->dwUserID;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_USER_EXCHANGE_INFO, dwSocketID, &UserRequest, sizeof(UserRequest));
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_USER_EXCHANGE_INFO, dwSocketID, &UserRequest, sizeof(UserRequest));
 	return true;
 }
 
@@ -3193,7 +3184,7 @@ bool CAttemperEngineSink::On_CMD_LC_Other_ExchangeInfo( DWORD dwContextID, VOID 
 
 	//发送数据
 	WORD wHeadSize=sizeof(ExchangeInfo);
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_OTHERS_EXCHANGE_INFO, &ExchangeInfo, wHeadSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_SERVICE, CMD_LC_OTHERS_EXCHANGE_INFO, &ExchangeInfo, wHeadSize);
 
 	return true;
 }
@@ -3206,7 +3197,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_ALL_CLUB_INFO_LIST(VOID * pData, WORD w
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_ALL_CLUB_INFO_LIST)) return false;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_ALL_CLUB_INFO_LIST, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_ALL_CLUB_INFO_LIST, dwSocketID, pData, wDataSize);
 
 	return true;
 }
@@ -3218,7 +3209,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_ALL_CLUB_INFO_LIST( DWORD dwContextID, 
 	if( (wDataSize % Size) != 0) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_ALL_CLUB_INFO_LIST, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_ALL_CLUB_INFO_LIST, pData, wDataSize);
 	return true;
 }
 //查询牌友圈列表结束
@@ -3228,7 +3219,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_ALL_INFO_FINISH( DWORD dwContextID, VOI
 	cmd.byMask = 1;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_ALL_INFO_FINISH, &cmd, sizeof(STR_CMD_LC_CLUB_ALL_INFO_FINISH));
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_ALL_INFO_FINISH, &cmd, sizeof(STR_CMD_LC_CLUB_ALL_INFO_FINISH));
 	return true;
 }
 
@@ -3239,7 +3230,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_ROOM_LIST(VOID * pData, WORD wDataSize,
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_ROOM_LIST)) return false;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_ROOM_LIST, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_ROOM_LIST, dwSocketID, pData, wDataSize);
 	return true;
 }
 //查询指定牌友圈房间列表 返回
@@ -3250,7 +3241,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_ROOM_LIST( DWORD dwContextID, VOID * pD
 	if( (wDataSize % Size ) != 0) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_ROOM_LIST, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_ROOM_LIST, pData, wDataSize);
 	return true;
 }
 //查询指定牌友圈房间列表 结束
@@ -3260,7 +3251,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_ROOM_LIST_FINISH( DWORD dwContextID, VO
 	cmd.byMask = 1;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_ROOM_LIST_FINISH, &cmd, sizeof(STR_CMD_LC_CLUB_ROOM_LIST_FINISH));
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_ROOM_LIST_FINISH, &cmd, sizeof(STR_CMD_LC_CLUB_ROOM_LIST_FINISH));
 	return true;
 }
 
@@ -3271,7 +3262,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_RANDOM_CLUB_LIST(VOID * pData, WORD wDa
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_RANDOM_CLUB_LIST)) return false;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_RANDOM_CLUB_LIST, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_RANDOM_CLUB_LIST, dwSocketID, pData, wDataSize);
 	return true;
 }
 //查询未满员, 随机牌友圈(最大9个) 返回
@@ -3282,7 +3273,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_RANDOM_CLUB_LIST( DWORD dwContextID, VO
 	if( (wDataSize % Size) != 0) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_RANDOM_CLUB_LIST, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_RANDOM_CLUB_LIST, pData, wDataSize);
 	return true;
 }
 //查询未满员, 随机牌友圈(最大9个) 结束
@@ -3292,7 +3283,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_RANDOM_CLUB_LIST_FINISH( DWORD dwContex
 	cmd.byMask = 1;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_RANDOM_CLUB_LIST_FINISH, &cmd, sizeof(STR_CMD_LC_CLUB_RANDOM_CLUB_LIST_FINISH));
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_RANDOM_CLUB_LIST_FINISH, &cmd, sizeof(STR_CMD_LC_CLUB_RANDOM_CLUB_LIST_FINISH));
 	return true;
 }
 
@@ -3303,7 +3294,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_JOIN_CLUB(VOID * pData, WORD wDataSize,
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_JOIN_CLUB)) return false;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_JOIN_CLUB, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_JOIN_CLUB, dwSocketID, pData, wDataSize);
 	return true;
 }
 //申请加入牌友圈返回 
@@ -3314,7 +3305,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_JOIN_CLUB( DWORD dwContextID, VOID * pD
 	if( wDataSize != Size) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_JOIN_CLUB, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_JOIN_CLUB, pData, wDataSize);
 	return true;
 }
 //申请加入牌友圈广播
@@ -3325,7 +3316,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_JOIN_CLUB_BDCAST( DWORD dwContextID, VO
 	if( wDataSize != Size) return false;
 
 	//TODONOW 暂时是每个人都发送，后面改为 1.特定俱乐部的  2.会长和管理员发送
-	m_pITCPNetworkEngine->SendDataBatch(MDM_CLUB, CMD_LC_CLUB_JOIN_CLUB_BDCAST, pData, wDataSize);
+	g_TCPNetworkEngine->SendDataBatch(MDM_CLUB, CMD_LC_CLUB_JOIN_CLUB_BDCAST, pData, wDataSize);
 	return true;
 }
 //申请加入牌友圈 通知客户端实时刷新
@@ -3336,7 +3327,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_JOIN_CLUB_RE( DWORD dwContextID, VOID *
 	if( wDataSize != Size) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_LIST_RE, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_LIST_RE, pData, wDataSize);
 	return true;
 }
 
@@ -3348,7 +3339,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_DISS_CLUB(VOID * pData, WORD wDataSize,
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_DISS_CLUB)) return false;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_DISS_CLUB, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_DISS_CLUB, dwSocketID, pData, wDataSize);
 	return true;
 }
 //解散牌友圈 返回 
@@ -3359,7 +3350,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_DISS_CLUB( DWORD dwContextID, VOID * pD
 	if( wDataSize != Size) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_DISS_CLUB, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_DISS_CLUB, pData, wDataSize);
 	return true;
 }
 
@@ -3391,7 +3382,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_CREATE_CLUB(VOID * pData, WORD wDataSiz
 	}
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_CREATE_CLUB, dwSocketID, &Dbr, sizeof(Dbr));
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_CREATE_CLUB, dwSocketID, &Dbr, sizeof(Dbr));
 	return true;
 }
 //创建牌友圈 返回
@@ -3402,7 +3393,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_CREATE_CLUB( DWORD dwContextID, VOID * 
 	if( wDataSize != Size ) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_CREATE_CLUB, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_CREATE_CLUB, pData, wDataSize);
 	return true;
 }
 
@@ -3413,7 +3404,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_ROOM_SETTING(VOID * pData, WORD wDataSi
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_ROOM_SETTING)) return false;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_ROOM_SETTING, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_ROOM_SETTING, dwSocketID, pData, wDataSize);
 	return true;
 }
 //房间设置 返回
@@ -3424,7 +3415,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_ROOM_SETTING( DWORD dwContextID, VOID *
 	if( wDataSize != Size) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_ROOM_SETTING, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_ROOM_SETTING, pData, wDataSize);
 	return true;
 }
 
@@ -3435,7 +3426,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_ROOM_QUERY_SETTING(VOID * pData, WORD w
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_ROOM_QUERY_SETTING)) return false;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_ROOM_QUERY_SETTING, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_ROOM_QUERY_SETTING, dwSocketID, pData, wDataSize);
 	return true;
 }
 //请求房间设置 返回
@@ -3446,7 +3437,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_ROOM_QUERY_SETTING( DWORD dwContextID, 
 	if( wDataSize != Size) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_ROOM_QUERY_SETTING, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_ROOM_QUERY_SETTING, pData, wDataSize);
 	return true;
 }
 
@@ -3458,7 +3449,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_ROOM_USER_LEAVE(VOID * pData, WORD wDat
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_ROOM_USER_LEAVE)) return false;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_ROOM_USER_LEAVE, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_ROOM_USER_LEAVE, dwSocketID, pData, wDataSize);
 	return true;
 }
 
@@ -3469,7 +3460,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_ROOM_DISSOLVE(VOID * pData, WORD wDataS
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_ROOM_DISSOLVE)) return false;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_ROOM_DISSOLVE, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_ROOM_DISSOLVE, dwSocketID, pData, wDataSize);
 	return true;
 }
 //解散房间请求 返回
@@ -3480,7 +3471,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_ROOM_DISSOLVE( DWORD dwContextID, VOID 
 	if( wDataSize != Size) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_ROOM_DISSOLVE, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_ROOM_DISSOLVE, pData, wDataSize);
 	return true;
 }
 
@@ -3491,7 +3482,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_TABLE_DISSOLVE(VOID * pData, WORD wData
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_TABLE_DISSOLVE)) return false;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_TABLE_DISSOLVE, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_TABLE_DISSOLVE, dwSocketID, pData, wDataSize);
 	return true;
 }
 //解散房间请求 返回
@@ -3504,7 +3495,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_TABLE_DISSOLVE( DWORD dwContextID, VOID
 	STR_CMD_LC_CLUB_TABLE_DISSOLVE* pCmd = (STR_CMD_LC_CLUB_TABLE_DISSOLVE *) pData;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_TABLE_DISSOLVE, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_TABLE_DISSOLVE, pData, wDataSize);
 
 	if( (DB_SUCCESS ==  pCmd->lResultCode) && (0 == pCmd->byMask) && (0 != pCmd->dwGameID))
 	{
@@ -3513,7 +3504,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_TABLE_DISSOLVE( DWORD dwContextID, VOID
 		CPR.dwGameID = pCmd->dwGameID;
 		CPR.dwTableID = pCmd->dwTableID;
 
-		m_pITCPSocketEngine->SendData(MDM_TRANSFER, CPR_LP_CLUB_TABLE_DISSOLVE, &CPR, sizeof(STR_CPR_LP_CLUB_TABLE_DISSOLVE));
+		g_TCPSocketEngine->SendData(MDM_TRANSFER, CPR_LP_CLUB_TABLE_DISSOLVE, &CPR, sizeof(STR_CPR_LP_CLUB_TABLE_DISSOLVE));
 	}
 	return true;
 }
@@ -3526,7 +3517,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_NOTICE(VOID * pData, WORD wDataSize, DW
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_NOTICE)) return false;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_NOTICE, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_NOTICE, dwSocketID, pData, wDataSize);
 	return true;
 }
 //牌友圈公告 返回
@@ -3537,7 +3528,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_NOTICE( DWORD dwContextID, VOID * pData
 	if( wDataSize != Size) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_NOTICE, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_NOTICE, pData, wDataSize);
 	return true;
 }
 //牌友圈公告 广播
@@ -3549,7 +3540,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_NOTICE_BDCAST( DWORD dwContextID, VOID 
 	if( wDataSize != Size) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_ROOM_SETTING, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_ROOM_SETTING, pData, wDataSize);
 	return true;
 }
 
@@ -3562,19 +3553,19 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_CHAT(VOID * pData, WORD wDataSize, DWOR
 
 	if(0 == pSub->byChatMode) //俱乐部聊天
 	{
-		g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_CHAT, dwSocketID, pData, wDataSize);
+		g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_CHAT, dwSocketID, pData, wDataSize);
 	}
 	else if( 1 == pSub->byChatMode) //世界聊天
 	{
-		g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_WORD_CHAT, dwSocketID, pData, wDataSize);
+		g_AttemperEngine->PostDataBaseRequest(DBR_CL_WORD_CHAT, dwSocketID, pData, wDataSize);
 	}
 	else if( 2 == pSub->byChatMode) //系统聊天
 	{
-		g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_SYSTEM_CHAT, dwSocketID, pData, wDataSize);
+		g_AttemperEngine->PostDataBaseRequest(DBR_CL_SYSTEM_CHAT, dwSocketID, pData, wDataSize);
 	}
 	else if( 3 == pSub->byChatMode) //私聊
 	{
-		g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_SECRET_CHAT, dwSocketID, pData, wDataSize);
+		g_AttemperEngine->PostDataBaseRequest(DBR_CL_SECRET_CHAT, dwSocketID, pData, wDataSize);
 	}
 
 	return true;
@@ -3587,7 +3578,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_CHAT( DWORD dwContextID, VOID * pData, 
 	if( wDataSize != Size) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_CHAT, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_CHAT, pData, wDataSize);
 	return true;
 }
 //牌友圈聊天 广播
@@ -3615,7 +3606,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_CHAT_BDCAST( DWORD dwContextID, VOID * 
 						(pBindParameter->dwUserID == (pCmd + i)->dwTagID))
 					{
 						//通知用户
-						m_pITCPNetworkEngine->SendData(pBindParameter->dwSocketID, MDM_CLUB, CMD_LC_CLUB_CHAT_BDCAST, 
+						g_TCPNetworkEngine->SendData(pBindParameter->dwSocketID, MDM_CLUB, CMD_LC_CLUB_CHAT_BDCAST, 
 							pCmd+i, sizeof(STR_CMD_LC_CLUB_CHAT_BDCAST));
 					}
 				}
@@ -3624,7 +3615,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_CHAT_BDCAST( DWORD dwContextID, VOID * 
 		}
 	case 1: //世界聊天
 		{
-			m_pITCPNetworkEngine->SendDataBatch(MDM_CLUB, CMD_LC_CLUB_CHAT_BDCAST, pData, wDataSize);
+			g_TCPNetworkEngine->SendDataBatch(MDM_CLUB, CMD_LC_CLUB_CHAT_BDCAST, pData, wDataSize);
 			break;
 		}
 	case 2: //系统聊天
@@ -3647,7 +3638,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_CHAT_BDCAST( DWORD dwContextID, VOID * 
 					(pBindParameter->dwUserID == (pCmd->dwTagID)))
 				{
 					//通知用户
-					m_pITCPNetworkEngine->SendData(pBindParameter->dwSocketID, MDM_CLUB, CMD_LC_CLUB_CHAT_BDCAST, 
+					g_TCPNetworkEngine->SendData(pBindParameter->dwSocketID, MDM_CLUB, CMD_LC_CLUB_CHAT_BDCAST, 
 						pData, wDataSize);
 				}
 			}
@@ -3673,7 +3664,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUBSTICKY_POST(VOID * pData, WORD wDataSize
 	DBR.dwUserID = pSub->dwUserID;
 
 	//发送请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_STICKY_POST, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_STICKY_POST, dwSocketID, pData, wDataSize);
 
 	return true;
 }
@@ -3691,7 +3682,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_STICKY_POST( DWORD dwContextID, VOID * 
 	CMD.lResultCode = DBO->lResultCode;
 
 	//发送返回
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_STICKY_POST, &CMD, sizeof(CMD));
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_STICKY_POST, &CMD, sizeof(CMD));
 
 	return true;
 }
@@ -3703,7 +3694,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_MESSAGE(VOID * pData, WORD wDataSize, D
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_MESSAGE)) return false;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_MESSAGE, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_MESSAGE, dwSocketID, pData, wDataSize);
 	return true;
 }
 //牌友圈简介 返回
@@ -3714,7 +3705,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_MESSAGE( DWORD dwContextID, VOID * pDat
 	if( wDataSize != Size) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_MESSAGE, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_MESSAGE, pData, wDataSize);
 	return true;
 }
 
@@ -3725,7 +3716,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_CONTRIBUTE_FK(VOID * pData, WORD wDataS
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_CONTRIBUTE_FK)) return false;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_CONTRIBUTE_FK, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_CONTRIBUTE_FK, dwSocketID, pData, wDataSize);
 	return true;
 }
 //贡献房卡 返回
@@ -3736,7 +3727,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_CONTRIBUTE_FK( DWORD dwContextID, VOID 
 	if( wDataSize != Size) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_CONTRIBUTE_FK, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_CONTRIBUTE_FK, pData, wDataSize);
 	return true;
 }
 
@@ -3747,7 +3738,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_AUTO_AGREE(VOID * pData, WORD wDataSize
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_AUTO_AGREE)) return false;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_AUTO_AGREE, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_AUTO_AGREE, dwSocketID, pData, wDataSize);
 	return true;
 }
 //牌友圈设置 返回
@@ -3758,7 +3749,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_AUTO_AGREE( DWORD dwContextID, VOID * p
 	if( wDataSize != Size) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_AUTO_AGREE, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_AUTO_AGREE, pData, wDataSize);
 	return true;
 }
 
@@ -3769,7 +3760,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_JOIN_ROOM(VOID * pData, WORD wDataSize,
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_JOIN_ROOM)) return false;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_JOIN_ROOM, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_JOIN_ROOM, dwSocketID, pData, wDataSize);
 	return true;
 }
 //申请加入房间 返回
@@ -3780,7 +3771,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_JOIN_ROOM( DWORD dwContextID, VOID * pD
 	if( wDataSize != Size) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_JOIN_ROOM, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_JOIN_ROOM, pData, wDataSize);
 	return true;
 }
 //桌子列表
@@ -3791,7 +3782,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_TABLE_LIST_TABLE( DWORD dwContextID, VO
 	if( (wDataSize % Size) != 0) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_TABLE_LIST_TABLE, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_TABLE_LIST_TABLE, pData, wDataSize);
 	return true;
 }
 //桌子玩家列表
@@ -3802,7 +3793,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_TABLE_LIST_USER( DWORD dwContextID, VOI
 	if( (wDataSize % Size) != 0) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_TABLE_LIST_USER, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_TABLE_LIST_USER, pData, wDataSize);
 	return true;
 }
 
@@ -3815,7 +3806,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_APPLICANT_RESULT(VOID * pData, WORD wDa
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_APPLICANT_RESULT)) return false;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_APPLICANT_RESULT, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_APPLICANT_RESULT, dwSocketID, pData, wDataSize);
 	return true;
 }
 //群主|管理对申请消息的答复(同意|拒绝) 返回
@@ -3826,7 +3817,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_APPLICANT_RESULT( DWORD dwContextID, VO
 	if( wDataSize != Size) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_APPLICANT_RESULT, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_APPLICANT_RESULT, pData, wDataSize);
 	return true;
 }
 
@@ -3837,7 +3828,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_MEMBER_MANAGER(VOID * pData, WORD wData
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_MEMBER_MANAGER)) return false;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_MEMBER_MANAGER, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_MEMBER_MANAGER, dwSocketID, pData, wDataSize);
 	return true;
 }
 //请求成员数据 返回
@@ -3848,7 +3839,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_MEMBER_MANAGER( DWORD dwContextID, VOID
 	if( (wDataSize % Size) != 0) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_MEMBER_MANAGER, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_MEMBER_MANAGER, pData, wDataSize);
 	return true;
 }
 //请求成员数据 结束
@@ -3858,7 +3849,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_MEMBER_MANAGER_FINISH( DWORD dwContextI
 	cmd.byMask = 1;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_MEMBER_MANAGER_FINISH, &cmd, sizeof(STR_CMD_LC_SHOP_QUERY_FINISH));
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_MEMBER_MANAGER_FINISH, &cmd, sizeof(STR_CMD_LC_SHOP_QUERY_FINISH));
 	return true;
 }
 //工会基本信息
@@ -3869,7 +3860,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_DATA( DWORD dwContextID, VOID * pData, 
 	if( wDataSize != Size) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_DATA, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_DATA, pData, wDataSize);
 	return true;
 }
 
@@ -3880,7 +3871,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_INVITE(VOID * pData, WORD wDataSize, DW
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_INVITE)) return false;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_INVITE, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_INVITE, dwSocketID, pData, wDataSize);
 
 	return true;
 }
@@ -3892,7 +3883,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_INVITE( DWORD dwContextID, VOID * pData
 	if( wDataSize != Size) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_INVITE, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_INVITE, pData, wDataSize);
 
 	return true;
 }
@@ -3914,7 +3905,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_INVITE_REMIND( DWORD dwContextID, VOID 
 			pBindParameter->dwUserID == pCMD->dwTagID)
 		{
 			//通知用户
-			m_pITCPNetworkEngine->SendData(pBindParameter->dwSocketID, MDM_CLUB, CMD_LC_CLUB_INVITE_REMIND, 
+			g_TCPNetworkEngine->SendData(pBindParameter->dwSocketID, MDM_CLUB, CMD_LC_CLUB_INVITE_REMIND, 
 											pData, wDataSize);		
 		}
 	}
@@ -3929,7 +3920,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_INVITE_RESULT(VOID * pData, WORD wDataS
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_INVITE_RESULT)) return false;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_INVITE_RESULT, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_INVITE_RESULT, dwSocketID, pData, wDataSize);
 
 	return true;
 }
@@ -3948,11 +3939,11 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_INVITE_RESULT( DWORD dwContextID, VOID 
 		STR_CMD_LC_CLUB_LIST_RE CMD;
 		CMD.byMask = 1;
 
-		m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_LIST_RE, &CMD, sizeof(CMD));
+		g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_LIST_RE, &CMD, sizeof(CMD));
 	}
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_INVITE_RESULT, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_INVITE_RESULT, pData, wDataSize);
 
 	return true;
 }
@@ -3964,7 +3955,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_QUIT(VOID * pData, WORD wDataSize, DWOR
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_QUIT)) return false;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_QUIT, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_QUIT, dwSocketID, pData, wDataSize);
 	return true;
 }
 //用户退出请求 返回
@@ -3975,7 +3966,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_QUIT( DWORD dwContextID, VOID * pData, 
 	if( wDataSize != Size) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_QUIT, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_QUIT, pData, wDataSize);
 	return true;
 }
 
@@ -3986,7 +3977,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_APPOINTMENT(VOID * pData, WORD wDataSiz
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_APPOINTMENT)) return false;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_APPOINTMENT, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_APPOINTMENT, dwSocketID, pData, wDataSize);
 	return true;
 }
 //职务任免 返回
@@ -3997,7 +3988,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_APPOINTMENT( DWORD dwContextID, VOID * 
 	if( wDataSize != Size) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_APPOINTMENT, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_APPOINTMENT, pData, wDataSize);
 	return true;
 }
 //职务任免 提醒
@@ -4017,7 +4008,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_APPOINTMENT_NOTE( DWORD dwContextID, VO
 			pBindParameter->dwUserID == pCMD->dwUserID)
 		{
 			//通知用户
-			m_pITCPNetworkEngine->SendData(pBindParameter->dwSocketID, MDM_CLUB, CMD_LC_CLUB_APPOINTMENT_NOTE, 
+			g_TCPNetworkEngine->SendData(pBindParameter->dwSocketID, MDM_CLUB, CMD_LC_CLUB_APPOINTMENT_NOTE, 
 											pData, wDataSize);		
 		}
 	}
@@ -4033,7 +4024,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_APPLICANT_LIST(VOID * pData, WORD wData
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_APPLICANT_LIST)) return false;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_APPLICANT_LIST, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_APPLICANT_LIST, dwSocketID, pData, wDataSize);
 	return true;
 }
 //申请人列表 返回
@@ -4044,7 +4035,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_APPLICANT_LIST( DWORD dwContextID, VOID
 	if( (wDataSize % Size) != 0) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_APPLICANT_LIST, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_APPLICANT_LIST, pData, wDataSize);
 	return true;
 }
 //申请人列表 结束
@@ -4054,7 +4045,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_APPLICANT_LIST_FINISH( DWORD dwContextI
 	cmd.byMask = 1;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_APPLICANT_LIST_FINISH, &cmd, sizeof(cmd));
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_APPLICANT_LIST_FINISH, &cmd, sizeof(cmd));
 	return true;
 }
 
@@ -4065,7 +4056,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_INQUERY_LIST(VOID * pData, WORD wDataSi
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_INQUERY_LIST)) return false;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_INQUERY_LIST, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_INQUERY_LIST, dwSocketID, pData, wDataSize);
 	return true;
 }
 //被邀请人查看自己的邀请列表 返回
@@ -4076,7 +4067,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_INQUERY_LIST( DWORD dwContextID, VOID *
 	if( (wDataSize % Size) != 0) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_INQUERY_LIST, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_INQUERY_LIST, pData, wDataSize);
 	return true;
 }
 //被邀请人查看自己的邀请列表 结束
@@ -4086,7 +4077,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_INQUERY_LIST_FINISH( DWORD dwContextID,
 	cmd.byMask = 1;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_INQUERY_LIST_FINISH, &cmd, sizeof(cmd));
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_INQUERY_LIST_FINISH, &cmd, sizeof(cmd));
 	return true;
 }
 
@@ -4098,7 +4089,7 @@ bool CAttemperEngineSink::On_SUB_CL_CLUB_RECORD_LIST(VOID * pData, WORD wDataSiz
 	if(wDataSize != sizeof(STR_SUB_CL_CLUB_RECORD_LIST)) return false;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_RECORD_LIST, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_CLUB_RECORD_LIST, dwSocketID, pData, wDataSize);
 	return true;
 }
 //工会战绩统计 返回
@@ -4111,7 +4102,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_RECORD_LIST( DWORD dwContextID, VOID * 
 		return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_RECORD_LIST, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_RECORD_LIST, pData, wDataSize);
 	return true;
 }
 //工会战绩统计 结束
@@ -4121,7 +4112,7 @@ bool CAttemperEngineSink::On_CMD_LC_CLUB_RECORD_FINISH( DWORD dwContextID, VOID 
 	cmd.byMask = 1;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_RECORD_FINISH, &cmd, sizeof(cmd));
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_CLUB, CMD_LC_CLUB_RECORD_FINISH, &cmd, sizeof(cmd));
 	return true;
 }
 
@@ -4144,7 +4135,7 @@ bool CAttemperEngineSink::On_SUB_CL_SHOP_QUERY(VOID * pData, WORD wDataSize, DWO
 	Dbr.dwUserID = pSub->dwUserID;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_SHOP_QUERY, dwSocketID, &Dbr, sizeof(Dbr));
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_SHOP_QUERY, dwSocketID, &Dbr, sizeof(Dbr));
 	return true;
 }
 //查询商城CMD
@@ -4155,7 +4146,7 @@ bool CAttemperEngineSink::On_CMD_LC_SHOP_QUERY_RESULT( DWORD dwContextID, VOID *
 	if( (wDataSize%Size) != 0) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SHOP, CMD_LC_SHOP_QUERY_RESULT, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_SHOP, CMD_LC_SHOP_QUERY_RESULT, pData, wDataSize);
 	return true;
 }
 //查询商城结束CMD
@@ -4165,7 +4156,7 @@ bool CAttemperEngineSink::On_CMD_LC_SHOP_QUERY_FINISH( DWORD dwContextID, VOID *
 	cmd.byMask = 1;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SHOP, CMD_LC_SHOP_QUERY_FINISH, &cmd, sizeof(STR_CMD_LC_SHOP_QUERY_FINISH));
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_SHOP, CMD_LC_SHOP_QUERY_FINISH, &cmd, sizeof(STR_CMD_LC_SHOP_QUERY_FINISH));
 	return true;
 }
 
@@ -4179,7 +4170,7 @@ bool CAttemperEngineSink::On_SUB_CL_SHOP_DIAMOND(VOID * pData, WORD wDataSize, D
 	STR_SUB_CL_SHOP_DIAMOND * pSub = (STR_SUB_CL_SHOP_DIAMOND *)pData;
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_SHOP_DIAMOND, dwSocketID, pData, wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_SHOP_DIAMOND, dwSocketID, pData, wDataSize);
 	return true;
 }
 
@@ -4196,7 +4187,7 @@ bool CAttemperEngineSink::On_CMD_LC_SHOP_DIAMOND_RESULT( DWORD dwContextID, VOID
 	lstrcpyn(CMD.szDescribe,pDBO->szDescribeString,CountArray(CMD.szDescribe));
 	
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SHOP, CMD_LC_SHOP_DIAMOND_RESULT, &CMD, sizeof(CMD));
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_SHOP, CMD_LC_SHOP_DIAMOND_RESULT, &CMD, sizeof(CMD));
 	return true;
 }
 
@@ -4216,7 +4207,7 @@ bool CAttemperEngineSink::On_SUB_CL_BAG_QUERY(VOID * pData, WORD wDataSize, DWOR
 	Dbr.dwUserID = pSub->dwUserID;	
 
 	//投递请求
-	g_pServiceUnits->m_AttemperEngine->PostDataBaseRequest(DBR_CL_BAG_QUERY, dwSocketID, &Dbr, sizeof(Dbr));
+	g_AttemperEngine->PostDataBaseRequest(DBR_CL_BAG_QUERY, dwSocketID, &Dbr, sizeof(Dbr));
 	return true;
 }
 
@@ -4228,7 +4219,7 @@ bool CAttemperEngineSink::On_CMD_LC_BAG_RESULT( DWORD dwContextID, VOID * pData,
 	if( (wDataSize%Size) != 0) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SHOP, CMD_LC_BAG_RESULT, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_SHOP, CMD_LC_BAG_RESULT, pData, wDataSize);
 	return true;
 }
 
@@ -4241,7 +4232,7 @@ bool CAttemperEngineSink::On_CMD_LC_BAG_FINISH( DWORD dwContextID, VOID * pData,
 	if( wDataSize != Size) return false;
 
 	//处理消息
-	m_pITCPNetworkEngine->SendData(dwContextID, MDM_SHOP, CMD_LC_BAG_FINISH, pData, wDataSize);
+	g_TCPNetworkEngine->SendData(dwContextID, MDM_SHOP, CMD_LC_BAG_FINISH, pData, wDataSize);
 	return true;
 }
 #pragma endregion

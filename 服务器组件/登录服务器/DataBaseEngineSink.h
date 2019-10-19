@@ -1,30 +1,22 @@
 #ifndef DATABASE_ENGINE_SINK_HEAD_FILE
 #define DATABASE_ENGINE_SINK_HEAD_FILE
+
 #include "Stdafx.h"
 #include "DataBasePacket.h"
-
-
-//////////////////////////////////////////////////////////////////////////////////
-//1、继承内核的数据库类
-//2、处理游戏服和登陆服发来的数据库消息
-//////////////////////////////////////////////////////////////////////////////////
 
 //数据库类
 class CDataBaseEngineSink : public IDataBaseEngineSink
 {
-	//友元定义
-	friend class CServiceUnits;
-
 	//用户数据库
 protected:
-	IDataBase					*m_AccountsDBModule;					//用户数据库
-	IDataBase					*m_TreasureDBModule;					//游戏币数据库
-	IDataBase					*m_PlatformDBModule;					//平台数据库
+	IDataBase					*m_AccountsDB;					//用户数据库
+	IDataBase					*m_TreasureDB;					//游戏币数据库
+	IDataBase					*m_PlatformDB;					//平台数据库
 
 	//函数定义
 public:
 	//构造函数
-	CDataBaseEngineSink();
+	CDataBaseEngineSink(){};
 	//析构函数
 	virtual ~CDataBaseEngineSink(){};
 

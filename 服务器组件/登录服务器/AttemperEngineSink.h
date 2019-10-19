@@ -42,13 +42,6 @@ protected:
 	COfflineUserItemArray			m_OfflineUserListManager;			//断线玩家列表
 	MarqueeMsgArray					m_MarqueeMsgListManager;			//跑马灯消息列表
 
-
-	//组件接口
-protected:
-	ITimerEngine *					m_pITimerEngine;					//时间引擎		//定时器通信
-	ITCPNetworkEngine *				m_pITCPNetworkEngine;				//网络引擎		//socket::server
-	ITCPSocketEngine *				m_pITCPSocketEngine;				//协调服务		//socket::client
-
 #pragma region 构造析构
 	//函数定义
 public:

@@ -63,20 +63,8 @@ CAttemperEngineSink::CAttemperEngineSink()
 	m_pGameServiceOption=NULL;
 
 	//组件变量
-	m_pITimerEngine=NULL;
-	m_pIAttemperEngine=NULL;
-	m_pITCPSocketEngine=NULL;
-	m_pITCPNetworkEngine=NULL;
 	m_pIGameServiceManager=NULL;
 	m_WaitDistributeList.RemoveAll();
-
-	//数据引擎
-	m_pIRecordDataBaseEngine=NULL;
-	m_pIKernelDataBaseEngine=NULL;
-	m_pIDBCorrespondManager=NULL;
-
-	//比赛变量
-	m_pIGameMatchServiceManager=NULL;
 
 	if(g_AttemperEngineSink == NULL) g_AttemperEngineSink =this;
 
@@ -123,8 +111,6 @@ bool CAttemperEngineSink::OnAttemperEngineStart(IUnknownEx * pIUnknownEx)
 	m_pNormalParameter=new tagBindParameter[MAX_TABLE];
 	ZeroMemory(m_pNormalParameter,sizeof(tagBindParameter)*MAX_TABLE);
 
-	//m_GameControlManager.Reset();
-
 	//配置机器
 	if (InitAndroidUser()==false)
 	{
@@ -146,21 +132,11 @@ bool CAttemperEngineSink::OnAttemperEngineStart(IUnknownEx * pIUnknownEx)
 		return false;
 	}
 
-	//启动机器
-	if (m_AndroidUserManager.StartService()==false)
-	{
-		ASSERT(FALSE);
-		return false;
-	}
 
 	//设置时间
 	m_pITimerEngine->SetTimer(IDI_GAME_SERVICE_PULSE,1000L,TIMES_INFINITY,NULL);
 
-#ifdef _DEBUG
-	m_pITimerEngine->SetTimer(IDI_LOAD_ANDROID_USER,10000L,TIMES_INFINITY,NULL);
-#else
 	m_pITimerEngine->SetTimer(IDI_LOAD_ANDROID_USER,TIME_LOAD_ANDROID_USER*1000L,TIMES_INFINITY,NULL);
-#endif
 
 	m_pITimerEngine->SetTimer(IDI_DISTRIBUTE_ANDROID,TIME_DISTRIBUTE_ANDROID*1000L,TIMES_INFINITY,NULL);
 
@@ -186,8 +162,7 @@ bool CAttemperEngineSink::OnAttemperEngineConclude(IUnknownEx * pIUnknownEx)
 	m_pITCPNetworkEngine=NULL;
 
 	//数据引擎
-	m_pIRecordDataBaseEngine=NULL;
-	m_pIKernelDataBaseEngine=NULL;
+	g_AttemperEngine=NULL;
 
 	//绑定数据
 	SafeDeleteArray(m_pNormalParameter);
@@ -203,12 +178,6 @@ bool CAttemperEngineSink::OnAttemperEngineConclude(IUnknownEx * pIUnknownEx)
 	m_TableFrameArray.RemoveAll();
 	m_ServerUserManager.DeleteUserItem();
 	m_WaitDistributeList.RemoveAll();
-
-	//停止服务
-	m_AndroidUserManager.ConcludeService();
-
-	if(m_pIGameMatchServiceManager!=NULL)
-		m_pIGameMatchServiceManager->StopService();
 
 	return true;
 }
@@ -226,13 +195,13 @@ bool CAttemperEngineSink::OnEventControl(WORD wIdentifier, VOID * pData, WORD wD
 	case CT_LOAD_SERVICE_CONFIG:	//加载配置
 		{
 			//加载机器
-			//m_pIDBCorrespondManager->PostDataBaseRequest(0L,DBR_GR_LOAD_ANDROID_USER,0L,NULL,0L);
+			//g_AttemperEngine->PostDataBaseRequest(0L,DBR_GR_LOAD_ANDROID_USER,0L,NULL,0L);
 
 			//加载断线重连数据 && 数据库置空对应的桌子的所有数据
 			STR_DBR_GR_LOAD_OFFLINE  dbr;
 			dbr.byMystery = _MYSTERY;
 			dbr.dwGameID = (m_pGameServiceOption->dwServerID) & 0xFFFFFF00;
-			m_pIDBCorrespondManager->PostDataBaseRequest(0L,DBR_GR_LOAD_OFFLINE,0L,&dbr,sizeof(dbr));
+			g_AttemperEngine->PostDataBaseRequest(DBR_GR_LOAD_OFFLINE,0L,&dbr,sizeof(dbr));
 
 			return true;
 		}
@@ -259,7 +228,7 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 		case IDI_LOAD_ANDROID_USER:		//加载机器
 			{
 				//加载机器
-				m_pIDBCorrespondManager->PostDataBaseRequest(0L,DBR_GR_LOAD_ANDROID_USER,0L,NULL,0L);
+				g_AttemperEngine->PostDataBaseRequest(DBR_GR_LOAD_ANDROID_USER,0L,NULL,0L);
 
 				return true;
 			}
@@ -290,16 +259,11 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 				DistributeAndroid();
 				return true;
 			}
-		case IDI_DBCORRESPOND_NOTIFY: //缓存定时处理
-			{
-				if(m_pIDBCorrespondManager) m_pIDBCorrespondManager->OnTimerNotify();
-				return true;
-			}
 
 		case IDI_LOAD_SENSITIVE_WORD:	//加载敏感词
 			{
 				//投递请求
-				//m_pIRecordDataBaseEngine->PostDataBaseRequest(DBR_GR_LOAD_SENSITIVE_WORDS,0,NULL,0);				
+				//g_AttemperEngine->PostDataBaseRequest(DBR_GR_LOAD_SENSITIVE_WORDS,0,NULL,0);				
 				return true;
 			}
 		case IDI_WAIT_SERVICE_STOP:
@@ -309,22 +273,6 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 			}
 
 		}
-	}
-
-	//机器时器
-	if ((dwTimerID>=IDI_REBOT_MODULE_START)&&(dwTimerID<=IDI_REBOT_MODULE_FINISH))
-	{
-		//时间处理
-		m_AndroidUserManager.OnEventTimerPulse(dwTimerID,wBindParam);
-
-		return true;
-	}
-
-	//比赛定时器
-	if((dwTimerID>=IDI_MATCH_MODULE_START)&&(dwTimerID<IDI_MATCH_MODULE_FINISH))
-	{
-		if(m_pIGameMatchServiceManager!=NULL) m_pIGameMatchServiceManager->OnEventTimer(dwTimerID,wBindParam);
-		return true;
 	}
 
 	//桌子时间
@@ -420,26 +368,6 @@ bool CAttemperEngineSink::OnEventDataBaseResult(WORD wRequestID, DWORD dwContext
 		{
 			return On_CMD_GC_USER_JOIN_TABLE_HALL_GOLD(dwContextID,pData,wDataSize);
 		}
-	}
-
-
-	if(wRequestID>=DBO_GR_MATCH_EVENT_START && wRequestID<=DBO_GR_MATCH_EVENT_END)
-	{
-		//参数效验
-		if(m_pIGameMatchServiceManager==NULL) return false;
-
-		tagBindParameter * pBindParameter=GetBindParameter(LOWORD(dwContextID));
-		IServerUserItem *pIServerUserItem=pBindParameter!=NULL?pBindParameter->pIServerUserItem:NULL;
-
-		//废弃判断
-		if ((pBindParameter->pIServerUserItem==NULL)||(pBindParameter->dwSocketID!=dwContextID))
-		{
-			//错误断言
-			ASSERT(FALSE);
-			return true;
-		}
-
-		return m_pIGameMatchServiceManager->OnEventDataBase(wRequestID,pIServerUserItem,pData,wDataSize);
 	}
 
 	return false;
@@ -634,7 +562,7 @@ bool CAttemperEngineSink::OnEventTCPNetworkShut(DWORD dwClientAddr, DWORD dwActi
 		{
 			quitInfo.byOnlineMask = 1;
 		}
-		m_pIRecordDataBaseEngine->PostDataBaseRequest(DBR_GP_GAME_USER_STATE,dwSocketID, &quitInfo,sizeof(quitInfo));
+		g_AttemperEngine->PostDataBaseRequest(DBR_GP_GAME_USER_STATE,dwSocketID, &quitInfo,sizeof(quitInfo));
 	}
 
 
@@ -692,7 +620,6 @@ bool CAttemperEngineSink::SendRoomMessage(LPCTSTR lpszMessage, WORD wType)
 	WORD wSendSize=wHeadSize+CountStringBuffer(SystemMessage.szString);
 
 	//发送数据
-	m_AndroidUserManager.SendDataToClient(MDM_CM_SYSTEM,SUB_CM_SYSTEM_MESSAGE,&SystemMessage,wSendSize);
 	m_pITCPNetworkEngine->SendDataBatch(MDM_CM_SYSTEM,SUB_CM_SYSTEM_MESSAGE,&SystemMessage,wSendSize);
 
 	return true;
@@ -715,7 +642,6 @@ bool CAttemperEngineSink::SendGameMessage(LPCTSTR lpszMessage, WORD wType)
 	WORD wSendSize=wHeadSize+CountStringBuffer(SystemMessage.szString);
 
 	//发送数据
-	m_AndroidUserManager.SendDataToClient(MDM_G_FRAME,CMD_GF_SYSTEM_MESSAGE,&SystemMessage,wSendSize);
 	m_pITCPNetworkEngine->SendDataBatch(MDM_G_FRAME,CMD_GF_SYSTEM_MESSAGE,&SystemMessage,wSendSize);
 
 	return true;
@@ -750,13 +676,7 @@ bool CAttemperEngineSink::SendRoomMessage(IServerUserItem * pIServerUserItem, LP
 		//发送数据
 		if (pIServerUserItem->IsAndroidUser()==true)
 		{
-			//机器用户
-			WORD wBindIndex=pIServerUserItem->GetBindIndex();
-			tagBindParameter * pBindParameter=GetBindParameter(wBindIndex);
-			m_AndroidUserManager.SendDataToClient(pBindParameter->dwSocketID,MDM_CM_SYSTEM,SUB_CM_SYSTEM_MESSAGE,&SystemMessage,wSendSize);
 
-			//关闭处理
-			if ((wType&(SMT_CLOSE_ROOM|SMT_CLOSE_LINK))!=0) m_AndroidUserManager.DeleteAndroidUserItem(pBindParameter->dwSocketID);
 		}
 		else
 		{
@@ -805,13 +725,7 @@ bool CAttemperEngineSink::SendGameMessage(IServerUserItem * pIServerUserItem, LP
 		//发送数据
 		if (pIServerUserItem->IsAndroidUser()==true)
 		{
-			//机器用户
-			WORD wBindIndex=pIServerUserItem->GetBindIndex();
-			tagBindParameter * pBindParameter=GetBindParameter(wBindIndex);
-			m_AndroidUserManager.SendDataToClient(pBindParameter->dwSocketID,MDM_G_FRAME,CMD_GF_SYSTEM_MESSAGE,&SystemMessage,wSendSize);
 
-			//关闭处理
-			if ((wType&(SMT_CLOSE_ROOM|SMT_CLOSE_LINK))!=0) m_AndroidUserManager.DeleteAndroidUserItem(pBindParameter->dwSocketID);
 		}
 		else
 		{
@@ -847,7 +761,7 @@ bool CAttemperEngineSink::SendRoomMessage(DWORD dwSocketID, LPCTSTR lpszMessage,
 	if (bAndroid)
 	{
 		//机器用户
-		m_AndroidUserManager.SendDataToClient(dwSocketID,MDM_CM_SYSTEM,SUB_CM_SYSTEM_MESSAGE,&SystemMessage,wSendSize);
+		//m_AndroidUserManager.SendDataToClient(dwSocketID,MDM_CM_SYSTEM,SUB_CM_SYSTEM_MESSAGE,&SystemMessage,wSendSize);
 	}
 	else
 	{
@@ -880,7 +794,7 @@ bool CAttemperEngineSink::SendData(BYTE cbSendMask, WORD wMainCmdID, WORD wSubCm
 	//机器数据
 	if ((cbSendMask&BG_COMPUTER)!=0)
 	{
-		m_AndroidUserManager.SendDataToClient(wMainCmdID,wSubCmdID,pData,wDataSize);
+		//m_AndroidUserManager.SendDataToClient(wMainCmdID,wSubCmdID,pData,wDataSize);
 	}
 
 	//用户数据
@@ -898,7 +812,7 @@ bool CAttemperEngineSink::SendData(DWORD dwSocketID, WORD wMainCmdID, WORD wSubC
 		if (LOWORD(dwSocketID)>=INDEX_ANDROID)
 		{
 			//机器用户
-			m_AndroidUserManager.SendDataToClient(dwSocketID,wMainCmdID,wSubCmdID,pData,wDataSize);
+			//m_AndroidUserManager.SendDataToClient(dwSocketID,wMainCmdID,wSubCmdID,pData,wDataSize);
 		}
 		else 
 		{
@@ -929,7 +843,7 @@ bool CAttemperEngineSink::SendData(IServerUserItem * pIServerUserItem, WORD wMai
 			//机器用户
 			WORD wBindIndex=pIServerUserItem->GetBindIndex();
 			tagBindParameter * pBindParameter=GetBindParameter(wBindIndex);
-			m_AndroidUserManager.SendDataToClient(pBindParameter->dwSocketID,wMainCmdID,wSubCmdID,pData,wDataSize);
+			//m_AndroidUserManager.SendDataToClient(pBindParameter->dwSocketID,wMainCmdID,wSubCmdID,pData,wDataSize);
 		}
 		else
 		{
@@ -967,10 +881,10 @@ bool CAttemperEngineSink::OnEventModifyUserTreasure(IServerUserItem *pIServerUse
 
 	if (NULL != pBindParameter)
 	{
-		m_pIRecordDataBaseEngine->PostDataBaseRequest(DBR_GR_MODIFY_USER_TREASURE, pBindParameter->dwSocketID, &DBR, sizeof(DBR));
+		g_AttemperEngine->PostDataBaseRequest(DBR_GR_MODIFY_USER_TREASURE, pBindParameter->dwSocketID, &DBR, sizeof(DBR));
 	}
 	else
-		m_pIRecordDataBaseEngine->PostDataBaseRequest(DBR_GR_MODIFY_USER_TREASURE, 0, &DBR, sizeof(DBR));
+		g_AttemperEngine->PostDataBaseRequest(DBR_GR_MODIFY_USER_TREASURE, 0, &DBR, sizeof(DBR));
 	
 	return true;
 }
@@ -1021,7 +935,7 @@ bool CAttemperEngineSink::OnEventUserItemStatus(IServerUserItem * pIServerUserIt
 			{
 				if (LOWORD(pBindParameter->dwSocketID)>=INDEX_ANDROID)
 				{
-					m_AndroidUserManager.DeleteAndroidUserItem(pBindParameter->dwSocketID);
+					//m_AndroidUserManager.DeleteAndroidUserItem(pBindParameter->dwSocketID);
 				}
 				else
 				{
@@ -1067,7 +981,7 @@ bool CAttemperEngineSink::OnEventUserItemRight(IServerUserItem *pIServerUserItem
 	ManageUserRight.bGameRight=bGameRight;
 
 	//发送请求
-	m_pIDBCorrespondManager->PostDataBaseRequest(ManageUserRight.dwUserID,DBR_GR_MANAGE_USER_RIGHT,0,&ManageUserRight,sizeof(ManageUserRight));
+	g_AttemperEngine->PostDataBaseRequest(DBR_GR_MANAGE_USER_RIGHT,0,&ManageUserRight,sizeof(ManageUserRight));
 
 	return true;
 }
@@ -1086,7 +1000,7 @@ bool CAttemperEngineSink::OnDBGameAndroidInfo(DWORD dwContextID, VOID * pData, W
 	//设置机器
 	if (pGameAndroidInfo->lResultCode==DB_SUCCESS)
 	{
-		m_AndroidUserManager.SetAndroidStock(pGameAndroidInfo->AndroidParameter,pGameAndroidInfo->wAndroidCount);
+		//m_AndroidUserManager.SetAndroidStock(pGameAndroidInfo->AndroidParameter,pGameAndroidInfo->wAndroidCount);
 	}
 
 	return true;
@@ -1296,10 +1210,6 @@ bool CAttemperEngineSink::OnTCPNetworkMainUser(WORD wSubCmdID, VOID *pData, WORD
 {
 	switch (wSubCmdID)
 	{
-	case SUB_CG_USER_RULE:			//用户规则
-		{
-			return On_SUB_CG_User_Rule(pData,wDataSize,dwSocketID);
-		}
 	case SUB_CG_USER_LOOKON:		//用户旁观
 		{
 			return On_SUB_CG_User_Lookon(pData,wDataSize,dwSocketID);
@@ -1380,6 +1290,7 @@ bool CAttemperEngineSink::OnTCPNetworkMainUser(WORD wSubCmdID, VOID *pData, WORD
 //比赛命令
 bool CAttemperEngineSink::OnTCPNetworkMainMatch(WORD wSubCmdID, VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
+	/*
 	//获取信息
 	WORD wBindIndex=LOWORD(dwSocketID);
 	IServerUserItem * pIServerUserItem=GetBindUserItem(wBindIndex);
@@ -1394,6 +1305,7 @@ bool CAttemperEngineSink::OnTCPNetworkMainMatch(WORD wSubCmdID, VOID * pData, WO
 
 	//消息处理
 	return m_pIGameMatchServiceManager->OnEventSocketMatch(wSubCmdID,pData,wDataSize,pIServerUserItem,dwSocketID);
+	*/
 }
 
 //游戏处理
@@ -1501,7 +1413,7 @@ bool CAttemperEngineSink::On_SUB_CG_Logon_UserID(VOID * pData, WORD wDataSize, D
 	lstrcpyn(LogonUserID.szMachineID,pLogonUserID->szMachineID,CountArray(LogonUserID.szMachineID));
 
 	//投递请求
-	return m_pIDBCorrespondManager->PostDataBaseRequest(LogonUserID.dwUserID, DBR_CG_LOGON_USERID, dwSocketID, &LogonUserID,sizeof(LogonUserID));
+	return g_AttemperEngine->PostDataBaseRequest(DBR_CG_LOGON_USERID, dwSocketID, &LogonUserID,sizeof(LogonUserID));
 }
 
 //ID登录返回
@@ -1649,7 +1561,7 @@ void CAttemperEngineSink::ActiveUserItem(IServerUserItem **pIServerUserItem, DWO
 		//断开用户
 		if (bAndroidUser==true)
 		{
-			m_AndroidUserManager.DeleteAndroidUserItem(dwContextID);
+			//m_AndroidUserManager.DeleteAndroidUserItem(dwContextID);
 		}
 		else
 		{
@@ -1746,18 +1658,12 @@ VOID CAttemperEngineSink::OnEventUserLogon(IServerUserItem * pIServerUserItem, b
 		}
 	}
 
-	/* 10. 比赛信息 */
-	if(m_pIGameMatchServiceManager!=NULL)
-	{
-		m_pIGameMatchServiceManager->SendMatchInfo(pIServerUserItem);
-	}
-
 	/* 11. 通知数据库改变 玩家状态 */
 	//TODONOWW
 	DBR_GP_UserQuitInfo quitInfo;
 	quitInfo.dwUserID = pIServerUserItem->GetUserID();
 	quitInfo.byOnlineMask = 2;
-	m_pIRecordDataBaseEngine->PostDataBaseRequest(DBR_GP_GAME_USER_STATE,0, &quitInfo,sizeof(quitInfo));
+	g_AttemperEngine->PostDataBaseRequest(DBR_GP_GAME_USER_STATE,0, &quitInfo,sizeof(quitInfo));
 }
 
 //切换连接
@@ -1783,7 +1689,7 @@ bool CAttemperEngineSink::SwitchUserItemConnect(IServerUserItem * pIServerUserIt
 		//断开用户
 		if (pIServerUserItem->IsAndroidUser()==true)
 		{
-			m_AndroidUserManager.DeleteAndroidUserItem(pSourceParameter->dwSocketID);
+			//m_AndroidUserManager.DeleteAndroidUserItem(pSourceParameter->dwSocketID);
 		}
 		else
 		{
@@ -1810,85 +1716,6 @@ bool CAttemperEngineSink::SwitchUserItemConnect(IServerUserItem * pIServerUserIt
 }
 
 /*********************************************【主消息 3 用户命令】*********************************************************/
-//用户规则
-bool CAttemperEngineSink::On_SUB_CG_User_Rule(VOID * pData, WORD wDataSize, DWORD dwSocketID)
-{
-	//效验参数
-	ASSERT(wDataSize>=sizeof(CMD_GR_UserRule));
-	if (wDataSize<sizeof(CMD_GR_UserRule)) return false;
-
-	//获取用户
-	WORD wBindIndex=LOWORD(dwSocketID);
-	IServerUserItem * pIServerUserItem=GetBindUserItem(wBindIndex);
-
-	//用户效验
-	ASSERT(pIServerUserItem!=NULL);
-	if (pIServerUserItem==NULL) return false;
-
-	//规则判断
-	//ASSERT(CServerRule::IsForfendGameRule(m_pGameServiceOption->dwServerRule)==false);
-	//if (CServerRule::IsForfendGameRule(m_pGameServiceOption->dwServerRule)==true) return true;
-
-	//消息处理
-	tagUserRule * pUserRule=pIServerUserItem->GetUserRule();
-	CMD_GR_UserRule * pCMDUserRule=(CMD_GR_UserRule *)pData;
-
-	//规则标志
-	pUserRule->bLimitSameIP=((pCMDUserRule->cbRuleMask&UR_LIMIT_SAME_IP)>0);
-	pUserRule->bLimitWinRate=((pCMDUserRule->cbRuleMask&UR_LIMIT_WIN_RATE)>0);
-	pUserRule->bLimitFleeRate=((pCMDUserRule->cbRuleMask&UR_LIMIT_FLEE_RATE)>0);
-	pUserRule->bLimitGameScore=((pCMDUserRule->cbRuleMask&UR_LIMIT_GAME_SCORE)>0);
-
-	//规则属性
-	pUserRule->szPassword[0]=0;
-	pUserRule->wMinWinRate=pCMDUserRule->wMinWinRate;
-	pUserRule->wMaxFleeRate=pCMDUserRule->wMaxFleeRate;
-	pUserRule->lMaxGameScore=pCMDUserRule->lMaxGameScore;
-	pUserRule->lMinGameScore=pCMDUserRule->lMinGameScore;
-
-	//桌子密码
-	if (wDataSize>sizeof(CMD_GR_UserRule))
-	{
-		//变量定义
-		VOID * pDataBuffer=NULL;
-		tagDataDescribe DataDescribe;
-		CRecvPacketHelper RecvPacket(pCMDUserRule+1,wDataSize-sizeof(CMD_GR_UserRule));
-
-		//提取处理
-		while (true)
-		{
-			//提取数据
-			pDataBuffer=RecvPacket.GetData(DataDescribe);
-			if (DataDescribe.wDataDescribe==DTP_NULL) break;
-
-			//数据分析
-			switch (DataDescribe.wDataDescribe)
-			{
-			case DTP_GR_TABLE_PASSWORD:		//桌子密码
-				{
-					//效验数据
-					ASSERT(pDataBuffer!=NULL);
-					ASSERT(DataDescribe.wDataSize<=sizeof(pUserRule->szPassword));
-
-					//规则判断
-					ASSERT(CServerRule::IsForfendLockTable(m_pGameServiceOption->dwServerRule)==false);
-					//if (CServerRule::IsForfendLockTable(m_pGameServiceOption->dwServerRule)==true) break;
-
-					//设置数据
-					if (DataDescribe.wDataSize<=sizeof(pUserRule->szPassword))
-					{
-						CopyMemory(&pUserRule->szPassword,pDataBuffer,DataDescribe.wDataSize);
-						pUserRule->szPassword[CountArray(pUserRule->szPassword)-1]=0;
-					}
-
-					break;
-				}
-			}
-		}
-	}
-
-	return true;
-}
 
 //用户旁观
 bool CAttemperEngineSink::On_SUB_CG_User_Lookon(VOID * pData, WORD wDataSize, DWORD dwSocketID)
@@ -2512,7 +2339,7 @@ bool CAttemperEngineSink::OnTcpNetworkQueryLottery(VOID * pData, WORD wDataSize,
 	DBR_GR_QueryLottery QueryLottery;
 	memcpy(&QueryLottery,pGetRankReward,sizeof(DBR_GR_QueryLottery));
 
-	return m_pIDBCorrespondManager->PostDataBaseRequest(INVALID_CHAIR,DBR_GR_QUERY_LOTTERY,dwSocketID,&QueryLottery,sizeof(DBR_GR_QueryLottery));
+	return g_AttemperEngine->PostDataBaseRequest(DBR_GR_QUERY_LOTTERY,dwSocketID,&QueryLottery,sizeof(DBR_GR_QueryLottery));
 
 }
 
@@ -2582,7 +2409,7 @@ bool CAttemperEngineSink::On_SUB_CG_USER_CREATE_TABLE(VOID * pData, WORD wDataSi
 	STR_SUB_CG_USER_CREATE_TABLE *pCreateRoom = (STR_SUB_CG_USER_CREATE_TABLE *)pData;
 
 	//投递请求
-	return m_pIDBCorrespondManager->PostDataBaseRequest(pCreateRoom->dwUserID, DBR_CG_CLUB_CREATE_TABLE, dwSocketID, pData, wDataSize);
+	return g_AttemperEngine->PostDataBaseRequest(DBR_CG_CLUB_CREATE_TABLE, dwSocketID, pData, wDataSize);
 }
 
 //创建普通桌子
@@ -3045,7 +2872,7 @@ bool CAttemperEngineSink::WriteClubRoomToDB(STR_DBR_CLUB_ROOM_INFO* pTableInfo)
 	if (pTableInfo==NULL) return false;
 
 	//投递请求
-	m_pIDBCorrespondManager->PostDataBaseRequest(INVALID_CHAIR, DBR_CLUB_ROOM_INFO, 0, pTableInfo, sizeof(STR_DBR_CLUB_ROOM_INFO));
+	g_AttemperEngine->PostDataBaseRequest(DBR_CLUB_ROOM_INFO, 0, pTableInfo, sizeof(STR_DBR_CLUB_ROOM_INFO));
 
 	return true;
 }
@@ -3074,7 +2901,7 @@ bool CAttemperEngineSink::On_SUB_User_JoinFkRoom(VOID * pData, WORD wDataSize, D
 	DBR.dwUserID = pIServerUserItem->GetUserID();
 
 	//投递请求
-	return m_pIDBCorrespondManager->PostDataBaseRequest(DBR.dwUserID, DBR_CG_JOIN_TABLE, dwSocketID, &DBR,sizeof(DBR));
+	return g_AttemperEngine->PostDataBaseRequest(DBR.dwUserID, DBR_CG_JOIN_TABLE, dwSocketID, &DBR,sizeof(DBR));
 }
 
 //加入桌子 返回 -- 需要密码
@@ -3214,7 +3041,7 @@ bool CAttemperEngineSink::On_SUB_CG_USER_JOIN_TABLE_NO_PASS(VOID * pData, WORD w
 	STR_SUB_CG_USER_JOIN_TABLE_NO_PASS *pJoin = (STR_SUB_CG_USER_JOIN_TABLE_NO_PASS *)pData;
 
 	//投递请求
-	return m_pIDBCorrespondManager->PostDataBaseRequest(pJoin->dwUserID, DBR_CG_USER_JOIN_TABLE_NO_PASS, dwSocketID, pData,wDataSize);
+	return g_AttemperEngine->PostDataBaseRequest(DBR_CG_USER_JOIN_TABLE_NO_PASS, dwSocketID, pData,wDataSize);
 }
 
 //加入桌子 -- 不需要密码, 即快速开始
@@ -3368,7 +3195,7 @@ bool CAttemperEngineSink::On_SUB_CG_USER_JOIN_GOLD_HALL_ROOM(VOID * pData, WORD 
 	STR_SUB_CG_USER_JOIN_GOLD_HALL_ROOM *pJoin = (STR_SUB_CG_USER_JOIN_GOLD_HALL_ROOM *)pData;
 
 	//投递请求
-	m_pIDBCorrespondManager->PostDataBaseRequest(pJoin->dwUserID, DBR_CG_USER_JOIN_TABLE_HALL_GOLD, dwSocketID, pData,wDataSize);
+	g_AttemperEngine->PostDataBaseRequest(DBR_CG_USER_JOIN_TABLE_HALL_GOLD, dwSocketID, pData,wDataSize);
 
 	return true;
 }
@@ -3641,7 +3468,7 @@ bool CAttemperEngineSink::On_Sub_CG_User_CreateGroupRoom(VOID *pData, WORD wData
 	memcpy_s(&CreateGroupRoom, sizeof(STR_DBR_CG_USER_CREATE_GROUP_ROOM), pCreateRoom, sizeof(STR_DBR_CG_USER_CREATE_GROUP_ROOM));
 
 	//投递请求
-	m_pIDBCorrespondManager->PostDataBaseRequest(CreateGroupRoom.dwUserID, DBR_CG_USER_CREATE_GROUP_ROOM, dwSocketID, &CreateGroupRoom, sizeof(STR_DBR_CG_USER_CREATE_GROUP_ROOM));
+	g_AttemperEngine->PostDataBaseRequest(DBR_CG_USER_CREATE_GROUP_ROOM, dwSocketID, &CreateGroupRoom, sizeof(STR_DBR_CG_USER_CREATE_GROUP_ROOM));
 	
 	return true;
 }
@@ -3783,7 +3610,7 @@ bool CAttemperEngineSink::On_Sub_CG_User_JoinGroupRoom(VOID * pData, WORD wDataS
 	memcpy_s(&JoinRoom, sizeof(STR_DBR_CG_USER_JOIN_GROUP_ROOM), pJoinGroupRoom, sizeof(STR_DBR_CG_USER_JOIN_GROUP_ROOM));
 
 	//投递请求
-	m_pIDBCorrespondManager->PostDataBaseRequest(JoinRoom.dwUserID, DBR_CG_USER_JOIN_GROUP_ROOM, dwSocketID, &JoinRoom, sizeof(STR_DBR_CG_USER_JOIN_GROUP_ROOM));
+	g_AttemperEngine->PostDataBaseRequest(DBR_CG_USER_JOIN_GROUP_ROOM, dwSocketID, &JoinRoom, sizeof(STR_DBR_CG_USER_JOIN_GROUP_ROOM));
 
 	return true;
 }
@@ -4080,7 +3907,7 @@ VOID CAttemperEngineSink::OnEventUserLogout(IServerUserItem * pIServerUserItem, 
 	lstrcpyn(LeaveGameServer.szMachineID,pIServerUserItem->GetMachineID(),CountArray(LeaveGameServer.szMachineID));
 
 	//投递请求
-	m_pIDBCorrespondManager->PostDataBaseRequest(pIServerUserItem->GetUserID(),DBR_GR_LEAVE_GAME_SERVER,0L,&LeaveGameServer,sizeof(LeaveGameServer), TRUE);
+	g_AttemperEngine->PostDataBaseRequest(DBR_GR_LEAVE_GAME_SERVER,0L,&LeaveGameServer,sizeof(LeaveGameServer), TRUE);
 
 	//汇总用户
 	if (m_bCollectUser==true)
@@ -4095,9 +3922,6 @@ VOID CAttemperEngineSink::OnEventUserLogout(IServerUserItem * pIServerUserItem, 
 		//发送消息
 		m_pITCPSocketEngine->SendData(MDM_CS_USER_COLLECT,SUB_CS_C_USER_LEAVE,&UserLeave,sizeof(UserLeave));
 	}
-
-	//知道比赛服务退出游戏
-	if(m_pIGameMatchServiceManager!=NULL)m_pIGameMatchServiceManager->OnUserQuitGame(pIServerUserItem, 0);
 
 	//分组删除
 	DeleteWaitDistribute(pIServerUserItem);
@@ -4326,18 +4150,6 @@ bool CAttemperEngineSink::InitAndroidUser()
 	AndroidUserParameter.pGameServiceAttrib=m_pGameServiceAttrib;
 	AndroidUserParameter.pGameServiceOption=m_pGameServiceOption;
 
-	//服务组件
-	AndroidUserParameter.pITimerEngine=m_pITimerEngine;
-	AndroidUserParameter.pIServerUserManager=&m_ServerUserManager;
-	AndroidUserParameter.pIGameServiceManager=m_pIGameServiceManager;
-	//AndroidUserParameter.pITCPNetworkEngineEvent=QUERY_OBJECT_PTR_INTERFACE(m_pIAttemperEngine,ITCPNetworkEngineEvent);
-
-	//设置对象
-	if (m_AndroidUserManager.InitAndroidUser(AndroidUserParameter)==false)
-	{
-		return false;
-	}
-
 	return true;
 }
 
@@ -4348,26 +4160,14 @@ bool CAttemperEngineSink::InitTableFrameArray()
 	tagTableFrameParameter TableFrameParameter;
 	ZeroMemory(&TableFrameParameter,sizeof(TableFrameParameter));
 
-	//内核组件
-	TableFrameParameter.pITimerEngine=m_pITimerEngine;
-	TableFrameParameter.pIKernelDataBaseEngine=m_pIKernelDataBaseEngine;
-	TableFrameParameter.pIRecordDataBaseEngine=m_pIRecordDataBaseEngine;
-
 	//服务组件
 	TableFrameParameter.pIMainServiceFrame=this;
-	TableFrameParameter.pIAndroidUserManager=&m_AndroidUserManager;
 	TableFrameParameter.pIGameServiceManager=m_pIGameServiceManager;
-
-	//组件接口
-	TableFrameParameter.PITCPSocketEngine = m_pITCPSocketEngine;
 
 	//配置参数
 	TableFrameParameter.pGameParameter=m_pGameParameter;
 	TableFrameParameter.pGameServiceAttrib=m_pGameServiceAttrib;
 	TableFrameParameter.pGameServiceOption=m_pGameServiceOption;
-
-	if(m_pIGameMatchServiceManager!=NULL)
-		TableFrameParameter.pIGameMatchServiceManager=QUERY_OBJECT_PTR_INTERFACE(m_pIGameMatchServiceManager,IUnknownEx);
 
 	//桌子容器
 	m_TableFrameArray.SetSize(MAX_TABLE);
@@ -4384,9 +4184,6 @@ bool CAttemperEngineSink::InitTableFrameArray()
 		{
 			return false;
 		}
-
-		if(m_pIGameMatchServiceManager!=NULL)
-			m_pIGameMatchServiceManager->InitTableFrame(QUERY_OBJECT_PTR_INTERFACE((m_TableFrameArray[i]),ITableFrame),i);
 	}
 
 	return true;
@@ -4404,7 +4201,6 @@ bool CAttemperEngineSink::InsertDistribute(IServerUserItem * pIServerUserItem)
 	ASSERT(pIServerUserItem->GetUserStatus()<US_PLAYING);
 	if (pIServerUserItem->GetUserStatus()>=US_PLAYING) return false;
 
-	if(m_pIGameMatchServiceManager!=NULL) m_pIGameMatchServiceManager->OnUserJoinGame(pIServerUserItem,0);
 	return false;
 }
 
@@ -4971,7 +4767,7 @@ bool CAttemperEngineSink::AddOtherRoomInfo(DBR_GR_UpdateTableInfo* pTableInfo)
 	if (pTableInfo==NULL) return false;
 
 	//投递请求
-	m_pIDBCorrespondManager->PostDataBaseRequest(INVALID_CHAIR, DBR_GR_ADD_TABLE_INFO, 0, pTableInfo, sizeof(DBR_GR_UpdateTableInfo));
+	g_AttemperEngine->PostDataBaseRequest(DBR_GR_ADD_TABLE_INFO, 0, pTableInfo, sizeof(DBR_GR_UpdateTableInfo));
 
 	return true;
 }
@@ -4980,14 +4776,14 @@ bool CAttemperEngineSink::AddOtherRoomInfo(DBR_GR_UpdateTableInfo* pTableInfo)
 void CAttemperEngineSink::StartTable(DWORD dwTableID)
 {
 	//投递请求
-	m_pIDBCorrespondManager->PostDataBaseRequest(INVALID_CHAIR,DBR_GR_START_TABLE,0,&dwTableID,sizeof(dwTableID));
+	g_AttemperEngine->PostDataBaseRequest(DBR_GR_START_TABLE,0,&dwTableID,sizeof(dwTableID));
 }
 
 //结束替他人开房
 void CAttemperEngineSink::ConcludeTable(DWORD dwTableID)
 {
 	//投递请求
-	m_pIDBCorrespondManager->PostDataBaseRequest(INVALID_CHAIR,DBR_GR_END_TABLE,0,&dwTableID,sizeof(dwTableID));
+	g_AttemperEngine->PostDataBaseRequest(DBR_GR_END_TABLE,0,&dwTableID,sizeof(dwTableID));
 }
 
 #pragma region Club牌友圈2 事件通知(1.桌子信息 2.玩家信息)
@@ -5008,7 +4804,7 @@ void CAttemperEngineSink::ClubTableCreate(DWORD dwClubRoomID, DWORD dwUserID, DW
 	Dbr.dwGameID = (m_pGameServiceOption->dwServerID) & 0xFFFFFF00;
 
 	//投递请求
-	m_pIDBCorrespondManager->PostDataBaseRequest(INVALID_CHAIR, DBR_CLUB_TABLE_INFO, 0, &Dbr, sizeof(Dbr));
+	g_AttemperEngine->PostDataBaseRequest(DBR_CLUB_TABLE_INFO, 0, &Dbr, sizeof(Dbr));
 }
 
 //club 桌子开始游戏
@@ -5024,7 +4820,7 @@ void CAttemperEngineSink::ClubTableStart(DWORD dwTableID, BYTE byClubOrHallGold)
 		Dbr.byCurrentRound = 1;//这是一个增量 TODONOW 后面修改
 		Dbr.byMask = 2;
 
-		m_pIDBCorrespondManager->PostDataBaseRequest(INVALID_CHAIR,DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
+		g_AttemperEngine->PostDataBaseRequest(DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
 	}
 
 	//金币大厅桌子信息
@@ -5036,7 +4832,7 @@ void CAttemperEngineSink::ClubTableStart(DWORD dwTableID, BYTE byClubOrHallGold)
 		HallDbr.dwTableState = 1;
 		HallDbr.byMask = 2;
 
-		m_pIDBCorrespondManager->PostDataBaseRequest(INVALID_CHAIR,DBR_HALL_GOLD_TABLE_INFO,0,&HallDbr,sizeof(HallDbr));
+		g_AttemperEngine->PostDataBaseRequest(DBR_HALL_GOLD_TABLE_INFO,0,&HallDbr,sizeof(HallDbr));
 	}
 }
 
@@ -5052,7 +4848,7 @@ void CAttemperEngineSink::ClubTableMax(DWORD dwTableID, BYTE byClubOrHallGold)
 		Dbr.dwTableState = 2;
 		Dbr.byMask = 2;
 
-		m_pIDBCorrespondManager->PostDataBaseRequest(INVALID_CHAIR,DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
+		g_AttemperEngine->PostDataBaseRequest(DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
 	}
 
 	//金币大厅桌子信息
@@ -5064,7 +4860,7 @@ void CAttemperEngineSink::ClubTableMax(DWORD dwTableID, BYTE byClubOrHallGold)
 		HallDbr.dwTableState = 2;
 		HallDbr.byMask = 2;
 
-		m_pIDBCorrespondManager->PostDataBaseRequest(INVALID_CHAIR,DBR_HALL_GOLD_TABLE_INFO,0,&HallDbr,sizeof(HallDbr));
+		g_AttemperEngine->PostDataBaseRequest(DBR_HALL_GOLD_TABLE_INFO,0,&HallDbr,sizeof(HallDbr));
 	}
 }
 
@@ -5080,7 +4876,7 @@ void CAttemperEngineSink::ClubTableNotMax(DWORD dwTableID, BYTE byClubOrHallGold
 		Dbr.dwTableState = 0;
 		Dbr.byMask = 2;
 
-		m_pIDBCorrespondManager->PostDataBaseRequest(INVALID_CHAIR,DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
+		g_AttemperEngine->PostDataBaseRequest(DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
 	}
 
 	//金币大厅桌子信息
@@ -5092,7 +4888,7 @@ void CAttemperEngineSink::ClubTableNotMax(DWORD dwTableID, BYTE byClubOrHallGold
 		HallDbr.dwTableState = 0;
 		HallDbr.byMask = 2;
 
-		m_pIDBCorrespondManager->PostDataBaseRequest(INVALID_CHAIR,DBR_HALL_GOLD_TABLE_INFO,0,&HallDbr,sizeof(HallDbr));
+		g_AttemperEngine->PostDataBaseRequest(DBR_HALL_GOLD_TABLE_INFO,0,&HallDbr,sizeof(HallDbr));
 	}
 }
 
@@ -5107,7 +4903,7 @@ void CAttemperEngineSink::ClubTableXJ(DWORD dwTableID)
 	Dbr.byCurrentRound = 1;//这是一个增量 TODONOW 后面修改
 	Dbr.byMask = 2;
 	
-	m_pIDBCorrespondManager->PostDataBaseRequest(INVALID_CHAIR,DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
+	g_AttemperEngine->PostDataBaseRequest(DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
 }
 
 //club 桌子大局结束
@@ -5119,7 +4915,7 @@ void CAttemperEngineSink::ClubTableDJ(DWORD dwTableID)
 	Dbr.dwTableID = dwTableID;
 	Dbr.byMask = 3;
 	
-	m_pIDBCorrespondManager->PostDataBaseRequest(INVALID_CHAIR,DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
+	g_AttemperEngine->PostDataBaseRequest(DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
 }
 
 #pragma endregion
@@ -5132,7 +4928,7 @@ void CAttemperEngineSink::JoinTable(DWORD dwTableID, DWORD dwUserID)
 	AddTableUser.dwTableID = dwTableID;
 	AddTableUser.dwUserID = dwUserID;
 	//投递请求
-	m_pIDBCorrespondManager->PostDataBaseRequest(INVALID_CHAIR,DBR_GR_ADD_TABLEUSER,0,&AddTableUser,sizeof(DBR_GP_AddTableUser));
+	g_AttemperEngine->PostDataBaseRequest(DBR_GR_ADD_TABLEUSER,0,&AddTableUser,sizeof(DBR_GP_AddTableUser));
 }
 
 //用户离开替他人开房
@@ -5143,7 +4939,7 @@ void CAttemperEngineSink::LeaveTable(DWORD dwTableID, DWORD dwUserID)
 	DeleteTableUser.dwUserID = dwUserID;
 
 	//投递请求
-	m_pIDBCorrespondManager->PostDataBaseRequest(INVALID_CHAIR,DBR_GR_DELETE_TABLEUSER,0,&DeleteTableUser,sizeof(DBR_GP_DeleteTableUser));
+	g_AttemperEngine->PostDataBaseRequest(DBR_GR_DELETE_TABLEUSER,0,&DeleteTableUser,sizeof(DBR_GP_DeleteTableUser));
 }
 
 //抽奖结果
@@ -5206,7 +5002,7 @@ void CAttemperEngineSink::ClubPlayerSitDown(DWORD dwTableID, DWORD dwUserID, BYT
 		Dbr.byChairID = byChairID;
 		Dbr.byMask = 1; 
 
-		m_pIDBCorrespondManager->PostDataBaseRequest(INVALID_CHAIR,DBR_CLUB_PLAYER_INFO,0,&Dbr,sizeof(Dbr));
+		g_AttemperEngine->PostDataBaseRequest(DBR_CLUB_PLAYER_INFO,0,&Dbr,sizeof(Dbr));
 	}
 
 	//金币大厅桌子
@@ -5219,7 +5015,7 @@ void CAttemperEngineSink::ClubPlayerSitDown(DWORD dwTableID, DWORD dwUserID, BYT
 		HallDbr.byChairID = byChairID;
 		HallDbr.byMask = 1; 
 
-		m_pIDBCorrespondManager->PostDataBaseRequest(INVALID_CHAIR,DBR_HALL_GOLD_PLAYER_INFO,0,&HallDbr,sizeof(HallDbr));
+		g_AttemperEngine->PostDataBaseRequest(DBR_HALL_GOLD_PLAYER_INFO,0,&HallDbr,sizeof(HallDbr));
 	}
 }
 
@@ -5235,7 +5031,7 @@ void CAttemperEngineSink::ClubPlayerSitUp(DWORD dwTableID, DWORD dwUserID, BYTE 
 		Dbr.dwUserID = dwUserID;
 		Dbr.byMask = 2; 
 
-		m_pIDBCorrespondManager->PostDataBaseRequest(INVALID_CHAIR,DBR_CLUB_PLAYER_INFO,0,&Dbr,sizeof(Dbr));
+		g_AttemperEngine->PostDataBaseRequest(DBR_CLUB_PLAYER_INFO,0,&Dbr,sizeof(Dbr));
 	}
 
 	//金币大厅
@@ -5248,7 +5044,7 @@ void CAttemperEngineSink::ClubPlayerSitUp(DWORD dwTableID, DWORD dwUserID, BYTE 
 		HallDbr.byChairID = byChairID;
 		HallDbr.byMask = 2; 
 
-		m_pIDBCorrespondManager->PostDataBaseRequest(INVALID_CHAIR,DBR_HALL_GOLD_PLAYER_INFO,0,&HallDbr,sizeof(HallDbr));
+		g_AttemperEngine->PostDataBaseRequest(DBR_HALL_GOLD_PLAYER_INFO,0,&HallDbr,sizeof(HallDbr));
 	}
 }
 
@@ -5263,7 +5059,7 @@ void CAttemperEngineSink::ClubLastPlayerSitUp(DWORD dwTableID, DWORD dwUserID, B
 		Dbr.dwTableID = dwTableID;
 		Dbr.byMask = 3;
 
-		m_pIDBCorrespondManager->PostDataBaseRequest(INVALID_CHAIR,DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
+		g_AttemperEngine->PostDataBaseRequest(DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
 	}
 
 	//金币大厅桌子
@@ -5274,7 +5070,7 @@ void CAttemperEngineSink::ClubLastPlayerSitUp(DWORD dwTableID, DWORD dwUserID, B
 		HallDbr.dwTableID = dwTableID;
 		HallDbr.byMask = 3;
 
-		m_pIDBCorrespondManager->PostDataBaseRequest(INVALID_CHAIR,DBR_HALL_GOLD_TABLE_INFO,0,&HallDbr,sizeof(HallDbr));
+		g_AttemperEngine->PostDataBaseRequest(DBR_HALL_GOLD_TABLE_INFO,0,&HallDbr,sizeof(HallDbr));
 	}
 }
 
@@ -5641,7 +5437,7 @@ void CAttemperEngineSink::HallTableCreate(DWORD dwUserID, DWORD dwKindID, BYTE b
 	Dbr.dwGameID = (m_pGameServiceOption->dwServerID) & 0xFFFFFF00;
 
 	//投递请求
-	m_pIDBCorrespondManager->PostDataBaseRequest(INVALID_CHAIR, DBR_HALL_GOLD_TABLE_INFO, 0, &Dbr, sizeof(Dbr));
+	g_AttemperEngine->PostDataBaseRequest(DBR_HALL_GOLD_TABLE_INFO, 0, &Dbr, sizeof(Dbr));
 }
 
 

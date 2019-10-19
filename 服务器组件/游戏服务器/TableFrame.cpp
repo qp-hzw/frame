@@ -4,6 +4,7 @@
 #include "AttemperEngineSink.h"
 #include <iostream>
 #include <vector>
+#include "ServiceUnits.h"
 //////////////////////////////////////////////////////////////////////////////////
 //校验GPS距离
 #define CHECK_USER_GPS_DISTANCE		200									//玩家GPS在多少距离内提示玩家
@@ -79,16 +80,11 @@ CTableFrame::CTableFrame()
 	m_pITimerEngine=NULL;
 	m_pITableFrameSink=NULL;
 	m_pIMainServiceFrame=NULL;
-	m_pIAndroidUserManager=NULL;
 
 	//扩张接口
 	m_pITableUserAction=NULL;
 	m_pITableUserRequest=NULL;
 	m_pIMatchTableAction=NULL;
-
-	//数据接口
-	m_pIKernelDataBaseEngine=NULL;
-	m_pIRecordDataBaseEngine=NULL;
 
 	//比赛接口
 	m_pIGameMatchSink=NULL;
@@ -563,9 +559,6 @@ bool CTableFrame::ConcludeGame(BYTE cbGameStatus)
 
 	KillGameTimer(IDI_GAME_CHECK);
 
-	//通知比赛
-	if(m_pIGameMatchSink!=NULL) m_pIGameMatchSink->OnEventGameEnd(this,0, NULL, cbGameStatus);
-
 	//游戏记录
 	RecordGameScore(bDrawStarted);
 
@@ -598,56 +591,6 @@ bool CTableFrame::ConcludeGame(BYTE cbGameStatus)
 
 					PerformStandUpAction(pIServerUserItem);
 
-					//机器处理
-					if (pIServerUserItem->IsAndroidUser()==true)
-					{
-						//查找机器
-						CAttemperEngineSink * pAttemperEngineSink=(CAttemperEngineSink *)m_pIMainServiceFrame;
-						tagBindParameter * pBindParameter=pAttemperEngineSink->GetBindParameter(pIServerUserItem->GetBindIndex());
-						IAndroidUserItem * pIAndroidUserItem=m_pIAndroidUserManager->SearchAndroidUserItem(pIServerUserItem->GetUserID(),
-							pBindParameter->dwSocketID);
-
-						//机器处理
-						if (pIAndroidUserItem!=NULL)
-						{
-							//获取时间
-							SYSTEMTIME SystemTime;
-							GetLocalTime(&SystemTime);
-							DWORD dwTimeMask=(1L<<SystemTime.wHour);
-
-							//获取属性
-							tagAndroidService * pAndroidService=pIAndroidUserItem->GetAndroidService();
-							tagAndroidParameter * pAndroidParameter=pIAndroidUserItem->GetAndroidParameter();
-
-							//设置信息
-							if(pAndroidService->dwResidualPlayDraw>0)
-								--pAndroidService->dwResidualPlayDraw;
-
-							//服务时间
-							if (((pIServerUserItem->GetTableID()==GetTableID())&&(pAndroidParameter->dwServiceTime&dwTimeMask)==0L))
-							{
-								PerformStandUpAction(pIServerUserItem);
-								continue;
-							}
-
-							//游戏时间
-							DWORD dwCurrentTime=(DWORD)time(NULL);
-							DWORD dwLogonTime=pIServerUserItem->GetLogonTime();
-							DWORD dwReposeTime=pAndroidService->dwReposeTime;
-							if ((dwLogonTime+dwReposeTime)<dwCurrentTime)
-							{
-								PerformStandUpAction(pIServerUserItem);
-								continue;
-							}
-
-							//局数判断
-							if ((pIServerUserItem->GetTableID()==GetTableID())&&(pAndroidService->dwResidualPlayDraw==0))
-							{
-								PerformStandUpAction(pIServerUserItem);
-								continue;
-							}
-						}
-					}
 				}
 			}
 		}
@@ -964,7 +907,7 @@ bool CTableFrame::XJUpdateGameTaskStatus(const BYTE &cbTableMode, const BYTE &cb
 		TaskStatus.cbCurGameCount = cbCurGameCount;
 
 		//发送数据库请求,无法获得用户的socketID，发0
-		m_pIRecordDataBaseEngine->PostDataBaseRequest(DBR_SC_TABLE_UPDATE_TASK_STATUS, 0, &TaskStatus, sizeof(STR_DBR_CG_TABLE_UPDATE_TASK_STATUS));
+		g_AttemperEngine->PostDataBaseRequest(DBR_SC_TABLE_UPDATE_TASK_STATUS, 0, &TaskStatus, sizeof(STR_DBR_CG_TABLE_UPDATE_TASK_STATUS));
 
 	}
 
@@ -990,7 +933,7 @@ bool CTableFrame::WriteRecordInfo(WORD wXJCount,TCHAR strScore[], VOID* pData, D
 	memcpy_s(GameRecordInfo.szData, dwDataSize*sizeof(BYTE), pData, dwDataSize*sizeof(BYTE));
 
 	//写入数据库
-	m_pIRecordDataBaseEngine->PostDataBaseRequest(DBR_GR_SAVE_RECORDINFO, 0, &GameRecordInfo, sizeof(DBR_GR_GameRecordInfo));
+	g_AttemperEngine->PostDataBaseRequest(DBR_GR_SAVE_RECORDINFO, 0, &GameRecordInfo, sizeof(DBR_GR_GameRecordInfo));
 
 	return true;
 }
@@ -1543,9 +1486,6 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 	//游戏处理 此处处理的应该是只有200的主消息号 TODONOW 细看
 	if (m_pITableFrameSink->OnFrameMessage(wSubCmdID,pData,wDataSize,pIServerUserItem)==true) return true;
 
-	//比赛处理
-	if(m_pIGameMatchSink!=NULL && m_pIGameMatchSink->OnFrameMessage(wSubCmdID,pData,wDataSize,pIServerUserItem)==true) return true;
-
 	//默认处理
 	switch (wSubCmdID)
 	{
@@ -1981,12 +1921,7 @@ bool CTableFrame::InitializationFrame(WORD wTableID, tagTableFrameParameter & Ta
 	m_pGameServiceOption=TableFrameParameter.pGameServiceOption;
 
 	//组件接口
-	m_pITimerEngine=TableFrameParameter.pITimerEngine;
 	m_pIMainServiceFrame=TableFrameParameter.pIMainServiceFrame;
-	m_pIAndroidUserManager=TableFrameParameter.pIAndroidUserManager;
-	m_pIKernelDataBaseEngine=TableFrameParameter.pIKernelDataBaseEngine;
-	m_pIRecordDataBaseEngine=TableFrameParameter.pIRecordDataBaseEngine;
-	m_pITCPSocketEngine = TableFrameParameter.PITCPSocketEngine;
 
 	//创建桌子
 	IGameServiceManager * pIGameServiceManager=TableFrameParameter.pIGameServiceManager;
@@ -2993,7 +2928,7 @@ void CTableFrame::RecordGameScore(bool bDrawStarted, DWORD dwStartGameTime)
 			{
 				WORD wHeadSize=sizeof(GameScoreRecord)-sizeof(GameScoreRecord.GameScoreRecord);
 				WORD wDataSize=sizeof(GameScoreRecord.GameScoreRecord[0])*GameScoreRecord.wRecordCount;
-				m_pIRecordDataBaseEngine->PostDataBaseRequest(DBR_GR_GAME_SCORE_RECORD,0,&GameScoreRecord,wHeadSize+wDataSize);
+				g_AttemperEngine->PostDataBaseRequest(DBR_GR_GAME_SCORE_RECORD,0,&GameScoreRecord,wHeadSize+wDataSize);
 			}
 		}
 
