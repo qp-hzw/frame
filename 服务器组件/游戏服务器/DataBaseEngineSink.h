@@ -26,10 +26,6 @@ protected:
 protected:
 	IGameDataBaseEngineSink *		m_pIGameDataBaseEngineSink;			//数据接口
 
-	//组件变量
-public:
-	IDBCorrespondManager *          m_pIDBCorrespondManager;            //数据协调
-
 	//函数定义
 public:
 	//构造函数

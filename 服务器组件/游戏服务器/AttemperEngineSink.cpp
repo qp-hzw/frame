@@ -2901,7 +2901,7 @@ bool CAttemperEngineSink::On_SUB_User_JoinFkRoom(VOID * pData, WORD wDataSize, D
 	DBR.dwUserID = pIServerUserItem->GetUserID();
 
 	//投递请求
-	return g_AttemperEngine->PostDataBaseRequest(DBR.dwUserID, DBR_CG_JOIN_TABLE, dwSocketID, &DBR,sizeof(DBR));
+	return g_AttemperEngine->PostDataBaseRequest(DBR_CG_JOIN_TABLE, dwSocketID, &DBR,sizeof(DBR));
 }
 
 //加入桌子 返回 -- 需要密码
@@ -3907,7 +3907,7 @@ VOID CAttemperEngineSink::OnEventUserLogout(IServerUserItem * pIServerUserItem, 
 	lstrcpyn(LeaveGameServer.szMachineID,pIServerUserItem->GetMachineID(),CountArray(LeaveGameServer.szMachineID));
 
 	//投递请求
-	g_AttemperEngine->PostDataBaseRequest(DBR_GR_LEAVE_GAME_SERVER,0L,&LeaveGameServer,sizeof(LeaveGameServer), TRUE);
+	g_AttemperEngine->PostDataBaseRequest(DBR_GR_LEAVE_GAME_SERVER,0L,&LeaveGameServer,sizeof(LeaveGameServer));
 
 	//汇总用户
 	if (m_bCollectUser==true)

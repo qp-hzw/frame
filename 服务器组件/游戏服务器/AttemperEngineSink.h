@@ -5,7 +5,7 @@
 #include "TableFrame.h"
 #include "ServerListManager.h"
 #include "DataBasePacket.h"
-
+#include "ServerUserManager.h"
 
 //°ó¶¨²ÎÊı
 struct tagBindParameter

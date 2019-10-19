@@ -192,13 +192,6 @@ enum enOption
 //桌子参数
 struct tagTableFrameParameter
 {
-	//内核组件
-	ITimerEngine *					pITimerEngine;						//时间引擎
-	IDataBaseEngine *				pIRecordDataBaseEngine;				//数据引擎
-
-	//组件接口
-	ITCPSocketEngine *				PITCPSocketEngine;					//网络服务
-
 	//服务组件
 	IMainServiceFrame *				pIMainServiceFrame;					//服务框架
 	IGameServiceManager *			pIGameServiceManager;				//服务管理
@@ -221,7 +214,7 @@ struct tagAndroidUserParameter
 	tagGameServiceOption *			pGameServiceOption;					//配置参数
 
 	//内核组件
-	ITimerEngine *					pITimerEngine;						//时间引擎
+//	ITimerEngine *					pITimerEngine;						//时间引擎
 	IServerUserManager *			pIServerUserManager;				//用户管理
 	IGameServiceManager *			pIGameServiceManager;				//服务管理
 	//ITCPNetworkEngineEvent *		pITCPNetworkEngineEvent;			//事件接口
@@ -352,9 +345,6 @@ struct tagAndroidUserInfo
 	WORD							wFreeUserCount;						//用户数目
 	WORD							wPlayUserCount;						//用户数目
 	WORD							wSitdownUserCount;					//用户数目
-	IAndroidUserItem *				pIAndroidUserFree[MAX_ANDROID];		//机器接口
-	IAndroidUserItem *				pIAndroidUserPlay[MAX_ANDROID];		//机器接口
-	IAndroidUserItem *				pIAndroidUserSitdown[MAX_ANDROID];	//机器接口
 };
 
 //服务信息
