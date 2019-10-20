@@ -58,8 +58,6 @@ public:
 
 	//辅助函数
 protected:
-	//创建模块
-	int CreateServiceDLL();
 	//配置组件
 	int InitializeService();
 	//启动内核

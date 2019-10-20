@@ -1,3 +1,5 @@
+#include <string>
+#include <iostream>
 #include "StdAfx.h"
 #include "ServiceUnits.h"
 #include "ControlPacket.h"
@@ -14,9 +16,15 @@ ITimerEngine			   *g_TimerEngine = NULL;						//定时器
 //构造函数
 CServiceUnits::CServiceUnits(std::string dll_name)
 {
-	m_subgame_dll_name = dll_name;
 	//设置对象
 	if (g_pServiceUnits==NULL) g_pServiceUnits=this;
+
+	m_AttemperEngine = NULL;
+	m_TCPNetworkEngine = NULL;
+	m_TCPSocketEngine = NULL;
+	m_TimerEngine = NULL;
+
+	m_subgame_dll_name = dll_name;
 
 	//组件配置
 	ZeroMemory(&m_GameServiceAttrib,sizeof(m_GameServiceAttrib));
@@ -38,10 +46,7 @@ int CServiceUnits::InitializeService()
 	m_TCPSocketEngine = static_cast<ITCPSocketEngine*>(CWHModule::TCPSocketEngine());
 	m_TimerEngine = static_cast<ITimerEngine*>(CWHModule::TimerEngine());
 
-
-	wchar_t * dll_name = new wchar_t[m_subgame_dll_name.size()];
-	swprintf(dll_name,100,L"%S",m_subgame_dll_name.c_str()); //注意大写
-	ITableFrameSink *SubGameDll = static_cast<ITableFrameSink*>(CWHModule::SubGame(dll_name)); //此处只是校验
+	ITableFrameSink *SubGameDll = static_cast<ITableFrameSink*>(CWHModule::SubGame(m_subgame_dll_name)); //此处只是校验
 
 	if(m_AttemperEngine == NULL) return 1;
 	if(m_TCPNetworkEngine == NULL) return 2;
@@ -81,6 +86,7 @@ int CServiceUnits::InitializeService()
 	std::string log_nam= "GameServer.log";
 	CLog::Init(log_nam.c_str());
 
+	CLog::Log(log_debug, "service create success");
 	return 0;
 }
 
@@ -129,22 +135,22 @@ bool CServiceUnits::ConcludeService()
 //启动内核
 int CServiceUnits::StartKernelService()
 {
-	//时间引擎
-	if (m_TimerEngine->StartService()==false)
-	{
-		return -1;
-	}
-
 	//调度引擎
 	if (m_AttemperEngine->StartService()==false)
 	{
-		return -2;
+		return 1;
+	}
+
+	//时间引擎
+	if (m_TimerEngine->StartService()==false)
+	{
+		return 2;
 	}
 
 	//协调引擎
 	if (m_TCPSocketEngine->StartService()==false)
 	{
-		return -3;
+		return 3;
 	}
 
 	return 0;

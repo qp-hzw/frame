@@ -116,7 +116,7 @@ public:
 #pragma endregion
 
 #pragma region Socket系统函数
-	//本地Socket事件 (与协调服)
+	//socket::client
 public:
 	//连接事件
 	virtual bool OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode);
@@ -125,7 +125,7 @@ public:
 	//读取事件
 	virtual bool OnEventTCPSocketRead(WORD wServiceID, TCP_Command Command, VOID * pData, WORD wDataSize);
 
-	//网络Socket事件 (与client && web后台)
+	//socket::server
 public:
 	//应答事件
 	virtual bool OnEventTCPNetworkBind(DWORD dwClientAddr, DWORD dwSocketID);
@@ -369,8 +369,6 @@ public:
 
 	//辅助函数
 protected:
-	//配置机器
-	bool InitAndroidUser();
 	//设置参数
 	void SetMobileUserParameter(IServerUserItem * pIServerUserItem,BYTE cbDeviceType,WORD wBehaviorFlags,WORD wPageTableCount);
 	//群发数据

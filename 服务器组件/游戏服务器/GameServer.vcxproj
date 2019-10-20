@@ -133,7 +133,7 @@
     <Link>
       <OutputFile>../../发布组件/Release/GameServer.exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -187,7 +187,7 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
   <ItemGroup>
     <ClCompile Include="AttemperEngineSink.cpp" />
     <ClCompile Include="DataBaseEngineSink.cpp" />
-    <ClCompile Include="GameServer.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="ServerListManager.cpp" />
     <ClCompile Include="ServerUserManager.cpp" />
     <ClCompile Include="ServiceUnits.cpp" />
@@ -200,7 +200,6 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClInclude Include="ControlPacket.h" />
     <ClInclude Include="DataBaseEngineSink.h" />
     <ClInclude Include="DataBasePacket.h" />
-    <ClInclude Include="GameServer.h" />
     <ClInclude Include="ServerListManager.h" />
     <ClInclude Include="ServerUserManager.h" />
     <ClInclude Include="ServiceUnits.h" />

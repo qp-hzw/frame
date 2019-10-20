@@ -39,6 +39,14 @@
 //控制台
 #include "ConsoleAdapter.h"
 
+
+
+//windows下 控制台窗口
+#include <SDKDDKVer.h>
+
+#include <stdio.h>
+#include <tchar.h>
+
 //////////////////////////////////////////////////////////////////////////////////
 //包含文件
 /***全局文件***/

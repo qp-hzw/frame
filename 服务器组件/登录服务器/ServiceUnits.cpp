@@ -15,6 +15,11 @@ ITimerEngine			   *g_TimerEngine = NULL;						//定时器
 //构造函数
 CServiceUnits::CServiceUnits()
 {
+	m_AttemperEngine = NULL;
+	m_TCPNetworkEngine = NULL;
+	m_TCPSocketEngine = NULL;
+	m_TimerEngine = NULL;
+
 	//设置对象
 	if (g_pServiceUnits==NULL) g_pServiceUnits=this;
 
@@ -69,6 +74,8 @@ int CServiceUnits::InitializeService()
 
 	/***************************************************  log 配置信息 *************************************************/
 	CLog::Init("logon.log");
+
+	CLog::Log(log_debug, "service create success");
 	return 0;
 }
 
@@ -118,19 +125,19 @@ bool CServiceUnits::ConcludeService()
 //启动内核
 int CServiceUnits::StartKernelService()
 {
-	//时间引擎
-	if (m_TimerEngine->StartService()==false)
+	//调度引擎
+	if (m_AttemperEngine->StartService()==false)
 	{
 		return 1;
 	}
-	
-	//调度引擎
-	if (m_AttemperEngine->StartService()==false)
+
+	//时间引擎
+	if (m_TimerEngine->StartService()==false)
 	{
 		return 2;
 	}
 
-	//协调引擎
+	//socket::client
 	if (m_TCPSocketEngine->StartService()==false)
 	{
 		return 3;

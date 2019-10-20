@@ -5,6 +5,7 @@
 #include "AttemperEngineSink.h"
 #include <vector>
 
+using std::vector;
 
 #define RANK_COUNT  12  //排行榜类别数量
 

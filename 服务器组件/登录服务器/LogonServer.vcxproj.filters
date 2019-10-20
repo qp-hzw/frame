@@ -7,9 +7,6 @@
     <ClCompile Include="DataBaseEngineSink.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="LogonServer.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="RankManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -17,6 +14,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ServerListManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -28,9 +28,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="DataBaseEngineSink.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="LogonServer.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="RankManager.h">

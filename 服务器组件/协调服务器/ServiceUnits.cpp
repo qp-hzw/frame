@@ -5,6 +5,12 @@
 IAttemperEngine			   *g_AttemperEngine = NULL;					//调度引擎
 ITCPNetworkEngine		   *g_TCPNetworkEngine = NULL;				    //socket::server
 
+CServiceUnits::CServiceUnits()
+{
+	m_AttemperEngine = NULL;
+	m_TCPNetworkEngine = NULL;
+}
+
 //启动服务
 bool CServiceUnits::StartService()
 {
@@ -60,7 +66,6 @@ int CServiceUnits::InitializeService()
 	//AttemperEngine设置回调
 	if (m_AttemperEngine->SetAttemperEngineSink(pIAttemperEngineSink)==false) return 4;
 
-
 	/***************************************************  socket::server 配置信息 *************************************************/
 	//配置网络
 	WORD wServicePort=PORT_CENTER;
@@ -71,6 +76,7 @@ int CServiceUnits::InitializeService()
 	//设置服务器日志输出等级
 	CLog::Init("correspond.log");
 
+	CLog::Log(log_debug, "service create success");
 	return 0;
 }
 

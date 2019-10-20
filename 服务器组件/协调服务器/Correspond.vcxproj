@@ -130,7 +130,7 @@
     <Link>
       <OutputFile>../../发布组件/Release/Correspond.exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -181,7 +181,7 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AttemperEngineSink.cpp" />
-    <ClCompile Include="CorrespondServer.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="GlobalInfoManager.cpp" />
     <ClCompile Include="ServiceUnits.cpp" />
   </ItemGroup>
@@ -189,7 +189,6 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClInclude Include="..\..\消息定义\CMD_Correspond.h" />
     <ClInclude Include="..\..\消息定义\CMD_STR_Correspond.h" />
     <ClInclude Include="AttemperEngineSink.h" />
-    <ClInclude Include="CorrespondServer.h" />
     <ClInclude Include="GlobalInfoManager.h" />
     <ClInclude Include="ServiceUnits.h" />
     <ClInclude Include="Stdafx.h" />

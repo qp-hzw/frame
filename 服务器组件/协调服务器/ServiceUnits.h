@@ -22,7 +22,7 @@ protected:
 	//函数定义
 public:
 	//构造函数
-	CServiceUnits() {} 
+	CServiceUnits();
 	//析构函数
 	virtual ~CServiceUnits() {}
 

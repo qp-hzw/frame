@@ -86,8 +86,3 @@
 #pragma comment (lib,"../../../../share/依赖项/链接库/KernelEngine.lib")
 
 //////////////////////////////////////////////////////////////////////////////////
-
-
-//控制台
-#include "ConsoleAdapter.h"
-//CConsoleAdapter g_ConsoleAdpter;

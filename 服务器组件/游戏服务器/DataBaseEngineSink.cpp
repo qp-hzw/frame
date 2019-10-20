@@ -40,11 +40,11 @@ VOID * CDataBaseEngineSink::QueryInterface(REFGUID Guid, DWORD dwQueryVer)
 //启动事件
 bool CDataBaseEngineSink::OnDataBaseEngineStart(IUnknownEx * pIUnknownEx)
 {
-	m_TreasureDB = static_cast<IDataBase*>(CWHModule::Database());
 	m_PlatformDB = static_cast<IDataBase*>(CWHModule::Database());
-
-	if(m_TreasureDB == NULL) return false;
+	m_TreasureDB = static_cast<IDataBase*>(CWHModule::Database());
+	
 	if(m_PlatformDB == NULL) return false;
+	if(m_TreasureDB == NULL) return false;
 
 	//发起连接
 	m_PlatformDB->Connect(1);

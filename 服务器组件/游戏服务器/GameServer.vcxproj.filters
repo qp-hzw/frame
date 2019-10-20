@@ -7,9 +7,6 @@
     <ClCompile Include="DataBaseEngineSink.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="GameServer.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="ServerListManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -22,6 +19,9 @@
     <ClCompile Include="ServerUserManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AttemperEngineSink.h">
@@ -31,9 +31,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="DataBaseEngineSink.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="GameServer.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ServerListManager.h">

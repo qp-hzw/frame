@@ -102,20 +102,10 @@ VOID * CAttemperEngineSink::QueryInterface(REFGUID Guid, DWORD dwQueryVer)
 //启动事件
 bool CAttemperEngineSink::OnAttemperEngineStart(IUnknownEx * pIUnknownEx)
 {
-	//绑定信息
-	m_pAndroidParameter=new tagBindParameter[MAX_ANDROID + MAX_VIRTUAL];
-	ZeroMemory(m_pAndroidParameter,sizeof(tagBindParameter)*(MAX_ANDROID +MAX_VIRTUAL));
-
+	/*  TODONOW 该处会导致程序崩溃
 	//绑定信息
 	m_pNormalParameter=new tagBindParameter[MAX_TABLE];
 	ZeroMemory(m_pNormalParameter,sizeof(tagBindParameter)*MAX_TABLE);
-
-	//配置机器
-	if (InitAndroidUser()==false)
-	{
-		ASSERT(FALSE);
-		return false;
-	}
 
 	//配置桌子
 	if (InitTableFrameArray()==false)
@@ -127,19 +117,15 @@ bool CAttemperEngineSink::OnAttemperEngineStart(IUnknownEx * pIUnknownEx)
 	//设置接口
 	if (m_ServerUserManager.SetServerUserItemSink(QUERY_ME_INTERFACE(IServerUserItemSink))==false)
 	{
-		ASSERT(FALSE);
 		return false;
 	}
 
-
 	//设置时间
 	g_TimerEngine->SetTimer(IDI_GAME_SERVICE_PULSE,1000L,TIMES_INFINITY,NULL);
-
 	g_TimerEngine->SetTimer(IDI_LOAD_ANDROID_USER,TIME_LOAD_ANDROID_USER*1000L,TIMES_INFINITY,NULL);
-
 	g_TimerEngine->SetTimer(IDI_DISTRIBUTE_ANDROID,TIME_DISTRIBUTE_ANDROID*1000L,TIMES_INFINITY,NULL);
-
 	g_TimerEngine->SetTimer(IDI_DBCORRESPOND_NOTIFY,TIME_DBCORRESPOND_NOTIFY*1000L,TIMES_INFINITY,NULL);
+	*/
 	return true;
 }
 
@@ -392,6 +378,7 @@ bool CAttemperEngineSink::OnEventTCPSocketShut(WORD wServiceID, BYTE cbShutReaso
 //连接事件
 bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 {
+	std::cout << "OnEventTCPSocketLink" <<std::endl;
 	//协调连接
 	if (wServiceID==NETWORK_CORRESPOND)
 	{
@@ -400,7 +387,6 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		{
 			//设置时间
 			g_TimerEngine->SetTimer(IDI_CONNECT_CORRESPOND, TIME_CONNECT_CORRESPOND, 1, 0);
-
 			return false;
 		}
 
@@ -408,12 +394,14 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		STR_CPR_GP_REGISTER_GAME RegisterServer;
 		ZeroMemory(&RegisterServer,sizeof(RegisterServer));
 
+		/*
 		//构造数据
 		RegisterServer.dwServerID=m_pGameServiceOption->dwServerID;
 		lstrcpyn(RegisterServer.szServerName, m_pGameServiceOption->szServerName, CountArray(RegisterServer.szServerName));
 		lstrcpyn(RegisterServer.szGameServerAddr, m_pGameServiceOption->szGameServerAddr,CountArray(RegisterServer.szGameServerAddr));
 		RegisterServer.wGameServerPort=m_pGameServiceOption->wGameServerPort;
 		RegisterServer.dwSubGameVersion = m_pGameServiceAttrib->dwSubGameVersion;
+		*/
 
 		//发送数据
 		g_TCPSocketEngine->SendData(MDM_REGISTER,CPR_GP_REGISTER_GAME,&RegisterServer,sizeof(RegisterServer));
@@ -4127,22 +4115,6 @@ WORD CAttemperEngineSink::GetPropertyType(WORD wPropertyIndex)
 	ASSERT(false);
 
 	return PT_TYPE_ERROR;
-}
-
-
-//配置机器
-bool CAttemperEngineSink::InitAndroidUser()
-{
-	//机器参数
-	tagAndroidUserParameter AndroidUserParameter;
-	ZeroMemory(&AndroidUserParameter,sizeof(AndroidUserParameter));
-
-	//配置参数
-	AndroidUserParameter.pGameParameter=m_pGameParameter;
-	AndroidUserParameter.pGameServiceAttrib=m_pGameServiceAttrib;
-	AndroidUserParameter.pGameServiceOption=m_pGameServiceOption;
-
-	return true;
 }
 
 //配置桌子
