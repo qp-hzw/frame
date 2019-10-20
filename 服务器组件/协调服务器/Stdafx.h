@@ -71,13 +71,17 @@
 
 
 //组件定义
+#include "../../../../share\依赖项\全局定义\Struct.h"
+
 #include "../../../../share\依赖项\服务核心\ServiceCoreHead.h"
 #include "../../../../share\依赖项\服务核心\WHIniData.h"
 #include "../../../../share\依赖项\服务核心\WHDataLocker.h"
 #include "../../../../share\依赖项\服务核心\WHService.h"
+#include "../../../../share\依赖项\服务核心\log.h"
+#include "../../../../share\依赖项\服务核心\WHModule.h"
 
 #include "../../../../share\依赖项\内核引擎\KernelEngineHead.h"
-#include "../../../../share\依赖项\内核引擎\log.h"
+
 
 //////////////////////////////////////////////////////////////////////////////////
 //链接代码

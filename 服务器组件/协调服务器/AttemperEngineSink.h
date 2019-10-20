@@ -52,9 +52,6 @@ protected:
 protected:
 	CGlobalInfoManager				m_GlobalInfoManager;				//全局管理
 
-	//组件接口
-protected:
-	ITCPNetworkEngine *				m_pITCPNetworkEngine;				//网络引擎
 #pragma endregion
 
 #pragma region 初始化函数

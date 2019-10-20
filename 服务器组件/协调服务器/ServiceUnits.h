@@ -15,8 +15,8 @@ protected:
 
 	//内核组件
 protected:
-	CAttemperEngineHelper			m_AttemperEngine;					//调度引擎
-	CTCPNetworkEngineHelper			m_TCPNetworkEngine;					//网络引擎
+	IAttemperEngine			       *m_AttemperEngine;					//调度引擎
+    ITCPNetworkEngine			   *m_TCPNetworkEngine;					//网络引擎
 
 
 	//函数定义
@@ -40,5 +40,8 @@ protected:
 	//启动内核
 	int StartKernelService();
 };
+           
+extern IAttemperEngine			   *g_AttemperEngine;					//调度引擎
+extern ITCPNetworkEngine		   *g_TCPNetworkEngine;				    //socket::server
 
 #endif
