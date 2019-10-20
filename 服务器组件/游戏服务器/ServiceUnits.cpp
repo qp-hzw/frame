@@ -12,8 +12,9 @@ ITimerEngine			   *g_TimerEngine = NULL;						//定时器
 
 
 //构造函数
-CServiceUnits::CServiceUnits()
+CServiceUnits::CServiceUnits(std::string dll_name)
 {
+	m_subgame_dll_name = dll_name;
 	//设置对象
 	if (g_pServiceUnits==NULL) g_pServiceUnits=this;
 
@@ -36,18 +37,17 @@ int CServiceUnits::InitializeService()
 	m_TCPNetworkEngine = static_cast<ITCPNetworkEngine*>(CWHModule::TCPNetworkEngine());
 	m_TCPSocketEngine = static_cast<ITCPSocketEngine*>(CWHModule::TCPSocketEngine());
 	m_TimerEngine = static_cast<ITimerEngine*>(CWHModule::TimerEngine());
-	
-	//游戏模块
-	if ((m_GameServiceManager.GetInterface()==NULL)&&(m_GameServiceManager.CreateInstance()==false))
-	{
-		return -7;
-	}
 
+
+	wchar_t * dll_name = new wchar_t[m_subgame_dll_name.size()];
+	swprintf(dll_name,100,L"%S",m_subgame_dll_name.c_str()); //注意大写
+	ITableFrameSink *SubGameDll = static_cast<ITableFrameSink*>(CWHModule::SubGame(dll_name)); //此处只是校验
 
 	if(m_AttemperEngine == NULL) return 1;
 	if(m_TCPNetworkEngine == NULL) return 2;
 	if(m_TCPSocketEngine == NULL) return 3;
 	if(m_TimerEngine == NULL) return 4;
+	if(SubGameDll == NULL) return 5;
 
 	g_AttemperEngine = m_AttemperEngine;
 	g_TCPNetworkEngine = m_TCPNetworkEngine;
@@ -76,7 +76,9 @@ int CServiceUnits::InitializeService()
 
 	/***************************************************  log 配置信息 *************************************************/
 	//考虑到游戏服到现在才能知道ServerID, 因此只能将log的配置信息写到这里
-	std::string log_nam= "GameServer-" + std::to_string(m_GameServiceOption.dwServerID) + ".log";
+	//std::string log_nam= "GameServer-" + std::to_string(m_GameServiceOption.dwServerID) + ".log";
+
+	std::string log_nam= "GameServer.log";
 	CLog::Init(log_nam.c_str());
 
 	return 0;
@@ -120,9 +122,6 @@ bool CServiceUnits::ConcludeService()
 	if (m_AttemperEngine!=NULL) m_AttemperEngine->ConcludeService();
 	if (m_TCPSocketEngine!=NULL) m_TCPSocketEngine->ConcludeService();
 	if (m_TCPNetworkEngine!=NULL) m_TCPNetworkEngine->ConcludeService();
-
-	//注销组件
-	if (m_GameServiceManager.GetInterface()!=NULL) m_GameServiceManager.CloseInstance();
 
 	return true;
 }

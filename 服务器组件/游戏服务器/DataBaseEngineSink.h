@@ -47,14 +47,6 @@ public:
 	//服务配置
 	virtual tagGameServiceOption * GetGameServiceOption() { return m_pGameServiceOption; }
 
-	//获取对象
-public:
-	//获取对象
-	virtual VOID * GetDataBase(REFGUID Guid, DWORD dwQueryVer);
-	//获取对象
-	virtual VOID * GetDataBaseEngine(REFGUID Guid, DWORD dwQueryVer);
-
-
 
 	//系统事件
 public:

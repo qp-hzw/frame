@@ -63,16 +63,6 @@ protected:
 	CServerUserManager				m_ServerUserManager;				//用户管理 在激活用户的时候赋值
 	CWaitDistributeList             m_WaitDistributeList;               //等待分配
 
-
-	//组件接口
-protected:
-	ITimerEngine *					m_pITimerEngine;					//时间引擎
-	IAttemperEngine *				m_pIAttemperEngine;					//调度引擎
-	ITCPSocketEngine *				m_pITCPSocketEngine;				//网络服务 协调服务
-	ITCPNetworkEngine *				m_pITCPNetworkEngine;				//网络引擎
-	IGameServiceManager *			m_pIGameServiceManager;				//服务管理
-
-
 	//房间控制值
 public:
 	SCORE							m_ControlValueForRoom;

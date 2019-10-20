@@ -649,21 +649,6 @@ public:
 //////////////////////////////////////////////////////////////////////////////////
 
 #ifdef _UNICODE
-#define VER_IServerUserService INTERFACE_VERSION(1,1)
-static const GUID IID_IServerUserService={0x2f4e25a9,0xad87,0x4a37,0x98,0x96,0x5c,0x50,0xf9,0x91,0x05,0x31};
-#else
-#define VER_IServerUserService INTERFACE_VERSION(1,1)
-static const GUID IID_IServerUserService={0xcc4e885f,0x3357,0x4d68,0xb2,0x6b,0x78,0x8f,0x4b,0x3e,0x64,0xc3};
-#endif
-
-//用户服务
-interface IServerUserService : public IUnknownEx
-{
-};
-
-//////////////////////////////////////////////////////////////////////////////////
-
-#ifdef _UNICODE
 #define VER_IServerUserItemSink INTERFACE_VERSION(1,1)
 static const GUID IID_IServerUserItemSink={0x415be3e4,0xd48d,0x4a77,0x94,0xb7,0xd1,0x05,0xcd,0xa3,0x82,0x81};
 #else

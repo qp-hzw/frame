@@ -1,15 +1,13 @@
 #ifndef SERVER_USER_MANAGER_HEAD_FILE
 #define SERVER_USER_MANAGER_HEAD_FILE
 
-#pragma once
-
 #include "AfxTempl.h"
 #include "GameServiceHead.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 
 //用户信息
-class GAME_SERVICE_CLASS CServerUserItem : public IServerUserItem, public IServerUserService
+class  CServerUserItem : public IServerUserItem
 {
 	//友元定义
 	friend class CServerUserManager;
@@ -291,7 +289,7 @@ typedef CWHArray<CServerUserItem *> CServerUserItemArray;
 typedef CMap<DWORD,DWORD,CServerUserItem *,CServerUserItem *> CServerUserItemMap;
 
 //用户管理类
-class GAME_SERVICE_CLASS CServerUserManager : public IServerUserManager
+class  CServerUserManager : public IServerUserManager
 {
 	//用户变量
 protected:

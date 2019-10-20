@@ -21,7 +21,7 @@ BOOL CGameServerApp::InitInstance()
 	InitCommonControls();
 	AfxEnableControlContainer();
 
-	CServiceUnits m_ServiceUnits;
+	CServiceUnits m_ServiceUnits("dll_name.so"); //jTODONOW
 	m_ServiceUnits.StartService();
 
 	//Æô¶¯·þÎñ

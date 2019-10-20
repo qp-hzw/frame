@@ -75,7 +75,6 @@ CServerUserItem::~CServerUserItem()
 VOID * CServerUserItem::QueryInterface(REFGUID Guid, DWORD dwQueryVer)
 {
 	QUERYINTERFACE(IServerUserItem,Guid,dwQueryVer);
-	QUERYINTERFACE(IServerUserService,Guid,dwQueryVer);
 	QUERYINTERFACE_IUNKNOWNEX(IServerUserItem,Guid,dwQueryVer);
 	return NULL;
 }

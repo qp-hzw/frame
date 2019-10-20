@@ -77,7 +77,6 @@ CTableFrame::CTableFrame()
 	m_pGameServiceOption=NULL;
 
 	//组件接口
-	m_pITimerEngine=NULL;
 	m_pITableFrameSink=NULL;
 	m_pIMainServiceFrame=NULL;
 
@@ -85,9 +84,6 @@ CTableFrame::CTableFrame()
 	m_pITableUserAction=NULL;
 	m_pITableUserRequest=NULL;
 	m_pIMatchTableAction=NULL;
-
-	//比赛接口
-	m_pIGameMatchSink=NULL;
 
 	//用户数组
 	ZeroMemory(m_TableUserItemArray,sizeof(m_TableUserItemArray));
