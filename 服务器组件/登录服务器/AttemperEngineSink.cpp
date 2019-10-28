@@ -55,14 +55,6 @@ CAttemperEngineSink::~CAttemperEngineSink()
 {
 }
 
-//接口查询
-VOID * CAttemperEngineSink::QueryInterface(REFGUID Guid, DWORD dwQueryVer)
-{
-	QUERYINTERFACE(IAttemperEngineSink,Guid,dwQueryVer);
-	QUERYINTERFACE_IUNKNOWNEX(IAttemperEngineSink,Guid,dwQueryVer);
-	return NULL;
-}
-
 //启动事件
 bool CAttemperEngineSink::OnAttemperEngineStart(IUnknownEx * pIUnknownEx)
 {

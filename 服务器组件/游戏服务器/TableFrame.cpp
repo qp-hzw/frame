@@ -117,14 +117,6 @@ CTableFrame::~CTableFrame()
 	return;
 }
 
-//接口查询
-VOID * CTableFrame::QueryInterface(REFGUID Guid, DWORD dwQueryVer)
-{
-	QUERYINTERFACE(ITableFrame,Guid,dwQueryVer);
-	QUERYINTERFACE_IUNKNOWNEX(ITableFrame,Guid,dwQueryVer);
-	return NULL;
-}
-
 //设置桌主，第一个坐下的玩家
 void CTableFrame::SetTableOwner(DWORD dwUserID)
 {
@@ -1931,12 +1923,12 @@ bool CTableFrame::InitializationFrame(WORD wTableID, tagTableFrameParameter & Ta
 	}
 
 	//设置桌子
-	IUnknownEx * pITableFrame=QUERY_ME_INTERFACE(IUnknownEx);
+	IUnknownEx * pITableFrame=static_cast<IUnknownEx*>(this);
 	if (m_pITableFrameSink->Initialization(pITableFrame)==false) return false;
 
 	//扩展接口
-	m_pITableUserAction=QUERY_OBJECT_PTR_INTERFACE(m_pITableFrameSink,ITableUserAction);
-	m_pITableUserRequest=QUERY_OBJECT_PTR_INTERFACE(m_pITableFrameSink,ITableUserRequest);
+	m_pITableUserAction=static_cast<ITableUserAction*>(m_pITableFrameSink);
+	m_pITableUserRequest=static_cast<ITableUserRequest*>(m_pITableFrameSink);
 
 	//创建比赛模式
 	/*

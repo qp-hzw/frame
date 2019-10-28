@@ -62,16 +62,15 @@ public:
 	//析构函数
 	virtual ~CAttemperEngineSink();
 
-	//基础接口
+	//管理接口
 public:
-	//释放对象
-	virtual VOID Release() { return; }
-	//接口查询
-	virtual VOID * QueryInterface(REFGUID Guid, DWORD dwQueryVer);
+	//启动服务
+	virtual bool StartService(){return true;}
+	//停止服务
+	virtual bool ConcludeService(){return true;}
 #pragma endregion
 
 #pragma region 事件接口
-	//异步接口
 public:
 	//启动事件
 	virtual bool OnAttemperEngineStart(IUnknownEx * pIUnknownEx);

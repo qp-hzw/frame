@@ -71,14 +71,6 @@ CServerUserItem::~CServerUserItem()
 {
 }
 
-//接口查询
-VOID * CServerUserItem::QueryInterface(REFGUID Guid, DWORD dwQueryVer)
-{
-	QUERYINTERFACE(IServerUserItem,Guid,dwQueryVer);
-	QUERYINTERFACE_IUNKNOWNEX(IServerUserItem,Guid,dwQueryVer);
-	return NULL;
-}
-
 //用户胜率
 WORD CServerUserItem::GetUserWinRate()
 {
@@ -378,8 +370,8 @@ CServerUserManager::CServerUserManager()
 CServerUserManager::~CServerUserManager()
 {
 	//释放用户
-	for (INT_PTR i=0;i<m_UserItemStore.GetCount();i++) m_UserItemStore[i]->Release();
-	for (INT_PTR i=0;i<m_UserItemArray.GetCount();i++) m_UserItemArray[i]->Release();
+	for (INT_PTR i=0;i<m_UserItemStore.GetCount();i++) delete m_UserItemStore[i];
+	for (INT_PTR i=0;i<m_UserItemArray.GetCount();i++) delete m_UserItemArray[i];
 
 	//删除数据
 	m_UserIDMap.RemoveAll();
@@ -389,14 +381,6 @@ CServerUserManager::~CServerUserManager()
 	return;
 }
 
-//接口查询
-VOID * CServerUserManager::QueryInterface(REFGUID Guid, DWORD dwQueryVer)
-{
-	QUERYINTERFACE(IServerUserManager,Guid,dwQueryVer);
-	QUERYINTERFACE_IUNKNOWNEX(IServerUserManager,Guid,dwQueryVer);
-	return NULL;
-}
-
 //设置接口
 bool CServerUserManager::SetServerUserItemSink(IUnknownEx * pIUnknownEx)
 {
@@ -404,8 +388,7 @@ bool CServerUserManager::SetServerUserItemSink(IUnknownEx * pIUnknownEx)
 	if (pIUnknownEx!=NULL)
 	{
 		//查询接口
-		ASSERT(QUERY_OBJECT_PTR_INTERFACE(pIUnknownEx,IServerUserItemSink)!=NULL);
-		m_pIServerUserItemSink=QUERY_OBJECT_PTR_INTERFACE(pIUnknownEx,IServerUserItemSink);
+		m_pIServerUserItemSink=static_cast<IServerUserItemSink*>(pIUnknownEx);
 
 		//成功判断
 		if (m_pIServerUserItemSink==NULL) return false;

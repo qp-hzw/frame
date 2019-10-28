@@ -23,18 +23,7 @@ CDataBaseEngineSink::CDataBaseEngineSink()
 //析构函数
 CDataBaseEngineSink::~CDataBaseEngineSink()
 {
-	//释放对象
-	SafeRelease(m_pIGameDataBaseEngineSink);
-
 	return;
-}
-
-//接口查询
-VOID * CDataBaseEngineSink::QueryInterface(REFGUID Guid, DWORD dwQueryVer)
-{
-	QUERYINTERFACE(IDataBaseEngineSink,Guid,dwQueryVer);
-	QUERYINTERFACE_IUNKNOWNEX(IDataBaseEngineSink,Guid,dwQueryVer);
-	return NULL;
 }
 
 //启动事件

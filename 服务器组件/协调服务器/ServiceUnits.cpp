@@ -60,7 +60,7 @@ int CServiceUnits::InitializeService()
 	g_TCPNetworkEngine = m_TCPNetworkEngine;
 
 	//回调对象
-	IUnknownEx * pIAttemperEngineSink=QUERY_OBJECT_INTERFACE(m_AttemperEngineSink,IUnknownEx);
+	IUnknownEx * pIAttemperEngineSink=static_cast<IUnknownEx*>(&m_AttemperEngineSink);
 
 	/***************************************************  AttemperEngine 配置信息 *************************************************/
 	//AttemperEngine设置回调

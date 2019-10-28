@@ -53,8 +53,8 @@ int CServiceUnits::InitializeService()
 	g_TimerEngine = m_TimerEngine;
 
 	//回调对象
-	IUnknownEx * pIAttemperEngineSink=QUERY_OBJECT_INTERFACE(m_AttemperEngineSink,IUnknownEx);
-	IUnknownEx * pIDataBaseEngineSink=QUERY_OBJECT_INTERFACE(m_DataBaseEngineSink,IUnknownEx);
+	IUnknownEx * pIAttemperEngineSink=static_cast<IUnknownEx*>(&m_AttemperEngineSink);
+	IUnknownEx * pIDataBaseEngineSink=static_cast<IUnknownEx*>(&m_DataBaseEngineSink);
 
 	/***************************************************  AttemperEngine 配置信息 *************************************************/
 	//AttemperEngine设置 Attemper钩子
