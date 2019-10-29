@@ -1,6 +1,5 @@
 #include "StdAfx.h"
 #include "ServiceUnits.h"
-#include "ControlPacket.h"
 #include "AttemperEngineSink.h"
 #include "RankManager.h"
 #include "ServiceUnits.h"
@@ -1042,11 +1041,6 @@ bool CAttemperEngineSink::OnDBPCGameListResult(DWORD dwContextID, VOID * pData, 
 	{
 		//清理列表
 		//m_ServerListManager.CleanKernelItem();
-
-		//事件通知
-		CP_ControlResult ControlResult;
-		ControlResult.cbSuccess=ER_SUCCESS;
-
 	}
 	else
 	{

@@ -1,14 +1,17 @@
 #include "StdAfx.h"
 #include "ServiceUnits.h"
-#include "ControlPacket.h"
 #include "AttemperEngineSink.h"
 #include <vector>
 #include <algorithm>
-#include <iostream>
 
 #include "../../全局定义/Define.h"
 
 CAttemperEngineSink * g_AttemperEngineSink = NULL;
+
+//////////////////////////////////////////////////////////////////////////////////
+#define CT_CONNECT_CORRESPOND		100									//连接协调
+#define CT_LOAD_SERVICE_CONFIG		101									//加载配置
+#define CT_TRY_TO_STOP_SERVICE		102									//停止服务
 
 //////////////////////////////////////////////////////////////////////////////////
 //时间标识
@@ -368,7 +371,6 @@ bool CAttemperEngineSink::OnEventTCPSocketShut(WORD wServiceID, BYTE cbShutReaso
 //连接事件
 bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 {
-	std::cout << "OnEventTCPSocketLink" <<std::endl;
 	//协调连接
 	if (wServiceID==NETWORK_CORRESPOND)
 	{

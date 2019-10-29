@@ -2,7 +2,6 @@
 #include <iostream>
 #include "StdAfx.h"
 #include "ServiceUnits.h"
-#include "ControlPacket.h"
 
 
 //全局变量

@@ -24,9 +24,6 @@
     <ClInclude Include="AttemperEngineSink.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ControlPacket.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="DataBaseEngineSink.h">
       <Filter>头文件</Filter>
     </ClInclude>
