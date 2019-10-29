@@ -3,7 +3,6 @@
 
 #include "Stdafx.h"
 #include "TableFrame.h"
-#include "ServerListManager.h"
 #include "DataBasePacket.h"
 #include "ServerUserManager.h"
 
