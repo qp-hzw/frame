@@ -2,14 +2,14 @@
 #define TABLE_FRAME_HEAD_FILE
 
 #include "Stdafx.h"
-#pragma pack(1)
+#include "Player.h"
 //////////////////////////////////////////////////////////////////////////////////
 #define GAME_CONCLUDE_CONTINUE  0xFF //大局结束并续费
 #define GAME_CONCLUDE_NORMAL    0xFE //正常结束
 
 //数组定义
-typedef IServerUserItem * CTableUserItemArray[MAX_CHAIR];				//游戏数组
-typedef CWHArray<IServerUserItem *> CLookonUserItemArray;				//旁观数组
+typedef CPlayer * CTableUserItemArray[MAX_CHAIR];				//游戏数组
+typedef CWHArray<CPlayer *> CLookonUserItemArray;				//旁观数组
 typedef CWHArray<tagGameScoreRecord *> CGameScoreRecordArray;			//记录数组
 interface IMatchTableFrameNotify;
 
@@ -82,14 +82,9 @@ protected:
 protected:
 	ITimerEngine *					m_pITimerEngine;					//时间引擎
 	ITableFrameSink	*				m_pITableFrameSink;					//桌子接口
-	IMainServiceFrame *				m_pIMainServiceFrame;				//服务接口
 
 	//扩展接口
 protected:
-	ITableUserAction *				m_pITableUserAction;				//动作接口
-	ITableUserRequest *				m_pITableUserRequest;				//请求接口
-	ITableUserAction *				m_pIMatchTableAction;				//动作接口(比赛用)
-
 	ITCPSocketEngine *				m_pITCPSocketEngine;				//网络服务
 
 	//配置信息
@@ -233,7 +228,7 @@ public:
 	bool WriteRecordInfo(WORD wXJCount,TCHAR strScore[], VOID* pData, DWORD dwDataSize);
 
 	//TODONOW 下次迭代删除  查询限额
-	virtual SCORE QueryConsumeQuota(IServerUserItem * pIServerUserItem);
+	virtual SCORE QueryConsumeQuota(CPlayer * pIServerUserItem);
 
 	
 	//小局大局结束辅助函数
@@ -243,7 +238,7 @@ protected:
 	//每局游戏结束后，更新用户财富信息
 	bool XJModifyUserTreasure(BYTE byTableMode, BYTE byRound, SCORE *lGameScore, tagTableRule *pCfg);	
 	//每局游戏结束后, 检测用户财富是否可以继续游戏
-	bool CheckUserLeave(BYTE byTableMode, IServerUserItem* pIServerUserItem, tagTableRule* pCfg);
+	bool CheckUserLeave(BYTE byTableMode, CPlayer* pIServerUserItem, tagTableRule* pCfg);
 	//每局游戏结束后，更新游戏任务状态
 	bool XJUpdateGameTaskStatus(const BYTE &cbTableMode, const BYTE &cbCurGameCount);
 #pragma endregion
@@ -285,44 +280,44 @@ public:
 	//所有用户
 public:
 	//发送数据
-	virtual bool SendUserItemData(IServerUserItem * pIServerUserItem, WORD wSubCmdID);
+	virtual bool SendUserItemData(CPlayer * pIServerUserItem, WORD wSubCmdID);
 	//发送数据
-	virtual bool SendUserItemData(IServerUserItem * pIServerUserItem, WORD wSubCmdID, VOID * pData, WORD wDataSize);
+	virtual bool SendUserItemData(CPlayer * pIServerUserItem, WORD wSubCmdID, VOID * pData, WORD wDataSize);
 
 	//系统消息
 public:
 	//发送消息
 	virtual bool SendGameMessage(LPCTSTR lpszMessage, WORD wType);
 	//游戏消息
-	virtual bool SendGameMessage(IServerUserItem * pIServerUserItem, LPCTSTR lpszMessage, WORD wType);
+	virtual bool SendGameMessage(CPlayer * pIServerUserItem, LPCTSTR lpszMessage, WORD wType);
 	//房间消息
-	virtual bool SendRoomMessage(IServerUserItem * pIServerUserItem, LPCTSTR lpszMessage, WORD wType);
+	virtual bool SendRoomMessage(CPlayer * pIServerUserItem, LPCTSTR lpszMessage, WORD wType);
 #pragma endregion
 
 #pragma region 用户接口
 	//用户接口
 public:
 	//寻找用户 -- 旁观用户 +游戏用户
-	virtual IServerUserItem * SearchUserItem(DWORD dwUserID);
+	virtual CPlayer * SearchUserItem(DWORD dwUserID);
 	//游戏用户
-	virtual IServerUserItem * GetTableUserItem(WORD wChairID);
+	virtual CPlayer * GetTableUserItem(WORD wChairID);
 	//旁观用户
-	virtual IServerUserItem * EnumLookonUserItem(WORD wEnumIndex);
+	virtual CPlayer * EnumLookonUserItem(WORD wEnumIndex);
 
 	//动作处理
 public:
 	//起立动作
-	virtual bool PerformStandUpAction(IServerUserItem * pIServerUserItem);
+	virtual bool PerformStandUpAction(CPlayer * pIServerUserItem);
 	//旁观动作
-	virtual bool PerformLookonAction(WORD wChairID, IServerUserItem * pIServerUserItem);
+	virtual bool PerformLookonAction(WORD wChairID, CPlayer * pIServerUserItem);
 	//坐下动作		只有创建和加入房间时，用户坐下时需要校验GPS，故加此字段
-	virtual bool PerformSitDownAction(WORD wChairID, IServerUserItem * pIServerUserItem, LPCTSTR lpszPassword=NULL, bool bCheckUserGPS = false);
+	virtual bool PerformSitDownAction(WORD wChairID, CPlayer * pIServerUserItem, LPCTSTR lpszPassword=NULL, bool bCheckUserGPS = false);
 #pragma endregion
 
 	//功能接口
 public:
 	//发送场景
-	virtual bool SendGameScene(IServerUserItem * pIServerUserItem, VOID * pData, WORD wDataSize);
+	virtual bool SendGameScene(CPlayer * pIServerUserItem, VOID * pData, WORD wDataSize);
 
 #pragma region 比赛接口
 	//比赛接口
@@ -357,9 +352,9 @@ public:
 	//用户事件
 public:
 	//断线事件
-	bool OnEventUserOffLine(IServerUserItem * pIServerUserItem);
+	bool OnEventUserOffLine(CPlayer * pIServerUserItem);
 	//积分事件
-	bool OnUserScroeNotify(WORD wChairID, IServerUserItem * pIServerUserItem, BYTE cbReason);
+	bool OnUserScroeNotify(WORD wChairID, CPlayer * pIServerUserItem, BYTE cbReason);
 
 	//通用事件
 public:
@@ -373,25 +368,25 @@ public:
 	//时间事件
 	bool OnEventTimer(DWORD dwTimerID, WPARAM dwBindParameter);
 	//游戏事件
-	bool OnEventSocketGame(WORD wSubCmdID, VOID * pData, WORD wDataSize, IServerUserItem * pIServerUserItem);
+	bool OnEventSocketGame(WORD wSubCmdID, VOID * pData, WORD wDataSize, CPlayer * pIServerUserItem);
 	//框架事件
-	bool OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSize, IServerUserItem * pIServerUserItem);
+	bool OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSize, CPlayer * pIServerUserItem);
 
 	//辅助函数
 public:
 	//桌子状态
 	bool SendTableStatus();
 	//请求失败
-	bool SendRequestFailure(IServerUserItem * pIServerUserItem, LPCTSTR pszDescribe, LONG lErrorCode);
+	bool SendRequestFailure(CPlayer * pIServerUserItem, LPCTSTR pszDescribe, LONG lErrorCode);
 
 	//效验函数
 public:
 	//开始效验
 	bool EfficacyStartGame(WORD wReadyChairID);
 	//地址效验
-	bool EfficacyIPAddress(IServerUserItem * pIServerUserItem);
+	bool EfficacyIPAddress(CPlayer * pIServerUserItem);
 	//积分效验
-	bool EfficacyScoreRule(IServerUserItem * pIServerUserItem);
+	bool EfficacyScoreRule(CPlayer * pIServerUserItem);
 	//校验用户GPS距离
 	bool CheckUserDistance();
 	//检验用户的IP地址（暂时不用EfficacyIPAddress函数）
@@ -410,7 +405,7 @@ public:
 
 //虚拟用户，添加机器人
 public:
-	virtual bool AddVirtualUser(IServerUserItem* pServerUserItem);
+	virtual bool AddVirtualUser(CPlayer* pServerUserItem);
 
 	//辅助函数
 protected:

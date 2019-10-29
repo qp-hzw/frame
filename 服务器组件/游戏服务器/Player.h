@@ -1,19 +1,18 @@
-#ifndef SERVER_USER_MANAGER_HEAD_FILE
-#define SERVER_USER_MANAGER_HEAD_FILE
+#ifndef C_PLAYER_H
+#define C_PLAYER_H
 
-#include "AfxTempl.h"
-#include "GameServiceHead.h"
+#include "Stdafx.h"
+#include "gameservicehead.h"
 
-//////////////////////////////////////////////////////////////////////////////////
-
-//用户信息
-class  CServerUserItem : public IServerUserItem
+/*
+** 用户信息
+** 2019-10-29
+** wcq
+*/
+class  CPlayer
 {
-	//友元定义
-	friend class CServerUserManager;
-
 	//属性变量
-protected:
+private:
 	tagUserInfo						m_UserInfo;							//用户信息
 	tagUserRule						m_UserRule;							//用户规则
 	tagUserScore					m_ScoreFormer;						//先前分数
@@ -61,10 +60,6 @@ protected:
 	DWORD							m_dwClientAddr;						//连接地址
 	TCHAR							m_szMachineID[LEN_MACHINE_ID];		//机器标识
 
-	//组件接口
-protected:
-	IServerUserItemSink *			m_pIServerUserItemSink;				//回调接口
-
 	//手机定义
 protected:
 	WORD	                        m_wDeskPos;                         //当前分页
@@ -78,18 +73,11 @@ protected:
 protected:
 
 	//函数定义
-protected:
-	//构造函数
-	CServerUserItem();
-	//析构函数
-	virtual ~CServerUserItem();
-
-	//管理接口
 public:
-	//启动服务
-	virtual bool StartService(){return true;}
-	//停止服务
-	virtual bool ConcludeService(){return true;}
+	//构造函数
+	CPlayer(tagUserInfo & UserInfo, tagUserInfoPlus & UserInfoPlus);
+	//析构函数
+	virtual ~CPlayer();
 
 	//属性信息
 public:
@@ -281,69 +269,5 @@ public:
 	//获取是否为虚拟用户
 	virtual bool IsVirtualUser(){return m_bVirtualUser;}
 };
-
-//////////////////////////////////////////////////////////////////////////////////
-
-//用户索引类
-typedef CWHArray<CServerUserItem *> CServerUserItemArray;
-typedef CMap<DWORD,DWORD,CServerUserItem *,CServerUserItem *> CServerUserItemMap;
-
-//用户管理类
-class  CServerUserManager : public IServerUserManager
-{
-	//用户变量
-protected:
-	CServerUserItemMap				m_UserIDMap;						//用户索引
-	CServerUserItemArray			m_UserItemArray;					//用户数组
-	CServerUserItemArray			m_UserItemStore;					//存储用户
-
-	//组件接口
-protected:
-	IServerUserItemSink *			m_pIServerUserItemSink;				//回调接口
-
-	//函数定义
-public:
-	//构造函数
-	CServerUserManager();
-	//析构函数
-	virtual ~CServerUserManager();
-
-	//管理接口
-public:
-	//启动服务
-	virtual bool StartService(){return true;}
-	//停止服务
-	virtual bool ConcludeService(){return true;}
-
-	//配置函数
-public:
-	//设置接口
-	virtual bool SetServerUserItemSink(IUnknownEx * pIUnknownEx);
-
-	//查找函数
-public:
-	//枚举用户
-	virtual IServerUserItem * EnumUserItem(WORD wEnumIndex);
-	//查找用户
-	virtual IServerUserItem * SearchUserItem(DWORD dwUserID);
-	//查找用户
-	virtual IServerUserItem * SearchUserItem(LPCTSTR pszNickName);
-
-	//统计函数
-public:
-	//在线人数
-	virtual DWORD GetUserItemCount() { return (DWORD)m_UserItemArray.GetCount(); }
-
-	//管理函数
-public:
-	//删除用户
-	virtual bool DeleteUserItem();
-	//删除用户
-	virtual bool DeleteUserItem(IServerUserItem * pIServerUserItem);
-	//插入用户
-	virtual bool InsertUserItem(IServerUserItem * * pIServerUserResult, tagUserInfo & UserInfo, tagUserInfoPlus & UserInfoPlus);
-};
-
-//////////////////////////////////////////////////////////////////////////////////
 
 #endif

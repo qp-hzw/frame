@@ -1,7 +1,8 @@
 #ifndef GAME_SERVICE_HEAD_HEAD_FILE
 #define GAME_SERVICE_HEAD_HEAD_FILE
 
-
+class CPlayer;
+class CPlayerManager;
 //////////////////////////////////////////////////////////////////////////////////
 //导出定义
 
@@ -24,10 +25,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 //接口说明
 
-//用户接口
-interface IServerUserItem;
-interface IServerUserManager;
-interface IServerUserItemSink;
+
 //桌子接口
 interface ITableFrame;
 interface ITableFrameSink;
@@ -192,17 +190,10 @@ enum enOption
 //桌子参数
 struct tagTableFrameParameter
 {
-	//服务组件
-	IMainServiceFrame *				pIMainServiceFrame;					//服务框架
-	IGameServiceManager *			pIGameServiceManager;				//服务管理
-
 	//配置变量
 	tagGameParameter *				pGameParameter;						//配置参数
 	tagGameServiceAttrib *			pGameServiceAttrib;					//桌子属性
 	tagGameServiceOption *			pGameServiceOption;					//配置参数
-
-	//比赛配置
-	IUnknownEx						* pIGameMatchServiceManager;		//比赛管理
 };
 
 //机器参数
@@ -215,7 +206,7 @@ struct tagAndroidUserParameter
 
 	//内核组件
 //	ITimerEngine *					pITimerEngine;						//时间引擎
-	IServerUserManager *			pIServerUserManager;				//用户管理
+	CPlayerManager *			pIServerUserManager;				//用户管理
 	IGameServiceManager *			pIGameServiceManager;				//服务管理
 	//ITCPNetworkEngineEvent *		pITCPNetworkEngineEvent;			//事件接口
 };
@@ -375,15 +366,6 @@ enum EN_MatchStatus
 	EN_OUT,
 };
 //////////////////////////////////////////////////////////////////////////////////
-
-#ifdef _UNICODE
-#define VER_IGameServiceManager INTERFACE_VERSION(1,1)
-static const GUID IID_IGameServiceManager={0xa975cceb,0x0331,0x4553,0xa1,0xe0,0xa7,0xc7,0x7a,0x7c,0x4e,0xfd};
-#else
-#define VER_IGameServiceManager INTERFACE_VERSION(1,1)
-static const GUID IID_IGameServiceManager={0x4b2b9d8f,0xce1b,0x44f3,0xa5,0x22,0x65,0x1a,0x65,0xc9,0x0a,0x25};
-#endif
-
 //游戏接口
 interface IGameServiceManager : public IUnknownEx
 {
@@ -405,15 +387,6 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////////////
-
-#ifdef _UNICODE
-#define VER_IGameServiceCustomRule INTERFACE_VERSION(1,1)
-static const GUID IID_IGameServiceCustomRule={0x74a43b7d,0x7c29,0x4fb8,0xa5,0x00,0x8e,0x8d,0xff,0x6e,0x2a,0xdd};
-#else
-#define VER_IGameServiceCustomRule INTERFACE_VERSION(1,1)
-static const GUID IID_IGameServiceCustomRule={0xc7ace01d,0x75f8,0x4af7,0xb1,0x80,0xa8,0x53,0xcd,0x2e,0x0a,0xb6};
-#endif
-
 //配置接口
 interface IGameServiceCustomRule : public IUnknownEx
 {
@@ -427,15 +400,6 @@ interface IGameServiceCustomRule : public IUnknownEx
 
 
 //////////////////////////////////////////////////////////////////////////////////
-
-#ifdef _UNICODE
-#define VER_IGameDataBaseEngineSink INTERFACE_VERSION(1,1)
-static const GUID IID_IGameDataBaseEngineSink={0x9b9111d9,0x7a71,0x41a1,0xae,0x78,0xd4,0xf3,0x20,0x08,0x24,0xdf};
-#else
-#define VER_IGameDataBaseEngineSink INTERFACE_VERSION(1,1)
-static const GUID IID_IGameDataBaseEngineSink={0xa6c5e2cc,0x34c1,0x422c,0xa0,0x1b,0x54,0xab,0x68,0xfa,0xe6,0x81};
-#endif
-
 //数据接口
 interface IGameDataBaseEngineSink : public IUnknownEx
 {
@@ -446,278 +410,6 @@ interface IGameDataBaseEngineSink : public IUnknownEx
 };
 
 //////////////////////////////////////////////////////////////////////////////////
-
-#ifdef _UNICODE
-#define VER_IServerUserItem INTERFACE_VERSION(1,1)
-static const GUID IID_IServerUserItem={0xcd43dce8,0x1e12,0x43be,0x8b,0x4f,0x94,0x95,0x92,0xa4,0xf6,0x19};
-#else
-#define VER_IServerUserItem INTERFACE_VERSION(1,1)
-static const GUID IID_IServerUserItem={0xb5ce01a7,0x5cd1,0x4788,0x94,0x6c,0xa1,0xef,0x5b,0x30,0x2c,0xb7};
-#endif
-
-//用户接口
-interface IServerUserItem : public IUnknownEx
-{
-	//属性信息
-public:
-	//用户索引
-	virtual WORD GetBindIndex()=NULL;
-	//用户地址
-	virtual DWORD GetClientAddr()=NULL;
-	//机器标识
-	virtual LPCTSTR GetMachineID()=NULL;
-	//设置断线标志 GameID  TODONOW
-	virtual void SetOfflineGameID(DWORD )=NULL;
-	//获取断线标志 GameID  TODONOW
-	virtual DWORD GetOfflineGameID()=NULL;
-
-	//登录信息
-public:
-	//请求标识
-	virtual DWORD GetDBQuestID()=NULL;
-	//登录时间
-	virtual DWORD GetLogonTime()=NULL;
-	//记录索引
-	virtual DWORD GetInoutIndex()=NULL;
-
-	//用户信息
-public:
-	//用户信息
-	virtual tagUserInfo * GetUserInfo()=NULL;
-	//用户规则
-	virtual tagUserRule * GetUserRule()=NULL;
-	//道具信息
-	virtual tagUserProperty * GetUserProperty()=NULL;
-
-	//属性信息
-public:
-	//用户性别
-	virtual BYTE GetGender()=NULL;
-	//用户标识
-	virtual DWORD GetUserID()=NULL;
-	//用户昵称
-	virtual LPCTSTR GetNickName()=NULL;
-	
-	//用户断线之前的状态
-	virtual void SetOldGameStatus(BYTE gamestatus) = NULL;
-
-	//用户断线之前的状态
-	virtual BYTE GetOldGameStatus() = NULL;
-
-	//状态接口
-public:
-	//桌子号码
-	virtual WORD GetTableID()=NULL;
-	//椅子号码
-	virtual WORD GetChairID()=NULL;
-	//用户状态
-	virtual BYTE GetUserStatus()=NULL;
-
-	//权限信息
-public:
-	//用户权限
-	virtual DWORD GetUserRight()=NULL;
-	//管理权限
-	virtual DWORD GetMasterRight()=NULL;
-
-	//权限信息
-public:
-	//用户权限
-	virtual BYTE GetMemberOrder()=NULL;
-	//管理权限
-	virtual BYTE GetMasterOrder()=NULL;
-
-	//积分信息
-public:
-	//用户积分
-	virtual SCORE GetUserScore()=NULL;
-	//用户成绩
-	virtual SCORE GetUserGrade()=NULL;
-
-	//获得用户房卡
-	virtual SCORE GetUserRoomCard()=NULL;
-	//设置用户房卡
-	virtual void SetUserRoomCard(SCORE lRoomCard)=NULL;
-
-	//获得用户钻石
-	virtual SCORE GetUserDiamond()=NULL;
-	//设置用户钻石
-	virtual void SetUserDiamond(SCORE lDiamod)=NULL;
-
-	//获得用户金币
-	virtual SCORE GetUserGold()=NULL;
-	//设置用户金币
-	virtual void SetUserGold(SCORE lGold)=NULL;
-
-	//用户控制值
-	virtual SCORE GetUserControlScore()=NULL;
-	virtual VOID  SetUserControlScore( SCORE val )=NULL;
-
-
-	//托管信息
-public:
-	//托管积分
-	virtual SCORE GetTrusteeScore()=NULL;
-	//锁定积分
-	virtual SCORE GetFrozenedScore()=NULL;
-
-	//积分信息
-public:
-	//用户胜率
-	virtual WORD GetUserWinRate()=NULL;
-	//用户输率
-	virtual WORD GetUserLostRate()=NULL;
-	//用户和率
-	virtual WORD GetUserDrawRate()=NULL;
-	//用户逃率
-	virtual WORD GetUserFleeRate()=NULL;
-	//游戏局数
-	virtual DWORD GetUserPlayCount()=NULL;
-
-	//效验接口
-public:
-	//对比帐号
-	virtual bool ContrastNickName(LPCTSTR pszNickName)=NULL;
-
-	//游戏状态
-public:
-	//连接状态
-	virtual bool IsClientReady()=NULL;
-	//设置连接
-	virtual VOID SetClientReady(bool bClientReady)=NULL;
-
-	//控制用户
-public:
-	//控制状态
-	virtual bool IsAndroidUser()=NULL;
-	//设置控制
-	virtual VOID SetAndroidUser(bool bbMachineUser)=NULL;
-
-public:
-	//记录接口
-public:
-	//变更判断
-	virtual bool IsVariation()=NULL;
-	//查询记录
-	virtual bool QueryRecordInfo(tagVariationInfo & UserRecordInfo)=NULL;
-	//提取变更
-	virtual bool DistillVariation(tagVariationInfo & UserVariationInfo)=NULL;
-
-	//管理接口
-public:
-	//设置状态
-	virtual bool SetUserStatus(BYTE cbUserStatus, WORD wTableID, WORD wChairID, bool bNotify=true)=NULL;
-	//修改权限
-	virtual VOID ModifyUserRight( DWORD dwAddRight, DWORD dwRemoveRight, bool bGameRight=true)=NULL;
-
-	//更新用户财富信息
-	virtual bool ModifyUserTreasure(DWORD dwTableID, BYTE byTableMode, BYTE byRound, SCORE lUserTreasuse, BYTE byWin) = NULL;
-
-	//高级接口
-public:
-	//解除绑定
-	virtual bool DetachBindStatus()=NULL;
-	//银行操作
-	virtual bool ModifyUserInsure(SCORE lScore, SCORE lInsure, SCORE lRevenue)=NULL;
-	//设置参数
-	virtual bool SetUserParameter(DWORD dwClientAddr, WORD wBindIndex, TCHAR szMachineID[LEN_MACHINE_ID], bool bAndroidUser, 
-									bool bClientReady, const double &dLongitude, const double &dLatitude)=NULL;
-
-	//手机定义
-public:
-	//手机规则
-	virtual WORD GetMobileUserRule()=NULL;
-	//设置定义
-	virtual VOID SetMobileUserRule(WORD wMobileUserRule)=NULL;
-	//当前分页
-	virtual WORD GetMobileUserDeskPos()=NULL;
-	//当前分页
-	virtual VOID SetMobileUserDeskPos(WORD wMobileUserDeskPos)=NULL;
-	//分页桌数
-	virtual WORD GetMobileUserDeskCount()=NULL;
-	//分页桌数
-	virtual VOID SetMobileUserDeskCount(WORD wMobileUserDeskCount)=NULL;
-
-public:
-	//设置为虚拟用户
-	virtual VOID SetVirtualUser(bool bVirtual) = NULL;
-	//获取是否为虚拟用户
-	virtual bool IsVirtualUser() = NULL;
-
-};
-
-//////////////////////////////////////////////////////////////////////////////////
-
-#ifdef _UNICODE
-#define VER_IServerUserItemSink INTERFACE_VERSION(1,1)
-static const GUID IID_IServerUserItemSink={0x415be3e4,0xd48d,0x4a77,0x94,0xb7,0xd1,0x05,0xcd,0xa3,0x82,0x81};
-#else
-#define VER_IServerUserItemSink INTERFACE_VERSION(1,1)
-static const GUID IID_IServerUserItemSink={0x9d0cfe02,0x0fe9,0x4a8b,0x97,0x95,0xac,0x32,0x67,0x5a,0xf8,0xb1};
-#endif
-
-//状态接口
-interface IServerUserItemSink : public IUnknownEx
-{
-	//更新用户财富信息
-	virtual bool OnEventModifyUserTreasure(IServerUserItem *pIServerUserItem, DWORD dwTableID, BYTE byTableMode, BYTE byRound, SCORE lUserTreasuse, BYTE byWin)=NULL;
-	//用户状态
-	virtual bool OnEventUserItemStatus(IServerUserItem * pIServerUserItem, WORD wOldTableID=INVALID_TABLE, WORD wOldChairID=INVALID_CHAIR)=NULL;
-	//用户权限
-	virtual bool OnEventUserItemRight(IServerUserItem *pIServerUserItem, DWORD dwAddRight, DWORD dwRemoveRight,bool bGameRight=true)=NULL;
-};
-
-//////////////////////////////////////////////////////////////////////////////////
-
-#ifdef _UNICODE
-#define VER_IServerUserManager INTERFACE_VERSION(1,1)
-static const GUID IID_IServerUserManager={0xeb413ed6,0x185b,0x4ceb,0xa8,0xbd,0x54,0x74,0x19,0x89,0x6a,0x53};
-#else
-#define VER_IServerUserManager INTERFACE_VERSION(1,1)
-static const GUID IID_IServerUserManager={0x77a3c4df,0x1d95,0x48c6,0xac,0x9d,0x75,0xd7,0x6c,0x2a,0x3c,0x0e};
-#endif
-
-//用户管理
-interface IServerUserManager : public IUnknownEx
-{
-	//配置接口
-public:
-	//设置接口
-	virtual bool SetServerUserItemSink(IUnknownEx * pIUnknownEx)=NULL;
-
-	//查找接口
-public:
-	//枚举用户
-	virtual IServerUserItem * EnumUserItem(WORD wEnumIndex)=NULL;
-	//查找用户
-	virtual IServerUserItem * SearchUserItem(DWORD dwUserID)=NULL;
-	//查找用户
-	virtual IServerUserItem * SearchUserItem(LPCTSTR pszNickName)=NULL;
-
-	//统计接口
-public:
-	//在线人数
-	virtual DWORD GetUserItemCount()=NULL;
-
-	//管理接口
-public:
-	//删除用户
-	virtual bool DeleteUserItem()=NULL;
-	//删除用户
-	virtual bool DeleteUserItem(IServerUserItem * pIServerUserItem)=NULL;
-	//插入用户
-	virtual bool InsertUserItem(IServerUserItem * * pIServerUserResult, tagUserInfo & UserInfo, tagUserInfoPlus & UserInfoPlus)=NULL;
-};
-
-//////////////////////////////////////////////////////////////////////////////////
-
-#ifdef _UNICODE
-#define VER_ITableFrame INTERFACE_VERSION(1,1)
-static const GUID IID_ITableFrame={0x2e577d5f,0x1e01,0x44ff,0x9f,0xf4,0x01,0x16,0x23,0x1b,0x76,0x15};
-#else
-#define VER_ITableFrame INTERFACE_VERSION(1,1)
-static const GUID IID_ITableFrame={0x860cd1cf,0x1a4f,0x4e35,0xb8,0x0c,0xd2,0x46,0xa4,0xef,0xfd,0xfb};
-#endif
 
 interface IGameMatchSink;
 
@@ -790,16 +482,16 @@ public:
 	//计算接口
 public:
 	//消费限额
-	virtual SCORE QueryConsumeQuota(IServerUserItem * pIServerUserItem)=NULL;
+	virtual SCORE QueryConsumeQuota(CPlayer * pIServerUserItem)=NULL;
 
 	//用户接口
 public:
 	//寻找用户
-	virtual IServerUserItem * SearchUserItem(DWORD dwUserID)=NULL;
+	virtual CPlayer * SearchUserItem(DWORD dwUserID)=NULL;
 	//游戏用户
-	virtual IServerUserItem * GetTableUserItem(WORD wChairID)=NULL;
+	virtual CPlayer * GetTableUserItem(WORD wChairID)=NULL;
 	//旁观用户
-	virtual IServerUserItem * EnumLookonUserItem(WORD wEnumIndex)=NULL;
+	virtual CPlayer * EnumLookonUserItem(WORD wEnumIndex)=NULL;
 
 	//时间接口
 public:
@@ -821,9 +513,9 @@ public:
 	//发送数据
 	virtual bool SendLookonData(WORD wChairID, WORD wSubCmdID, VOID * pData, WORD wDataSize)=NULL;
 	//发送数据
-	virtual bool SendUserItemData(IServerUserItem * pIServerUserItem, WORD wSubCmdID)=NULL;
+	virtual bool SendUserItemData(CPlayer * pIServerUserItem, WORD wSubCmdID)=NULL;
 	//发送数据
-	virtual bool SendUserItemData(IServerUserItem * pIServerUserItem, WORD wSubCmdID, VOID * pData, WORD wDataSize)=NULL;
+	virtual bool SendUserItemData(CPlayer * pIServerUserItem, WORD wSubCmdID, VOID * pData, WORD wDataSize)=NULL;
 	//发送数据
 	virtual bool SendAndroidUserData(WORD wChairID, WORD wSubCmdID) = NULL;
 	//发送数据
@@ -834,23 +526,23 @@ public:
 	//发送消息
 	virtual bool SendGameMessage(LPCTSTR lpszMessage, WORD wType)=NULL;
 	//游戏消息
-	virtual bool SendGameMessage(IServerUserItem * pIServerUserItem, LPCTSTR lpszMessage, WORD wType)=NULL;
+	virtual bool SendGameMessage(CPlayer * pIServerUserItem, LPCTSTR lpszMessage, WORD wType)=NULL;
 	//房间消息
-	virtual bool SendRoomMessage(IServerUserItem * pIServerUserItem, LPCTSTR lpszMessage, WORD wType)=NULL;
+	virtual bool SendRoomMessage(CPlayer * pIServerUserItem, LPCTSTR lpszMessage, WORD wType)=NULL;
 
 	//动作处理
 public:
 	//起立动作
-	virtual bool PerformStandUpAction(IServerUserItem * pIServerUserItem)=NULL;
+	virtual bool PerformStandUpAction(CPlayer * pIServerUserItem)=NULL;
 	//旁观动作
-	virtual bool PerformLookonAction(WORD wChairID, IServerUserItem * pIServerUserItem)=NULL;
+	virtual bool PerformLookonAction(WORD wChairID, CPlayer * pIServerUserItem)=NULL;
 	//坐下动作
-	virtual bool PerformSitDownAction(WORD wChairID, IServerUserItem * pIServerUserItem, LPCTSTR lpszPassword=NULL, bool bCheckUserGPS = false)=NULL;
+	virtual bool PerformSitDownAction(WORD wChairID, CPlayer * pIServerUserItem, LPCTSTR lpszPassword=NULL, bool bCheckUserGPS = false)=NULL;
 
 	//功能接口
 public:
 	//发送场景
-	virtual bool SendGameScene(IServerUserItem * pIServerUserItem, VOID * pData, WORD wDataSize)=NULL;
+	virtual bool SendGameScene(CPlayer * pIServerUserItem, VOID * pData, WORD wDataSize)=NULL;
 
 	//比赛接口
 public:
@@ -863,15 +555,6 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////////////
-
-#ifdef _UNICODE
-#define VER_ITableFrameSink INTERFACE_VERSION(1,1)
-static const GUID IID_ITableFrameSink={0x9476b154,0x8beb,0x4f7e,0xaf,0x64,0xd2,0xb1,0x1a,0xda,0x5e,0xc4};
-#else
-#define VER_ITableFrameSink INTERFACE_VERSION(1,1)
-static const GUID IID_ITableFrameSink={0x38a74df5,0x6245,0x46c7,0xb6,0xce,0x53,0xf9,0xd5,0xbf,0x6d,0xe6};
-#endif
-
 //回调接口
 interface ITableFrameSink : public IUnknownEx
 {
@@ -885,9 +568,9 @@ public:
 	//查询接口
 public:
 	//查询限额
-	virtual SCORE QueryConsumeQuota(IServerUserItem * pIServerUserItem)=NULL;
+	virtual SCORE QueryConsumeQuota(CPlayer * pIServerUserItem)=NULL;
 	//最少积分
-	virtual SCORE QueryLessEnterScore(WORD wChairID, IServerUserItem * pIServerUserItem)=NULL;
+	virtual SCORE QueryLessEnterScore(WORD wChairID, CPlayer * pIServerUserItem)=NULL;
 	//查询是否扣服务费
 	virtual bool QueryBuckleServiceCharge(WORD wChairID)=NULL;
 
@@ -896,9 +579,9 @@ public:
 	//游戏开始
 	virtual bool OnEventGameStart()=NULL;
 	//游戏结束
-	virtual bool OnEventGameConclude(WORD wChairID, IServerUserItem * pIServerUserItem, BYTE cbReason)=NULL;
+	virtual bool OnEventGameConclude(WORD wChairID, CPlayer * pIServerUserItem, BYTE cbReason)=NULL;
 	//发送场景
-	virtual bool OnEventSendGameScene(WORD wChairID, IServerUserItem * pIServerUserItem, BYTE cbGameStatus, bool bSendSecret)=NULL;
+	virtual bool OnEventSendGameScene(WORD wChairID, CPlayer * pIServerUserItem, BYTE cbGameStatus, bool bSendSecret)=NULL;
 
 	//事件接口
 public:
@@ -907,9 +590,9 @@ public:
 	//数据事件
 	virtual bool OnDataBaseMessage(WORD wRequestID, VOID * pData, WORD wDataSize)=NULL;
 	//积分事件
-	virtual bool OnUserScroeNotify(WORD wChairID, IServerUserItem * pIServerUserItem, BYTE cbReason)=NULL;
+	virtual bool OnUserScroeNotify(WORD wChairID, CPlayer * pIServerUserItem, BYTE cbReason)=NULL;
 	//控制值改变
-	virtual void OnUserControlScoreChange( WORD chair_id, IServerUserItem * server_user_item, SCORE val ){};
+	virtual void OnUserControlScoreChange( WORD chair_id, CPlayer * server_user_item, SCORE val ){};
 	//游戏程度改变yang
 	virtual void SetGameLevel(DWORD RoomID, DWORD val){};
 
@@ -924,9 +607,9 @@ public:
 	//网络接口
 public:
 	//游戏消息
-	virtual bool OnGameMessage(WORD wSubCmdID, VOID * pData, WORD wDataSize, IServerUserItem * pIServerUserItem)=NULL;
+	virtual bool OnGameMessage(WORD wSubCmdID, VOID * pData, WORD wDataSize, CPlayer * pIServerUserItem)=NULL;
 	//框架消息
-	virtual bool OnFrameMessage(WORD wSubCmdID, VOID * pData, WORD wDataSize, IServerUserItem * pIServerUserItem)=NULL;
+	virtual bool OnFrameMessage(WORD wSubCmdID, VOID * pData, WORD wDataSize, CPlayer * pIServerUserItem)=NULL;
 
 	//比赛接口
 public:
@@ -934,81 +617,35 @@ public:
 	virtual void SetGameBaseScore(LONG lBaseScore)=NULL;
 
 public:
-	virtual bool OnActionUserSitDownT(WORD chair_id, IServerUserItem* server_user_item, bool lookon_user){ return true; }
-	virtual bool OnActionUserStandUpT(WORD chair_id, IServerUserItem* server_user_item, bool lookon_user){ return true; }
-	virtual bool OnActionUserOnReadyT(WORD chair_id, IServerUserItem * server_user_item, void* data, WORD data_size){ return true; }
-	virtual bool OnActionUserNetCutT(WORD wChairID, IServerUserItem * pIServerUserItem, bool bLookonUser){ return true; }
-};
+	virtual bool OnActionUserSitDownT(WORD chair_id, CPlayer* server_user_item, bool lookon_user){ return true; }
+	virtual bool OnActionUserStandUpT(WORD chair_id, CPlayer* server_user_item, bool lookon_user){ return true; }
+	virtual bool OnActionUserOnReadyT(WORD chair_id, CPlayer * server_user_item, void* data, WORD data_size){ return true; }
+	virtual bool OnActionUserNetCutT(WORD wChairID, CPlayer * pIServerUserItem, bool bLookonUser){ return true; }
 
-//////////////////////////////////////////////////////////////////////////////////
-
-#ifdef _UNICODE
-#define VER_ITableUserAction INTERFACE_VERSION(1,1)
-static const GUID IID_ITableUserAction={0x0f9aa3f9,0xdba4,0x49cb,0x88,0x4f,0xd9,0x11,0xaf,0x24,0xfb,0x8d};
-#else
-#define VER_ITableUserAction INTERFACE_VERSION(1,1)
-static const GUID IID_ITableUserAction={0xc97c060b,0xcf0e,0x40b7,0x93,0x30,0x97,0xa4,0xf6,0x8c,0xca,0x84};
-#endif
-
-//用户动作
-interface ITableUserAction : public IUnknownEx
-{
+	//用户动作
+public:
 	//用户坐下
-	virtual bool OnActionUserSitDown(WORD wChairID, IServerUserItem * pIServerUserItem, bool bLookonUser)=NULL;
+	virtual bool OnActionUserSitDown(WORD wChairID, CPlayer * pIServerUserItem, bool bLookonUser)=NULL;
 	//用户起来
-	virtual bool OnActionUserStandUp(WORD wChairID, IServerUserItem * pIServerUserItem, bool bLookonUser)=NULL;
+	virtual bool OnActionUserStandUp(WORD wChairID, CPlayer * pIServerUserItem, bool bLookonUser)=NULL;
 	//用户同意
-	virtual bool OnActionUserOnReady(WORD wChairID, IServerUserItem * pIServerUserItem, VOID * pData, WORD wDataSize)=NULL;
+	virtual bool OnActionUserOnReady(WORD wChairID, CPlayer * pIServerUserItem, VOID * pData, WORD wDataSize)=NULL;
 	//用户断线
-	virtual bool OnActionUserNetCut(WORD wChairID, IServerUserItem * pIServerUserItem, bool bLookonUser){ return true; }
-};
+	virtual bool OnActionUserNetCut(WORD wChairID, CPlayer * pIServerUserItem, bool bLookonUser){ return true; }
 
-//////////////////////////////////////////////////////////////////////////////////
-
-#ifdef _UNICODE
-#define VER_ITableUserRequest INTERFACE_VERSION(1,1)
-static const GUID IID_ITableUserRequest={0x7a810ebe,0x3835,0x41b5,0xba,0x7e,0x02,0x97,0x8c,0x13,0x73,0x50};
-#else
-#define VER_ITableUserRequest INTERFACE_VERSION(1,1)
-static const GUID IID_ITableUserRequest={0x7ad17e89,0xcb5b,0x472a,0xac,0xeb,0x84,0x4d,0x4f,0xa1,0x4c,0x38};
-#endif
-
-//用户请求
-interface ITableUserRequest : public IUnknownEx
-{
+	//用户请求
+public:
 	//旁观请求
-	virtual bool OnUserRequestLookon(WORD wChairID, IServerUserItem * pIServerUserItem, tagRequestResult & RequestResult)=NULL;
+	virtual bool OnUserRequestLookon(WORD wChairID, CPlayer * pIServerUserItem, tagRequestResult & RequestResult)=NULL;
 	//坐下请求
-	virtual bool OnUserRequestSitDown(WORD wChairID, IServerUserItem * pIServerUserItem, tagRequestResult & RequestResult)=NULL;
+	virtual bool OnUserRequestSitDown(WORD wChairID, CPlayer * pIServerUserItem, tagRequestResult & RequestResult)=NULL;
 };
 
 //////////////////////////////////////////////////////////////////////////////////
-
-#ifdef _UNICODE
-#define VER_IMainServiceFrame INTERFACE_VERSION(1,1)
-static const GUID IID_IMainServiceFrame={0xef3efa64,0x788b,0x4299,0x80,0x99,0xdd,0xed,0x08,0xde,0x57,0xc1};
-#else
-#define VER_IMainServiceFrame INTERFACE_VERSION(1,1)
-static const GUID IID_IMainServiceFrame={0xbaaf5584,0xf9b4,0x41b6,0xae,0x6b,0xef,0x4d,0x54,0x41,0xf8,0x32};
-#endif
-
 //服务框架
 interface IMainServiceFrame : public IUnknownEx
 {
-	//消息接口
 public:
-	//房间消息
-	virtual bool SendRoomMessage(LPCTSTR lpszMessage, WORD wType)=NULL;
-	//游戏消息
-	virtual bool SendGameMessage(LPCTSTR lpszMessage, WORD wType)=NULL;
-	//房间消息
-	virtual bool SendRoomMessage(IServerUserItem * pIServerUserItem, LPCTSTR lpszMessage, WORD wType)=NULL;
-	//游戏消息
-	virtual bool SendGameMessage(IServerUserItem * pIServerUserItem, LPCTSTR lpszMessage, WORD wType)=NULL;
-
-	//发送到大厅和所有游戏 用前要慎重考虑( 将会发送给所有与登陆服相连的玩家. 还会发送给所有和游戏服相连的玩家)
-	virtual bool SendMessageLobbyAndAllGame(LPCTSTR lpszMessage, WORD wType,WORD MsgID){ return true;}
-
 	//库存计算是否控制
 	virtual bool IsControl( SCORE expectStock ) = NULL;
 	//修改当前库存值
@@ -1019,25 +656,14 @@ public:
 	virtual SCORE GetRoomControl() = NULL;
 	virtual void SetRoomContorl(SCORE val ) = NULL;
 
-	//网络接口
-public:
-	//发送数据
-	virtual bool SendData(BYTE cbSendMask, WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize)=NULL;
-	//发送数据
-	virtual bool SendData(DWORD dwContextID, WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize)=NULL;
-	//发送数据
-	virtual bool SendData(IServerUserItem * pIServerUserItem, WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize)=NULL;
-
 	//功能接口
 public:
 	//插入分配
-	virtual bool InsertDistribute(IServerUserItem * pIServerUserItem)=NULL;
+	virtual bool InsertDistribute(CPlayer * pIServerUserItem)=NULL;
 	//插入用户
-	virtual bool InsertWaitDistribute(IServerUserItem * pIServerUserItem)=NULL;
+	virtual bool InsertWaitDistribute(CPlayer * pIServerUserItem)=NULL;
 	//删除用户
-	virtual bool DeleteWaitDistribute(IServerUserItem * pIServerUserItem)=NULL;
-
-
+	virtual bool DeleteWaitDistribute(CPlayer * pIServerUserItem)=NULL;
 
 #pragma region DB事件通知
 	//替他人开房
@@ -1075,8 +701,6 @@ public:
 	//桌子大局结束游戏
 	virtual void ClubTableDJ(DWORD dwTableID) = NULL;
 #pragma endregion
-
-public:
 };
 
 #endif

@@ -7,16 +7,19 @@
     <ClCompile Include="DataBaseEngineSink.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ServiceUnits.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="TableFrame.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ServerUserManager.cpp">
+    <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="PlayerManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="GameCtrl.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -25,9 +28,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="DataBaseEngineSink.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ServiceUnits.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Stdafx.h">
@@ -45,7 +45,13 @@
     <ClInclude Include="..\..\消息定义\STR_CMD_GameServer.h">
       <Filter>消息定义</Filter>
     </ClInclude>
-    <ClInclude Include="ServerUserManager.h">
+    <ClInclude Include="PlayerManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="GameCtrl.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

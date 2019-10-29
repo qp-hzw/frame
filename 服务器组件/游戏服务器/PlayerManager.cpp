@@ -1,0 +1,69 @@
+#include "PlayerManager.h"
+
+std::vector<CPlayer*> CPlayerManager::s_PlayerArray;
+
+//增
+bool CPlayerManager::InsertPlayer(CPlayer * * pIServerUserResult, tagUserInfo & UserInfo, tagUserInfoPlus & UserInfoPlus)
+{
+	CPlayer * pPlayer=NULL;
+	try
+	{
+		pPlayer=new CPlayer(UserInfo, UserInfoPlus);
+	}
+	catch (...)
+	{
+		CLog::Log(log_error, "new CPlayer failed;");
+		return false;
+	}
+
+	//插入用户
+	s_PlayerArray.push_back(pPlayer);
+
+	//设置变量
+	*pIServerUserResult=pPlayer;
+
+	return true;
+}
+
+//删
+bool CPlayerManager::DeletePlayer(CPlayer * pPlayer)
+{
+	if (pPlayer==NULL) return false;
+
+	for(auto ite = s_PlayerArray.begin(); ite != s_PlayerArray.end(); ite++)
+	{
+		if(*ite == pPlayer)
+		{
+			ite = s_PlayerArray.erase(ite);
+			break;
+		}
+	}
+
+	return true;
+}
+
+//删 所有
+bool CPlayerManager::DeleteAllPlayer()
+{
+	s_PlayerArray.clear();
+	return true;
+}
+
+//查
+CPlayer * CPlayerManager::SearchPlayerByEnum(WORD wEnumIndex)
+{
+	if (wEnumIndex >= s_PlayerArray.size()) return NULL;
+	return s_PlayerArray[wEnumIndex];
+}
+
+//查
+CPlayer * CPlayerManager::SearchPlayerByID(DWORD dwUserID)
+{
+	for(auto player : s_PlayerArray)
+	{
+		if(player && player->GetUserID() == dwUserID)
+			return player;
+	}
+
+	return NULL;
+}

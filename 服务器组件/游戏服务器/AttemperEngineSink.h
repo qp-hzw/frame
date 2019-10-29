@@ -4,7 +4,8 @@
 #include "Stdafx.h"
 #include "TableFrame.h"
 #include "DataBasePacket.h"
-#include "ServerUserManager.h"
+#include "Player.h"
+#include "PlayerManager.h"
 
 //绑定参数
 struct tagBindParameter
@@ -14,7 +15,7 @@ struct tagBindParameter
 	DWORD							dwClientAddr;						//连接地址
 	DWORD							dwActiveTime;						//激活时间
 	//用户属性
-	IServerUserItem *				pIServerUserItem;					//用户接口
+	CPlayer *				        pCPlayer;					        //用户接口
 };
 
 //系统消息
@@ -27,17 +28,13 @@ struct tagSystemMessage
 
 //数组说明
 typedef CWHArray<CTableFrame *>		CTableFrameArray;					//桌子数组
-typedef CList<IServerUserItem *>    CWaitDistributeList;                //等待分配
+typedef CList<CPlayer *>    CWaitDistributeList;                //等待分配
 
 //////////////////////////////////////////////////////////////////////////////////
 
 //调度钩子
-class CAttemperEngineSink : public IAttemperEngineSink, public IMainServiceFrame,
-	public IServerUserItemSink
+class CAttemperEngineSink : public IAttemperEngineSink
 {
-	//友元定义
-	friend class CServiceUnits;
-
 #pragma region 成员变量
 	//状态变量
 protected:
@@ -59,7 +56,6 @@ protected:
 	//组件变量
 protected:
 	CTableFrameArray				m_TableFrameArray;					//桌子数组
-	CServerUserManager				m_ServerUserManager;				//用户管理 在激活用户的时候赋值
 	CWaitDistributeList             m_WaitDistributeList;               //等待分配
 
 	//房间控制值
@@ -157,51 +153,24 @@ protected:
 
 #pragma endregion
 
-#pragma region 消息发送接口
-    //网络接口
-public:
-	//发送数据
-	virtual bool SendData(BYTE cbSendMask, WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize);
-	//发送数据
-	virtual bool SendData(DWORD dwSocketID, WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize);
-	//发送数据
-	virtual bool SendData(IServerUserItem * pIServerUserItem, WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize);
-
-
-	//消息接口
-public:
-	//房间消息
-	virtual bool SendRoomMessage(LPCTSTR lpszMessage, WORD wType);
-	//游戏消息
-	virtual bool SendGameMessage(LPCTSTR lpszMessage, WORD wType);
-	//房间消息
-	virtual bool SendRoomMessage(IServerUserItem * pIServerUserItem, LPCTSTR lpszMessage, WORD wType);
-	//游戏消息
-	virtual bool SendGameMessage(IServerUserItem * pIServerUserItem, LPCTSTR lpszMessage, WORD wType);
-	//房间消息
-	virtual bool SendRoomMessage(DWORD dwSocketID, LPCTSTR lpszMessage, WORD wType, bool bAndroid);
-	//发送到大厅和所有游戏 用前要慎重考虑( 将会发送给所有与登陆服相连的玩家. 还会发送给所有和游戏服相连的玩家)
-	virtual bool SendMessageLobbyAndAllGame(LPCTSTR lpszMessage, WORD wType ,WORD MsgID);
-#pragma endregion
-
 #pragma region 用户接口
 	//功能接口
 public:
 	//插入用户
-	virtual bool InsertDistribute(IServerUserItem * pIServerUserItem);
+	virtual bool InsertDistribute(CPlayer * pCPlayer);
 	//插入用户
-	virtual bool InsertWaitDistribute(IServerUserItem * pIServerUserItem);
+	virtual bool InsertWaitDistribute(CPlayer * pCPlayer);
 	//删除用户
-	virtual bool DeleteWaitDistribute(IServerUserItem * pIServerUserItem);
+	virtual bool DeleteWaitDistribute(CPlayer * pCPlayer);
 
 	//用户接口
 public:
 	//用户状态
-	virtual bool OnEventUserItemStatus(IServerUserItem * pIServerUserItem, WORD wOldTableID=INVALID_TABLE, WORD wOldChairID=INVALID_CHAIR);
+	virtual bool OnEventUserItemStatus(CPlayer * pCPlayer, WORD wOldTableID=INVALID_TABLE, WORD wOldChairID=INVALID_CHAIR);
 	//用户权限
-	virtual bool OnEventUserItemRight(IServerUserItem *pIServerUserItem, DWORD dwAddRight, DWORD dwRemoveRight,bool bGameRight=true);
+	virtual bool OnEventUserItemRight(CPlayer *pCPlayer, DWORD dwAddRight, DWORD dwRemoveRight,bool bGameRight=true);
 	//更新用户财富信息
-	virtual bool OnEventModifyUserTreasure(IServerUserItem *pIServerUserItem, DWORD dwTableID, BYTE byTableMode, BYTE byRound, SCORE lUserTreasuse, BYTE byWin);
+	virtual bool OnEventModifyUserTreasure(CPlayer *pCPlayer, DWORD dwTableID, BYTE byTableMode, BYTE byRound, SCORE lUserTreasuse, BYTE byWin);
 #pragma endregion
 
 #pragma region 登录模块 MDM_LOGON
@@ -214,17 +183,17 @@ protected:
 
     //登录模块 辅助函数
 protected:
-	//ID登录成功，激活用户（为了给pIServerUserItem赋值，传进去双指针，pIServerUserItem传进去的就是NULL）
-	void ActiveUserItem(IServerUserItem **pIServerUserItem, DWORD dwContextID, 
+	//ID登录成功，激活用户（为了给pCPlayer赋值，传进去双指针，pCPlayer传进去的就是NULL）
+	void ActiveUserItem(CPlayer **pCPlayer, DWORD dwContextID, 
 		tagBindParameter *pBindParameter, STR_DBO_CG_LOGON_USERID *pDBOLogon, WORD wBindIndex);
 
 	//用户登录
-	VOID OnEventUserLogon(IServerUserItem * pIServerUserItem, bool bAlreadyOnLine);
+	VOID OnEventUserLogon(CPlayer * pCPlayer, bool bAlreadyOnLine);
 	//用户登出
-	VOID OnEventUserLogout(IServerUserItem * pIServerUserItem, DWORD dwLeaveReason);
+	VOID OnEventUserLogout(CPlayer * pCPlayer, DWORD dwLeaveReason);
 
 	//切换连接
-	bool SwitchUserItemConnect(IServerUserItem *pIServerUserItem, TCHAR szMachineID[LEN_MACHINE_ID], WORD wTargetIndex, 
+	bool SwitchUserItemConnect(CPlayer *pCPlayer, TCHAR szMachineID[LEN_MACHINE_ID], WORD wTargetIndex, 
 								const double &dLongitude, const double &dLatitude, 
 								BYTE cbDeviceType=DEVICE_TYPE_PC, WORD wBehaviorFlags=0, WORD wPageTableCount=0);
 #pragma endregion
@@ -348,28 +317,28 @@ protected:
 	//发送函数
 protected:
 	//发送用户信息
-	bool SendUserInfoPacket(IServerUserItem * pIServerUserItem, DWORD dwSocketID);
+	bool SendUserInfoPacket(CPlayer * pCPlayer, DWORD dwSocketID);
 
 	//辅助函数
 protected:
 	//请求失败
-	bool SendRequestFailure(IServerUserItem * pIServerUserItem, LPCTSTR pszDescribe, LONG lErrorCode);
+	bool SendRequestFailure(CPlayer * pCPlayer, LPCTSTR pszDescribe, LONG lErrorCode);
 
 	//辅助函数
 public:
 	//绑定用户
-	IServerUserItem * GetBindUserItem(WORD wBindIndex);
+	CPlayer * GetBindUserItem(WORD wBindIndex);
 	//绑定参数
 	tagBindParameter * GetBindParameter(WORD wBindIndex);
 	//道具类型
 	WORD GetPropertyType(WORD wPropertyIndex);
 	//获取空闲虚拟用户 
-	IServerUserItem * GetVirtualUserItem();
+	CPlayer * GetVirtualUserItem();
 
 	//辅助函数
 protected:
 	//设置参数
-	void SetMobileUserParameter(IServerUserItem * pIServerUserItem,BYTE cbDeviceType,WORD wBehaviorFlags,WORD wPageTableCount);
+	void SetMobileUserParameter(CPlayer * pCPlayer,BYTE cbDeviceType,WORD wBehaviorFlags,WORD wPageTableCount);
 	//群发数据
 	virtual bool SendDataBatchToMobileUser(WORD wCmdTable, WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize);
 
@@ -386,29 +355,29 @@ protected:
     //创建房间 && 创建桌子
 protected: 
 	//检查创建桌子的门票
-	bool CheckCreateTableTicket(tagTableRule * pCfg, IServerUserItem *pIServerUserItem);
+	bool CheckCreateTableTicket(tagTableRule * pCfg, CPlayer *pCPlayer);
 
     //创建普通桌子(1. 为自己创建桌子  2.为他人创建桌子)
-	bool CreateTableNormal(tagTableRule * pCfg, IServerUserItem *pIServerUserItem, STR_SUB_CG_USER_CREATE_ROOM* pCreateRoom);
+	bool CreateTableNormal(tagTableRule * pCfg, CPlayer *pCPlayer, STR_SUB_CG_USER_CREATE_ROOM* pCreateRoom);
 	//创建牌友圈房间
-	bool CreateRoomClub(tagTableRule * pCfg, IServerUserItem *pIServerUserItem, STR_SUB_CG_USER_CREATE_ROOM* pCreateRoom);
+	bool CreateRoomClub(tagTableRule * pCfg, CPlayer *pCPlayer, STR_SUB_CG_USER_CREATE_ROOM* pCreateRoom);
 	//创建牌友圈桌子(先读取数据库中的房间规则)
-	bool CreateTableClub(STR_DBO_GC_CLUB_CREATE_TABLE* , IServerUserItem *pIServerUserItem);
+	bool CreateTableClub(STR_DBO_GC_CLUB_CREATE_TABLE* , CPlayer *pCPlayer);
 
 	//创建桌子 金币大厅桌子  -- 玩家进入金币大厅时候, 如果没有找到可用的桌子,就会创建桌子
-	bool CreateTableHallGold(STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD* , IServerUserItem *pIServerUserItem);
+	bool CreateTableHallGold(STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD* , CPlayer *pCPlayer);
 
 	//创建桌子 俱乐部桌子  -- 玩家进入俱乐部桌子时候, 如果没有找到可用的桌子,就会创建桌子
-	bool CreateTableAutoClub(STR_DBO_CG_USER_JOIN_TABLE_NO_PASS* , IServerUserItem *pIServerUserItem);
+	bool CreateTableAutoClub(STR_DBO_CG_USER_JOIN_TABLE_NO_PASS* , CPlayer *pCPlayer);
 
 
 
     //创建房间 && 创建桌子 辅助函数
 protected: 
     //为自己创建桌子
-	bool HandleCreateTable(CTableFrame *pCurTableFrame, IServerUserItem *pIServerUserItem, tagTableRule *pCfg);
+	bool HandleCreateTable(CTableFrame *pCurTableFrame, CPlayer *pCPlayer, tagTableRule *pCfg);
 	//为他人创建桌子
-	void HandleCreateTableForOthers(CTableFrame *pCurTableFrame, IServerUserItem *pIServerUserItem, tagTableRule *pCfg);
+	void HandleCreateTableForOthers(CTableFrame *pCurTableFrame, CPlayer *pCPlayer, tagTableRule *pCfg);
 
 	//牌友圈房间信息需要写入数据库
 	bool WriteClubRoomToDB(STR_DBR_CLUB_ROOM_INFO* pTableInfo);
@@ -427,7 +396,7 @@ protected:
 	//加入桌子
 protected:
 	 //检查加入桌子的门票
-	bool CheckJoinTableTicket(tagTableRule * pCfg, IServerUserItem *pIServerUserItem);
+	bool CheckJoinTableTicket(tagTableRule * pCfg, CPlayer *pCPlayer);
 
 #pragma endregion 
 

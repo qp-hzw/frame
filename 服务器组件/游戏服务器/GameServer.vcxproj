@@ -188,8 +188,9 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClCompile Include="AttemperEngineSink.cpp" />
     <ClCompile Include="DataBaseEngineSink.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="ServerUserManager.cpp" />
-    <ClCompile Include="ServiceUnits.cpp" />
+    <ClCompile Include="PlayerManager.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="GameCtrl.cpp" />
     <ClCompile Include="TableFrame.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -198,8 +199,9 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClInclude Include="AttemperEngineSink.h" />
     <ClInclude Include="DataBaseEngineSink.h" />
     <ClInclude Include="DataBasePacket.h" />
-    <ClInclude Include="ServerUserManager.h" />
-    <ClInclude Include="ServiceUnits.h" />
+    <ClInclude Include="PlayerManager.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="GameCtrl.h" />
     <ClInclude Include="Stdafx.h" />
     <ClInclude Include="TableFrame.h" />
   </ItemGroup>
