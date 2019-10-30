@@ -3,13 +3,13 @@
 #include <SDKDDKVer.h>
 #include <iostream>
 
-#include "ServiceUnits.h"
+#include "GameCtrl.h"
 
 int _tmain(int argc, _TCHAR* argv[])
 {
 	//ÏÔÊ¾´°¿Ú
-	CServiceUnits	m_ServiceUnits;	
-	m_ServiceUnits.StartService();
+	CGameCtrl	GameCtrl;	
+	GameCtrl.StartService();
 
 	while(true)
 	{

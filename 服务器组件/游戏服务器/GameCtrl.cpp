@@ -2,10 +2,8 @@
 
 //全局变量
 CGameCtrl                  *g_GameCtrl = NULL; 
-IAttemperEngine			   *g_AttemperEngine = NULL;					//调度引擎
 ITCPNetworkEngine		   *g_TCPNetworkEngine = NULL;				    //socket::server
 ITCPSocketEngine		   *g_TCPSocketEngine = NULL;					//socker::client -- 目标服务器为 协调服
-ITimerEngine			   *g_TimerEngine = NULL;						//定时器
 
 
 //构造函数
@@ -90,10 +88,8 @@ int CGameCtrl::InitializeService()
 	if(m_TimerEngine == NULL) return 4;
 	if(SubGameDll == NULL) return 5;
 
-	g_AttemperEngine = m_AttemperEngine;
 	g_TCPNetworkEngine = m_TCPNetworkEngine;
 	g_TCPSocketEngine = m_TCPSocketEngine;
-	g_TimerEngine = m_TimerEngine;
 
 	//回调对象
 	IUnknownEx * pIAttemperEngineSink=static_cast<IAttemperEngineSink*>(&m_AttemperEngineSink);
@@ -396,4 +392,34 @@ bool CGameCtrl::SendMessageLobbyAndAllGame( LPCTSTR lpszMessage, WORD wType ,WOR
 	m_TCPSocketEngine->SendData(MDM_WEB,CPR_WP_WEB_MARQUEE,&pSendLobbyMessage,sizeof(CMD_CS_C_SendMarquee));
 	*/
 	return true;
+}
+
+
+/***************************************************  消息发送  ->DB  *************************************************/
+bool CGameCtrl::PostDataBaseRequest(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize)
+{
+	return m_AttemperEngine->PostDataBaseRequest(wRequestID, dwContextID, pData, wDataSize);
+}
+
+
+/***************************************************     Timer       *************************************************/
+//设置定时器
+bool CGameCtrl::SetTimer(DWORD dwTimerID, DWORD dwElapse, DWORD dwRepeat, WPARAM dwBindParameter)
+{
+	return m_TimerEngine->SetTimer(dwTimerID, dwElapse, dwRepeat, dwBindParameter);
+}
+//删除定时器
+bool CGameCtrl::KillTimer(DWORD dwTimerID)
+{
+	return m_TimerEngine->KillTimer(dwTimerID);
+}
+//删除定时器
+bool CGameCtrl::KillAllTimer()
+{
+	return m_TimerEngine->KillAllTimer();
+}
+//获取定时器剩余时间（毫秒）
+DWORD CGameCtrl::GetTimerLeftTickCount(DWORD dwTimerID)
+{
+	return m_TimerEngine->GetTimerLeftTickCount(dwTimerID);
 }

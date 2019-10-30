@@ -18,7 +18,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 //服务单元
-class CServiceUnits : public CWnd
+class CGameCtrl : public CWnd
 {
 	//组件变量
 private:
@@ -40,9 +40,9 @@ public:
 	//函数定义
 public:
 	//构造函数
-	CServiceUnits();
+	CGameCtrl();
 	//析构函数
-	virtual ~CServiceUnits();
+	virtual ~CGameCtrl();
 
 	//服务控制
 public:
@@ -61,13 +61,38 @@ protected:
 	int InitializeService();
 	//启动内核
 	int StartKernelService();
+
+
+	/*********************** 消息发送 Socket::Server -> Socket::Client ***********************/
+public:
+	//发送函数
+	bool SendData(DWORD dwSocketID, WORD wMainCmdID, WORD wSubCmdID);
+	//发送函数
+	bool SendData(DWORD dwSocketID, WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize);
+	//批量发送
+	bool SendDataBatch(WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize);
+
+
+	/***********************           消息发送  -> DB                ***********************/
+public:
+	bool PostDataBaseRequest(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize);
+
+
+	/***********************            Timer                         ***********************/
+public:
+	//设置定时器
+	bool SetTimer(DWORD dwTimerID, DWORD dwElapse, DWORD dwRepeat, WPARAM dwBindParameter); 
+	//删除定时器
+	bool KillTimer(DWORD dwTimerID);
+	//删除定时器
+	bool KillAllTimer();
+	//获取定时器剩余时间（毫秒）
+	DWORD GetTimerLeftTickCount(DWORD dwTimerID);
 };
 
-extern CServiceUnits               *g_pServiceUnits;                     
-extern IAttemperEngine			   *g_AttemperEngine;					//调度引擎
+extern CGameCtrl                   *g_GameCtrl;                     
 extern ITCPNetworkEngine		   *g_TCPNetworkEngine;				    //socket::server
 extern ITCPSocketEngine			   *g_TCPSocketEngine;					//socker::client -- 目标服务器为 协调服
-extern ITimerEngine				   *g_TimerEngine;						//定时器
 
  
 //////////////////////////////////////////////////////////////////////////////////

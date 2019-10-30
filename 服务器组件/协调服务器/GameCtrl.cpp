@@ -1,24 +1,26 @@
 #include "StdAfx.h"
-#include "ServiceUnits.h"
+#include "GameCtrl.h"
 
 //全局变量
 IAttemperEngine			   *g_AttemperEngine = NULL;					//调度引擎
 ITCPNetworkEngine		   *g_TCPNetworkEngine = NULL;				    //socket::server
+CGameCtrl                   *g_GameCtrl = NULL;          
 
-CServiceUnits::CServiceUnits()
+CGameCtrl::CGameCtrl()
 {
+	g_GameCtrl = this;
 	m_AttemperEngine = NULL;
 	m_TCPNetworkEngine = NULL;
 }
 
 //启动服务
-bool CServiceUnits::StartService()
+bool CGameCtrl::StartService()
 {
 	//配置服务
 	int iRet = InitializeService();
 	if (iRet != 0 )
 	{
-		CLog::Log(log_error, "CServiceUnits::InitializeService  %d", iRet);
+		CLog::Log(log_error, "CGameCtrl::InitializeService  %d", iRet);
 		ConcludeService();
 		return false;
 	}
@@ -27,7 +29,7 @@ bool CServiceUnits::StartService()
 	iRet = StartKernelService();
 	if (iRet != 0)
 	{
-		CLog::Log(log_error,"CServiceUnits::StartKernelService  %d", iRet);
+		CLog::Log(log_error,"CGameCtrl::StartKernelService  %d", iRet);
 		ConcludeService();
 		return false;
 	}
@@ -36,7 +38,7 @@ bool CServiceUnits::StartService()
 }
 
 //停止服务
-bool CServiceUnits::ConcludeService()
+bool CGameCtrl::ConcludeService()
 {
 	//停止服务
 	if (m_AttemperEngine!=NULL) m_AttemperEngine->ConcludeService();
@@ -46,7 +48,7 @@ bool CServiceUnits::ConcludeService()
 }
 
 //配置组件
-int CServiceUnits::InitializeService()
+int CGameCtrl::InitializeService()
 {
 	/***************************************************  创建服务 *************************************************/
 	//创建服务
@@ -81,7 +83,7 @@ int CServiceUnits::InitializeService()
 }
 
 //启动内核
-int CServiceUnits::StartKernelService()
+int CGameCtrl::StartKernelService()
 {
 	//调度引擎
 	if (m_AttemperEngine->StartService()==false)
@@ -96,4 +98,25 @@ int CServiceUnits::StartKernelService()
 	}
 
 	return 0;
+}
+
+
+/***************************************************  消息发送 *************************************************/
+
+//发送函数
+bool CGameCtrl::SendData(DWORD dwSocketID, WORD wMainCmdID, WORD wSubCmdID)
+{
+	return m_TCPNetworkEngine->SendData(dwSocketID, wMainCmdID, wSubCmdID);
+}
+
+//发送函数
+bool CGameCtrl::SendData(DWORD dwSocketID, WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize)
+{
+	return m_TCPNetworkEngine->SendData(dwSocketID, wMainCmdID, wSubCmdID, pData, wDataSize);
+}
+
+//批量发送
+bool CGameCtrl::SendDataBatch(WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize)
+{
+	return m_TCPNetworkEngine->SendDataBatch(wMainCmdID, wSubCmdID, pData, wDataSize);
 }

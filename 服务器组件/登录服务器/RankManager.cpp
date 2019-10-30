@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "RankManager.h"
 #include "DataBasePacket.h"
-#include "ServiceUnits.h"
+#include "GameCtrl.h"
 
 RankManager::RankManager()
 {
@@ -63,7 +63,7 @@ RankManager::~RankManager(void)
 
 void RankManager::Init()
 {
-	g_AttemperEngine->PostDataBaseRequest(DBR_GP_READ_RANK_LIST,0,this,sizeof(RankManager));
+	g_GameCtrl->PostDataBaseRequest(DBR_GP_READ_RANK_LIST,0,this,sizeof(RankManager));
 }
 
 
@@ -192,11 +192,8 @@ void RankManager::AddRankCount(DWORD dwUserID, DWORD dwCount,TCHAR* szNickName, 
 	dbrRankItem.dwCount = vecPtr->at(i)->dwCount;
 	dbrRankItem.byIndex =  static_cast<BYTE>(index);
 
-	
-
 	//写入数据库
-	if(NULL != g_AttemperEngine)
-		g_AttemperEngine->PostDataBaseRequest(DBR_GP_UPDATE_RANK_VALUE,0,&dbrRankItem,sizeof(DBR_GP_UserRankItem));
+	g_GameCtrl->PostDataBaseRequest(DBR_GP_UPDATE_RANK_VALUE,0,&dbrRankItem,sizeof(DBR_GP_UserRankItem));
 }
 
 
@@ -364,7 +361,7 @@ int RankManager::GetRankReward(int index, DWORD dwUserID, TCHAR szDescribe[], DW
 			RecRankReward.dwUserID = dwUserID;
 
 			//投递请求
-			if(true == g_AttemperEngine->PostDataBaseRequest(DBR_CL_SERVICE_GET_RANK_REWARD,dwSocketID,&RecRankReward,sizeof(STR_DBR_CL_SERCIVR_GET_RANK_REWARD)))
+			if(true == g_GameCtrl->PostDataBaseRequest(DBR_CL_SERVICE_GET_RANK_REWARD,dwSocketID,&RecRankReward,sizeof(STR_DBR_CL_SERCIVR_GET_RANK_REWARD)))
 			{
 				m_bRecived[i] = true;
 				UnLock();

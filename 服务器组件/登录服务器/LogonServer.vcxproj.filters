@@ -10,13 +10,13 @@
     <ClCompile Include="RankManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ServiceUnits.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="ServerListManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="GameCtrl.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -28,9 +28,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="RankManager.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ServiceUnits.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ServerListManager.h">
@@ -47,6 +44,9 @@
     </ClInclude>
     <ClInclude Include="..\..\消息定义\CMD_STR_LogonServer.h">
       <Filter>消息定义</Filter>
+    </ClInclude>
+    <ClInclude Include="GameCtrl.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

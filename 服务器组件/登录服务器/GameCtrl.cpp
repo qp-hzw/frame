@@ -1,18 +1,16 @@
 #include "StdAfx.h"
-#include "ServiceUnits.h"
+#include "GameCtrl.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 //全局变量
-CServiceUnits              *g_pServiceUnits = NULL; 
-IAttemperEngine			   *g_AttemperEngine = NULL;					//调度引擎
+CGameCtrl                  *g_GameCtrl = NULL; 
 ITCPNetworkEngine		   *g_TCPNetworkEngine = NULL;				    //socket::server
 ITCPSocketEngine		   *g_TCPSocketEngine = NULL;					//socker::client -- 目标服务器为 协调服
-ITimerEngine			   *g_TimerEngine = NULL;						//定时器
 
 //////////////////////////////////////////////////////////////////////////////////
 
 //构造函数
-CServiceUnits::CServiceUnits()
+CGameCtrl::CGameCtrl()
 {
 	m_AttemperEngine = NULL;
 	m_TCPNetworkEngine = NULL;
@@ -20,19 +18,19 @@ CServiceUnits::CServiceUnits()
 	m_TimerEngine = NULL;
 
 	//设置对象
-	if (g_pServiceUnits==NULL) g_pServiceUnits=this;
+	if (g_GameCtrl==NULL) g_GameCtrl=this;
 
 	return;
 }
 
 //析构函数
-CServiceUnits::~CServiceUnits()
+CGameCtrl::~CGameCtrl()
 {
 	ConcludeService();
 }
 
 //配置组件
-int CServiceUnits::InitializeService()
+int CGameCtrl::InitializeService()
 {
 	/***************************************************  创建服务 *************************************************/
 	//创建组件
@@ -46,10 +44,8 @@ int CServiceUnits::InitializeService()
 	if(m_TCPSocketEngine == NULL) return 3;
 	if(m_TimerEngine == NULL) return 4;
 
-	g_AttemperEngine = m_AttemperEngine;
 	g_TCPNetworkEngine = m_TCPNetworkEngine;
 	g_TCPSocketEngine = m_TCPSocketEngine;
-	g_TimerEngine = m_TimerEngine;
 
 	//回调对象
 	IUnknownEx * pIAttemperEngineSink=static_cast<IUnknownEx*>(&m_AttemperEngineSink);
@@ -79,13 +75,13 @@ int CServiceUnits::InitializeService()
 }
 
 //启动服务
-bool CServiceUnits::StartService()
+bool CGameCtrl::StartService()
 {
 	//配置服务
 	int iRet = InitializeService();
 	if (iRet != 0)
 	{
-		CLog::Log(log_error, "CServiceUnits::InitializeService %d", iRet);
+		CLog::Log(log_error, "CGameCtrl::InitializeService %d", iRet);
 		ConcludeService();
 		return false;
 	}
@@ -94,7 +90,7 @@ bool CServiceUnits::StartService()
 	iRet = StartKernelService();
 	if (iRet != 0)
 	{
-		CLog::Log(log_error, "CServiceUnits::StartKernelService  %d", iRet);
+		CLog::Log(log_error, "CGameCtrl::StartKernelService  %d", iRet);
 		ConcludeService();
 		return false;
 	}
@@ -110,7 +106,7 @@ bool CServiceUnits::StartService()
 }
 
 //停止服务
-bool CServiceUnits::ConcludeService()
+bool CGameCtrl::ConcludeService()
 {
 	//停止服务
 	if (m_TimerEngine!=NULL) m_TimerEngine->ConcludeService();
@@ -122,7 +118,7 @@ bool CServiceUnits::ConcludeService()
 }
 
 //启动内核
-int CServiceUnits::StartKernelService()
+int CGameCtrl::StartKernelService()
 {
 	//调度引擎
 	if (m_AttemperEngine->StartService()==false)
@@ -146,7 +142,7 @@ int CServiceUnits::StartKernelService()
 }
 
 //启动网络
-int CServiceUnits::StartNetworkService()
+int CGameCtrl::StartNetworkService()
 {
 	//网络引擎
 	if (m_TCPNetworkEngine->StartService()==false)
@@ -155,4 +151,51 @@ int CServiceUnits::StartNetworkService()
 	}
 
 	return 0;
+}
+
+
+/***************************************************  消息发送  S->C  *************************************************/
+//发送函数
+bool CGameCtrl::SendData(DWORD dwSocketID, WORD wMainCmdID, WORD wSubCmdID)
+{
+	return m_TCPNetworkEngine->SendData(dwSocketID, wMainCmdID, wSubCmdID);
+}
+//发送函数
+bool CGameCtrl::SendData(DWORD dwSocketID, WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize)
+{
+	return m_TCPNetworkEngine->SendData(dwSocketID, wMainCmdID, wSubCmdID, pData, wDataSize);
+}
+//批量发送
+bool CGameCtrl::SendDataBatch(WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize)
+{
+	return m_TCPNetworkEngine->SendDataBatch(wMainCmdID, wSubCmdID, pData, wDataSize);
+}
+
+/***************************************************  消息发送  ->DB  *************************************************/
+bool CGameCtrl::PostDataBaseRequest(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize)
+{
+	return m_AttemperEngine->PostDataBaseRequest(wRequestID, dwContextID, pData, wDataSize);
+}
+
+
+/***************************************************     Timer       *************************************************/
+//设置定时器
+bool CGameCtrl::SetTimer(DWORD dwTimerID, DWORD dwElapse, DWORD dwRepeat, WPARAM dwBindParameter)
+{
+	return m_TimerEngine->SetTimer(dwTimerID, dwElapse, dwRepeat, dwBindParameter);
+}
+//删除定时器
+bool CGameCtrl::KillTimer(DWORD dwTimerID)
+{
+	return m_TimerEngine->KillTimer(dwTimerID);
+}
+//删除定时器
+bool CGameCtrl::KillAllTimer()
+{
+	return m_TimerEngine->KillAllTimer();
+}
+//获取定时器剩余时间（毫秒）
+DWORD CGameCtrl::GetTimerLeftTickCount(DWORD dwTimerID)
+{
+	return m_TimerEngine->GetTimerLeftTickCount(dwTimerID);
 }

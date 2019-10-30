@@ -1,12 +1,12 @@
 #include "Stdafx.h"
-#include "ServiceUnits.h"
+#include "GameCtrl.h"
 
 
 int main(int argc, char **argv)
 {
 	//ÏÔÊ¾´°¿Ú
-	CServiceUnits	m_ServiceUnits;	
-	m_ServiceUnits.StartService();
+	CGameCtrl	GameCtrl;	
+	GameCtrl.StartService();
 
 	while(true)
 	{

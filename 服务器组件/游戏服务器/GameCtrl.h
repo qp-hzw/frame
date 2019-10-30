@@ -65,7 +65,7 @@ protected:
 	int StartKernelService();
 
 
-	//消息接口 1
+	/*********************** 消息发送 Socket::Server -> Socket::Client ***********************/
 public:
 	//发送数据
 	virtual bool SendData(DWORD dwSocketID, WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize);
@@ -87,13 +87,28 @@ public:
 	virtual bool SendRoomMessage(DWORD dwSocketID, LPCTSTR lpszMessage, WORD wType, bool bAndroid);
 	//发送到大厅和所有游戏 用前要慎重考虑( 将会发送给所有与登陆服相连的玩家. 还会发送给所有和游戏服相连的玩家)
 	virtual bool SendMessageLobbyAndAllGame(LPCTSTR lpszMessage, WORD wType,WORD MsgID);
+
+
+	/***********************           消息发送  -> DB                ***********************/
+public:
+	bool PostDataBaseRequest(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize);
+
+
+	/***********************            Timer                         ***********************/
+public:
+	//设置定时器
+	bool SetTimer(DWORD dwTimerID, DWORD dwElapse, DWORD dwRepeat, WPARAM dwBindParameter); 
+	//删除定时器
+	bool KillTimer(DWORD dwTimerID);
+	//删除定时器
+	bool KillAllTimer();
+	//获取定时器剩余时间（毫秒）
+	DWORD GetTimerLeftTickCount(DWORD dwTimerID);
 };
 
 extern CGameCtrl                   *g_GameCtrl;                     
-extern IAttemperEngine			   *g_AttemperEngine;					//调度引擎
 extern ITCPNetworkEngine		   *g_TCPNetworkEngine;				    //socket::server
 extern ITCPSocketEngine			   *g_TCPSocketEngine;					//socker::client -- 目标服务器为 协调服
-extern ITimerEngine				   *g_TimerEngine;						//定时器
 
 
 #endif

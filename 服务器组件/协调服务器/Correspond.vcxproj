@@ -183,14 +183,14 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClCompile Include="AttemperEngineSink.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="GlobalInfoManager.cpp" />
-    <ClCompile Include="ServiceUnits.cpp" />
+    <ClCompile Include="GameCtrl.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\消息定义\CMD_Correspond.h" />
     <ClInclude Include="..\..\消息定义\CMD_STR_Correspond.h" />
     <ClInclude Include="AttemperEngineSink.h" />
     <ClInclude Include="GlobalInfoManager.h" />
-    <ClInclude Include="ServiceUnits.h" />
+    <ClInclude Include="GameCtrl.h" />
     <ClInclude Include="Stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

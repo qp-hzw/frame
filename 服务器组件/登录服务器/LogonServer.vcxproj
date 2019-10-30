@@ -184,7 +184,7 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClCompile Include="main.cpp" />
     <ClCompile Include="RankManager.cpp" />
     <ClCompile Include="ServerListManager.cpp" />
-    <ClCompile Include="ServiceUnits.cpp" />
+    <ClCompile Include="GameCtrl.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\消息定义\CMD_LogonServer.h" />
@@ -194,7 +194,7 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClInclude Include="DataBasePacket.h" />
     <ClInclude Include="RankManager.h" />
     <ClInclude Include="ServerListManager.h" />
-    <ClInclude Include="ServiceUnits.h" />
+    <ClInclude Include="GameCtrl.h" />
     <ClInclude Include="Stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

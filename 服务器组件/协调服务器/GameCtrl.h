@@ -7,7 +7,7 @@
 
 
 //服务单元
-class CServiceUnits
+class CGameCtrl
 {
 	//服务组件
 protected:
@@ -22,9 +22,9 @@ protected:
 	//函数定义
 public:
 	//构造函数
-	CServiceUnits();
+	CGameCtrl();
 	//析构函数
-	virtual ~CServiceUnits() {}
+	virtual ~CGameCtrl() {}
 
 	//服务控制
 public:
@@ -39,8 +39,18 @@ protected:
 	int InitializeService();
 	//启动内核
 	int StartKernelService();
+
+	//消息发送函数
+public:
+	//发送函数
+	bool SendData(DWORD dwSocketID, WORD wMainCmdID, WORD wSubCmdID);
+	//发送函数
+	bool SendData(DWORD dwSocketID, WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize);
+	//批量发送
+	bool SendDataBatch(WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize);
 };
            
+extern CGameCtrl                   *g_GameCtrl;                          
 extern IAttemperEngine			   *g_AttemperEngine;					//调度引擎
 extern ITCPNetworkEngine		   *g_TCPNetworkEngine;				    //socket::server
 

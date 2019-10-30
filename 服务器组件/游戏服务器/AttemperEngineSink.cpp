@@ -108,10 +108,10 @@ bool CAttemperEngineSink::OnAttemperEngineStart(IUnknownEx * pIUnknownEx)
 	}
 
 	//设置时间
-	g_TimerEngine->SetTimer(IDI_GAME_SERVICE_PULSE,1000L,TIMES_INFINITY,NULL);
-	g_TimerEngine->SetTimer(IDI_LOAD_ANDROID_USER,TIME_LOAD_ANDROID_USER*1000L,TIMES_INFINITY,NULL);
-	g_TimerEngine->SetTimer(IDI_DISTRIBUTE_ANDROID,TIME_DISTRIBUTE_ANDROID*1000L,TIMES_INFINITY,NULL);
-	g_TimerEngine->SetTimer(IDI_DBCORRESPOND_NOTIFY,TIME_DBCORRESPOND_NOTIFY*1000L,TIMES_INFINITY,NULL);
+	g_GameCtrl->SetTimer(IDI_GAME_SERVICE_PULSE,1000L,TIMES_INFINITY,NULL);
+	g_GameCtrl->SetTimer(IDI_LOAD_ANDROID_USER,TIME_LOAD_ANDROID_USER*1000L,TIMES_INFINITY,NULL);
+	g_GameCtrl->SetTimer(IDI_DISTRIBUTE_ANDROID,TIME_DISTRIBUTE_ANDROID*1000L,TIMES_INFINITY,NULL);
+	g_GameCtrl->SetTimer(IDI_DBCORRESPOND_NOTIFY,TIME_DBCORRESPOND_NOTIFY*1000L,TIMES_INFINITY,NULL);
 	*/
 	return true;
 }
@@ -159,13 +159,13 @@ bool CAttemperEngineSink::OnEventControl(WORD wIdentifier, VOID * pData, WORD wD
 	case CT_LOAD_SERVICE_CONFIG:	//加载配置
 		{
 			//加载机器
-			//g_AttemperEngine->PostDataBaseRequest(0L,DBR_GR_LOAD_ANDROID_USER,0L,NULL,0L);
+			//g_GameCtrl->PostDataBaseRequest(0L,DBR_GR_LOAD_ANDROID_USER,0L,NULL,0L);
 
 			//加载断线重连数据 && 数据库置空对应的桌子的所有数据
 			STR_DBR_GR_LOAD_OFFLINE  dbr;
 			dbr.byMystery = _MYSTERY;
 			dbr.dwGameID = (m_pGameServiceOption->dwServerID) & 0xFFFFFF00;
-			g_AttemperEngine->PostDataBaseRequest(DBR_GR_LOAD_OFFLINE,0L,&dbr,sizeof(dbr));
+			g_GameCtrl->PostDataBaseRequest(DBR_GR_LOAD_OFFLINE,0L,&dbr,sizeof(dbr));
 
 			return true;
 		}
@@ -192,7 +192,7 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 		case IDI_LOAD_ANDROID_USER:		//加载机器
 			{
 				//加载机器
-				g_AttemperEngine->PostDataBaseRequest(DBR_GR_LOAD_ANDROID_USER,0L,NULL,0L);
+				g_GameCtrl->PostDataBaseRequest(DBR_GR_LOAD_ANDROID_USER,0L,NULL,0L);
 
 				return true;
 			}
@@ -227,7 +227,7 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 		case IDI_LOAD_SENSITIVE_WORD:	//加载敏感词
 			{
 				//投递请求
-				//g_AttemperEngine->PostDataBaseRequest(DBR_GR_LOAD_SENSITIVE_WORDS,0,NULL,0);				
+				//g_GameCtrl->PostDataBaseRequest(DBR_GR_LOAD_SENSITIVE_WORDS,0,NULL,0);				
 				return true;
 			}
 		case IDI_WAIT_SERVICE_STOP:
@@ -347,13 +347,13 @@ bool CAttemperEngineSink::OnEventTCPSocketShut(WORD wServiceID, BYTE cbShutReaso
 		m_bCollectUser=false;
 
 		//删除时间
-		g_TimerEngine->KillTimer(IDI_REPORT_SERVER_INFO);
+		g_GameCtrl->KillTimer(IDI_REPORT_SERVER_INFO);
 
 		//重连判断
 		if (m_bNeekCorrespond==true)
 		{
 			//设置时间
-			g_TimerEngine->SetTimer(IDI_CONNECT_CORRESPOND, TIME_CONNECT_CORRESPOND, 1, 0);
+			g_GameCtrl->SetTimer(IDI_CONNECT_CORRESPOND, TIME_CONNECT_CORRESPOND, 1, 0);
 		}
 
 		return true;
@@ -372,7 +372,7 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		if (nErrorCode!=0)
 		{
 			//设置时间
-			g_TimerEngine->SetTimer(IDI_CONNECT_CORRESPOND, TIME_CONNECT_CORRESPOND, 1, 0);
+			g_GameCtrl->SetTimer(IDI_CONNECT_CORRESPOND, TIME_CONNECT_CORRESPOND, 1, 0);
 			return false;
 		}
 
@@ -393,7 +393,7 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		g_TCPSocketEngine->SendData(MDM_REGISTER,CPR_GP_REGISTER_GAME,&RegisterServer,sizeof(RegisterServer));
 
 		//设置时间
-		g_TimerEngine->SetTimer(IDI_REPORT_SERVER_INFO,TIME_REPORT_SERVER_INFO*1000L,TIMES_INFINITY,0);
+		g_GameCtrl->SetTimer(IDI_REPORT_SERVER_INFO,TIME_REPORT_SERVER_INFO*1000L,TIMES_INFINITY,0);
 
 		return true;
 	}
@@ -526,7 +526,7 @@ bool CAttemperEngineSink::OnEventTCPNetworkShut(DWORD dwClientAddr, DWORD dwActi
 		{
 			quitInfo.byOnlineMask = 1;
 		}
-		g_AttemperEngine->PostDataBaseRequest(DBR_GP_GAME_USER_STATE,dwSocketID, &quitInfo,sizeof(quitInfo));
+		g_GameCtrl->PostDataBaseRequest(DBR_GP_GAME_USER_STATE,dwSocketID, &quitInfo,sizeof(quitInfo));
 	}
 
 
@@ -591,10 +591,10 @@ bool CAttemperEngineSink::OnEventModifyUserTreasure(CPlayer *pIServerUserItem, D
 
 	if (NULL != pBindParameter)
 	{
-		g_AttemperEngine->PostDataBaseRequest(DBR_GR_MODIFY_USER_TREASURE, pBindParameter->dwSocketID, &DBR, sizeof(DBR));
+		g_GameCtrl->PostDataBaseRequest(DBR_GR_MODIFY_USER_TREASURE, pBindParameter->dwSocketID, &DBR, sizeof(DBR));
 	}
 	else
-		g_AttemperEngine->PostDataBaseRequest(DBR_GR_MODIFY_USER_TREASURE, 0, &DBR, sizeof(DBR));
+		g_GameCtrl->PostDataBaseRequest(DBR_GR_MODIFY_USER_TREASURE, 0, &DBR, sizeof(DBR));
 	
 	return true;
 }
@@ -691,7 +691,7 @@ bool CAttemperEngineSink::OnEventUserItemRight(CPlayer *pIServerUserItem, DWORD 
 	ManageUserRight.bGameRight=bGameRight;
 
 	//发送请求
-	g_AttemperEngine->PostDataBaseRequest(DBR_GR_MANAGE_USER_RIGHT,0,&ManageUserRight,sizeof(ManageUserRight));
+	g_GameCtrl->PostDataBaseRequest(DBR_GR_MANAGE_USER_RIGHT,0,&ManageUserRight,sizeof(ManageUserRight));
 
 	return true;
 }
@@ -1125,7 +1125,7 @@ bool CAttemperEngineSink::On_SUB_CG_Logon_UserID(VOID * pData, WORD wDataSize, D
 	lstrcpyn(LogonUserID.szMachineID,pLogonUserID->szMachineID,CountArray(LogonUserID.szMachineID));
 
 	//投递请求
-	return g_AttemperEngine->PostDataBaseRequest(DBR_CG_LOGON_USERID, dwSocketID, &LogonUserID,sizeof(LogonUserID));
+	return g_GameCtrl->PostDataBaseRequest(DBR_CG_LOGON_USERID, dwSocketID, &LogonUserID,sizeof(LogonUserID));
 }
 
 //ID登录返回
@@ -1375,7 +1375,7 @@ VOID CAttemperEngineSink::OnEventUserLogon(CPlayer * pIServerUserItem, bool bAlr
 	DBR_GP_UserQuitInfo quitInfo;
 	quitInfo.dwUserID = pIServerUserItem->GetUserID();
 	quitInfo.byOnlineMask = 2;
-	g_AttemperEngine->PostDataBaseRequest(DBR_GP_GAME_USER_STATE,0, &quitInfo,sizeof(quitInfo));
+	g_GameCtrl->PostDataBaseRequest(DBR_GP_GAME_USER_STATE,0, &quitInfo,sizeof(quitInfo));
 }
 
 //切换连接
@@ -2051,7 +2051,7 @@ bool CAttemperEngineSink::OnTcpNetworkQueryLottery(VOID * pData, WORD wDataSize,
 	DBR_GR_QueryLottery QueryLottery;
 	memcpy(&QueryLottery,pGetRankReward,sizeof(DBR_GR_QueryLottery));
 
-	return g_AttemperEngine->PostDataBaseRequest(DBR_GR_QUERY_LOTTERY,dwSocketID,&QueryLottery,sizeof(DBR_GR_QueryLottery));
+	return g_GameCtrl->PostDataBaseRequest(DBR_GR_QUERY_LOTTERY,dwSocketID,&QueryLottery,sizeof(DBR_GR_QueryLottery));
 
 }
 
@@ -2121,7 +2121,7 @@ bool CAttemperEngineSink::On_SUB_CG_USER_CREATE_TABLE(VOID * pData, WORD wDataSi
 	STR_SUB_CG_USER_CREATE_TABLE *pCreateRoom = (STR_SUB_CG_USER_CREATE_TABLE *)pData;
 
 	//投递请求
-	return g_AttemperEngine->PostDataBaseRequest(DBR_CG_CLUB_CREATE_TABLE, dwSocketID, pData, wDataSize);
+	return g_GameCtrl->PostDataBaseRequest(DBR_CG_CLUB_CREATE_TABLE, dwSocketID, pData, wDataSize);
 }
 
 //创建普通桌子
@@ -2582,7 +2582,7 @@ bool CAttemperEngineSink::WriteClubRoomToDB(STR_DBR_CLUB_ROOM_INFO* pTableInfo)
 	if (pTableInfo==NULL) return false;
 
 	//投递请求
-	g_AttemperEngine->PostDataBaseRequest(DBR_CLUB_ROOM_INFO, 0, pTableInfo, sizeof(STR_DBR_CLUB_ROOM_INFO));
+	g_GameCtrl->PostDataBaseRequest(DBR_CLUB_ROOM_INFO, 0, pTableInfo, sizeof(STR_DBR_CLUB_ROOM_INFO));
 
 	return true;
 }
@@ -2611,7 +2611,7 @@ bool CAttemperEngineSink::On_SUB_User_JoinFkRoom(VOID * pData, WORD wDataSize, D
 	DBR.dwUserID = pIServerUserItem->GetUserID();
 
 	//投递请求
-	return g_AttemperEngine->PostDataBaseRequest(DBR_CG_JOIN_TABLE, dwSocketID, &DBR,sizeof(DBR));
+	return g_GameCtrl->PostDataBaseRequest(DBR_CG_JOIN_TABLE, dwSocketID, &DBR,sizeof(DBR));
 }
 
 //加入桌子 返回 -- 需要密码
@@ -2751,7 +2751,7 @@ bool CAttemperEngineSink::On_SUB_CG_USER_JOIN_TABLE_NO_PASS(VOID * pData, WORD w
 	STR_SUB_CG_USER_JOIN_TABLE_NO_PASS *pJoin = (STR_SUB_CG_USER_JOIN_TABLE_NO_PASS *)pData;
 
 	//投递请求
-	return g_AttemperEngine->PostDataBaseRequest(DBR_CG_USER_JOIN_TABLE_NO_PASS, dwSocketID, pData,wDataSize);
+	return g_GameCtrl->PostDataBaseRequest(DBR_CG_USER_JOIN_TABLE_NO_PASS, dwSocketID, pData,wDataSize);
 }
 
 //加入桌子 -- 不需要密码, 即快速开始
@@ -2905,7 +2905,7 @@ bool CAttemperEngineSink::On_SUB_CG_USER_JOIN_GOLD_HALL_ROOM(VOID * pData, WORD 
 	STR_SUB_CG_USER_JOIN_GOLD_HALL_ROOM *pJoin = (STR_SUB_CG_USER_JOIN_GOLD_HALL_ROOM *)pData;
 
 	//投递请求
-	g_AttemperEngine->PostDataBaseRequest(DBR_CG_USER_JOIN_TABLE_HALL_GOLD, dwSocketID, pData,wDataSize);
+	g_GameCtrl->PostDataBaseRequest(DBR_CG_USER_JOIN_TABLE_HALL_GOLD, dwSocketID, pData,wDataSize);
 
 	return true;
 }
@@ -3178,7 +3178,7 @@ bool CAttemperEngineSink::On_Sub_CG_User_CreateGroupRoom(VOID *pData, WORD wData
 	memcpy_s(&CreateGroupRoom, sizeof(STR_DBR_CG_USER_CREATE_GROUP_ROOM), pCreateRoom, sizeof(STR_DBR_CG_USER_CREATE_GROUP_ROOM));
 
 	//投递请求
-	g_AttemperEngine->PostDataBaseRequest(DBR_CG_USER_CREATE_GROUP_ROOM, dwSocketID, &CreateGroupRoom, sizeof(STR_DBR_CG_USER_CREATE_GROUP_ROOM));
+	g_GameCtrl->PostDataBaseRequest(DBR_CG_USER_CREATE_GROUP_ROOM, dwSocketID, &CreateGroupRoom, sizeof(STR_DBR_CG_USER_CREATE_GROUP_ROOM));
 	
 	return true;
 }
@@ -3320,7 +3320,7 @@ bool CAttemperEngineSink::On_Sub_CG_User_JoinGroupRoom(VOID * pData, WORD wDataS
 	memcpy_s(&JoinRoom, sizeof(STR_DBR_CG_USER_JOIN_GROUP_ROOM), pJoinGroupRoom, sizeof(STR_DBR_CG_USER_JOIN_GROUP_ROOM));
 
 	//投递请求
-	g_AttemperEngine->PostDataBaseRequest(DBR_CG_USER_JOIN_GROUP_ROOM, dwSocketID, &JoinRoom, sizeof(STR_DBR_CG_USER_JOIN_GROUP_ROOM));
+	g_GameCtrl->PostDataBaseRequest(DBR_CG_USER_JOIN_GROUP_ROOM, dwSocketID, &JoinRoom, sizeof(STR_DBR_CG_USER_JOIN_GROUP_ROOM));
 
 	return true;
 }
@@ -3617,7 +3617,7 @@ VOID CAttemperEngineSink::OnEventUserLogout(CPlayer * pIServerUserItem, DWORD dw
 	lstrcpyn(LeaveGameServer.szMachineID,pIServerUserItem->GetMachineID(),CountArray(LeaveGameServer.szMachineID));
 
 	//投递请求
-	g_AttemperEngine->PostDataBaseRequest(DBR_GR_LEAVE_GAME_SERVER,0L,&LeaveGameServer,sizeof(LeaveGameServer));
+	g_GameCtrl->PostDataBaseRequest(DBR_GR_LEAVE_GAME_SERVER,0L,&LeaveGameServer,sizeof(LeaveGameServer));
 
 	//汇总用户
 	if (m_bCollectUser==true)
@@ -4104,16 +4104,16 @@ void CAttemperEngineSink::StopService()
 	}
 
 	//停止加载机器人、分配用户机器人等定时器
-	g_TimerEngine->KillTimer(IDI_LOAD_ANDROID_USER);
-	g_TimerEngine->KillTimer(IDI_DISTRIBUTE_ANDROID);
+	g_GameCtrl->KillTimer(IDI_LOAD_ANDROID_USER);
+	g_GameCtrl->KillTimer(IDI_DISTRIBUTE_ANDROID);
 
 	//延迟关闭，确保写分等数据库存储过程执行
-	g_TimerEngine->SetTimer(IDI_WAIT_SERVICE_STOP, TIME_WAIT_SERVICE_STOP, 1, NULL);
+	g_GameCtrl->SetTimer(IDI_WAIT_SERVICE_STOP, TIME_WAIT_SERVICE_STOP, 1, NULL);
 }
 
 void CAttemperEngineSink::SendServiceStopped()
 {
-	g_TimerEngine->KillTimer(IDI_WAIT_SERVICE_STOP);
+	g_GameCtrl->KillTimer(IDI_WAIT_SERVICE_STOP);
 
 	g_GameCtrl->ConcludeService();
 }
@@ -4457,7 +4457,7 @@ bool CAttemperEngineSink::AddOtherRoomInfo(DBR_GR_UpdateTableInfo* pTableInfo)
 	if (pTableInfo==NULL) return false;
 
 	//投递请求
-	g_AttemperEngine->PostDataBaseRequest(DBR_GR_ADD_TABLE_INFO, 0, pTableInfo, sizeof(DBR_GR_UpdateTableInfo));
+	g_GameCtrl->PostDataBaseRequest(DBR_GR_ADD_TABLE_INFO, 0, pTableInfo, sizeof(DBR_GR_UpdateTableInfo));
 
 	return true;
 }
@@ -4466,14 +4466,14 @@ bool CAttemperEngineSink::AddOtherRoomInfo(DBR_GR_UpdateTableInfo* pTableInfo)
 void CAttemperEngineSink::StartTable(DWORD dwTableID)
 {
 	//投递请求
-	g_AttemperEngine->PostDataBaseRequest(DBR_GR_START_TABLE,0,&dwTableID,sizeof(dwTableID));
+	g_GameCtrl->PostDataBaseRequest(DBR_GR_START_TABLE,0,&dwTableID,sizeof(dwTableID));
 }
 
 //结束替他人开房
 void CAttemperEngineSink::ConcludeTable(DWORD dwTableID)
 {
 	//投递请求
-	g_AttemperEngine->PostDataBaseRequest(DBR_GR_END_TABLE,0,&dwTableID,sizeof(dwTableID));
+	g_GameCtrl->PostDataBaseRequest(DBR_GR_END_TABLE,0,&dwTableID,sizeof(dwTableID));
 }
 
 #pragma region Club牌友圈2 事件通知(1.桌子信息 2.玩家信息)
@@ -4494,7 +4494,7 @@ void CAttemperEngineSink::ClubTableCreate(DWORD dwClubRoomID, DWORD dwUserID, DW
 	Dbr.dwGameID = (m_pGameServiceOption->dwServerID) & 0xFFFFFF00;
 
 	//投递请求
-	g_AttemperEngine->PostDataBaseRequest(DBR_CLUB_TABLE_INFO, 0, &Dbr, sizeof(Dbr));
+	g_GameCtrl->PostDataBaseRequest(DBR_CLUB_TABLE_INFO, 0, &Dbr, sizeof(Dbr));
 }
 
 //club 桌子开始游戏
@@ -4510,7 +4510,7 @@ void CAttemperEngineSink::ClubTableStart(DWORD dwTableID, BYTE byClubOrHallGold)
 		Dbr.byCurrentRound = 1;//这是一个增量 TODONOW 后面修改
 		Dbr.byMask = 2;
 
-		g_AttemperEngine->PostDataBaseRequest(DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
+		g_GameCtrl->PostDataBaseRequest(DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
 	}
 
 	//金币大厅桌子信息
@@ -4522,7 +4522,7 @@ void CAttemperEngineSink::ClubTableStart(DWORD dwTableID, BYTE byClubOrHallGold)
 		HallDbr.dwTableState = 1;
 		HallDbr.byMask = 2;
 
-		g_AttemperEngine->PostDataBaseRequest(DBR_HALL_GOLD_TABLE_INFO,0,&HallDbr,sizeof(HallDbr));
+		g_GameCtrl->PostDataBaseRequest(DBR_HALL_GOLD_TABLE_INFO,0,&HallDbr,sizeof(HallDbr));
 	}
 }
 
@@ -4538,7 +4538,7 @@ void CAttemperEngineSink::ClubTableMax(DWORD dwTableID, BYTE byClubOrHallGold)
 		Dbr.dwTableState = 2;
 		Dbr.byMask = 2;
 
-		g_AttemperEngine->PostDataBaseRequest(DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
+		g_GameCtrl->PostDataBaseRequest(DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
 	}
 
 	//金币大厅桌子信息
@@ -4550,7 +4550,7 @@ void CAttemperEngineSink::ClubTableMax(DWORD dwTableID, BYTE byClubOrHallGold)
 		HallDbr.dwTableState = 2;
 		HallDbr.byMask = 2;
 
-		g_AttemperEngine->PostDataBaseRequest(DBR_HALL_GOLD_TABLE_INFO,0,&HallDbr,sizeof(HallDbr));
+		g_GameCtrl->PostDataBaseRequest(DBR_HALL_GOLD_TABLE_INFO,0,&HallDbr,sizeof(HallDbr));
 	}
 }
 
@@ -4566,7 +4566,7 @@ void CAttemperEngineSink::ClubTableNotMax(DWORD dwTableID, BYTE byClubOrHallGold
 		Dbr.dwTableState = 0;
 		Dbr.byMask = 2;
 
-		g_AttemperEngine->PostDataBaseRequest(DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
+		g_GameCtrl->PostDataBaseRequest(DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
 	}
 
 	//金币大厅桌子信息
@@ -4578,7 +4578,7 @@ void CAttemperEngineSink::ClubTableNotMax(DWORD dwTableID, BYTE byClubOrHallGold
 		HallDbr.dwTableState = 0;
 		HallDbr.byMask = 2;
 
-		g_AttemperEngine->PostDataBaseRequest(DBR_HALL_GOLD_TABLE_INFO,0,&HallDbr,sizeof(HallDbr));
+		g_GameCtrl->PostDataBaseRequest(DBR_HALL_GOLD_TABLE_INFO,0,&HallDbr,sizeof(HallDbr));
 	}
 }
 
@@ -4593,7 +4593,7 @@ void CAttemperEngineSink::ClubTableXJ(DWORD dwTableID)
 	Dbr.byCurrentRound = 1;//这是一个增量 TODONOW 后面修改
 	Dbr.byMask = 2;
 	
-	g_AttemperEngine->PostDataBaseRequest(DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
+	g_GameCtrl->PostDataBaseRequest(DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
 }
 
 //club 桌子大局结束
@@ -4605,7 +4605,7 @@ void CAttemperEngineSink::ClubTableDJ(DWORD dwTableID)
 	Dbr.dwTableID = dwTableID;
 	Dbr.byMask = 3;
 	
-	g_AttemperEngine->PostDataBaseRequest(DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
+	g_GameCtrl->PostDataBaseRequest(DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
 }
 
 #pragma endregion
@@ -4618,7 +4618,7 @@ void CAttemperEngineSink::JoinTable(DWORD dwTableID, DWORD dwUserID)
 	AddTableUser.dwTableID = dwTableID;
 	AddTableUser.dwUserID = dwUserID;
 	//投递请求
-	g_AttemperEngine->PostDataBaseRequest(DBR_GR_ADD_TABLEUSER,0,&AddTableUser,sizeof(DBR_GP_AddTableUser));
+	g_GameCtrl->PostDataBaseRequest(DBR_GR_ADD_TABLEUSER,0,&AddTableUser,sizeof(DBR_GP_AddTableUser));
 }
 
 //用户离开替他人开房
@@ -4629,7 +4629,7 @@ void CAttemperEngineSink::LeaveTable(DWORD dwTableID, DWORD dwUserID)
 	DeleteTableUser.dwUserID = dwUserID;
 
 	//投递请求
-	g_AttemperEngine->PostDataBaseRequest(DBR_GR_DELETE_TABLEUSER,0,&DeleteTableUser,sizeof(DBR_GP_DeleteTableUser));
+	g_GameCtrl->PostDataBaseRequest(DBR_GR_DELETE_TABLEUSER,0,&DeleteTableUser,sizeof(DBR_GP_DeleteTableUser));
 }
 
 //抽奖结果
@@ -4692,7 +4692,7 @@ void CAttemperEngineSink::ClubPlayerSitDown(DWORD dwTableID, DWORD dwUserID, BYT
 		Dbr.byChairID = byChairID;
 		Dbr.byMask = 1; 
 
-		g_AttemperEngine->PostDataBaseRequest(DBR_CLUB_PLAYER_INFO,0,&Dbr,sizeof(Dbr));
+		g_GameCtrl->PostDataBaseRequest(DBR_CLUB_PLAYER_INFO,0,&Dbr,sizeof(Dbr));
 	}
 
 	//金币大厅桌子
@@ -4705,7 +4705,7 @@ void CAttemperEngineSink::ClubPlayerSitDown(DWORD dwTableID, DWORD dwUserID, BYT
 		HallDbr.byChairID = byChairID;
 		HallDbr.byMask = 1; 
 
-		g_AttemperEngine->PostDataBaseRequest(DBR_HALL_GOLD_PLAYER_INFO,0,&HallDbr,sizeof(HallDbr));
+		g_GameCtrl->PostDataBaseRequest(DBR_HALL_GOLD_PLAYER_INFO,0,&HallDbr,sizeof(HallDbr));
 	}
 }
 
@@ -4721,7 +4721,7 @@ void CAttemperEngineSink::ClubPlayerSitUp(DWORD dwTableID, DWORD dwUserID, BYTE 
 		Dbr.dwUserID = dwUserID;
 		Dbr.byMask = 2; 
 
-		g_AttemperEngine->PostDataBaseRequest(DBR_CLUB_PLAYER_INFO,0,&Dbr,sizeof(Dbr));
+		g_GameCtrl->PostDataBaseRequest(DBR_CLUB_PLAYER_INFO,0,&Dbr,sizeof(Dbr));
 	}
 
 	//金币大厅
@@ -4734,7 +4734,7 @@ void CAttemperEngineSink::ClubPlayerSitUp(DWORD dwTableID, DWORD dwUserID, BYTE 
 		HallDbr.byChairID = byChairID;
 		HallDbr.byMask = 2; 
 
-		g_AttemperEngine->PostDataBaseRequest(DBR_HALL_GOLD_PLAYER_INFO,0,&HallDbr,sizeof(HallDbr));
+		g_GameCtrl->PostDataBaseRequest(DBR_HALL_GOLD_PLAYER_INFO,0,&HallDbr,sizeof(HallDbr));
 	}
 }
 
@@ -4749,7 +4749,7 @@ void CAttemperEngineSink::ClubLastPlayerSitUp(DWORD dwTableID, DWORD dwUserID, B
 		Dbr.dwTableID = dwTableID;
 		Dbr.byMask = 3;
 
-		g_AttemperEngine->PostDataBaseRequest(DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
+		g_GameCtrl->PostDataBaseRequest(DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
 	}
 
 	//金币大厅桌子
@@ -4760,7 +4760,7 @@ void CAttemperEngineSink::ClubLastPlayerSitUp(DWORD dwTableID, DWORD dwUserID, B
 		HallDbr.dwTableID = dwTableID;
 		HallDbr.byMask = 3;
 
-		g_AttemperEngine->PostDataBaseRequest(DBR_HALL_GOLD_TABLE_INFO,0,&HallDbr,sizeof(HallDbr));
+		g_GameCtrl->PostDataBaseRequest(DBR_HALL_GOLD_TABLE_INFO,0,&HallDbr,sizeof(HallDbr));
 	}
 }
 
@@ -5127,7 +5127,7 @@ void CAttemperEngineSink::HallTableCreate(DWORD dwUserID, DWORD dwKindID, BYTE b
 	Dbr.dwGameID = (m_pGameServiceOption->dwServerID) & 0xFFFFFF00;
 
 	//投递请求
-	g_AttemperEngine->PostDataBaseRequest(DBR_HALL_GOLD_TABLE_INFO, 0, &Dbr, sizeof(Dbr));
+	g_GameCtrl->PostDataBaseRequest(DBR_HALL_GOLD_TABLE_INFO, 0, &Dbr, sizeof(Dbr));
 }
 
 
