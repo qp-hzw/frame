@@ -79,8 +79,6 @@ struct DBR_GP_UserQuitInfo
 #define DBR_GR_MATCH_QUIT			604									//退出比赛
 
 //游戏控制
-#define DBR_GR_ROOMLEVELMODIFY			1000							//房间难度控制
-#define DBR_GR_ROOMCONTROLVALMODIFY		1001							//房间杀放控制
 #define DBR_GR_WRITE_CURRENT_STOCK		1006							//写当前库存值
 //////////////////////////////////////////////////////////////////////////////////
 //输出信息
@@ -106,8 +104,6 @@ struct DBR_GP_UserQuitInfo
 #define DBO_GR_MATCH_RANK			501									//比赛名次
 #define DBO_GR_MATCH_QUIT_RESULT	502									//退赛结果
 
-#define DBO_GR_ROOMLEVELMODIFY			1000							//房间难度控制
-#define DBO_GR_ROOMCONTROLVALMODIFY		1001							//房间杀放控制
 #define DBO_GR_USERCONTROLVALMODIFY		1002							//玩家杀放控制
 #
 //桌子记录信息 added by lizhihu  700-800
@@ -362,8 +358,8 @@ struct DBR_GR_LeaveGameServer
 	DWORD							dwOnLineTimeCount;					//在线时长
 
 	//成绩变量
-	tagVariationInfo				RecordInfo;							//记录信息
-	tagVariationInfo				VariationInfo;						//提取信息
+	//tagVariationInfo				RecordInfo;							//记录信息
+	//tagVariationInfo				VariationInfo;						//提取信息
 
 	////控制值(不需要)
 	//SCORE							lControlScore;						//控制值
@@ -389,7 +385,7 @@ struct DBR_GR_GameScoreRecord
 
 	//统计信息
 	DWORD							dwUserMemal;						//奖牌数目
-	DWORD							dwPlayTimeCount;					//游戏时间
+	DWORD							dwPlayTimeCount;					//游戏时间 TODOLATER 删除
 
 	//时间信息
 	SYSTEMTIME						SystemTimeStart;					//开始时间

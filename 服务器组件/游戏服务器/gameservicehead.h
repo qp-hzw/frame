@@ -83,12 +83,6 @@ interface IGameServiceCustomRule;
 #define SCORE_TYPE_PRESENT			0x10								//赠送积分
 #define SCORE_TYPE_SERVICE			0x11								//服务积分
 
-//开始模式
-#define START_MODE_ALL_READY		0x00								//所有准备
-#define START_MODE_FULL_READY		0x01								//满人开始
-#define START_MODE_PAIR_READY		0x02								//配对开始
-#define START_MODE_TIME_CONTROL		0x10								//时间控制
-#define START_MODE_MASTER_CONTROL	0x11								//管理控制
 
 //分组选项
 #define DISTRIBUTE_ALLOW			0x01								//允许分组
@@ -324,7 +318,7 @@ struct tagRequestResult
 //桌子状况
 struct tagTableUserInfo
 {
-	WORD							wMinUserCount;						//最少人数
+	//WORD							wMinUserCount;						//最少人数
 	WORD							wTableUserCount;					//用户数目
 	WORD							wTableReadyCount;					//准备数目
 	WORD							wTableAndroidCount;					//机器数目
@@ -438,21 +432,10 @@ public:
 	//服务配置
 	virtual tagGameServiceOption * GetGameServiceOption()=NULL;
 
-	//配置接口
-public:
-	//开始模式
-	virtual BYTE GetStartMode()=NULL;
-	//开始模式
-	virtual VOID SetStartMode(BYTE cbStartMode)=NULL;
-
 	//信息接口
 public:
-	//锁定状态
-	virtual bool IsTableLocked()=NULL;
 	//游戏状态
 	virtual bool IsGameStarted()=NULL;
-	//游戏状态
-	virtual bool IsDrawStarted()=NULL;
 	//游戏状态
 	virtual bool IsTableStarted()=NULL;
 
@@ -543,15 +526,6 @@ public:
 public:
 	//发送场景
 	virtual bool SendGameScene(CPlayer * pIServerUserItem, VOID * pData, WORD wDataSize)=NULL;
-
-	//比赛接口
-public:
-	//设置接口:
-	virtual bool SetMatchInterface(IUnknownEx * pIUnknownEx)=NULL;
-	//获取比赛桌子接口
-	virtual IGameMatchSink* GetGameMatchSink()=NULL;
-
-
 };
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -656,14 +630,6 @@ public:
 	virtual SCORE GetRoomControl() = NULL;
 	virtual void SetRoomContorl(SCORE val ) = NULL;
 
-	//功能接口
-public:
-	//插入分配
-	virtual bool InsertDistribute(CPlayer * pIServerUserItem)=NULL;
-	//插入用户
-	virtual bool InsertWaitDistribute(CPlayer * pIServerUserItem)=NULL;
-	//删除用户
-	virtual bool DeleteWaitDistribute(CPlayer * pIServerUserItem)=NULL;
 
 #pragma region DB事件通知
 	//替他人开房

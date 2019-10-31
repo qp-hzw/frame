@@ -113,10 +113,6 @@ protected:
 	//退出比赛
 	bool OnRequestMatchQuit(DWORD dwContextID, VOID * pData, WORD wDataSize, DWORD &dwUserID);
 
-	//房间难度修改
-	bool OnRequestRoomLevelModify(DWORD dwContextID, VOID * pData, WORD wDataSize, DWORD &dwUserID);
-	//房间控制值修改
-	bool OnRequestRoomControlValModify(DWORD dwContextID, VOID * pData, WORD wDataSize, DWORD &dwUserID);
 	//写当前库存
 	bool OnWriteCurrentStock(DWORD dwContextID, VOID * pData, WORD wDataSize, DWORD &dwUserID);
 

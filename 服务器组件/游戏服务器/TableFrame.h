@@ -11,7 +11,6 @@
 typedef CPlayer * CTableUserItemArray[MAX_CHAIR];				//游戏数组
 typedef CWHArray<CPlayer *> CLookonUserItemArray;				//旁观数组
 typedef CWHArray<tagGameScoreRecord *> CGameScoreRecordArray;			//记录数组
-interface IMatchTableFrameNotify;
 
 //子游戏房间规则
 struct tagTableSubGameRule
@@ -29,20 +28,26 @@ class CTableFrame : public ITableFrame
 protected:
 	WORD							m_wTableID;							//桌子号码		从0开始，在桌子初始化的时候已经赋值
 	WORD							m_wChairCount;						//椅子数目
-	BYTE							m_cbStartMode;						//开始模式      子游戏初始化时候 传递给frame
-	WORD							m_wUserCount;						//用户数目
-	DWORD							m_dwTableOwner;						//桌主用户（第一个坐下的玩家）
-	DWORD							m_dwCreateTableUser;				//创建桌子用户
-	DWORD							m_dwGroupID;						//所在牌友圈ID
-	BYTE							m_cbTableMode;						//桌子游戏模式
+
+	WORD                            m_wDrawCount;                       //游戏局数
+
+	BYTE							m_cbTableMode;						//桌子游戏模式  房卡场, 金币场, 房卡金币场, 比赛场
 
 	tagTableRule					m_tagTableRule;						//通用房间规则(client传给服务端大厅的)
 	tagTableSubGameRule				m_tagTableSubGameRule;				//子游戏特有房间规则(client传给子游戏的)
 
+
+	//TODOLATER 只保留一个字段
+	DWORD							m_dwTableOwner;						//房主（第一个坐下的玩家）
+	DWORD							m_dwCreateTableUser;				//创建桌子用户
+
+	//TODOLATER 待整理
+	DWORD							m_dwGroupID;						//所在牌友圈ID
+	
+
 	//状态变量
 protected:
 	bool							m_bGameStarted;						//游戏开始标志
-	bool							m_bDrawStarted;						//游戏标志
 	bool							m_bTableStarted;					//游戏标志
 
 	//状态变量
@@ -63,13 +68,11 @@ protected:
 
 	//时间变量
 protected:
-	DWORD							m_dwDrawStartTime;					//开始时间
 	SYSTEMTIME						m_SystemTimeStart;					//开始时间
-	WORD                            m_wDrawCount;                       //游戏局数
+	
 
 	//动态属性
 protected:	
-	TCHAR							m_szEnterPassword[LEN_PASSWORD];	//进入密码		TODO 这个密码有什么用
 	DWORD							m_dwPassword;						//6位房卡房间密码
 
 
@@ -98,15 +101,6 @@ protected:
 	CGameScoreRecordArray			m_GameScoreRecordActive;			//游戏记录
 	static CGameScoreRecordArray	m_GameScoreRecordBuffer;			//游戏记录
 
-	//比赛接口
-protected:
-	IGameMatchSink					* m_pIGameMatchSink;				//比赛接口
-
-	//
-protected:
-	bool							m_ConrtolValueEnabled;				//是否接受房间控制值影响
-	static SCORE					m_ControlValueForRoom;				//房间控制值yang
-	static SCORE					m_ControlValueForRoomOrgi;			//房间控制值yang
 #pragma endregion
 
 #pragma region 初始化函数
@@ -133,18 +127,11 @@ public:
 	virtual WORD GetTableID() { return m_wTableID; }
 	//游戏人数
 	virtual WORD GetChairCount() { return m_wChairCount; }
-	//空位置数目
-	virtual WORD GetNullChairCount(){return m_wChairCount - m_wUserCount;}
 
 	//服务属性
 	virtual tagGameServiceAttrib * GetGameServiceAttrib() { return m_pGameServiceAttrib; }
 	//服务配置
 	virtual tagGameServiceOption * GetGameServiceOption() { return m_pGameServiceOption; }
-
-	//开始模式
-	virtual BYTE GetStartMode() { return m_cbStartMode; }
-	//开始模式
-	virtual VOID SetStartMode(BYTE cbStartMode) { m_cbStartMode=cbStartMode; }
 
 	//获取状态
 	virtual BYTE GetGameStatus() { return m_cbGameStatus; }
@@ -154,11 +141,7 @@ public:
 	//游戏状态
 	virtual bool IsGameStarted() { return m_bGameStarted; }
 	//游戏状态
-	virtual bool IsDrawStarted() { return m_bDrawStarted; }
-	//游戏状态
 	virtual bool IsTableStarted() { return m_bTableStarted; }
-	//锁定状态
-	virtual bool IsTableLocked() { return (m_szEnterPassword[0]!=0); }
 
 	//设置桌主，第一个坐下的人
 	virtual void SetTableOwner(DWORD dwUserID);
@@ -319,14 +302,6 @@ public:
 	//发送场景
 	virtual bool SendGameScene(CPlayer * pIServerUserItem, VOID * pData, WORD wDataSize);
 
-#pragma region 比赛接口
-	//比赛接口
-public:
-	virtual bool SetMatchInterface(IUnknownEx * pIUnknownEx);
-	//获取比赛桌子接口
-	virtual IGameMatchSink* GetGameMatchSink(){return m_pIGameMatchSink;}
-#pragma endregion
-
 	//功能函数
 public:
 	//获取空位
@@ -393,10 +368,8 @@ public:
 	bool CheckUserIpAddress();
 
 public:
-	//检查分配
-	bool CheckDistribute();
 	//游戏记录
-	void RecordGameScore(bool bDrawStarted, DWORD dwStartGameTime=INVALID_DWORD);
+	void RecordGameScore( DWORD dwStartGameTime=INVALID_DWORD);
 
 public:
 

@@ -152,16 +152,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 			bSucceed = OnRequestMatchQuit(dwContextID,pData,wDataSize,dwUserID);
 		}
 		break;
-	case DBR_GR_ROOMLEVELMODIFY:				//修改房间难度
-		{
-			bSucceed = OnRequestRoomLevelModify(dwContextID,pData,wDataSize,dwUserID);
-		}
-		break;
-	case DBR_GR_ROOMCONTROLVALMODIFY:				//修改房间控制值
-		{
-			bSucceed = OnRequestRoomControlValModify(dwContextID,pData,wDataSize,dwUserID);
-		}
-		break;
 	case DBR_GR_WRITE_CURRENT_STOCK:
 		{
 			bSucceed = OnWriteCurrentStock(dwContextID,pData,wDataSize,dwUserID);
@@ -681,6 +671,7 @@ bool CDataBaseEngineSink::OnRequestLeaveGameServer(DWORD dwContextID, VOID * pDa
 	m_TreasureDB->AddParameter(TEXT("@dwInoutIndex"),pLeaveGameServer->dwInoutIndex);
 	m_TreasureDB->AddParameter(TEXT("@dwLeaveReason"),pLeaveGameServer->dwLeaveReason);
 
+	/*
 	//记录成绩
 	m_TreasureDB->AddParameter(TEXT("@lRecordScore"),pLeaveGameServer->RecordInfo.lScore);
 	m_TreasureDB->AddParameter(TEXT("@lRecordGrade"),pLeaveGameServer->RecordInfo.lGrade);
@@ -708,6 +699,7 @@ bool CDataBaseEngineSink::OnRequestLeaveGameServer(DWORD dwContextID, VOID * pDa
 	m_TreasureDB->AddParameter(TEXT("@lVariationExperience"),pLeaveGameServer->VariationInfo.dwExperience);
 	m_TreasureDB->AddParameter(TEXT("@lVariationLoveLiness"),pLeaveGameServer->VariationInfo.lLoveLiness);
 	m_TreasureDB->AddParameter(TEXT("@dwVariationPlayTimeCount"),pLeaveGameServer->VariationInfo.dwPlayTimeCount);
+	*/
 
 	//////控制信息(不需要写)
 	//m_TreasureDB->AddParameter(TEXT("@lControlScore"),pLeaveGameServer->lControlScore);
@@ -1080,64 +1072,6 @@ bool CDataBaseEngineSink::OnRequestMatchQuit(DWORD dwContextID, VOID * pData, WO
 
 	return true;
 
-}
-
-bool CDataBaseEngineSink::OnRequestRoomLevelModify(DWORD dwContextID, VOID * pData, WORD wDataSize, DWORD &dwUserID)
-{
-	//效验参数
-	ASSERT(wDataSize==sizeof(DBR_GR_RoomLevelModify));
-	if (wDataSize!=sizeof(DBR_GR_RoomLevelModify)) return false;
-
-	//变量定义
-	DBR_GR_RoomLevelModify * pRoomLevelModify=(DBR_GR_RoomLevelModify *)pData;
-
-
-	//请求处理
-
-	//构造参数
-	m_TreasureDB->ResetParameter();
-	m_TreasureDB->AddParameter(TEXT("@wServerID"),pRoomLevelModify->wSeverID);
-	m_TreasureDB->AddParameter(TEXT("@wGameLevel"),pRoomLevelModify->wGameLevel);
-
-	//结果处理
-	LONG lReturnValue=m_TreasureDB->ExecuteProcess(TEXT("GSP_GR_RoomLevelModify"),false);
-
-	//发送结果
-	if (lReturnValue == DB_SUCCESS)
-	{
-		g_AttemperEngineSink->OnEventDataBaseResult(DBO_GR_ROOMLEVELMODIFY,dwContextID,pRoomLevelModify,wDataSize);
-	}
-
-	return true;
-
-}
-
-bool CDataBaseEngineSink::OnRequestRoomControlValModify(DWORD dwContextID, VOID * pData, WORD wDataSize, DWORD &dwUserID)
-{
-	//效验参数
-	ASSERT(wDataSize==sizeof(DBR_GR_RoomControlValModify));
-	if (wDataSize!=sizeof(DBR_GR_RoomControlValModify)) return false;
-
-	//变量定义
-	DBR_GR_RoomControlValModify * pRoomControlVal=(DBR_GR_RoomControlValModify *)pData;
-
-
-	//请求处理
-
-	//构造参数
-	m_TreasureDB->ResetParameter();
-	m_TreasureDB->AddParameter(TEXT("@wServerID"),pRoomControlVal->wSeverID);
-	m_TreasureDB->AddParameter(TEXT("@wControlVal"),pRoomControlVal->wControlVal);
-
-	//结果处理
-	LONG lReturnValue=m_TreasureDB->ExecuteProcess(TEXT("GSP_GR_RoomControlVal"),false);
-
-	if ( lReturnValue == DB_SUCCESS)
-	{
-		g_AttemperEngineSink->OnEventDataBaseResult(DBO_GR_ROOMCONTROLVALMODIFY,dwContextID,pRoomControlVal,wDataSize);
-	}
-
-	return true;
 }
 
 //写当前库存

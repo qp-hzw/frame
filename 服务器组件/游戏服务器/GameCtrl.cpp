@@ -305,9 +305,6 @@ bool CGameCtrl::SendGameMessage(CPlayer * pIServerUserItem, LPCTSTR lpszMessage,
 	ASSERT(pIServerUserItem!=NULL);
 	if (pIServerUserItem==NULL) return false;
 
-	if(pIServerUserItem->IsVirtualUser())
-		return true;
-
 	//·¢ËÍÊý¾Ý
 	if ((pIServerUserItem->GetBindIndex()!=INVALID_WORD)&&(pIServerUserItem->IsClientReady()==true))
 	{

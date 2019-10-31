@@ -26,22 +26,12 @@ struct tagSystemMessage
 };
 
 
-//数组说明
-typedef CWHArray<CTableFrame *>		CTableFrameArray;					//桌子数组
-typedef CList<CPlayer *>    CWaitDistributeList;                //等待分配
-
 //////////////////////////////////////////////////////////////////////////////////
 
 //调度钩子
 class CAttemperEngineSink : public IAttemperEngineSink
 {
 #pragma region 成员变量
-	//状态变量
-protected:
-	bool							m_bCollectUser;						//汇总标志
-	bool							m_bNeekCorrespond;					//协调标志
-	bool							m_bStopping;
-
 	//绑定信息
 protected:
 	tagBindParameter *				m_pNormalParameter;					//绑定信息
@@ -52,16 +42,6 @@ protected:
 	tagGameParameter *				m_pGameParameter;					//配置参数
 	tagGameServiceAttrib *			m_pGameServiceAttrib;				//服务属性
 	tagGameServiceOption *			m_pGameServiceOption;				//服务配置
-
-	//组件变量
-protected:
-	CTableFrameArray				m_TableFrameArray;					//桌子数组
-	CWaitDistributeList             m_WaitDistributeList;               //等待分配
-
-	//房间控制值
-public:
-	SCORE							m_ControlValueForRoom;
-	SCORE							m_ControlValueForRoomOrgi;
 
 #pragma endregion
 
@@ -88,11 +68,6 @@ public:
 	virtual bool OnAttemperEngineStart(IUnknownEx * pIUnknownEx);
 	//停止事件
 	virtual bool OnAttemperEngineConclude(IUnknownEx * pIUnknownEx);
-
-    //异步接口辅助函数
-protected:
-    //配置桌子
-	bool InitTableFrameArray();
 
 #pragma endregion
 
@@ -154,14 +129,6 @@ protected:
 #pragma endregion
 
 #pragma region 用户接口
-	//功能接口
-public:
-	//插入用户
-	virtual bool InsertDistribute(CPlayer * pCPlayer);
-	//插入用户
-	virtual bool InsertWaitDistribute(CPlayer * pCPlayer);
-	//删除用户
-	virtual bool DeleteWaitDistribute(CPlayer * pCPlayer);
 
 	//用户接口
 public:
@@ -293,12 +260,6 @@ public:
 	virtual bool SetStockScore(SCORE currentStock);
 	//设置库存值
 	virtual SCORE GetChangeStockScore();
-	//初始化房间控制值yang
-	virtual void InitRoomControlVal( SCORE val );
-	//检测是否保存房间控制值yang
-	virtual SCORE CheckAndSaveRoomControlValue();
-	virtual SCORE GetRoomControl(){ return m_ControlValueForRoom ;}
-	virtual void SetRoomContorl(SCORE val ){ m_ControlValueForRoom = val;}
 
 	//数据事件
 protected:
@@ -308,12 +269,6 @@ protected:
 	//加载断线重连
 	bool On_DBO_GR_LOAD_OFFLINE(DWORD dwContextID, VOID * pData, WORD wDataSize);
 	
-
-	//修改房间难度成功
-	bool OnDBRoomLevelModify(DWORD dwContextID, VOID * pData, WORD wDataSize);
-	bool OnDBRoomControlValModify(DWORD dwContextID, VOID * pData, WORD wDataSize);
-
-
 	//发送函数
 protected:
 	//发送用户信息
@@ -346,9 +301,6 @@ protected:
 	void StopService();
 	//通知服务停止
 	void SendServiceStopped();
-	//分配机器人
-	bool DistributeAndroid();
-	bool Distribute(CTableFrame* pTableFrame, bool bChoiceAndroid, WORD wWantUserCount, WORD& wHandleCount );
 #pragma endregion
 
 #pragma region  创建房间 && 创建桌子 && 加入桌子

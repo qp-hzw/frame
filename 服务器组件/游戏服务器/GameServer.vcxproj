@@ -192,6 +192,7 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="GameCtrl.cpp" />
     <ClCompile Include="TableFrame.cpp" />
+    <ClCompile Include="TableManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\消息定义\CMD_GameServer.h" />
@@ -204,6 +205,7 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClInclude Include="GameCtrl.h" />
     <ClInclude Include="Stdafx.h" />
     <ClInclude Include="TableFrame.h" />
+    <ClInclude Include="TableManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,4 +1,5 @@
 #include "PlayerManager.h"
+#include "Player.h"
 
 std::vector<CPlayer*> CPlayerManager::s_PlayerArray;
 
@@ -50,14 +51,14 @@ bool CPlayerManager::DeleteAllPlayer()
 }
 
 //²é
-CPlayer * CPlayerManager::SearchPlayerByEnum(WORD wEnumIndex)
+CPlayer * CPlayerManager::FindPlayerByEnum(WORD wEnumIndex)
 {
 	if (wEnumIndex >= s_PlayerArray.size()) return NULL;
 	return s_PlayerArray[wEnumIndex];
 }
 
 //²é
-CPlayer * CPlayerManager::SearchPlayerByID(DWORD dwUserID)
+CPlayer * CPlayerManager::FindPlayerByID(DWORD dwUserID)
 {
 	for(auto player : s_PlayerArray)
 	{
