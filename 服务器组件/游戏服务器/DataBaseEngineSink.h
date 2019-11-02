@@ -14,8 +14,6 @@ protected:
 
 	//配置变量
 protected:
-	tagGameParameter *				m_pGameParameter;					//配置参数
-	tagGameServiceAttrib *			m_pGameServiceAttrib;				//服务属性
 	tagGameServiceOption *			m_pGameServiceOption;				//服务配置
 
 	//组件变量
@@ -42,8 +40,6 @@ public:
 
 	//配置参数
 public:
-	//服务属性
-	virtual tagGameServiceAttrib * GetGameServiceAttrib() { return m_pGameServiceAttrib; }
 	//服务配置
 	virtual tagGameServiceOption * GetGameServiceOption() { return m_pGameServiceOption; }
 

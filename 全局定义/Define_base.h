@@ -42,10 +42,6 @@
 #define SCORE						LONGLONG							//积分类型
 #define SCORE_STRING				TEXT("%I64d")						//积分类型
 
-//游戏状态
-#define GAME_STATUS_FREE			0									//空闲状态
-#define GAME_STATUS_PLAY			100									//游戏状态	TODO 细看，改成桌子状态
-#define GAME_STATUS_WAIT			200									//等待状态
 
 //系统参数
 #define LEN_USER_CHAT				128									//聊天长度
@@ -149,14 +145,6 @@
 
 //////////////////////////////////////////////////////////////////////////////////
 
-//用户状态
-#define US_NULL						0x00								//没有状态
-#define US_FREE						0x01								//站立状态
-#define US_SIT						0x02								//坐下状态
-#define US_READY					0x03								//同意状态
-#define US_LOOKON					0x04								//旁观状态
-#define US_PLAYING					0x05								//游戏状态
-#define US_OFFLINE					0x06								//断线状态
 
 //////////////////////////////////////////////////////////////////////////////////
 

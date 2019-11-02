@@ -410,50 +410,14 @@ interface IGameMatchSink;
 //桌子接口
 interface ITableFrame : public IUnknownEx
 {
-	//属性接口
-public:
-	//ServerID
-	virtual DWORD GetServerID()=NULL;
-	//桌子号码
-	virtual WORD GetTableID()=NULL;
-	//游戏人数
-	virtual WORD GetChairCount()=NULL;
-	//获取密码
-	virtual DWORD GetPassword()=NULL;
-
 	//配置参数
 public:
 	//读取通用房间规则
 	virtual VOID* GetCustomRule() =NULL;
 	//读取子游戏特有房间规则
 	virtual VOID * GetSubGameRule()=NULL;
-	//服务属性
-	virtual tagGameServiceAttrib * GetGameServiceAttrib()=NULL;
 	//服务配置
 	virtual tagGameServiceOption * GetGameServiceOption()=NULL;
-
-	//信息接口
-public:
-	//游戏状态
-	virtual bool IsGameStarted()=NULL;
-	//游戏状态
-	virtual bool IsTableStarted()=NULL;
-
-	//状态接口
-public:
-	//获取状态
-	virtual BYTE GetGameStatus()=NULL;
-	//设置状态
-	virtual VOID SetGameStatus(BYTE bGameStatus)=NULL;
-
-	//控制接口
-public:
-	//开始游戏
-	virtual bool StartGame()=NULL;
-	//解散游戏
-	virtual bool DismissGame()=NULL;
-	//结束游戏
-	virtual bool ConcludeGame(BYTE cbGameStatus)=NULL;
 
 	//写分接口
 public:
@@ -461,20 +425,6 @@ public:
 	virtual bool WriteRecordInfo(WORD wXJCount,TCHAR strScore[],  VOID* pData, DWORD dwDataSize) = NULL;
 	//处理小局结束
 	virtual bool HandleXJGameEnd(BYTE cbCurGameCount, BYTE cbGameMode, SCORE *lGameScore) = NULL;
-
-	//计算接口
-public:
-	//消费限额
-	virtual SCORE QueryConsumeQuota(CPlayer * pIServerUserItem)=NULL;
-
-	//用户接口
-public:
-	//寻找用户
-	virtual CPlayer * SearchUserItem(DWORD dwUserID)=NULL;
-	//游戏用户
-	virtual CPlayer * GetTableUserItem(WORD wChairID)=NULL;
-	//旁观用户
-	virtual CPlayer * EnumLookonUserItem(WORD wEnumIndex)=NULL;
 
 	//时间接口
 public:
@@ -484,43 +434,6 @@ public:
 	virtual bool KillGameTimer(DWORD dwTimerID)=NULL;
 	//获取定时器剩余毫秒数
 	virtual DWORD GetTimerLeftTickCount(DWORD dwTimerID)=NULL;
-
-	//网络接口
-public:
-	//发送数据
-	virtual bool SendTableData(WORD wChairID, WORD wSubCmdID)=NULL;
-	//发送数据
-	virtual bool SendTableData(WORD wChairID, WORD wSubCmdID, VOID * pData, WORD wDataSize,WORD wMainCmdID=MDM_GF_GAME)=NULL;
-	//发送数据
-	virtual bool SendLookonData(WORD wChairID, WORD wSubCmdID)=NULL;
-	//发送数据
-	virtual bool SendLookonData(WORD wChairID, WORD wSubCmdID, VOID * pData, WORD wDataSize)=NULL;
-	//发送数据
-	virtual bool SendUserItemData(CPlayer * pIServerUserItem, WORD wSubCmdID)=NULL;
-	//发送数据
-	virtual bool SendUserItemData(CPlayer * pIServerUserItem, WORD wSubCmdID, VOID * pData, WORD wDataSize)=NULL;
-	//发送数据
-	virtual bool SendAndroidUserData(WORD wChairID, WORD wSubCmdID) = NULL;
-	//发送数据
-	virtual bool SendAndroidUserData(WORD wChairID, WORD wSubCmdID, VOID * pData, WORD wDataSize,WORD wMainCmdID=MDM_GF_GAME) = NULL;
-
-	//功能接口
-public:
-	//发送消息
-	virtual bool SendGameMessage(LPCTSTR lpszMessage, WORD wType)=NULL;
-	//游戏消息
-	virtual bool SendGameMessage(CPlayer * pIServerUserItem, LPCTSTR lpszMessage, WORD wType)=NULL;
-	//房间消息
-	virtual bool SendRoomMessage(CPlayer * pIServerUserItem, LPCTSTR lpszMessage, WORD wType)=NULL;
-
-	//动作处理
-public:
-	//起立动作
-	virtual bool PerformStandUpAction(CPlayer * pIServerUserItem)=NULL;
-	//旁观动作
-	virtual bool PerformLookonAction(WORD wChairID, CPlayer * pIServerUserItem)=NULL;
-	//坐下动作
-	virtual bool PerformSitDownAction(WORD wChairID, CPlayer * pIServerUserItem, LPCTSTR lpszPassword=NULL, bool bCheckUserGPS = false)=NULL;
 
 	//功能接口
 public:
@@ -541,8 +454,6 @@ public:
 
 	//查询接口
 public:
-	//查询限额
-	virtual SCORE QueryConsumeQuota(CPlayer * pIServerUserItem)=NULL;
 	//最少积分
 	virtual SCORE QueryLessEnterScore(WORD wChairID, CPlayer * pIServerUserItem)=NULL;
 	//查询是否扣服务费
@@ -563,8 +474,6 @@ public:
 	virtual bool OnTimerMessage(DWORD dwTimerID, WPARAM dwBindParameter)=NULL;
 	//数据事件
 	virtual bool OnDataBaseMessage(WORD wRequestID, VOID * pData, WORD wDataSize)=NULL;
-	//积分事件
-	virtual bool OnUserScroeNotify(WORD wChairID, CPlayer * pIServerUserItem, BYTE cbReason)=NULL;
 	//控制值改变
 	virtual void OnUserControlScoreChange( WORD chair_id, CPlayer * server_user_item, SCORE val ){};
 	//游戏程度改变yang
@@ -634,8 +543,6 @@ public:
 #pragma region DB事件通知
 	//替他人开房
 public:
-	//替他人开房结束
-	virtual void ConcludeTable(DWORD dwTableID) = NULL;
 	//替他人开房开始
 	virtual void StartTable(DWORD dwTableID) = NULL;
 	//用户加入替他人开房

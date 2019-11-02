@@ -39,7 +39,6 @@ protected:
 
 	//配置信息
 protected:
-	tagGameParameter *				m_pGameParameter;					//配置参数
 	tagGameServiceAttrib *			m_pGameServiceAttrib;				//服务属性
 	tagGameServiceOption *			m_pGameServiceOption;				//服务配置
 
@@ -207,8 +206,6 @@ protected:
 	bool On_CMD_GC_User_ModifyUserTreasure(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
 
-	//用户旁观
-	bool On_SUB_CG_User_Lookon(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//用户坐下
 	bool On_SUB_CG_User_SitDown(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//用户起立

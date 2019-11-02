@@ -57,8 +57,6 @@ CAttemperEngineSink::CAttemperEngineSink()
 	m_pAndroidParameter=NULL;
 
 	//状态变量
-	m_pGameParameter=NULL;
-	m_pGameServiceAttrib=NULL;
 	m_pGameServiceOption=NULL;
 
 	if(g_AttemperEngineSink == NULL) g_AttemperEngineSink =this;
@@ -96,7 +94,6 @@ bool CAttemperEngineSink::OnAttemperEngineStart(IUnknownEx * pIUnknownEx)
 bool CAttemperEngineSink::OnAttemperEngineConclude(IUnknownEx * pIUnknownEx)
 {
 	//配置信息
-	m_pGameServiceAttrib=NULL;
 	m_pGameServiceOption=NULL;
 
 	//绑定数据
@@ -440,7 +437,7 @@ bool CAttemperEngineSink::OnEventTCPNetworkShut(DWORD dwClientAddr, DWORD dwActi
 		}
 		else
 		{
-			pIServerUserItem->SetUserStatus(US_NULL,INVALID_TABLE,INVALID_CHAIR);
+			pIServerUserItem->SetUserStatus(US_FREE,INVALID_TABLE,INVALID_CHAIR);
 		}
 
 		//玩家状态变化
@@ -558,7 +555,7 @@ bool CAttemperEngineSink::OnEventUserItemStatus(CPlayer * pIServerUserItem, WORD
 
 
 	//离开判断
-	if (pIServerUserItem->GetUserStatus()==US_NULL)
+	if (pIServerUserItem->GetUserStatus()==US_FREE)
 	{
 		//获取绑定
 		WORD wBindIndex=pIServerUserItem->GetBindIndex();
@@ -715,7 +712,7 @@ bool CAttemperEngineSink::OnTCPSocketMainTransfer(WORD wSubCmdID, VOID * pData, 
 					continue;
 
 				//找到相同桌子号的， 然后解散
-				if(pTableFrame->GetPassword() == pCPO->dwTableID)
+				if(pTableFrame->GetTableID() == pCPO->dwTableID)
 				{
 					//设置房间处于解散状态
 					pTableFrame->SetDismissState(true);
@@ -736,7 +733,7 @@ bool CAttemperEngineSink::OnTCPSocketMainTransfer(WORD wSubCmdID, VOID * pData, 
 					//空闲状态 直接解散
 					if(GAME_STATUS_FREE == pTableFrame->GetGameStatus())
 					{
-						pTableFrame->ConcludeGame(GAME_CONCLUDE_NORMAL);
+						pTableFrame->HandleDJGameEnd(GAME_CONCLUDE_NORMAL);
 					}
 					//游戏状态则 通知子游戏
 					else
@@ -817,10 +814,6 @@ bool CAttemperEngineSink::OnTCPNetworkMainUser(WORD wSubCmdID, VOID *pData, WORD
 {
 	switch (wSubCmdID)
 	{
-	case SUB_CG_USER_LOOKON:		//用户旁观
-		{
-			return On_SUB_CG_User_Lookon(pData,wDataSize,dwSocketID);
-		}
 	case SUB_CG_USER_SITDOWN:		//用户坐下
 		{
 			return On_SUB_CG_User_SitDown(pData,wDataSize,dwSocketID);
@@ -966,6 +959,7 @@ bool CAttemperEngineSink::On_SUB_CG_Logon_UserID(VOID * pData, WORD wDataSize, D
 	if (wDataSize != sizeof(STR_SUB_CG_LOGON_USERID)) return false;
 	STR_SUB_CG_LOGON_USERID *pLogonUserID = (STR_SUB_CG_LOGON_USERID *)pData;
 
+	/*
 	//版本校验   校验client子游戏  与  server子游戏版本是否匹配
 	DWORD clientSubGameVersion = pLogonUserID->dwSubGameVersion;
 	DWORD serverSubGameVersion = m_pGameServiceAttrib->dwSubGameVersion;
@@ -973,6 +967,7 @@ bool CAttemperEngineSink::On_SUB_CG_Logon_UserID(VOID * pData, WORD wDataSize, D
 	{
 		//printf("\n【客户端】：USERID登录，版本不匹配\n");
 	}
+	*/
 
 	//重复判断
 	WORD wBindIndex = LOWORD(dwSocketID);
@@ -1232,7 +1227,7 @@ VOID CAttemperEngineSink::OnEventUserLogon(CPlayer * pIServerUserItem, bool bAlr
 		if(NULL == pTableFrame) continue;
 
 		//TableInfo.TableStatusArray[i].cbTableLock = pTableFrame->IsTableLocked()?TRUE:FALSE;
-		TableInfo.TableStatusArray[i].cbPlayStatus = pTableFrame->IsTableStarted()?TRUE:FALSE;
+		//TableInfo.TableStatusArray[i].cbPlayStatus = pTableFrame->IsTableStarted()?TRUE:FALSE;
 	}
 
 	//桌子状态
@@ -1326,59 +1321,10 @@ bool CAttemperEngineSink::SwitchUserItemConnect(CPlayer * pIServerUserItem, TCHA
 }
 
 /*********************************************【主消息 3 用户命令】*********************************************************/
-
-//用户旁观
-bool CAttemperEngineSink::On_SUB_CG_User_Lookon(VOID * pData, WORD wDataSize, DWORD dwSocketID)
-{
-	//效验参数
-	ASSERT(wDataSize==sizeof(CMD_GR_UserLookon));
-	if (wDataSize!=sizeof(CMD_GR_UserLookon)) return false;
-
-	//效验数据
-	CMD_GR_UserLookon * pUserLookon=(CMD_GR_UserLookon *)pData;
-	if (pUserLookon->wChairID>=m_pGameServiceAttrib->wChairCount) return false;
-	if (pUserLookon->wTableID>=(WORD)CTableManager::TableCount()) return false;
-
-	//获取用户
-	WORD wBindIndex=LOWORD(dwSocketID);
-	CPlayer * pIServerUserItem=GetBindUserItem(wBindIndex);
-
-	//用户效验
-	ASSERT(pIServerUserItem!=NULL);
-	if (pIServerUserItem==NULL) return false;
-
-	//消息处理
-	WORD wTableID=pIServerUserItem->GetTableID();
-	WORD wChairID=pIServerUserItem->GetChairID();
-	BYTE cbUserStatus=pIServerUserItem->GetUserStatus();
-	if ((wTableID==pUserLookon->wTableID)&&(wChairID==pUserLookon->wChairID)&&(cbUserStatus==US_LOOKON)) return true;
-
-	//用户判断
-	if (cbUserStatus==US_PLAYING)
-	{
-		SendRequestFailure(pIServerUserItem,TEXT("您正在游戏中，暂时不能离开，请先结束当前游戏！"),0);
-		return true;
-	}
-
-	//离开处理
-	if (wTableID!=INVALID_TABLE)
-	{
-		CTableFrame * pTableFrame=CTableManager::FindTableByTableID(wTableID);
-		if (pTableFrame->PerformStandUpAction(pIServerUserItem)==false) return true;
-	}
-
-	//坐下处理
-	CTableFrame * pTableFrame=CTableManager::FindTableByTableID(pUserLookon->wTableID);
-	pTableFrame->PerformLookonAction(pUserLookon->wChairID,pIServerUserItem);
-
-	return true;
-}
-
 //用户坐下
 bool CAttemperEngineSink::On_SUB_CG_User_SitDown(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
 	//效验参数
-	ASSERT(wDataSize==sizeof(CMD_GR_UserSitDown));
 	if (wDataSize!=sizeof(CMD_GR_UserSitDown)) return false;
 
 	//效验数据
@@ -1398,7 +1344,7 @@ bool CAttemperEngineSink::On_SUB_CG_User_SitDown(VOID * pData, WORD wDataSize, D
 	BYTE cbUserStatus=pIServerUserItem->GetUserStatus();
 
 	//重复判断
-	if ((pUserSitDown->wTableID < MAX_TABLE)&&(pUserSitDown->wChairID<m_pGameServiceAttrib->wChairCount))
+	if (pUserSitDown->wTableID < MAX_TABLE)
 	{
 		CTableFrame * pTableFrame=CTableManager::FindTableByTableID(pUserSitDown->wTableID);
 		if (pTableFrame->GetTableUserItem(pUserSitDown->wChairID)==pIServerUserItem) return true;
@@ -1416,13 +1362,8 @@ bool CAttemperEngineSink::On_SUB_CG_User_SitDown(VOID * pData, WORD wDataSize, D
 	if (wTableID!=INVALID_TABLE)
 	{
 		CTableFrame * pTableFrame=CTableManager::FindTableByTableID(wTableID);
-		if (pTableFrame->PerformStandUpAction(pIServerUserItem)==false) return true;
+		if (pTableFrame->PlayerUpTable(pIServerUserItem)==false) return true;
 	}
-
-	////防作弊
-	//if(CServerRule::IsAllowAvertCheatMode(m_pGameServiceOption->dwServerRule)&&(m_pGameServiceAttrib->wChairCount < MAX_CHAIR))
-	//{
-	//}
 
 	//请求调整
 	WORD wRequestTableID=pUserSitDown->wTableID;
@@ -1433,13 +1374,9 @@ bool CAttemperEngineSink::On_SUB_CG_User_SitDown(VOID * pData, WORD wDataSize, D
 	{
 		//起始桌子
 		WORD wStartTableID=0;
-//		DWORD dwServerRule=m_pGameServiceOption->dwServerRule;
-	//	if ((CServerRule::IsAllowAvertCheatMode(dwServerRule)==true)&&(m_pGameServiceAttrib->wChairCount<MAX_CHAIR)) wStartTableID=1;
 
 		//动态加入
 		bool bDynamicJoin=true;
-		//if (m_pGameServiceAttrib->cbDynamicJoin==FALSE) bDynamicJoin=false;
-	//	if (CServerRule::IsAllowDynamicJoin(m_pGameServiceOption->dwServerRule)==false) bDynamicJoin=false;
 
 		//寻找位置
 		for (WORD i=wStartTableID;i<CTableManager::TableCount();i++)
@@ -1447,8 +1384,7 @@ bool CAttemperEngineSink::On_SUB_CG_User_SitDown(VOID * pData, WORD wDataSize, D
 			CTableFrame* pTable = CTableManager::FindTableByIndex(i);
 
 			//游戏状态
-			if(NULL == pTable || 
-				pTable->IsGameStarted())
+			if(NULL == pTable )
 				continue;
 
 			//获取空位
@@ -1474,7 +1410,6 @@ bool CAttemperEngineSink::On_SUB_CG_User_SitDown(VOID * pData, WORD wDataSize, D
 	}
 
 	//椅子调整
-	if (wRequestChairID>=m_pGameServiceAttrib->wChairCount)
 	{
 		//效验参数
 		if (wRequestTableID>=CTableManager::TableCount()) return false;
@@ -1495,7 +1430,7 @@ bool CAttemperEngineSink::On_SUB_CG_User_SitDown(VOID * pData, WORD wDataSize, D
 	//坐下处理
 	CTableFrame * pTableFrame=CTableManager::FindTableByTableID(wRequestTableID);
 	if(pTableFrame != NULL) 
-		pTableFrame->PerformSitDownAction(wRequestChairID,pIServerUserItem,pUserSitDown->szPassword);
+		pTableFrame->PlayerSitTable(wRequestChairID,pIServerUserItem,pUserSitDown->szPassword);
 
 	return true;
 }
@@ -1518,16 +1453,7 @@ bool CAttemperEngineSink::On_SUB_CG_User_StandUp(VOID * pData, WORD wDataSize, D
 	//起立数据
 	STR_SUB_CG_USER_STANDUP *pUserStandUp = (STR_SUB_CG_USER_STANDUP *)pData;
 
-	//取消分组		TODO 这是在干嘛？
-	if( //CServerRule::IsAllowAvertCheatMode(m_pGameServiceOption->dwServerRule) && 
-		(m_pGameServiceAttrib->wChairCount < MAX_CHAIR) )
-	{
-		if(pUserStandUp->wTableID == INVALID_TABLE) return true;
-	}
-
 	//效验桌子和椅子
-	if (pUserStandUp->wChairID >= m_pGameServiceAttrib->wChairCount) 
-		return false;
 	if (pUserStandUp->wTableID >= (WORD)CTableManager::TableCount()) 
 		return false;
 
@@ -1567,7 +1493,7 @@ bool CAttemperEngineSink::On_SUB_CG_User_StandUp(VOID * pData, WORD wDataSize, D
 		if (NULL == pTableFrame) 
 			return true;
 		//用户站起
-		if ( !pTableFrame->PerformStandUpAction(pIServerUserItem) ) 
+		if ( !pTableFrame->PlayerUpTable(pIServerUserItem) ) 
 			return true;
 	}
 
@@ -1627,7 +1553,6 @@ bool CAttemperEngineSink::On_SUB_CG_User_RefuseSit(VOID * pData, WORD wDataSize,
 
 	//获取桌子
 	CTableFrame * pTableFrame=CTableManager::FindTableByTableID(pUserRepulseSit->wTableID);
-	if (pTableFrame->IsGameStarted()==true) return true;
 
 	//获取用户
 	CPlayer * pRepulseIServerUserItem = pTableFrame->GetTableUserItem(pUserRepulseSit->wChairID);
@@ -1640,7 +1565,7 @@ bool CAttemperEngineSink::On_SUB_CG_User_RefuseSit(VOID * pData, WORD wDataSize,
 	g_GameCtrl->SendRoomMessage(pRepulseIServerUserItem,szDescribe,SMT_EJECT|SMT_CHAT|SMT_CLOSE_GAME);
 
 	//弹起玩家
-	pTableFrame->PerformStandUpAction(pRepulseIServerUserItem);
+	pTableFrame->PlayerUpTable(pRepulseIServerUserItem);
 
 	return true;
 }
@@ -1666,14 +1591,6 @@ bool CAttemperEngineSink::On_SUB_CG_User_KickUser(VOID * pData, WORD wDataSize, 
 	//用户效验
 	ASSERT((pIServerUserItem!=NULL)&&(pIServerUserItem->GetMemberOrder()>pITargetUserItem->GetMemberOrder()));
 	if ((pIServerUserItem==NULL)||(pIServerUserItem->GetMemberOrder()<=pITargetUserItem->GetMemberOrder())) return false;
-
-	//百人游戏
-	if(m_pGameServiceAttrib->wChairCount >= MAX_CHAIR)
-	{
-		//发送消息
-		g_GameCtrl->SendRoomMessage(pIServerUserItem,TEXT("很抱歉，百人游戏不许踢人！"),SMT_EJECT);
-		return true;
-	}
 
 	//用户状态
 	if(pITargetUserItem->GetUserStatus()==US_PLAYING)
@@ -1723,7 +1640,7 @@ bool CAttemperEngineSink::On_SUB_CG_User_KickUser(VOID * pData, WORD wDataSize, 
 		g_GameCtrl->SendGameMessage(pITargetUserItem,szMessage,SMT_CHAT|SMT_CLOSE_GAME);
 
 		CTableFrame * pTableFrame=CTableManager::FindTableByTableID(wTargerTableID);
-		if (pTableFrame->PerformStandUpAction(pITargetUserItem)==false) return true;
+		if (pTableFrame->PlayerUpTable(pITargetUserItem)==false) return true;
 	}
 
 	return true;
@@ -1732,137 +1649,6 @@ bool CAttemperEngineSink::On_SUB_CG_User_KickUser(VOID * pData, WORD wDataSize, 
 //请求更换位置  TODONOW 切换桌子逻辑  WangChengQing
 bool CAttemperEngineSink::OnTCPNetworkSubUserChairReq(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	/*
-	//获取用户
-	WORD wBindIndex=LOWORD(dwSocketID);
-	CPlayer * pIServerUserItem=GetBindUserItem(wBindIndex);
-
-	//用户效验
-	ASSERT(pIServerUserItem!=NULL);
-	if (pIServerUserItem==NULL) return false;
-
-	//用户状态
-	if(pIServerUserItem->GetUserStatus() == US_PLAYING)
-	{
-		//失败
-		m_TableFrameArray[0]->SendRequestFailure(pIServerUserItem,TEXT("您正在游戏中，暂时不能离开，请先结束当前游戏！"),REQUEST_FAILURE_NORMAL);
-		return true;
-	}
-
-	//查找桌子
-	INT nStartIndex=rand()%MAX_TABLE;
-	for (int i=0;i< MAX_TABLE; i++)
-	{
-		//定义变量
-		INT nTableIndex=(i+nStartIndex)%MAX_TABLE;
-
-		//过滤同桌
-		if(nTableIndex == pIServerUserItem->GetTableID())continue;
-
-		//获取桌子
-		CTableFrame * pTableFrame=CTableManager::FindTableByTableID(nTableIndex);
-		if ((pTableFrame->IsGameStarted()==true)) continue;
-		if(pTableFrame->IsTableLocked()) continue;
-		if(pTableFrame->GetChairCount()==pTableFrame->GetNullChairCount()) continue;
-
-		//无效过滤
-		WORD wChairID=pTableFrame->GetRandNullChairID();
-		if (wChairID==INVALID_CHAIR) continue;
-
-		//离开处理
-		if (pIServerUserItem->GetTableID()!=INVALID_TABLE)
-		{
-			CTableFrame * pTableFrame=m_TableFrameArray[pIServerUserItem->GetTableID()];
-			if (pTableFrame->PerformStandUpAction(pIServerUserItem)==false) return true;
-		}
-
-		//定义变量
-		WORD wTagerDeskPos = pIServerUserItem->GetMobileUserDeskPos();
-		WORD wTagerDeskCount = pIServerUserItem->GetMobileUserDeskCount();
-
-		//更新信息
-		if((nTableIndex < wTagerDeskPos) ||(nTableIndex > (wTagerDeskPos+wTagerDeskCount-1)))
-		{
-			pIServerUserItem->SetMobileUserDeskPos(nTableIndex/wTagerDeskCount);
-		}
-
-		//用户坐下
-		pTableFrame->PerformSitDownAction(wChairID,pIServerUserItem);
-		return true;
-	}
-
-	//查找桌子
-	nStartIndex=rand()%MAX_TABLE;
-	for (INT_PTR i=0;i<MAX_TABLE;i++)
-	{
-		//定义变量
-		INT nTableIndex=(i+nStartIndex)%MAX_TABLE;
-
-		//过滤同桌
-		if(nTableIndex == pIServerUserItem->GetTableID())continue;
-
-		//获取桌子
-		CTableFrame * pTableFrame=CTableManager::FindTableByTableID(nTableIndex);
-		if ((pTableFrame->IsGameStarted()==true)) continue;
-		if(pTableFrame->IsTableLocked()) continue;
-
-		//无效过滤
-		WORD wChairID=pTableFrame->GetRandNullChairID();
-		if (wChairID==INVALID_CHAIR) continue;
-
-		//离开处理
-		if (pIServerUserItem->GetTableID()!=INVALID_TABLE)
-		{
-			CTableFrame * pTableFrame=CTableManager::FindTableByTableID(pIServerUserItem->GetTableID());
-			if (pTableFrame->PerformStandUpAction(pIServerUserItem)==false) return true;
-		}
-
-		//定义变量
-		WORD wTagerDeskPos = pIServerUserItem->GetMobileUserDeskPos();
-		WORD wTagerDeskCount = pIServerUserItem->GetMobileUserDeskCount();
-
-		//更新信息
-		if((nTableIndex < wTagerDeskPos) ||(nTableIndex > (wTagerDeskPos+wTagerDeskCount-1)))
-		{
-			pIServerUserItem->SetMobileUserDeskPos(nTableIndex/wTagerDeskCount);
-		}
-
-		//用户坐下
-		pTableFrame->PerformSitDownAction(wChairID,pIServerUserItem);
-		return true;
-	}
-
-	//查找同桌
-	if(pIServerUserItem->GetTableID() != INVALID_TABLE)
-	{
-		//获取桌子
-		CTableFrame * pTableFrame=CTableManager::FindTableByTableID(pIServerUserItem->GetTableID());
-		if (pTableFrame->IsGameStarted()==false && pTableFrame->IsTableLocked()==false)
-		{
-			//无效过滤
-			WORD wChairID=pTableFrame->GetRandNullChairID();
-			if (wChairID!=INVALID_CHAIR)
-			{
-				//离开处理
-				if (pIServerUserItem->GetTableID()!=INVALID_TABLE)
-				{
-					CTableFrame * pTableFrame=CTableManager::FindTableByTableID(pIServerUserItem->GetTableID());
-					if (pTableFrame->PerformStandUpAction(pIServerUserItem)==false) return true;
-				}
-
-				//用户坐下
-				pTableFrame->PerformSitDownAction(wChairID,pIServerUserItem);
-				return true;
-			}
-		}
-	}
-
-	//失败
-	m_TableFrameArray[0]->SendRequestFailure(pIServerUserItem,TEXT("没找到可进入的游戏桌！"),REQUEST_FAILURE_NORMAL);
-
-	*/
-
-
 	return true;
 }
 
@@ -2068,7 +1854,7 @@ bool CAttemperEngineSink::CreateTableNormal(tagTableRule * pCfg, CPlayer *pIServ
 
 	//发送房间消息
 	STR_CMD_GC_USER_CREATE_ROOM_SUCCESS nCreate;
-	nCreate.dwPassword = pCurrTableFrame->GetPassword();
+	nCreate.dwPassword = pCurrTableFrame->GetTableID();
 	nCreate.wChairID = pIServerUserItem->GetChairID();
 	nCreate.byAllGameCount = pCfg->GameCount;
 	nCreate.byGameMode = pCfg->GameMode;
@@ -2115,7 +1901,7 @@ bool CAttemperEngineSink::CreateRoomClub(tagTableRule * pCfg, CPlayer *pIServerU
 
 	//设置桌子属性
 	//pCurTableFrame->SetTableOwner(pIServerUserItem->GetUserID());
-	pCurrTableFrame->SetPassword(dwPassword);
+	pCurrTableFrame->SetTableID(dwPassword);
 
 	//设置房间自动解散，默认一分钟 -- 这里是指不开始游戏 自动一分钟后解散
 	pCurrTableFrame->SetTableAutoDismiss();
@@ -2231,7 +2017,7 @@ bool CAttemperEngineSink::CreateTableClub(STR_DBO_GC_CLUB_CREATE_TABLE * pDbo, C
 
 	//设置桌子属性
 	//pCurTableFrame->SetTableOwner(pIServerUserItem->GetUserID());
-	pCurrTableFrame->SetPassword(dwPassword);
+	pCurrTableFrame->SetTableID(dwPassword);
 
 	//设置房间自动解散，默认一分钟 -- 这里是指不开始游戏 自动一分钟后解散
 	pCurrTableFrame->SetTableAutoDismiss();
@@ -2239,7 +2025,7 @@ bool CAttemperEngineSink::CreateTableClub(STR_DBO_GC_CLUB_CREATE_TABLE * pDbo, C
 	/* 桌创建子信息写入数据库 && 发送给客户端(在消息号的后续环节中发送) */
 	DWORD dwClubRoomID = pDbo->dwClubRoomID;
 	DWORD dwUserID = pIServerUserItem->GetUserID();
-	DWORD dwTableID = pCurrTableFrame->GetPassword();
+	DWORD dwTableID = pCurrTableFrame->GetTableID();
     DWORD dwLockState = (pDbo->byTableMode == 2) ? 0 : 1;
 	ClubTableCreate(dwClubRoomID, dwUserID, dwTableID, dwLockState);
 
@@ -2255,27 +2041,16 @@ bool CAttemperEngineSink::CreateTableClub(STR_DBO_GC_CLUB_CREATE_TABLE * pDbo, C
 	}
 
 	/* 用户坐下 */
-	WORD wChairID = pCurrTableFrame->GetNullChairID(); 
-	//椅子号有效
-	if (INVALID_CHAIR != wChairID)
+	//用户坐下		TODO 后面让客户端主动发送
+	if(pCurrTableFrame->PlayerSitTable(INVALID_CHAIR, pIServerUserItem, 0, true) != 0 )
 	{
-		//用户坐下		TODO 后面让客户端主动发送
-		if(pCurrTableFrame->PerformSitDownAction(wChairID, pIServerUserItem, 0, true)==false)
-		{
-			SendRequestFailure(pIServerUserItem, TEXT("用户坐下失败!"), REQUEST_FAILURE_NORMAL);
-			return false;
-		}		
-	}
-	else
-	{
-		SendRequestFailure(pIServerUserItem, TEXT("房间已满,无法加入房间!"), REQUEST_FAILURE_NORMAL);
+		SendRequestFailure(pIServerUserItem, TEXT("用户坐下失败!"), REQUEST_FAILURE_NORMAL);
 		return false;
 	}
-
 	
 	/* 发送给client创建房间成功消息 */
 	STR_CMD_GC_USER_CREATE_ROOM_SUCCESS nCreate;
-	nCreate.dwPassword = pCurrTableFrame->GetPassword();
+	nCreate.dwPassword = pCurrTableFrame->GetTableID();
 	nCreate.wChairID = pIServerUserItem->GetChairID();
 	nCreate.byAllGameCount = pCfg->GameCount;
 	nCreate.byGameMode = pCfg->GameMode;
@@ -2316,7 +2091,7 @@ bool CAttemperEngineSink::CreateTableHallGold(STR_DBO_CG_USER_JOIN_TABLE_HALL_GO
 
 	//设置桌子属性
 	//pCurTableFrame->SetTableOwner(pIServerUserItem->GetUserID());
-	pCurrTableFrame->SetPassword(dwPassword);
+	pCurrTableFrame->SetTableID(dwPassword);
 
 	//设置房间自动解散，默认一分钟 -- 这里是指不开始游戏 自动一分钟后解散
 	pCurrTableFrame->SetTableAutoDismiss();
@@ -2325,7 +2100,7 @@ bool CAttemperEngineSink::CreateTableHallGold(STR_DBO_CG_USER_JOIN_TABLE_HALL_GO
 	DWORD dwUserID = pIServerUserItem->GetUserID();
 	DWORD dwKindID = pDbo->dwKindID;
 	BYTE  byGameType = pDbo->byGameType;
-	DWORD dwTableID = pCurrTableFrame->GetPassword();
+	DWORD dwTableID = pCurrTableFrame->GetTableID();
 	HallTableCreate(dwUserID, dwKindID, byGameType, dwTableID);
 
 	/* 设置房间规则 */
@@ -2345,7 +2120,7 @@ bool CAttemperEngineSink::CreateTableHallGold(STR_DBO_CG_USER_JOIN_TABLE_HALL_GO
 	if (INVALID_CHAIR != wChairID)
 	{
 		//用户坐下		TODO 后面让客户端主动发送
-		if(pCurrTableFrame->PerformSitDownAction(wChairID, pIServerUserItem, 0, true)==false)
+		if(pCurrTableFrame->PlayerSitTable(wChairID, pIServerUserItem, 0, true) != 0)
 		{
 			SendRequestFailure(pIServerUserItem, TEXT("用户坐下失败!"), REQUEST_FAILURE_NORMAL);
 			return true; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
@@ -2363,7 +2138,7 @@ bool CAttemperEngineSink::CreateTableHallGold(STR_DBO_CG_USER_JOIN_TABLE_HALL_GO
 	STR_CMD_GC_USER_JOIN_ROOM_SUCCESS CMD;
 	memcpy(&CMD.strTableRule, pDbo->strCreateRoom.CommonRule, sizeof(CMD.strTableRule));
 
-	CMD.dwRoomID = pCurrTableFrame->GetPassword();
+	CMD.dwRoomID = pCurrTableFrame->GetTableID();
 	CMD.wChairID = pIServerUserItem->GetChairID();
 	CMD.byAllGameCount = pCfg->GameCount;
 	CMD.byGameMode = pCfg->GameMode;
@@ -2399,7 +2174,7 @@ bool CAttemperEngineSink::CreateTableAutoClub(STR_DBO_CG_USER_JOIN_TABLE_NO_PASS
 
 	//设置桌子属性
 	//pCurTableFrame->SetTableOwner(pIServerUserItem->GetUserID());
-	pCurrTableFrame->SetPassword(dwPassword);
+	pCurrTableFrame->SetTableID(dwPassword);
 
 	//设置房间自动解散，默认一分钟 -- 这里是指不开始游戏 自动一分钟后解散
 	pCurrTableFrame->SetTableAutoDismiss();
@@ -2407,7 +2182,7 @@ bool CAttemperEngineSink::CreateTableAutoClub(STR_DBO_CG_USER_JOIN_TABLE_NO_PASS
 	/* 桌创建子信息写入数据库 && 发送给客户端(在消息号的后续环节中发送) */
 	DWORD dwClubRoomID = pDbo->dwClubRoomID;
 	DWORD dwUserID = pIServerUserItem->GetUserID();
-	DWORD dwTableID = pCurrTableFrame->GetPassword();
+	DWORD dwTableID = pCurrTableFrame->GetTableID();
     DWORD dwLockState =  1; //默认为普通桌子(而不是私密桌子)
 	ClubTableCreate(dwClubRoomID, dwUserID, dwTableID, dwLockState);
 
@@ -2429,7 +2204,7 @@ bool CAttemperEngineSink::CreateTableAutoClub(STR_DBO_CG_USER_JOIN_TABLE_NO_PASS
 	if (INVALID_CHAIR != wChairID)
 	{
 		//用户坐下		TODO 后面让客户端主动发送
-		if(pCurrTableFrame->PerformSitDownAction(wChairID, pIServerUserItem, 0, true)==false)
+		if(pCurrTableFrame->PlayerSitTable(wChairID, pIServerUserItem, 0, true) != 0)
 		{
 			SendRequestFailure(pIServerUserItem, TEXT("用户坐下失败!"), REQUEST_FAILURE_NORMAL);
 			return true; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
@@ -2447,7 +2222,7 @@ bool CAttemperEngineSink::CreateTableAutoClub(STR_DBO_CG_USER_JOIN_TABLE_NO_PASS
 	STR_CMD_GC_USER_JOIN_ROOM_SUCCESS CMD;
 	memcpy(&CMD.strTableRule, pDbo->strCreateRoom.CommonRule, sizeof(CMD.strTableRule));
 
-	CMD.dwRoomID = pCurrTableFrame->GetPassword();
+	CMD.dwRoomID = pCurrTableFrame->GetTableID();
 	CMD.wChairID = pIServerUserItem->GetChairID();
 	CMD.byAllGameCount = pCfg->GameCount;
 	CMD.byGameMode = pCfg->GameMode;
@@ -2590,7 +2365,7 @@ bool CAttemperEngineSink::On_CMD_GC_JOIN_TABLE( DWORD dwContextID, VOID * pData,
 	WORD wChairID = pCurrTableFrame->GetNullChairID();//寻找空椅子
 	if (wChairID != INVALID_CHAIR)
 	{
-		if(pCurrTableFrame->PerformSitDownAction(wChairID, pIServerUserItem, 0, true)==false)
+		if(pCurrTableFrame->PlayerSitTable(wChairID, pIServerUserItem, 0, true) != 0)
 		{
 			SendRequestFailure(pIServerUserItem,TEXT("加入房间失败, 坐下失败"),REQUEST_FAILURE_PASSWORD);
 			return false;
@@ -2742,7 +2517,7 @@ bool CAttemperEngineSink::On_CMD_GC_USER_JOIN_TABLE_NO_PASS( DWORD dwContextID, 
 	WORD wChairID = pCurrTableFrame->GetNullChairID();//寻找空椅子
 	if (wChairID != INVALID_CHAIR)
 	{
-		if(pCurrTableFrame->PerformSitDownAction(wChairID, pIServerUserItem, 0, true)==false)
+		if(pCurrTableFrame->PlayerSitTable(wChairID, pIServerUserItem, 0, true) != 0)
 		{
 			SendRequestFailure(pIServerUserItem,TEXT("加入失败, 坐下失败!"),REQUEST_FAILURE_PASSWORD);
 			return false;
@@ -2891,7 +2666,7 @@ bool CAttemperEngineSink::On_CMD_GC_USER_JOIN_TABLE_HALL_GOLD( DWORD dwContextID
 	WORD wChairID = pCurrTableFrame->GetNullChairID();//寻找空椅子
 	if (wChairID != INVALID_CHAIR)
 	{
-		if(pCurrTableFrame->PerformSitDownAction(wChairID, pIServerUserItem, 0, true)==false)
+		if(pCurrTableFrame->PlayerSitTable(wChairID, pIServerUserItem, 0, true) != 0)
 		{
 			SendRequestFailure(pIServerUserItem,TEXT("加入失败, 坐下失败!"),REQUEST_FAILURE_PASSWORD);
 			return false;
@@ -2969,7 +2744,7 @@ bool CAttemperEngineSink::On_SUB_User_ReconnectRoom(VOID * pData, WORD wDataSize
 	ZeroMemory(&ReJoinResult, sizeof(STR_CMD_GC_USER_RECONNECT_ROOM));
 
 	//用户坐下
-	if( CTableManager::FindTableByTableID(wOldTableID)->PerformSitDownAction(wChairID, pIServerUserItem))
+	if( CTableManager::FindTableByTableID(wOldTableID)->PlayerSitTable(wChairID, pIServerUserItem) != 0 )
 	{
 		BYTE OldGameStatus = pIServerUserItem->GetOldGameStatus();
 
@@ -2987,7 +2762,7 @@ bool CAttemperEngineSink::On_SUB_User_ReconnectRoom(VOID * pData, WORD wDataSize
 		ReJoinResult.retCode = 0;
 		memcpy(&ReJoinResult.strTableRule, pRule, sizeof(ReJoinResult.strTableRule));
 		ReJoinResult.wChairID = wChairID;
-		ReJoinResult.dwPassWord = CTableManager::FindTableByTableID(wOldTableID)->GetPassword();
+		ReJoinResult.dwPassWord = CTableManager::FindTableByTableID(wOldTableID)->GetTableID();
 		ReJoinResult.cbGameCount = pRule->GameCount;
 		ReJoinResult.cbPlayerCount = pRule->PlayerCount;
 		ReJoinResult.cbPayType = pRule->cbPayType;
@@ -3011,7 +2786,6 @@ bool CAttemperEngineSink::On_SUB_User_ReconnectRoom(VOID * pData, WORD wDataSize
 		//发送给协调服, 再转发给登录服
 		tagOfflineUser data;
 		data.dwUserID = pIServerUserItem->GetUserID();
-		//data.dwGameID = m_pGameServiceAttrib->dwGameID; 删除的时候不需要改字段
 		data.byMask = 2; //表示删除断线用户
 		g_TCPSocketEngine->SendData(MDM_CS_USER_COLLECT,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
 	}
@@ -3041,8 +2815,7 @@ bool CAttemperEngineSink::On_Sub_CG_User_CreateGroupRoom(VOID *pData, WORD wData
 		if(NULL == pGroupTable) continue;
 
 		//是牌友圈房间，并且有一个桌子未开始游戏，则说明还有空桌子加入，不需要再创建房间
-		if ( (pGroupTable->GetGroupID() == pCreateRoom->dwGroupID) && 
-			 (!pGroupTable->IsGameStarted()) )
+		if ( pGroupTable->GetGroupID() == pCreateRoom->dwGroupID)
 		{
 			//返回创建成功
 			STR_CMD_GC_USER_CREATE_GROUP_ROOM CMDCreate;
@@ -3142,7 +2915,7 @@ bool CAttemperEngineSink::On_CMD_GC_User_CreateGroupRoom(DWORD dwContextID, VOID
 
 			//设置桌子属性	
 			DWORD dwPassword = GenerateTablePassword();		
-			pGroupTable->SetPassword(dwPassword);
+			pGroupTable->SetTableID(dwPassword);
 			pGroupTable->SetGroupID(pDBOGroup->dwGroupID);			
 			pGroupTable->SetCommonRule(pCfg);
 			pGroupTable->SetCreateTableUser(pIServerUserItem->GetUserID());		//设置创建玩家ID
@@ -3251,14 +3024,14 @@ bool CAttemperEngineSink::On_CMD_GC_User_JoinGroupRoom(DWORD dwContextID, VOID *
 		if( (NULL != pTableFrame) && 
 			(pTableFrame->GetGroupID() == pDBOGroup->dwGroupID) && 
 			(GAME_STATUS_FREE == pTableFrame->GetGameStatus()) && 
-			(0 != pTableFrame->GetPassword()) )
+			(0 != pTableFrame->GetTableID()) )
 		{
 			//找到房间，判断是否有空位置
 			WORD wChairID = pTableFrame->GetNullChairID();
 			if(wChairID != INVALID_CHAIR)
 			{
 				//用户坐下
-				if(pTableFrame->PerformSitDownAction(wChairID, pIServerUserItem, 0, true)==false)
+				if(pTableFrame->PlayerSitTable(wChairID, pIServerUserItem, 0, true) != 0)
 				{
 					SendRequestFailure(pIServerUserItem, TEXT("房间号不对!"), REQUEST_FAILURE_PASSWORD);
 					return true;
@@ -3275,7 +3048,7 @@ bool CAttemperEngineSink::On_CMD_GC_User_JoinGroupRoom(DWORD dwContextID, VOID *
 				ZeroMemory(&nJoin, sizeof(STR_CMD_GC_USER_JOIN_ROOM_SUCCESS));
 				memcpy(&nJoin.strTableRule, pSelfOption, sizeof(nJoin.strTableRule));
 				//赋值
-				nJoin.dwRoomID = pTableFrame->GetPassword();
+				nJoin.dwRoomID = pTableFrame->GetTableID();
 				nJoin.wChairID = wChairID;
 				nJoin.byAllGameCount = pSelfOption->GameCount;
 				nJoin.byGameMode = pSelfOption->GameMode;
@@ -3339,7 +3112,7 @@ bool CAttemperEngineSink::On_SUB_User_JoinGoldRoom(VOID * pData, WORD wDataSize,
 	if ( (INVALID_CHAIR != wChairID) && (NULL != pTableFrame) )
 	{
 		//已有空椅子，用户坐下
-		if(pTableFrame->PerformSitDownAction(wChairID, pIServerUserItem, 0, true))
+		if(pTableFrame->PlayerSitTable(wChairID, pIServerUserItem, 0, true) != 0)
 		{
 			//获得金币房间规则
 			tagTableRule *pTableCfg = (tagTableRule*)pTableFrame->GetCustomRule();
@@ -3353,7 +3126,7 @@ bool CAttemperEngineSink::On_SUB_User_JoinGoldRoom(VOID * pData, WORD wDataSize,
 				//赋值
 				JoinSuccess.byGameMode = TABLE_MODE_GOLD;
 				JoinSuccess.wChairID = wChairID;
-				JoinSuccess.dwRoomID = pTableFrame->GetPassword();
+				JoinSuccess.dwRoomID = pTableFrame->GetTableID();
 				JoinSuccess.byAllGameCount = pTableCfg->GameCount;
 				JoinSuccess.wPlayerCount = pTableCfg->PlayerCount;
 				JoinSuccess.byZhuangType = pTableCfg->RobBankType;
@@ -3403,7 +3176,7 @@ bool CAttemperEngineSink::On_SUB_User_JoinGoldRoom(VOID * pData, WORD wDataSize,
 	if (wChairID != INVALID_CHAIR)
 	{
 		//用户坐下
-		if(!pCurrTableFrame->PerformSitDownAction(wChairID, pIServerUserItem, 0, true))
+		if(!pCurrTableFrame->PlayerSitTable(wChairID, pIServerUserItem, 0, true) != 0)
 		{
 			SendRequestFailure(pIServerUserItem,TEXT("服务器已满,请稍后重试!"),REQUEST_FAILURE_NORMAL);
 			return true;
@@ -3423,7 +3196,7 @@ bool CAttemperEngineSink::On_SUB_User_JoinGoldRoom(VOID * pData, WORD wDataSize,
 	//赋值
 	JoinSuccess.byGameMode = 2;
 	JoinSuccess.wChairID = wChairID;
-	JoinSuccess.dwRoomID = pCurrTableFrame->GetPassword();
+	JoinSuccess.dwRoomID = pCurrTableFrame->GetTableID();
 	JoinSuccess.byAllGameCount = 0;
 	JoinSuccess.wPlayerCount = 4;
 	JoinSuccess.byZhuangType = 3;
@@ -4152,7 +3925,7 @@ DWORD CAttemperEngineSink::GenerateTablePassword()
 			//桌子状态判断
 			if ( (NULL != pTableFrame) && 
 				 (0 < pTableFrame->GetSitUserCount() ) && 
-				 (dwPassword == pTableFrame->GetPassword()) )
+				 (dwPassword == pTableFrame->GetTableID()) )
 			{
 				bFind = true;
 				break;
@@ -4206,7 +3979,7 @@ CTableFrame* CAttemperEngineSink::GetDesignatedTable(const DWORD &dwPassword)
 
 		//桌子判断
 		if ( (NULL != pTableFrame) && 
-			 (dwPassword == pTableFrame->GetPassword()) )
+			 (dwPassword == pTableFrame->GetTableID()) )
 		{
 			return pTableFrame;
 		}
@@ -4261,7 +4034,7 @@ void CAttemperEngineSink::HandleCreateTableForOthers(CTableFrame *pCurTableFrame
 	DWORD dwPassword = GenerateTablePassword();
 
 	//设置房间密码和规则
-	pCurTableFrame->SetPassword(dwPassword);
+	pCurTableFrame->SetTableID(dwPassword);
 
 	//设置房间自动解散,替他人开房，房间暂时保留十分钟
 	pCurTableFrame->SetTableAutoDismiss(10);
@@ -4320,7 +4093,7 @@ bool CAttemperEngineSink::HandleCreateTable(CTableFrame *pCurTableFrame, CPlayer
 
 	//设置桌子属性
 	//pCurTableFrame->SetTableOwner(pIServerUserItem->GetUserID());
-	pCurTableFrame->SetPassword(dwPassword);
+	pCurTableFrame->SetTableID(dwPassword);
 
 	//设置房间自动解散，默认一分钟 -- 这里是指不开始游戏 自动一分钟后解散
 	pCurTableFrame->SetTableAutoDismiss();
@@ -4332,7 +4105,7 @@ bool CAttemperEngineSink::HandleCreateTable(CTableFrame *pCurTableFrame, CPlayer
 	if (INVALID_CHAIR != wChairID)
 	{
 		//用户坐下		TODO 后面让客户端主动发送
-		if(pCurTableFrame->PerformSitDownAction(wChairID, pIServerUserItem, 0, true)==false)
+		if(pCurTableFrame->PlayerSitTable(wChairID, pIServerUserItem, 0, true) != 0)
 		{
 			SendRequestFailure(pIServerUserItem, TEXT("用户坐下失败!"), REQUEST_FAILURE_NORMAL);
 			return false;

@@ -46,7 +46,7 @@
 
 //子消息  *表示客户端未用到		#初步整理		
 #define SUB_CG_USER_RULE				1									//*用户规则		TODO 貌似是限制用户IP、胜率、逃跑率、积分，应该需要保留
-#define SUB_CG_USER_LOOKON				2									//*旁观请求		TODO 成功无返回，失败返回103请求失败
+//#define SUB_CG_USER_LOOKON				2									//*旁观请求		TODO 成功无返回，失败返回103请求失败
 #define SUB_CG_USER_SITDOWN				3									//*坐下请求（用户加入/创建房间成功后，服务器主动让玩家坐下，不需要请求）
 #define SUB_CG_USER_STANDUP				4									//#起立请求		TODO 非房主解散房间，发送的是该消息，放在15的处理流程中
 #define SUB_CG_USER_INVITE_USER			5									//*邀请用户进入桌子

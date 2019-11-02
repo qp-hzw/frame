@@ -2,6 +2,18 @@
 #define C_PLAYER_H
 
 #include "Stdafx.h"
+//用户状态
+enum US_STATUS
+{
+	US_FREE = 1,       //没有状态 -- 没有在Table中
+	US_IN_TABLE = 2,   //在table中 -- 站立(旁观)状态
+	US_SIT = 3,        //坐下状态
+	US_PLAYING = 4,    //游戏状态
+
+};
+
+#define US_READY					0x03								//同意状态
+#define US_OFFLINE					0x06								//断线状态
 
 class  CPlayer
 {
@@ -74,7 +86,7 @@ public:
 
 	//用户状态
 	 BYTE GetUserStatus() { return m_UserInfo.cbUserStatus; }
-	 bool SetUserStatus(BYTE cbUserStatus, WORD wTableID, WORD wChairID, bool bNotify=true);
+	 bool SetUserStatus(BYTE cbUserStatus, WORD wTableID, WORD wChairID);
 
 	//设置断线标志 GameID  TODONOW
 	 void SetOfflineGameID(DWORD dwOfflineGameID){m_dwOfflineGameID = dwOfflineGameID;}
@@ -94,15 +106,6 @@ public:
 	 DWORD GetClientAddr() { return m_dwClientAddr; }
 	//机器标识
 	 LPCTSTR GetMachineID() { return m_szMachineID; }
-
-	 //连接状态
-	virtual bool IsClientReady() { return m_bClientReady; };
-	//设置连接
-	virtual VOID SetClientReady(bool bClientReady) { m_bClientReady=bClientReady; }
-
-
-
-
 
 
 	//登录信息

@@ -18,6 +18,7 @@ CGameCtrl::CGameCtrl(std::string dll_name)
 	m_TimerEngine = NULL;
 
 	m_subgame_dll_name = dll_name;
+	m_ServerID = 0;
 
 	//组件配置
 	ZeroMemory(&m_GameServiceAttrib,sizeof(m_GameServiceAttrib));
@@ -306,7 +307,7 @@ bool CGameCtrl::SendGameMessage(CPlayer * pIServerUserItem, LPCTSTR lpszMessage,
 	if (pIServerUserItem==NULL) return false;
 
 	//发送数据
-	if ((pIServerUserItem->GetBindIndex()!=INVALID_WORD)&&(pIServerUserItem->IsClientReady()==true))
+	if ((pIServerUserItem->GetBindIndex()!=INVALID_WORD))
 	{
 		//变量定义
 		CMD_CM_SystemMessage SystemMessage;

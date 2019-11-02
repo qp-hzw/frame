@@ -90,19 +90,11 @@ WORD CPlayer::GetUserFleeRate()
 }
 
 //设置状态
-bool CPlayer::SetUserStatus(BYTE cbUserStatus, WORD wTableID, WORD wChairID, bool bNotify)
+bool CPlayer::SetUserStatus(BYTE cbUserStatus, WORD wTableID, WORD wChairID)
 {
-	//记录信息
-	WORD wOldTableID=m_UserInfo.wTableID;
-	WORD wOldChairID=m_UserInfo.wChairID;
-
-	//设置变量
 	m_UserInfo.wTableID=wTableID;
 	m_UserInfo.wChairID=wChairID;
 	m_UserInfo.cbUserStatus=cbUserStatus;
-
-	//发送状态
-	//if (m_pIServerUserItemSink!=NULL && bNotify) m_pIServerUserItemSink->OnEventUserItemStatus(this,wOldTableID,wOldChairID);
 
 	return true;
 }

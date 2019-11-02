@@ -9,8 +9,6 @@
 CDataBaseEngineSink::CDataBaseEngineSink()
 {
 	//配置变量
-	m_pGameParameter=NULL;
-	m_pGameServiceAttrib=NULL;
 	m_pGameServiceOption=NULL;
 
 	//组件变量
@@ -46,7 +44,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineStart(IUnknownEx * pIUnknownEx)
 bool CDataBaseEngineSink::OnDataBaseEngineConclude(IUnknownEx * pIUnknownEx)
 {
 	//配置变量
-	m_pGameServiceAttrib=NULL;
 	m_pGameServiceOption=NULL;
 
 	//组件变量
@@ -812,9 +809,8 @@ bool CDataBaseEngineSink::OnRequestLoadAndroidUser(DWORD dwContextID, VOID * pDa
 
 	//用户帐户
 	m_TreasureDB->ResetParameter();
-	//TOODNOW WangChengQing sql中需要同步修改 wKindID 为GameID
-	m_TreasureDB->AddParameter(TEXT("@wKindID"),m_pGameServiceAttrib->dwGameID);
-	m_TreasureDB->AddParameter(TEXT("@wServerID"),m_pGameServiceOption->dwServerID);
+	m_TreasureDB->AddParameter(TEXT("@wKindID"),g_GameCtrl->GetKindID());
+	m_TreasureDB->AddParameter(TEXT("@wServerID"),g_GameCtrl->GetServerID());
 
 	//执行查询
 	GameAndroidInfo.lResultCode=m_TreasureDB->ExecuteProcess(TEXT("GSP_GR_LoadAndroidUser"),true);

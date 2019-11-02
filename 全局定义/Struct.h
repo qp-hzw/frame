@@ -93,7 +93,7 @@ struct tagOnLineInfoGame
 struct tagTableStatus
 {
 	BYTE							cbTableLock;						//锁定标志 TODONOW delete this
-	BYTE							cbPlayStatus;						//游戏标志
+	BYTE							cbPlayStatus;						//游戏标志 TODONOW delete this
 };
 
 //用户状态

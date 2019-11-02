@@ -36,6 +36,7 @@ protected:
 protected:
 	std::string			            m_subgame_dll_name;				    //子游戏dll名字
 	
+	DWORD                           m_ServerID;                         //serverid
 
 	//函数定义
 public:
@@ -56,6 +57,12 @@ public:
 
 	//获取ITableFrameSink
 	ITableFrameSink* GetITableFrameSink();
+
+	//获取ServerID
+	DWORD GetServerID(){return m_ServerID; }
+	void SetServerID(DWORD serverid){m_ServerID = serverid;}
+	//获取KindID
+	DWORD GetKindID(){return (m_ServerID & 0xFFFF0000) >> 16;}
 
 	//辅助函数
 protected:
