@@ -81,7 +81,7 @@ public:
 	//定时器事件
 	virtual bool OnEventTimer(DWORD dwTimerID, WPARAM wBindParam);
 	//数据库事件
-	virtual bool OnEventDataBaseResult(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize);
+	virtual bool OnEventDataBaseResult(WORD wRequestID, DWORD dwScoketID, VOID * pData, WORD wDataSize);
 #pragma endregion
 
 #pragma region Socket系统函数

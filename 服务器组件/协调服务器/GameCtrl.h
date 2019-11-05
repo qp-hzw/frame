@@ -1,10 +1,8 @@
 #ifndef SERVICE_UNITS_HEAD_FILE
 #define SERVICE_UNITS_HEAD_FILE
 
-
 #include "Stdafx.h"
 #include "AttemperEngineSink.h"
-
 
 //服务单元
 class CGameCtrl

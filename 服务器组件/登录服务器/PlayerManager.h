@@ -23,6 +23,9 @@ public:
 	static CPlayer * FindPlayerByEnum(WORD wEnumIndex);
 	//查
 	static CPlayer * FindPlayerByID(DWORD dwUserID);
+	//查
+	static CPlayer * FindPlayerBySocketID(DWORD dwSocketID);
+
 
 	//统计函数
 public:

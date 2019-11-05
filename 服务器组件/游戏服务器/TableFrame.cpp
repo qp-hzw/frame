@@ -245,7 +245,7 @@ bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 					data.byMask = 2; //表示删除断线用户
 
 					//发送给协调服务器
-					g_TCPSocketEngine->SendData(MDM_CS_USER_COLLECT,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
+					g_TCPSocketEngine->SendData(MDM_USER,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
 				}
 
 				//2. 用户站起

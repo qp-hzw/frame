@@ -57,10 +57,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 			return On_DBR_QueryScoreInfo(dwContextID,pData,wDataSize);
 		}
 #pragma region 启动命令
-	case DBR_GP_LOAD_GAME_LIST:				//加载列表
-		{
-			return OnRequestLoadGameList(dwContextID,pData,wDataSize);
-		}
 	case DBR_GP_ONLINE_COUNT_INFO:			//在线统计 -- 发给数据库
 		{
 			return OnRequestOnLineCountInfo(dwContextID,pData,wDataSize);
@@ -1674,119 +1670,6 @@ bool CDataBaseEngineSink::On_DBO_Other_ExchangeInfo(DWORD dwContextID, DWORD dwE
 }
 
 #pragma region 启动命令
-//加载列表
-bool CDataBaseEngineSink::OnRequestLoadGameList(DWORD dwContextID, VOID * pData, WORD wDataSize)
-{
-	//变量定义
-	WORD wPacketSize=0;
-	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
-
-	//加载类型
-	m_PlatformDB->ResetParameter();
-
-	m_PlatformDB->ExecuteProcess(TEXT("GSP_GP_LoadGameTypeItem"),true);
-
-	//发送种类
-	wPacketSize=0;
-	tagGameType * pGameType=NULL;
-	while (m_PlatformDB->IsRecordsetEnd()==false)
-	{
-		//发送信息
-		if ((wPacketSize+sizeof(tagGameType))>sizeof(cbBuffer))
-		{
-			g_AttemperEngineSink->OnEventDataBaseResult(DBO_GP_GAME_TYPE_ITEM,dwContextID,cbBuffer,wPacketSize);
-			wPacketSize=0;
-		}
-
-		//读取信息
-		pGameType=(tagGameType *)(cbBuffer+wPacketSize);
-		pGameType->wTypeID=m_PlatformDB->GetValue_WORD(TEXT("TypeID"));
-		m_PlatformDB->GetValue_String(TEXT("TypeName"),pGameType->szTypeName,CountArray(pGameType->szTypeName));
-
-		//设置位移
-		wPacketSize+=sizeof(tagGameType);
-
-		//移动记录
-		m_PlatformDB->MoveToNext();
-	}
-	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_GP_GAME_TYPE_ITEM,dwContextID,cbBuffer,wPacketSize);
-
-	//读取类型
-	m_PlatformDB->ResetParameter();
-
-	m_PlatformDB->ExecuteProcess(TEXT("GSP_GP_LoadGameKindItem"),true);
-
-	//发送类型
-	wPacketSize=0;
-	tagGameKind * pGameKind=NULL;
-	while (m_PlatformDB->IsRecordsetEnd()==false)
-	{
-		//发送信息
-		if ((wPacketSize+sizeof(tagGameKind))>sizeof(cbBuffer))
-		{
-			g_AttemperEngineSink->OnEventDataBaseResult(DBO_GP_GAME_KIND_ITEM,dwContextID,cbBuffer,wPacketSize);
-			wPacketSize=0;
-		}
-
-		//读取信息
-		pGameKind=(tagGameKind *)(cbBuffer+wPacketSize);
-		pGameKind->wKindID=m_PlatformDB->GetValue_WORD(TEXT("KindID"));
-		pGameKind->wTypeID=m_PlatformDB->GetValue_WORD(TEXT("TypeID"));
-		m_PlatformDB->GetValue_String(TEXT("KindName"),pGameKind->szKindName,CountArray(pGameKind->szKindName));
-
-		//设置位移
-		wPacketSize+=sizeof(tagGameKind);
-
-		//移动记录
-		m_PlatformDB->MoveToNext();
-	}
-	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_GP_GAME_KIND_ITEM,dwContextID,cbBuffer,wPacketSize);
-
-	//读取节点
-	m_PlatformDB->ResetParameter();
-
-	m_PlatformDB->ExecuteProcess(TEXT("GSP_GP_LoadGameNodeItem"),true);
-
-	//发送节点
-	wPacketSize=0;
-	tagGameNode * pGameNode=NULL;
-	while (m_PlatformDB->IsRecordsetEnd()==false)
-	{
-		//发送信息
-		if ((wPacketSize+sizeof(tagGameNode))>sizeof(cbBuffer))
-		{
-			g_AttemperEngineSink->OnEventDataBaseResult(DBO_GP_GAME_NODE_ITEM,dwContextID,cbBuffer,wPacketSize);
-			wPacketSize=0;
-		}
-
-		//读取信息
-		pGameNode=(tagGameNode *)(cbBuffer+wPacketSize);
-		pGameNode->wKindID=m_PlatformDB->GetValue_WORD(TEXT("KindID"));
-		pGameNode->wNodeID=m_PlatformDB->GetValue_WORD(TEXT("NodeID"));
-		m_PlatformDB->GetValue_String(TEXT("NodeName"),pGameNode->szNodeName,CountArray(pGameNode->szNodeName));
-
-		//设置位移
-		wPacketSize+=sizeof(tagGameNode);
-
-		//移动记录
-		m_PlatformDB->MoveToNext();
-	}
-	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_GP_GAME_NODE_ITEM,dwContextID,cbBuffer,wPacketSize);
-
-	//变量定义
-	DBO_GP_GameListResult GameListResult;
-	ZeroMemory(&GameListResult,sizeof(GameListResult));
-
-	//设置变量
-	GameListResult.cbSuccess=TRUE;
-
-	//发送消息
-	g_AttemperEngineSink->OnEventDataBaseResult(DBO_GP_GAME_LIST_RESULT,dwContextID,&GameListResult,sizeof(GameListResult));
-
-	return true;
-
-}
-
 //在线统计 -- 发给数据库
 bool CDataBaseEngineSink::OnRequestOnLineCountInfo(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
@@ -2154,25 +2037,16 @@ bool CDataBaseEngineSink::On_DBR_Logon_Accounts(DWORD dwContextID, VOID * pData,
 	//请求处理
 	STR_DBR_CL_LOGON_ACCOUNTS * pDBRLogonAccounts=(STR_DBR_CL_LOGON_ACCOUNTS *)pData;
 
-	//Socket判断
-	tagBindParameter * pBindParameter=(tagBindParameter *)pDBRLogonAccounts->pBindParameter;
-	if (pBindParameter->dwSocketID!=dwContextID) return true;
-
-	//转化地址
-	TCHAR szClientAddr[16]=TEXT("");
-	BYTE * pClientAddr=(BYTE *)&pBindParameter->dwClientAddr;
-	_sntprintf_s(szClientAddr,CountArray(szClientAddr),TEXT("%d.%d.%d.%d"),pClientAddr[0],pClientAddr[1],pClientAddr[2],pClientAddr[3]);
-
 	//构造参数
 	m_AccountsDB->ResetParameter();
 	m_AccountsDB->AddParameter(TEXT("@mystery"),_MYSTERY);
 	m_AccountsDB->AddParameter(TEXT("@strAccounts"),pDBRLogonAccounts->szAccounts);
 	m_AccountsDB->AddParameter(TEXT("@strPassword"),pDBRLogonAccounts->szPassword);
-	m_AccountsDB->AddParameter(TEXT("@strClientIP"),szClientAddr);
+	m_AccountsDB->AddParameter(TEXT("@strClientIP"),TEXT("")); //TODONOW 删除这个地址
 	m_AccountsDB->AddParameter(TEXT("@strMachineID"),pDBRLogonAccounts->szMachineID);
 	m_AccountsDB->AddParameter(TEXT("@ProxyID"),pDBRLogonAccounts->dwProxyID);
 
-	//输出参数ssss
+	//输出参数
 	TCHAR szDescribeString[128]=TEXT("");
 	m_AccountsDB->AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 

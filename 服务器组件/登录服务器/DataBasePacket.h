@@ -10,12 +10,6 @@
 #pragma region MDM_LIST 列表命令
 /* *********************************************************************************
 **   启动命令（启动登陆服时，服务单元发送的消息）				(201-300)
-** *********************************************************************************/
-#define DBR_GP_LOAD_GAME_LIST		1									//加载列表
-#define DBO_GP_GAME_LIST_RESULT		1001									//加载列表返回
-#define DBO_GP_GAME_TYPE_ITEM		2001									//种类信息返回
-#define DBO_GP_GAME_KIND_ITEM		3001									//类型信息返回
-#define DBO_GP_GAME_NODE_ITEM		4001									//节点信息返回
 
 #define DBR_GP_ONLINE_COUNT_INFO	2									//统计在线 -- 发给数据库
 
@@ -65,16 +59,9 @@ struct STR_DBO_UPDATA_MARQUEE
 //帐号登录
 struct STR_DBR_CL_LOGON_ACCOUNTS
 {
-	//Socket校验
-	LPVOID							pBindParameter;						//绑定参数
-
-	//登录信息
 	TCHAR							szAccounts[LEN_ACCOUNTS];			//登录帐号
 	TCHAR							szPassword[LEN_MD5];				//登录密码
-
-	//机器标识
 	TCHAR							szMachineID[LEN_MACHINE_ID];		//机器序列
-
 	DWORD							dwProxyID;							//代理ID
 };
 

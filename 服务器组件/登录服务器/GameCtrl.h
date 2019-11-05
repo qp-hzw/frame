@@ -1,8 +1,6 @@
 #ifndef SERVICE_UNITS_HEAD_FILE
 #define SERVICE_UNITS_HEAD_FILE
 
-#pragma once
-
 #include "Stdafx.h"
 #include "AttemperEngineSink.h"
 #include "DataBaseEngineSink.h"
@@ -18,13 +16,8 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 //服务单元
-class CGameCtrl : public CWnd
+class CGameCtrl
 {
-	//组件变量
-private:
-	//CWHDataQueue					m_DataQueue;						//数据队列
-	//CCriticalSection				m_CriticalSection;					//同步对象
-
 	//服务组件
 protected:
 	CAttemperEngineSink				m_AttemperEngineSink;				//Attemper钩子
@@ -75,7 +68,7 @@ public:
 
 	/***********************           消息发送  -> DB                ***********************/
 public:
-	bool PostDataBaseRequest(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize);
+	bool PostDataBaseRequest(WORD wRequestID, DWORD dwScoketID, VOID * pData, WORD wDataSize);
 
 
 	/***********************            Timer                         ***********************/

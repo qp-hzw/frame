@@ -2,21 +2,15 @@
 #define C_PLAYER_H
 #include "Stdafx.h"
 
-//用户状态
-enum US_STATUS
-{
-	US_FREE = 1,       //没有状态 -- 没有在Table中
-	US_IN_TABLE = 2,   //在table中 -- 站立(旁观)状态
-	US_SIT = 3,        //坐下状态
-	US_PLAYING = 4,    //游戏状态
-
-};
-
-#define US_READY					0x03								//同意状态
-#define US_OFFLINE					0x06								//断线状态
-
 class  CPlayer
 {
+private:
+	//Socket属性
+	DWORD                           m_dwSocketID;                       //scoketID
+	DWORD							m_dwClientAddr;						//连接地址
+	DWORD							m_dwLogonTime;						//登录时间
+
+
 	//属性变量
 private:
 	tagUserInfo						m_UserInfo;							//用户信息
@@ -25,7 +19,7 @@ private:
 	//登录信息
 private:
 	DWORD							m_dwDBQuestID;						//请求标识
-	DWORD							m_dwLogonTime;						//登录时间
+	
 	DWORD							m_dwInoutIndex;						//进出索引
 
 private:
@@ -40,7 +34,6 @@ private:
 	//系统属性
 private:
 	WORD							m_wBindIndex;						//绑定索引
-	DWORD							m_dwClientAddr;						//连接地址
 	TCHAR							m_szMachineID[LEN_MACHINE_ID];		//机器标识
 
 	DWORD							m_dwOfflineGameID;					//断线重连标志 
@@ -49,12 +42,15 @@ private:
 	//函数定义
 public:
 	//构造函数
-	CPlayer(tagUserInfo & UserInfo, tagUserInfoPlus & UserInfoPlus);
+	CPlayer();
 	//析构函数
 	~CPlayer(){}
 
 	/**********************************  游戏静态数据 ****************************************/
 public:
+	//用户SocketID
+	DWORD GetSocketID() { return m_dwSocketID;}
+
 	//用户信息
 	tagUserInfo * GetUserInfo() { return &m_UserInfo; }
 	//道具信息

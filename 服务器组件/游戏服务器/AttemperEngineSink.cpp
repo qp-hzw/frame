@@ -19,7 +19,7 @@ CAttemperEngineSink * g_AttemperEngineSink = NULL;
 //时间标识
 
 #define IDI_LOAD_ANDROID_USER			(IDI_MAIN_MODULE_START+1)			//机器信息
-#define IDI_REPORT_SERVER_INFO			(IDI_MAIN_MODULE_START+2)			//房间人数
+//#define IDI_REPORT_SERVER_INFO			(IDI_MAIN_MODULE_START+2)			//房间人数
 #define IDI_CONNECT_CORRESPOND			(IDI_MAIN_MODULE_START+3)			//连接时间
 #define IDI_GAME_SERVICE_PULSE			(IDI_MAIN_MODULE_START+4)			//服务脉冲
 #define IDI_DBCORRESPOND_NOTIFY			(IDI_MAIN_MODULE_START+6)			//缓存通知
@@ -156,19 +156,6 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 
 				return true;
 			}
-		case IDI_REPORT_SERVER_INFO:	//房间人数
-			{
-				//变量定义
-				STR_CPR_GP_LIST_GAME_ONLINE ServerOnLine;
-				ZeroMemory(&ServerOnLine,sizeof(ServerOnLine));
-
-				//设置变量
-				ServerOnLine.dwOnLineCount=CPlayerManager::GetPlayerCount();
-
-				//发送数据
-				g_TCPSocketEngine->SendData(MDM_CPD_LIST,CPR_GP_LIST_GAME_ONLINE,&ServerOnLine,sizeof(ServerOnLine));
-				return true;
-			}
 		case IDI_CONNECT_CORRESPOND:	//连接协调
 			{
 				g_TCPSocketEngine->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
@@ -285,7 +272,7 @@ bool CAttemperEngineSink::OnEventTCPSocketShut(WORD wServiceID, BYTE cbShutReaso
 	if (wServiceID==NETWORK_CORRESPOND)
 	{
 		//删除时间
-		g_GameCtrl->KillTimer(IDI_REPORT_SERVER_INFO);
+		//g_GameCtrl->KillTimer(IDI_REPORT_SERVER_INFO);
 
 		//设置时间
 		g_GameCtrl->SetTimer(IDI_CONNECT_CORRESPOND, TIME_CONNECT_CORRESPOND, 1, 0);
@@ -311,23 +298,18 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		}
 
 		//变量定义
-		STR_CPR_GP_REGISTER_GAME RegisterServer;
-		ZeroMemory(&RegisterServer,sizeof(RegisterServer));
+		tagServerItem ServerItem;
+		ZeroMemory(&ServerItem,sizeof(ServerItem));
 
-		/*
 		//构造数据
-		RegisterServer.dwServerID=m_pGameServiceOption->dwServerID;
-		lstrcpyn(RegisterServer.szServerName, m_pGameServiceOption->szServerName, CountArray(RegisterServer.szServerName));
-		lstrcpyn(RegisterServer.szGameServerAddr, m_pGameServiceOption->szGameServerAddr,CountArray(RegisterServer.szGameServerAddr));
-		RegisterServer.wGameServerPort=m_pGameServiceOption->wGameServerPort;
-		RegisterServer.dwSubGameVersion = m_pGameServiceAttrib->dwSubGameVersion;
-		*/
+		ServerItem.dwServerID = g_GameCtrl->GetServerID();
+		ServerItem.byServerType = GAME_TYPE;
+		//lstrcpyn(RegisterServer.szServerName, m_pGameServiceOption->szServerName, CountArray(RegisterServer.szServerName));
+		lstrcpyn(ServerItem.szServerAddr,TEXT("127.0.0.1"),CountArray(ServerItem.szServerAddr));
+		ServerItem.wServerPort = 9988; //TODONOW 这里的端口看下什么时候获取合适
 
 		//发送数据
-		g_TCPSocketEngine->SendData(MDM_REGISTER,CPR_GP_REGISTER_GAME,&RegisterServer,sizeof(RegisterServer));
-
-		//设置时间
-		g_GameCtrl->SetTimer(IDI_REPORT_SERVER_INFO,TIME_REPORT_SERVER_INFO*1000L,TIMES_INFINITY,0);
+		g_TCPSocketEngine->SendData(MDM_REGISTER,CPR_REGISTER_SERVER,&ServerItem,sizeof(ServerItem));
 
 		return true;
 	}
@@ -351,7 +333,7 @@ bool CAttemperEngineSink::OnEventTCPSocketRead(WORD wServiceID, TCP_Command Comm
 			{
 				return OnTCPSocketMainTransfer(Command.wSubCmdID,pData,wDataSize);	
 			}
-		case MDM_CS_USER_COLLECT:	//用户汇总
+		case MDM_USER:	//用户汇总
 			{
 				return OnTCPSocketMainUserCollect(Command.wSubCmdID,pData,wDataSize);
 			}
@@ -430,7 +412,7 @@ bool CAttemperEngineSink::OnEventTCPNetworkShut(DWORD dwClientAddr, DWORD dwActi
 				data.dwUserID = pIServerUserItem->GetUserID();
 				data.dwServerID = dwServerID;
 				data.byMask = 1; //表示增加断线用户
-				g_TCPSocketEngine->SendData(MDM_CS_USER_COLLECT,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
+				g_TCPSocketEngine->SendData(MDM_USER,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
 
 				bIsExsit = true;
 			}
@@ -663,7 +645,7 @@ bool CAttemperEngineSink::OnTCPSocketMainRegister(WORD wSubCmdID, VOID * pData, 
 {
 	switch (wSubCmdID)
 	{
-	case CPO_PGPL_REGISTER_SUCESS:		//注册完成
+	case CPO_REGISTER_SUCESS:		//注册完成
 		{
 			//开启socket::server服务
 			if(g_GameCtrl->StartNetworkService() != 0)
@@ -674,7 +656,7 @@ bool CAttemperEngineSink::OnTCPSocketMainRegister(WORD wSubCmdID, VOID * pData, 
 
 			return true;
 		}
-	case CPO_PGPL_REGISTER_FAILURE:		//注册失败
+	case CPO_REGISTER_FAILURE:		//注册失败
 		{
 			g_GameCtrl->ConcludeService();
 
@@ -756,38 +738,6 @@ bool CAttemperEngineSink::OnTCPSocketMainUserCollect(WORD wSubCmdID, VOID * pDat
 {
 	switch (wSubCmdID)
 	{
-	case SUB_CS_S_COLLECT_REQUEST:	//用户汇总
-		{
-			//变量定义
-			CMD_CS_C_UserEnter UserEnter;
-			ZeroMemory(&UserEnter,sizeof(UserEnter));
-
-			//发送用户
-			WORD wIndex=0;
-			do
-			{
-				//获取用户
-				CPlayer * pIServerUserItem=CPlayerManager::FindPlayerByEnum(wIndex++);
-				if (pIServerUserItem==NULL) break;
-
-				//设置变量
-				UserEnter.dwUserID=pIServerUserItem->GetUserID();
-				lstrcpyn(UserEnter.szNickName,pIServerUserItem->GetNickName(),CountArray(UserEnter.szNickName));
-
-				//辅助信息
-				UserEnter.cbGender=pIServerUserItem->GetGender();
-				UserEnter.cbMemberOrder=pIServerUserItem->GetMemberOrder();
-				UserEnter.cbMasterOrder=pIServerUserItem->GetMasterOrder();
-
-				//发送数据
-				g_TCPSocketEngine->SendData(MDM_CS_USER_COLLECT,SUB_CS_C_USER_ENTER,&UserEnter,sizeof(UserEnter));
-			} while (true);
-
-			//汇报完成
-			g_TCPSocketEngine->SendData(MDM_CS_USER_COLLECT,SUB_CS_C_USER_FINISH);
-
-			return true;
-		}
 	}
 
 	return true;
@@ -2787,7 +2737,7 @@ bool CAttemperEngineSink::On_SUB_User_ReconnectRoom(VOID * pData, WORD wDataSize
 		tagOfflineUser data;
 		data.dwUserID = pIServerUserItem->GetUserID();
 		data.byMask = 2; //表示删除断线用户
-		g_TCPSocketEngine->SendData(MDM_CS_USER_COLLECT,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
+		g_TCPSocketEngine->SendData(MDM_USER,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
 	}
 	return true;
 }
@@ -3274,17 +3224,6 @@ VOID CAttemperEngineSink::OnEventUserLogout(CPlayer * pIServerUserItem, DWORD dw
 
 	//投递请求
 	g_GameCtrl->PostDataBaseRequest(DBR_GR_LEAVE_GAME_SERVER,0L,&LeaveGameServer,sizeof(LeaveGameServer));
-
-	//汇总用户
-	//变量定义
-		CMD_CS_C_UserLeave UserLeave;
-		ZeroMemory(&UserLeave,sizeof(UserLeave));
-
-		//设置变量
-		UserLeave.dwUserID=pIServerUserItem->GetUserID();
-
-		//发送消息
-		g_TCPSocketEngine->SendData(MDM_CS_USER_COLLECT,SUB_CS_C_USER_LEAVE,&UserLeave,sizeof(UserLeave));
 
 	//广播在线人数
 	CMD_GF_OnlinePlayers OnlinePlayers;

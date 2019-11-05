@@ -175,8 +175,6 @@ protected:
 #pragma region 启动命令
 	//启动命令
 protected:
-	//加载列表
-	bool OnRequestLoadGameList(DWORD dwContextID, VOID * pData, WORD wDataSize);
 	//在线信息
 	bool OnRequestOnLineCountInfo(DWORD dwContextID, VOID * pData, WORD wDataSize);
 	//加载跑马灯消息

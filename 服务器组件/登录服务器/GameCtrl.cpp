@@ -172,9 +172,9 @@ bool CGameCtrl::SendDataBatch(WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WOR
 }
 
 /***************************************************  消息发送  ->DB  *************************************************/
-bool CGameCtrl::PostDataBaseRequest(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize)
+bool CGameCtrl::PostDataBaseRequest(WORD wRequestID, DWORD dwScoketID, VOID * pData, WORD wDataSize)
 {
-	return m_AttemperEngine->PostDataBaseRequest(wRequestID, dwContextID, pData, wDataSize);
+	return m_AttemperEngine->PostDataBaseRequest(wRequestID, dwScoketID, pData, wDataSize);
 }
 
 
