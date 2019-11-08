@@ -136,9 +136,6 @@ protected:
 	bool On_DBR_QueryScoreInfo(DWORD dwContextID, VOID * pData, WORD wDataSize);
 	//查询金币房卡返回（牌友圈 + 赠送道具时调用）
 	VOID On_DBO_QueryScoreInfo(DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString, bool bMobileClient);
-
-	//用户Socket连接关闭
-	bool On_DBR_GP_QUIT(DWORD dwContextID, VOID * pData, WORD wDataSize); 
 	
 #pragma endregion
 

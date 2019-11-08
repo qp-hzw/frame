@@ -43,6 +43,36 @@ bool CPlayerManager::DeletePlayer(CPlayer * pPlayer)
 	return true;
 }
 
+//É¾
+bool CPlayerManager::DeletePlayerByID(DWORD dwUserID)
+{
+	for(auto ite = s_PlayerArray.begin(); ite != s_PlayerArray.end(); ite++)
+	{
+		if( (*ite)->GetUserID() == dwUserID)
+		{
+			ite = s_PlayerArray.erase(ite);
+			break;
+		}
+	}
+
+	return true;
+}
+
+//É¾
+bool CPlayerManager::DeletePlayerBySocketID(DWORD dwSocketID)
+{
+	for(auto ite = s_PlayerArray.begin(); ite != s_PlayerArray.end(); ite++)
+	{
+		if( (*ite)->GetSocketID() == dwSocketID)
+		{
+			ite = s_PlayerArray.erase(ite);
+			break;
+		}
+	}
+
+	return true;
+}
+
 //É¾ ËùÓÐ
 bool CPlayerManager::DeleteAllPlayer()
 {
@@ -63,6 +93,18 @@ CPlayer * CPlayerManager::FindPlayerByID(DWORD dwUserID)
 	for(auto player : s_PlayerArray)
 	{
 		if(player && player->GetUserID() == dwUserID)
+			return player;
+	}
+
+	return NULL;
+}
+
+//²é
+CPlayer * CPlayerManager::FindPlayerBySocketID(DWORD dwScoketID)
+{
+	for(auto player : s_PlayerArray)
+	{
+		if(player && player->GetSocketID() == dwScoketID)
 			return player;
 	}
 

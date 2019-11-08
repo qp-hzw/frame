@@ -25,6 +25,15 @@
     <ClCompile Include="TableManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="HandleFromCenter.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="HandleFromGate.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="HandleFromDB.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AttemperEngineSink.h">
@@ -58,6 +67,15 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="TableManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="HandleFromCenter.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="HandleFromGate.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="HandleFromDB.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

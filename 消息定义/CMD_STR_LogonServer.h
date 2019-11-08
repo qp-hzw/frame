@@ -36,7 +36,6 @@ struct STR_SUB_CL_LOGON_ACCOUNTS
 	TCHAR							szMachineID[LEN_MACHINE_ID];		//机器序列
 	DWORD							dwProxyID;							//代理ID
 };
-
 //注册帐号
 struct STR_SUB_CL_LOGON_REGISTER
 {
@@ -49,7 +48,6 @@ struct STR_SUB_CL_LOGON_REGISTER
 	TCHAR							szMachineID[LEN_MACHINE_ID];		//机器序列
 	DWORD							dwProxyID;							//代理ID
 };
-
 //平台登录  
 struct STR_SUB_CL_LOGON_PLATFORM
 {
@@ -62,7 +60,8 @@ struct STR_SUB_CL_LOGON_PLATFORM
 	TCHAR							szMachineID[LEN_MACHINE_ID];		//机器序列
 	DWORD							dwProxyID;							//代理ID
 };
-//平台登录 返回
+
+//账号|平台登陆 返回
 struct STR_CMD_LC_LOGON_PLATFORM
 {
 	//操作结果

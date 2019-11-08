@@ -196,17 +196,8 @@ bool CGameCtrl::SendData(CPlayer * pIServerUserItem, WORD wMainCmdID, WORD wSubC
 	if (pIServerUserItem==NULL) return false;
 
 	//发送数据
-	if (pIServerUserItem->GetBindIndex()!=INVALID_WORD)
-	{
-		if (pIServerUserItem->IsAndroidUser()==false)
-		{
-			//常规用户
-			WORD wBindIndex=pIServerUserItem->GetBindIndex();
-			tagBindParameter * pBindParameter=m_AttemperEngineSink.GetBindParameter(wBindIndex);
-			m_TCPNetworkEngine->SendData(pBindParameter->dwSocketID,wMainCmdID,wSubCmdID,pData,wDataSize);
-		}
-	}
-
+	m_TCPNetworkEngine->SendData(pIServerUserItem->GetSocketID(),wMainCmdID,wSubCmdID,pData,wDataSize);
+	
 	return true;
 }
 
@@ -272,10 +263,6 @@ bool CGameCtrl::SendRoomMessage(CPlayer * pIServerUserItem, LPCTSTR lpszMessage,
 		SystemMessage.wLength=lstrlen(lpszMessage)+1;
 		lstrcpyn(SystemMessage.szString,lpszMessage,CountArray(SystemMessage.szString));
 
-		//变量定义
-		WORD dwUserIndex=pIServerUserItem->GetBindIndex();
-		tagBindParameter * pBindParameter=m_AttemperEngineSink.GetBindParameter(dwUserIndex);
-
 		//数据属性
 		WORD wHeadSize=sizeof(SystemMessage)-sizeof(SystemMessage.szString);
 		WORD wSendSize=wHeadSize+CountStringBuffer(SystemMessage.szString);
@@ -288,9 +275,7 @@ bool CGameCtrl::SendRoomMessage(CPlayer * pIServerUserItem, LPCTSTR lpszMessage,
 		else
 		{
 			//常规用户
-			WORD wBindIndex=pIServerUserItem->GetBindIndex();
-			tagBindParameter * pBindParameter=m_AttemperEngineSink.GetBindParameter(wBindIndex);
-			m_TCPNetworkEngine->SendData(pBindParameter->dwSocketID,MDM_CM_SYSTEM,SUB_CM_SYSTEM_MESSAGE,&SystemMessage,wSendSize);
+			m_TCPNetworkEngine->SendData(pIServerUserItem->GetSocketID(),MDM_CM_SYSTEM,SUB_CM_SYSTEM_MESSAGE,&SystemMessage,wSendSize);
 		}
 
 		return true;
@@ -318,10 +303,6 @@ bool CGameCtrl::SendGameMessage(CPlayer * pIServerUserItem, LPCTSTR lpszMessage,
 		SystemMessage.wLength=lstrlen(lpszMessage)+1;
 		lstrcpyn(SystemMessage.szString,lpszMessage,CountArray(SystemMessage.szString));
 
-		//变量定义
-		WORD dwUserIndex=pIServerUserItem->GetBindIndex();
-		tagBindParameter * pBindParameter=m_AttemperEngineSink.GetBindParameter(dwUserIndex);
-
 		//数据属性
 		WORD wHeadSize=sizeof(SystemMessage)-sizeof(SystemMessage.szString);
 		WORD wSendSize=wHeadSize+CountStringBuffer(SystemMessage.szString);
@@ -334,9 +315,7 @@ bool CGameCtrl::SendGameMessage(CPlayer * pIServerUserItem, LPCTSTR lpszMessage,
 		else
 		{
 			//常规用户
-			WORD wBindIndex=pIServerUserItem->GetBindIndex();
-			tagBindParameter * pBindParameter=m_AttemperEngineSink.GetBindParameter(wBindIndex);
-			m_TCPNetworkEngine->SendData(pBindParameter->dwSocketID,MDM_G_FRAME,CMD_GF_SYSTEM_MESSAGE,&SystemMessage,wSendSize);
+			m_TCPNetworkEngine->SendData(pIServerUserItem->GetSocketID(),MDM_G_FRAME,CMD_GF_SYSTEM_MESSAGE,&SystemMessage,wSendSize);
 		}
 
 		return true;

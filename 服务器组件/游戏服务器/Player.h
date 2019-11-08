@@ -17,6 +17,8 @@ enum US_STATUS
 
 class  CPlayer
 {
+	DWORD                           m_dwSocketID;                       //scoketID
+
 	//属性变量
 private:
 	tagUserInfo						m_UserInfo;							//用户信息
@@ -55,6 +57,9 @@ public:
 
 	/**********************************  游戏静态数据 ****************************************/
 public:
+	//用户SocketID
+	DWORD GetSocketID() { return m_dwSocketID;}
+
 	//用户信息
 	tagUserInfo * GetUserInfo() { return &m_UserInfo; }
 	//道具信息
@@ -156,7 +161,7 @@ public:
 	//参数接口
 public:
 	//设置参数
-	virtual bool SetUserParameter(DWORD dwClientAddr, WORD wBindIndex, TCHAR szMachineID[LEN_MACHINE_ID], bool bAndroidUser, 
+	virtual bool SetUserParameter(DWORD dwClientAddr, TCHAR szMachineID[LEN_MACHINE_ID], bool bAndroidUser, 
 		bool bClientReady, const double &dLongitude, const double &dLatitude);
 
 	//辅助函数

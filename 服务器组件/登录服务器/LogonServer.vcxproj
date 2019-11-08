@@ -182,12 +182,12 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClCompile Include="AttemperEngineSink.cpp" />
     <ClCompile Include="DataBaseEngineSink.cpp" />
     <ClCompile Include="HandleFromCenter.cpp" />
+    <ClCompile Include="HandleFromDB.cpp" />
     <ClCompile Include="HandleFromGate.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayerManager.cpp" />
     <ClCompile Include="RankManager.cpp" />
-    <ClCompile Include="ServerListManager.cpp" />
     <ClCompile Include="GameCtrl.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -197,11 +197,11 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClInclude Include="DataBaseEngineSink.h" />
     <ClInclude Include="DataBasePacket.h" />
     <ClInclude Include="HandleFromCenter.h" />
+    <ClInclude Include="HandleFromDB.h" />
     <ClInclude Include="HandleFromGate.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayerManager.h" />
     <ClInclude Include="RankManager.h" />
-    <ClInclude Include="ServerListManager.h" />
     <ClInclude Include="GameCtrl.h" />
     <ClInclude Include="Stdafx.h" />
   </ItemGroup>

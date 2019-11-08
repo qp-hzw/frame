@@ -14,9 +14,13 @@ private:
 	//查找函数
 public:
 	//增
-	static bool InsertPlayer(CPlayer * * pIServerUserResult, tagUserInfo & UserInfo, tagUserInfoPlus & UserInfoPlus);
+	static bool InsertPlayer(DWORD dwSocketID, STR_CMD_LC_LOGON_PLATFORM* UserInfoPlus);
 	//删
 	static bool DeletePlayer(CPlayer * pPlayer);
+	//删
+	static bool DeletePlayerByID(DWORD dwUserID);
+	//删
+	static bool DeletePlayerBySocketID(DWORD dwSocketID);
 	//删 所有
 	static bool DeleteAllPlayer();
 	//查
@@ -25,6 +29,8 @@ public:
 	static CPlayer * FindPlayerByID(DWORD dwUserID);
 	//查
 	static CPlayer * FindPlayerBySocketID(DWORD dwSocketID);
+	//查 俱乐部所有
+	static std::vector<CPlayer*> FindPlayerByClubID(DWORD dwClubID);
 
 
 	//统计函数

@@ -76,13 +76,6 @@ CTableFrame::CTableFrame()
 	m_bUnderDissState = false;
 	m_dissmisserChaiID = 0xFF;
 
-
-
-
-	//TODONOW 待删除
-	//配置信息
-	m_pGameServiceOption=NULL;
-
 	return;
 }
 
@@ -143,7 +136,9 @@ bool CTableFrame::StartGame()
 	{
 		byClubOrHalGold = 2;
 	}
-	g_AttemperEngineSink->ClubTableStart(GetTableID(), byClubOrHalGold);
+	
+	//TODONOW 需要增加这个功能
+	//g_AttemperEngineSink->ClubTableStart(GetTableID(), byClubOrHalGold);
 
 	//通知事件
 	if (m_pITableFrameSink!=NULL) 
@@ -182,7 +177,14 @@ bool CTableFrame::HandleXJGameEnd(BYTE byRound, BYTE byTableMode_NO_USER, SCORE 
 	XJGameTickets(byTableMode, byRound);
 
 	//事件通知
-	g_AttemperEngineSink->ClubTableXJ(GetTableID());
+	STR_DBR_CLUB_TABLE_INFO Dbr;
+	ZeroMemory(&Dbr, sizeof(Dbr));
+	Dbr.dwTableID = GetTableID();
+	Dbr.dwTableState = 1;
+	Dbr.byCurrentRound = 1;//这是一个增量 TODONOW 后面修改
+	Dbr.byMask = 2;
+	
+	g_GameCtrl->PostDataBaseRequest(DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
 
 	return true;
 }
@@ -2161,7 +2163,7 @@ void CTableFrame::RecordGameScore(DWORD dwStartGameTime)
 			GameScoreRecord.dwPlayTimeCount=0;
 
 			//添加库存相关yang
-			GameScoreRecord.wChangeStockScore = g_AttemperEngineSink->GetChangeStockScore();
+			//.wChangeStockScore = g_AttemperEngineSink->GetChangeStockScore();
 
 
 			//游戏时间

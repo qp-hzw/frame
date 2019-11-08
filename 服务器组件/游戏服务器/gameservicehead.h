@@ -416,8 +416,6 @@ public:
 	virtual VOID* GetCustomRule() =NULL;
 	//读取子游戏特有房间规则
 	virtual VOID * GetSubGameRule()=NULL;
-	//服务配置
-	virtual tagGameServiceOption * GetGameServiceOption()=NULL;
 
 	//写分接口
 public:
@@ -528,18 +526,6 @@ public:
 //服务框架
 interface IMainServiceFrame : public IUnknownEx
 {
-public:
-	//库存计算是否控制
-	virtual bool IsControl( SCORE expectStock ) = NULL;
-	//修改当前库存值
-	virtual bool SetStockScore(SCORE currentStock) = NULL;
-	//设置库存值
-	virtual SCORE GetChangeStockScore() = NULL;
-	//房间控制值相关
-	virtual SCORE GetRoomControl() = NULL;
-	virtual void SetRoomContorl(SCORE val ) = NULL;
-
-
 #pragma region DB事件通知
 	//替他人开房
 public:

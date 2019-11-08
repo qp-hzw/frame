@@ -3,27 +3,12 @@
 #include "Stdafx.h"
 #include "DataBasePacket.h"
 
-
-//绑定参数
-struct tagBindParameter
-{
-	//网络参数
-	DWORD							dwUserID;							//用户ID
-	DWORD							dwSocketID;							//网络标识
-	DWORD							dwClientAddr;						//连接地址
-	DWORD							dwActiveTime;						//激活时间
-};
-
 //////////////////////////////////////////////////////////////////////////////////
 //1、继承内核中的IAttemperEngineSink类
 //2、处理具体收到的 【网络事件 + 时间事件 + 数据库事件】
 //////////////////////////////////////////////////////////////////////////////////
 class CAttemperEngineSink : public IAttemperEngineSink
 {
-	//变量定义
-protected:
-	tagBindParameter *				m_pBindParameter;					//辅助数组
-
 #pragma region 构造析构
 	//函数定义
 public:

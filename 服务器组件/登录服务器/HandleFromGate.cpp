@@ -1,5 +1,8 @@
 #include "HandleFromGate.h"
 #include "GameCtrl.h"
+#include "PlayerManager.h"
+#include "Player.h"
+#include "RankManager.h"
 
 //消息分发处理函数
 bool CHandleFromGate::HandlePacket(TCP_Command Command, VOID * pData, WORD wDataSize, DWORD dwSocketID)
@@ -36,6 +39,342 @@ bool CHandleFromGate::HandlePacket(TCP_Command Command, VOID * pData, WORD wData
 	return false;
 }
 
+bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwScoketID, VOID * pData, WORD wDataSize)
+{
+	switch (wRequestID)
+	{
+#pragma region 登录模块
+	case DBO_CL_LOGON_ACCOUNTS:			//账号登录
+		{
+			return On_CMD_LC_Logon_Account(dwScoketID,pData,wDataSize);
+		}
+	case DBO_CL_LOGON_PLATFORM:			//第三方登陆
+		{
+			return On_CMD_LC_Logon_Platform(dwScoketID, pData, wDataSize);
+		}
+#pragma endregion
+
+	case DBO_CL_SERVICE_USER_FEEDBACK:			//玩家反馈返回
+		{
+			return On_CMD_LC_Service_UserFeedBack(dwScoketID, pData);
+		}
+	case DBO_CL_SERVICE_REFRESH_USER_INFO:		//刷新用户信息返回
+		{
+			return On_CMD_LC_Service_RefreshUserInfo(dwScoketID, pData);
+		}
+	case DBO_CL_SERVICE_QUERY_ROOM_LIST:		//查询开房列表返回
+		{
+			return On_CMD_LC_Service_QueryRoomList(dwScoketID,pData,wDataSize);
+		}
+	case DBO_CL_SERVICE_GET_RICH_LIST:			//获取富豪榜返回
+		{
+			return On_CMD_LC_Service_GetRichList(dwScoketID,pData,wDataSize);
+		}
+	case DBO_CL_SERVICE_GET_USER_RECORD_LIST:	//获取用户录像列表返回（大局）
+		{
+			return On_CMD_LC_Service_GetUserRecordList(dwScoketID,pData,wDataSize);
+		}
+	case DBO_CL_SERVICE_GET_SPECIFIC_RECORD:	//获取指定ID录像返回（小局）
+		{
+			return On_CMD_LC_Service_GetSpecificRecord(dwScoketID,pData,wDataSize);
+		}
+	case DBO_CL_SERVICE_ONLINE_REWARD:			//获取在线奖励返回
+		{
+			return On_CMD_LC_Service_OnlineReward(dwScoketID,pData,wDataSize);
+		}
+	case DBO_CL_SERVICE_GET_TASK_LIST:			//获取任务列表返回
+		{
+			return On_CMD_LC_Service_GetTaskList(dwScoketID,pData,wDataSize);
+		}
+	case DBO_CL_SERVICE_GET_TASK_REWARD:		//领取任务奖励返回
+		{
+			return On_CMD_LC_Service_GetTaskReward(dwScoketID,pData,wDataSize);
+		}
+	case DBO_CL_SERVICE_REQUEST_LOTTERY:		//请求抽奖返回
+		{
+			return On_CMD_LC_Service_RequestLottery(dwScoketID,pData,wDataSize);
+		}
+	case DBO_CL_SERVICE_MODIFY_PERSONAL_INFO:	//修改个人资料返回
+		{
+			return On_CMD_LC_Service_ModifyPersonalInfo(dwScoketID,pData,wDataSize);
+		}
+	case DBO_CL_USER_QUERY_SCORE_INFO:			//查询(变更)金币房卡
+		{
+			return On_CMD_LC_Service_QueryScoreInfo(dwScoketID,pData,wDataSize);
+		}
+	
+	case DBO_CL_USER_COMMAND_RESULT:		//公共操作结果
+		{
+			return On_CMD_LC_CommonOperateResult(dwScoketID,pData,wDataSize);
+		}
+#pragma region MDM_GIFT 礼物道具
+	case DBO_CL_GIFT_GIVE_PROPS:			//道具赠送 返回
+		{
+			return On_CMD_LC_GIFT_GIVE_PROPS(dwScoketID,pData,wDataSize);
+		}
+	case DBO_CL_GIFT_GIVE_PROPS_SHOW:		//道具赠送 通知接收人
+		{
+			return On_CMD_LC_GIFT_GIVE_PROPS_SHOW(dwScoketID,pData,wDataSize);
+		}
+#pragma endregion
+	case DBO_CL_USER_RECHARGE_INFO:			//充值信息返回
+		{
+			return On_CMD_LC_Other_RechargeInfo(dwScoketID,pData,wDataSize);
+		}
+	case DBO_CL_USER_EXCHANGE_INFO:			//兑换道具返回
+		{
+			return On_CMD_LC_Other_ExchangeInfo(dwScoketID,pData,wDataSize);
+		}
+	case DBO_CL_SERVICE_GET_RANK_REWARD:		//获得排行榜奖励	
+		{
+			return OnDBRankRewardResult(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_SERVICE_PURE_STANDING_LIST:		//pure大厅排行榜 返回
+		{
+			return On_CMD_LC_SERVICE_PURE_STANDING_LIST(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_SERVICE_PURE_STANDING_FINISH:	//pure大厅排行榜 结束
+		{
+			return On_CMD_LC_SERVICE_PURE_STANDING_FINISH(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_SERVICE_PURE_RECORD_LIST:		//大局战绩
+		{
+			return On_CMD_LC_SERVICE_PURE_RECORD_LIST(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_SERVICE_PURE_RECORD_LIST_PINFO:	//大局玩家信息
+		{
+			return On_CMD_LC_SERVICE_PURE_RECORD_LIST_PINFO(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_SERVICE_PURE_RECORD_FINISH://大局战绩结束
+		{
+			return On_CMD_LC_SERVICE_PURE_RECORD_FINISH(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_SERVICE_PURE_XJ_RECORD_LIST:		//小局战绩
+		{
+			return On_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_SERVICE_PURE_XJ_RECORD_LIST_PINFO:	//小局玩家信息
+		{
+			return On_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_PINFO(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_SERVICE_XJ_RECORD_PLAYBACK:			//小局录像回放
+		{
+			return On_CMD_LC_Service_XJRecordPlayback(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_SERVICE_CUSTOMER_MESSEGE:		//客服消息
+		{
+			return On_CMD_LC_SERVICE_CUSTOMER_MESSEGE(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_SERVICE_PURE_XJ_RECORD_FINISH://小局战绩结束
+		{
+			return On_CMD_LC_SERVICE_PURE_XJ_RECORD_FINISH(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_SERVICE_GOLD_INFO:		//请求金币大厅 返回
+		{
+			return On_CMD_LC_SERVICE_GOLD_INFO(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_SERVICE_GOLD_INFO_FINISH:	//请求金币大厅 结束
+		{
+			return On_CMD_LC_SERVICE_GOLD_INFO_FINISH(dwScoketID,pData,wDataSize);
+		}
+			 
+#pragma region MDM_CLUB 牌友圈
+	case DBO_LC_CLUB_ALL_CLUB_INFO_LIST:		//查询牌友圈列表 返回
+		{
+			return On_CMD_LC_CLUB_ALL_CLUB_INFO_LIST(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_ALL_INFO_FINISH:		//查询牌友圈列表 结束
+		{
+			return On_CMD_LC_CLUB_ALL_INFO_FINISH(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_ROOM_LIST: //查询指定牌友圈房间列表 返回
+		{
+			return On_CMD_LC_CLUB_ROOM_LIST(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_ROOM_LIST_FINISH: //查询指定牌友圈房间列表 结束
+		{
+			return On_CMD_LC_CLUB_ROOM_LIST_FINISH(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_RANDOM_CLUB_LIST : //查询未满员随机牌友圈 返回
+		{
+			return On_CMD_LC_CLUB_RANDOM_CLUB_LIST(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_RANDOM_CLUB_LIST_FINISH : //查询未满员随机牌友圈  结束
+		{
+			return On_CMD_LC_CLUB_RANDOM_CLUB_LIST_FINISH(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_JOIN_CLUB: //申请加入牌友圈
+		{
+			return On_CMD_LC_CLUB_JOIN_CLUB(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_JOIN_CLUB_BDCAST: //申请加入牌友圈 广播
+		{
+			return On_CMD_LC_CLUB_JOIN_CLUB_BDCAST(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_JOIN_CLUB_RE:	//申请加入牌友圈 客户端实时刷新俱乐部
+		{
+			return On_CMD_LC_CLUB_JOIN_CLUB_RE(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_DISS_CLUB : //解散牌友圈
+		{
+			return On_CMD_LC_CLUB_DISS_CLUB(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_ROOM_SETTING: //房间设置
+		{
+			return On_CMD_LC_CLUB_ROOM_SETTING(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_ROOM_QUERY_SETTING: //请求房间设置
+		{
+			return On_CMD_LC_CLUB_ROOM_QUERY_SETTING(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_ROOM_DISSOLVE: //解散房间请求 返回
+		{
+			return On_CMD_LC_CLUB_ROOM_DISSOLVE(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_TABLE_DISSOLVE: //解散桌子请求 返回
+		{
+			return On_CMD_LC_CLUB_TABLE_DISSOLVE(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_NOTICE: //牌友圈公告
+		{
+			return On_CMD_LC_CLUB_NOTICE(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_MESSAGE: //牌友圈简介
+		{
+			return On_CMD_LC_CLUB_MESSAGE(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_CONTRIBUTE_FK://贡献房卡
+		{
+			return On_CMD_LC_CLUB_CONTRIBUTE_FK(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_AUTO_AGREE://牌友圈设置
+		{
+			return On_CMD_LC_CLUB_AUTO_AGREE(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_INVITE://邀请他人加入牌友圈
+		{
+			return On_CMD_LC_CLUB_INVITE(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_INVITE_REMIND://被邀请人的提醒
+		{
+			return On_CMD_LC_CLUB_INVITE_REMIND(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_INVITE_RESULT: //被邀请人 回复
+		{
+			return On_CMD_LC_CLUB_INVITE_RESULT(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_INQUERY_LIST: //被邀请人查看自己的邀请列表 返回
+		{
+			return On_CMD_LC_CLUB_INQUERY_LIST(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_APPLICANT_LIST://申请人列表 返回
+		{
+			return On_CMD_LC_CLUB_APPLICANT_LIST(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_APPLICANT_LIST_FINISH://申请人列表 结束
+		{
+			return On_CMD_LC_CLUB_APPLICANT_LIST_FINISH(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_APPOINTMENT: //职务任免
+		{
+			return On_CMD_LC_CLUB_APPOINTMENT(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_APPOINTMENT_NOTE: //职务任免 提醒
+		{
+			return On_CMD_LC_CLUB_APPOINTMENT_NOTE(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CHAT_ALL://俱乐部聊天 返回
+		{
+			return On_CMD_LC_CLUB_CHAT(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CHAT_ALL_BDCAST://俱乐部聊天 广播
+		{
+			return On_CMD_LC_CLUB_CHAT_BDCAST(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_STICKY_POST:	//牌友圈置顶返回
+		{
+			return On_CMD_LC_CLUB_STICKY_POST(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_INQUERY_LIST_FINISH: //被邀请人查看自己的邀请列表 结束
+		{
+			return On_CMD_LC_CLUB_INQUERY_LIST_FINISH(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_TABLE_LIST_TABLE: //桌子列表
+		{
+			return On_CMD_LC_CLUB_TABLE_LIST_TABLE(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_TABLE_LIST_USER:	//桌子玩家列表
+		{
+			return On_CMD_LC_CLUB_TABLE_LIST_USER(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_CREATE_CLUB://创建牌友圈 返回
+		{
+			return On_CMD_LC_CLUB_CREATE_CLUB(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_JOIN_ROOM: //申请加入房间 返回
+		{
+			return On_CMD_LC_CLUB_JOIN_ROOM(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_APPLICANT_RESULT: //群主|管理对申请消息的答复(同意|拒绝) 返回
+		{
+			return On_CMD_LC_CLUB_APPLICANT_RESULT(dwScoketID,pData,wDataSize);
+		}
+		/*
+	case DBO_LC_CLUB_JOIN_CLUB_MESSAGE_FINISH: //群主|管理对申请消息的答复(同意|拒绝) 结束
+		{
+			return On_CMD_LC_CLUB_APPLICANT_LIST_FINISH(dwScoketID,pData,wDataSize);
+		}
+		*/
+	case DBO_LC_CLUB_MEMBER_MANAGER://请求成员数据 返回
+		{
+			return On_CMD_LC_CLUB_MEMBER_MANAGER(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_MEMBER_MANAGER_FINISH://请求成员数据 结束
+		{
+			return On_CMD_LC_CLUB_MEMBER_MANAGER_FINISH(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_DATA ://工会基本信息
+		{
+			return On_CMD_LC_CLUB_DATA(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_QUIT://踢出退出请求 返回
+		{
+			return On_CMD_LC_CLUB_QUIT(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_RECORD_LIST: //工会战绩统计 返回
+		{
+			return On_CMD_LC_CLUB_RECORD_LIST(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_CLUB_RECORD_FINISH: //工会战绩统计 结束
+		{
+			return On_CMD_LC_CLUB_RECORD_FINISH(dwScoketID,pData,wDataSize);
+		}
+#pragma endregion
+#pragma region MDM_SHOP 商城道具
+	case DBO_CL_SHOP_QUERY:		//查询商城
+		{
+			return On_CMD_LC_SHOP_QUERY_RESULT(dwScoketID,pData,wDataSize);
+		}
+	case DBO_CL_SHOP_QUERY_FINISH: //查询商城结束
+		{
+			return On_CMD_LC_SHOP_QUERY_FINISH(dwScoketID,pData,wDataSize);
+		}
+	case DBO_CL_SHOP_DIAMOND : //钻石购买道具
+		{
+			return On_CMD_LC_SHOP_DIAMOND_RESULT(dwScoketID,pData,wDataSize);
+		}
+	case DBO_CL_BAG_QUERY: //背包物品查询
+		{
+			return On_CMD_LC_BAG_RESULT(dwScoketID,pData,wDataSize);
+		}
+	case DBO_CL_BAG_FINISH://背包物品查询完成
+		{
+			return On_CMD_LC_BAG_FINISH(dwScoketID,pData,wDataSize);
+		}
+#pragma endregion
+	}
+
+}
 
 //登录模块
 bool CHandleFromGate::OnTCPNetworkMainLogon(WORD wSubCmdID, VOID * pData, WORD wDataSize, DWORD dwSocketID)
@@ -371,8 +710,7 @@ bool CHandleFromGate::On_SUB_CL_Logon_Accounts(VOID * pData, WORD wDataSize, DWO
 //账号登录返回
 bool CHandleFromGate::On_CMD_LC_Logon_Account(DWORD dwScoketID, VOID * pData, WORD wDataSize)
 {
-	//判断在线
-	if ((m_pBindParameter+LOWORD(dwScoketID))->dwSocketID!=dwScoketID) return true;
+	//数据校验
 	if(wDataSize != sizeof(STR_CMD_LC_LOGON_PLATFORM)) return false;
 
 	//变量定义
@@ -383,17 +721,16 @@ bool CHandleFromGate::On_CMD_LC_Logon_Account(DWORD dwScoketID, VOID * pData, WO
 	{
 		//发送数据
 		g_GameCtrl->SendData(dwScoketID, MDM_LOGON, CMD_LC_LOGON_ACCOUNTS, pCMD, sizeof(STR_CMD_LC_LOGON_PLATFORM));
-
 		return true;
 	}
 
-	//重复登录踢出
+	//重复登录处理
 	On_CMD_LC_Logon_RepeatLogon( pCMD->dwUserID, dwScoketID );
 
 	//断线重连的处理
 
-	//设置连接
-	(m_pBindParameter+LOWORD(dwScoketID))->dwUserID = pCMD->dwUserID;	//记录此连接的用户ID
+	//玩家记录
+	CPlayerManager::InsertPlayer (dwScoketID, pCMD);
 
 	//发送登录成功
 	g_GameCtrl->SendData(dwScoketID, MDM_LOGON, CMD_LC_LOGON_ACCOUNTS, pCMD, sizeof(STR_CMD_LC_LOGON_PLATFORM));
@@ -424,10 +761,9 @@ bool CHandleFromGate::On_SUB_CL_Logon_Register(VOID * pData, WORD wDataSize, DWO
 	
 
 	//变量定义
-	//TODONOW 增加代理ID  added by WangChengQing 2018/8/13
 	STR_DBR_CL_LOGON_REGISTER DBRLogonRegister;
 	ZeroMemory(&DBRLogonRegister,sizeof(DBRLogonRegister));
-	DBRLogonRegister.pBindParameter = (m_pBindParameter+LOWORD(dwSocketID));
+
 	//数据赋值
 	lstrcpyn(DBRLogonRegister.szAccounts,pSUBLogonRegister->szAccounts,CountArray(DBRLogonRegister.szAccounts));
 	lstrcpyn(DBRLogonRegister.szPassword,pSUBLogonRegister->szPassword,CountArray(DBRLogonRegister.szPassword));
@@ -464,8 +800,7 @@ bool CHandleFromGate::On_SUB_CL_Logon_Platform(VOID * pData, WORD wDataSize, DWO
 	//变量构造
 	STR_DBR_CL_LOGON_PLATFORM DBRLogonPlatform;
 	ZeroMemory(&DBRLogonPlatform,sizeof(DBRLogonPlatform));
-	//Socket校验
-	DBRLogonPlatform.pBindParameter=(m_pBindParameter+LOWORD(dwSocketID));
+
 	DBRLogonPlatform.cbGender = pSUBLogonPlatform->cbGender;
 	lstrcpyn(DBRLogonPlatform.szNickName, pSUBLogonPlatform->szNickName, CountArray(DBRLogonPlatform.szNickName));
 	lstrcpyn(DBRLogonPlatform.strHeadUrl, pSUBLogonPlatform->strHeadUrl, CountArray(DBRLogonPlatform.strHeadUrl));
@@ -482,39 +817,32 @@ bool CHandleFromGate::On_SUB_CL_Logon_Platform(VOID * pData, WORD wDataSize, DWO
 //平台登录返回
 bool CHandleFromGate::On_CMD_LC_Logon_Platform(DWORD dwScoketID, VOID * pData, WORD wDataSize)
 {
-	//判断在线
-	if ((m_pBindParameter+LOWORD(dwScoketID))->dwSocketID!=dwScoketID) return true;
+	//效验参数
+	if(wDataSize != sizeof(STR_CMD_LC_LOGON_PLATFORM)) return false;
 
 	//变量定义
-	STR_CMD_LC_LOGON_PLATFORM * pDBOLogonPlatform = (STR_CMD_LC_LOGON_PLATFORM *)pData;
-
-	//构造数据
-	STR_CMD_LC_LOGON_PLATFORM pCMDLogonPlatform;
-	ZeroMemory(&pCMDLogonPlatform, sizeof(STR_CMD_LC_LOGON_PLATFORM));
-	memcpy_s(&pCMDLogonPlatform, sizeof(STR_CMD_LC_LOGON_PLATFORM), pDBOLogonPlatform, sizeof(STR_CMD_LC_LOGON_PLATFORM));
+	STR_CMD_LC_LOGON_PLATFORM * pCMD = (STR_CMD_LC_LOGON_PLATFORM *)pData;
 
 	//如果登录失败, 直接返回
-	if(DB_SUCCESS != pDBOLogonPlatform->dwResultCode)
+	if(DB_SUCCESS != pCMD->dwResultCode)
 	{
-		g_GameCtrl->SendData(dwScoketID, MDM_LOGON, CMD_LC_LOGON_ACCOUNTS, &pCMDLogonPlatform, sizeof(STR_CMD_LC_LOGON_PLATFORM));
+		g_GameCtrl->SendData(dwScoketID, MDM_LOGON, CMD_LC_LOGON_ACCOUNTS, pCMD, sizeof(STR_CMD_LC_LOGON_PLATFORM));
 		return true;
 	}
 
 	//重复登录踢出
-	On_CMD_LC_Logon_RepeatLogon( pCMDLogonPlatform.dwUserID ,dwScoketID);
+	On_CMD_LC_Logon_RepeatLogon( pCMD->dwUserID ,dwScoketID);
 
-	//断线重连的处理 1.CMD结构体赋值  2.list中清除itme 
+	//断线重连的处理
 
-	//设置连接
-	(m_pBindParameter+LOWORD(dwScoketID))->dwUserID = pCMDLogonPlatform.dwUserID;//记录此连接的用户ID
+	//玩家记录
+	CPlayerManager::InsertPlayer (dwScoketID, pCMD);
 
 	//发送登录成功
-	g_GameCtrl->SendData(dwScoketID,MDM_LOGON,CMD_LC_LOGON_PLATFORM, &pCMDLogonPlatform, sizeof(STR_CMD_LC_LOGON_PLATFORM));
+	g_GameCtrl->SendData(dwScoketID,MDM_LOGON,CMD_LC_LOGON_PLATFORM, pCMD, sizeof(STR_CMD_LC_LOGON_PLATFORM));
 
-	//TODONOW 第三方登陆，登陆奖励和老玩家奖励应该放在这里
-
-	//更改用户在线标志
-	CheckUserState_Logon(pCMDLogonPlatform.dwUserID, bIsExist);
+	//登录奖励
+	On_CMD_LC_Logon_Logon_Reward(dwScoketID, pCMD->LasLogonDate);
 
 	return true;
 }
@@ -525,36 +853,25 @@ bool CHandleFromGate::On_CMD_LC_Logon_RepeatLogon(DWORD UserID, DWORD dwScoketID
 	//重复登录
 	bool bIsRepeatLogon = false;
 
-	//遍历所有连接
-	for ( int i = 0; i <  MAX_CONTENT; i++ )
+	CPlayer* player = CPlayerManager::FindPlayerByID(UserID);
+	if(player)
 	{
-		tagBindParameter* p_tempBind = (m_pBindParameter+LOWORD(i));
+		STR_CMD_LC_LOGON_REPEAT_LOGON pCMDLogonRepeatLogon;
+		ZeroMemory(&pCMDLogonRepeatLogon, sizeof(STR_CMD_LC_LOGON_REPEAT_LOGON));
 
-		//判断用户是否已经登录
-		if (p_tempBind->dwUserID == UserID)
-		{
-			STR_CMD_LC_LOGON_REPEAT_LOGON pCMDLogonRepeatLogon;
-			ZeroMemory(&pCMDLogonRepeatLogon, sizeof(STR_CMD_LC_LOGON_REPEAT_LOGON));
+		//提示之前用户账号已登录，无法登录
+		_snwprintf(pCMDLogonRepeatLogon.szDescribe, sizeof(pCMDLogonRepeatLogon.szDescribe), TEXT("账号已经在其它地方登录"));
+		g_GameCtrl->SendData(player->GetSocketID(), MDM_LOGON, CMD_LC_LOGON_REPEAT_LOGON, &pCMDLogonRepeatLogon, sizeof(STR_CMD_LC_LOGON_REPEAT_LOGON));
+		//关闭连接 --  关闭之前的连接
+		g_TCPNetworkEngine->CloseSocket(player->GetSocketID());
 
-			//提示当前用户账号已登录，无法登录
-			_snwprintf(pCMDLogonRepeatLogon.szDescribe, sizeof(pCMDLogonRepeatLogon.szDescribe), TEXT("账号已经在其它地方登录"));
-			g_GameCtrl->SendData(p_tempBind->dwSocketID, MDM_LOGON, CMD_LC_LOGON_REPEAT_LOGON, &pCMDLogonRepeatLogon, sizeof(STR_CMD_LC_LOGON_REPEAT_LOGON));
+		//提示已登录的用户
+		_snwprintf(pCMDLogonRepeatLogon.szDescribe, sizeof(pCMDLogonRepeatLogon.szDescribe), TEXT("账号在其它地方登录"));
+		g_GameCtrl->SendData(dwScoketID, MDM_LOGON, CMD_LC_LOGON_REPEAT_LOGON, &pCMDLogonRepeatLogon, sizeof(STR_CMD_LC_LOGON_REPEAT_LOGON));
 
+		CPlayerManager::DeletePlayerByID(UserID);
 
-			//提示已登录的用户
-			_snwprintf(pCMDLogonRepeatLogon.szDescribe, sizeof(pCMDLogonRepeatLogon.szDescribe), TEXT("账号在其它地方登录"));
-			g_GameCtrl->SendData(dwScoketID, MDM_LOGON, CMD_LC_LOGON_REPEAT_LOGON, &pCMDLogonRepeatLogon, sizeof(STR_CMD_LC_LOGON_REPEAT_LOGON));
-
-			//关闭连接 --  关闭之前的连接
-			//g_TCPNetworkEngine->ShutDownSocket(p_tempBind->dwSocketID);
-			g_TCPNetworkEngine->CloseSocket(p_tempBind->dwSocketID);
-			
-			//清空数据
-			WORD wBindIndex = LOWORD(i);
-			ZeroMemory( p_tempBind,sizeof(tagBindParameter));
-
-			bIsRepeatLogon = true;
-		}
+		bIsRepeatLogon = true;
 	}
 
 	return bIsRepeatLogon;
@@ -568,7 +885,6 @@ bool CHandleFromGate::On_CMD_LC_Logon_UpdateNotify(DWORD dwVersionCheck, DWORD d
 
 	byte ret = Compate_Hall_LogonServer(clientFrameVersion, serverFrameVersion);
 	CLog::Log(log_debug, "版本校验结果:%d  服务器版本:%ld  客户端版本:%ld", ret, serverFrameVersion, clientFrameVersion);
-
 
 	//版本匹配, 则直接退出, 不需要发送消息
 	if(0 == ret )
@@ -660,9 +976,6 @@ bool CHandleFromGate::On_SUB_CL_Service_UserFeedBack(VOID * pData, WORD wDataSiz
 //玩家反馈返回
 bool CHandleFromGate::On_CMD_LC_Service_UserFeedBack( DWORD dwScoketID, VOID * pData)
 {
-	//判断在线
-	if ((m_pBindParameter+LOWORD(dwScoketID))->dwSocketID!=dwScoketID) return true;
-
 	//变量定义
 	STR_CMD_LC_SERVICE_FEEDBACK FeedBack;
 	ZeroMemory(&FeedBack, sizeof(FeedBack));
@@ -704,9 +1017,6 @@ bool CHandleFromGate::On_SUB_CL_Service_RefreshUserInfo(VOID * pData, WORD wData
 //刷新用户信息返回
 bool CHandleFromGate::On_CMD_LC_Service_RefreshUserInfo( DWORD dwScoketID, VOID * pData )
 {
-	//判断在线
-	if ((m_pBindParameter+LOWORD(dwScoketID))->dwSocketID!=dwScoketID) return true;
-
 	//变量定义
 	STR_CMD_LC_SERVICE_REFRESH_INFO UserInfo;
 	ZeroMemory(&UserInfo,sizeof(UserInfo));
@@ -1074,11 +1384,11 @@ bool CHandleFromGate::On_SUB_CL_Service_GetRankList(VOID * pData, WORD wDataSize
 	ZeroMemory(&rankList, sizeof(STR_CMD_LC_SERVICE_GET_RANKLIST));
 
 	//排行榜管理器获取排行榜列表
-	int wCount = RankManager::GetRankCountByIndex(pTaskList->byIndex);
+	int wCount = RankManager::Instance()->GetRankCountByIndex(pTaskList->byIndex);
 
 	for(int i=0;i < 20 && i < wCount;i++)
 	{
-		tagRankInfo* item = RankManager::GetRankItemByIndex(pTaskList->byIndex,i);
+		tagRankInfo* item = RankManager::Instance()->GetRankItemByIndex(pTaskList->byIndex,i);
 		if(item != NULL)
 		{
 			g_GameCtrl->SendData(dwSocketID,MDM_SERVICE, CMD_LC_SERVICE_GET_RANK_LIST, item, sizeof(STR_CMD_LC_SERVICE_GET_RANKLIST));
@@ -1432,9 +1742,6 @@ bool CHandleFromGate::On_CMD_LC_Service_ModifyPersonalInfo( DWORD dwScoketID, VO
 //查询金币房卡返回
 bool CHandleFromGate::On_CMD_LC_Service_QueryScoreInfo(DWORD dwScoketID, VOID * pData, WORD wDataSize)
 {
-	//判断在线
-	if ((m_pBindParameter+LOWORD(dwScoketID))->dwSocketID!=dwScoketID) return true;
-
 	//变量定义
 	STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO * pScoreInfo =(STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO *)pData;
 
@@ -1461,9 +1768,6 @@ bool CHandleFromGate::On_CMD_LC_Service_QueryScoreInfo(DWORD dwScoketID, VOID * 
 //公共操作结果
 bool CHandleFromGate::On_CMD_LC_CommonOperateResult( DWORD dwScoketID, VOID * pData, WORD wDataSize )
 {
-	//判断在线
-	if ((m_pBindParameter+LOWORD(dwScoketID))->dwSocketID!=dwScoketID) return true;
-
 	//变量定义
 	STR_CMD_LC_OTHER_OPERATE_RESULT OperateResult;
 	ZeroMemory(&OperateResult,sizeof(OperateResult));
@@ -1903,25 +2207,16 @@ bool CHandleFromGate::On_CMD_LC_CLUB_CHAT_BDCAST( DWORD dwScoketID, VOID * pData
 	{
 	case 0: //俱乐部聊天
 		{
-			int DataNum = wDataSize / Size;
+			auto vec_player = CPlayerManager::FindPlayerByClubID(pCmd->dwClubID);
 
-			//查询用户
-			for(int i = 0; i < DataNum; i ++)
+			for(CPlayer* player : vec_player)
 			{
-				//查找在线用户 发送数据
-				for (int j = 0; j < MAX_CONTENT; j++)
-				{
-					tagBindParameter * pBindParameter=(m_pBindParameter+j);
-					if ( pBindParameter && pBindParameter->dwUserID != 0 && 
-						pBindParameter->dwSocketID != 0 && 
-						(pBindParameter->dwUserID == (pCmd + i)->dwTagID))
-					{
-						//通知用户
-						g_GameCtrl->SendData(pBindParameter->dwSocketID, MDM_CLUB, CMD_LC_CLUB_CHAT_BDCAST, 
-							pCmd+i, sizeof(STR_CMD_LC_CLUB_CHAT_BDCAST));
-					}
-				}
+				if(! player) continue;
+
+				g_GameCtrl->SendData(player->GetSocketID(), MDM_CLUB, CMD_LC_CLUB_CHAT_BDCAST, 
+					pCmd, sizeof(STR_CMD_LC_CLUB_CHAT_BDCAST));
 			}
+
 			break;
 		}
 	case 1: //世界聊天
@@ -1935,24 +2230,12 @@ bool CHandleFromGate::On_CMD_LC_CLUB_CHAT_BDCAST( DWORD dwScoketID, VOID * pData
 		}
 	case 3: //私密聊天
 		{
-			//TODONOW added by WangChengQing 需要修改下面的逻辑
-			//根据ID找到用户类
-			//根据用户类 找到对应的socket
-			//判断socket是否在线
+			auto player = CPlayerManager::FindPlayerByID(pCmd->dwTagID);
+			if(!player) return false;
 
-			//查找目标用户 发送数据
-			for (int j = 0; j < MAX_CONTENT; j++)
-			{
-				tagBindParameter * pBindParameter=(m_pBindParameter+j);
-				if ( pBindParameter && pBindParameter->dwUserID != 0 && 
-					pBindParameter->dwSocketID != 0 && 
-					(pBindParameter->dwUserID == (pCmd->dwTagID)))
-				{
-					//通知用户
-					g_GameCtrl->SendData(pBindParameter->dwSocketID, MDM_CLUB, CMD_LC_CLUB_CHAT_BDCAST, 
+			g_GameCtrl->SendData(player->GetSocketID(), MDM_CLUB, CMD_LC_CLUB_CHAT_BDCAST, 
 						pData, wDataSize);
-				}
-			}
+
 			break;
 		}
 	}
@@ -2207,19 +2490,12 @@ bool CHandleFromGate::On_CMD_LC_CLUB_INVITE_REMIND( DWORD dwScoketID, VOID * pDa
 	if( wDataSize != Size) return false;
 	STR_CMD_LC_CLUB_INVITE_REMIND * pCMD = (STR_CMD_LC_CLUB_INVITE_REMIND*) pData;
 
-	//查找在线用户 发送数据
-	for (int j = 0; j < MAX_CONTENT; j++)
-	{
-		tagBindParameter * pBindParameter=(m_pBindParameter+j);
-		if ( pBindParameter && pBindParameter->dwUserID != 0 && 
-			pBindParameter->dwSocketID != 0 && 
-			pBindParameter->dwUserID == pCMD->dwTagID)
-		{
-			//通知用户
-			g_GameCtrl->SendData(pBindParameter->dwSocketID, MDM_CLUB, CMD_LC_CLUB_INVITE_REMIND, 
-											pData, wDataSize);		
-		}
-	}
+	auto player = CPlayerManager::FindPlayerByID(pCMD->dwTagID);
+	if( !player) return false;
+
+	//通知用户
+	g_GameCtrl->SendData(player->GetSocketID(), MDM_CLUB, CMD_LC_CLUB_INVITE_REMIND, 
+		pData, wDataSize);	
 
 	return true;
 }
@@ -2305,24 +2581,16 @@ bool CHandleFromGate::On_CMD_LC_CLUB_APPOINTMENT( DWORD dwScoketID, VOID * pData
 //职务任免 提醒
 bool CHandleFromGate::On_CMD_LC_CLUB_APPOINTMENT_NOTE( DWORD dwScoketID, VOID * pData, WORD wDataSize)
 {
-		//校验参数
-	WORD Size = sizeof(STR_CMD_LC_CLUB_APPOINTMENT_NOTE);
-	if( wDataSize != Size) return false;
+	//校验参数
+	if( wDataSize != sizeof(STR_CMD_LC_CLUB_APPOINTMENT_NOTE)) return false;
 	STR_CMD_LC_CLUB_APPOINTMENT_NOTE * pCMD = (STR_CMD_LC_CLUB_APPOINTMENT_NOTE*) pData;
 
-	//查找在线用户 发送数据
-	for (int j = 0; j < MAX_CONTENT; j++)
-	{
-		tagBindParameter * pBindParameter=(m_pBindParameter+j);
-		if ( pBindParameter && pBindParameter->dwUserID != 0 && 
-			pBindParameter->dwSocketID != 0 && 
-			pBindParameter->dwUserID == pCMD->dwUserID)
-		{
-			//通知用户
-			g_GameCtrl->SendData(pBindParameter->dwSocketID, MDM_CLUB, CMD_LC_CLUB_APPOINTMENT_NOTE, 
-											pData, wDataSize);		
-		}
-	}
+	auto player = CPlayerManager::FindPlayerByID(pCMD->dwUserID);
+	if(!player) return false;
+	
+	//通知用户
+	g_GameCtrl->SendData(player->GetSocketID(), MDM_CLUB, CMD_LC_CLUB_APPOINTMENT_NOTE, 
+		pData, wDataSize);		
 
 	return true;
 }
@@ -2456,28 +2724,18 @@ bool CHandleFromGate::On_CMD_LC_GIFT_GIVE_PROPS( DWORD dwScoketID, VOID * pData,
 bool CHandleFromGate::On_CMD_LC_GIFT_GIVE_PROPS_SHOW( DWORD dwScoketID, VOID * pData, WORD wDataSize )
 {
 	//参数校验
-	if(wDataSize!=sizeof(STR_CMD_LC_GIFT_GIVE_PROPS_SHOW))
-		return false;
-
+	if(wDataSize!=sizeof(STR_CMD_LC_GIFT_GIVE_PROPS_SHOW)) return false;
+		
+	//变量定义
 	STR_CMD_LC_GIFT_GIVE_PROPS_SHOW *pCMD = (STR_CMD_LC_GIFT_GIVE_PROPS_SHOW*) pData;
 
-	//查找在线用户 发送数据
-	for (int j = 0; j < MAX_CONTENT; j++)
-	{
-		tagBindParameter * pBindParameter=(m_pBindParameter+j);
-		if ( pBindParameter && pBindParameter->dwUserID != 0 && 
-			pBindParameter->dwSocketID != 0 && 
-			pBindParameter->dwUserID == pCMD->dwTargetID)
-		{
-			//通知用户
-			g_GameCtrl->SendData(pBindParameter->dwSocketID, MDM_GIFT, CMD_LC_GIFT_GIVE_PROPS_SHOW, 
-											pData, wDataSize);		
-		}
-	}
+	auto player = CPlayerManager::FindPlayerByID(pCMD->dwTargetID);
+	if(!player) return false;
 
-	//TODONOW 后期赠送礼物的消息频道 可以在这里发送   
-	//1. 世界聊天的时候一定不要加头像, 只写昵称和聊天的消息即可
-	//2. 客户端增加一个按钮, 可以控制是否接受世界频道 
+	//通知用户
+	g_GameCtrl->SendData(player->GetSocketID(), MDM_GIFT, CMD_LC_GIFT_GIVE_PROPS_SHOW, 
+		pData, wDataSize);	
+
 	return true;
 }
 
@@ -2505,9 +2763,6 @@ bool CHandleFromGate::On_SUB_CL_Other_ReChargeInfo(VOID * pData, WORD wDataSize,
 //用户充值信息返回
 bool CHandleFromGate::On_CMD_LC_Other_RechargeInfo( DWORD dwScoketID, VOID * pData, WORD wDataSize )
 {
-	//判断在线
-	if ((m_pBindParameter+LOWORD(dwScoketID))->dwSocketID!=dwScoketID) return true;
-
 	//变量定义
 	STR_CMD_LC_OTHER_RECHARGE_INFO RechangeInfo;
 	ZeroMemory(&RechangeInfo,sizeof(RechangeInfo));
@@ -2551,9 +2806,6 @@ bool CHandleFromGate::On_SUB_CL_Other_ExchangeInfo(VOID * pData, WORD wDataSize,
 //兑换道具返回
 bool CHandleFromGate::On_CMD_LC_Other_ExchangeInfo( DWORD dwScoketID, VOID * pData, WORD wDataSize )
 {
-	//判断在线
-	if ((m_pBindParameter+LOWORD(dwScoketID))->dwSocketID!=dwScoketID) return true;
-
 	//变量定义
 	STR_DBO_CL_OTHER_EXCHANGE_INFO * pExchangeInfo=(STR_DBO_CL_OTHER_EXCHANGE_INFO *)pData;
 

@@ -69,7 +69,7 @@ struct STR_DBR_CL_LOGON_ACCOUNTS
 struct STR_DBR_CL_LOGON_REGISTER
 {
 	//Socket校验
-	LPVOID							pBindParameter;						//绑定参数
+	//LPVOID							pBindParameter;						//绑定参数
 	
 	//账号信息
 	TCHAR							szAccounts[LEN_ACCOUNTS];			//登录帐号
@@ -132,14 +132,6 @@ struct STR_DBR_CL_LOGON_PLATFORM
 	DWORD							dwProxyID;							//代理ID
 };
 
-//用户Socket关闭事件
-#define DBR_GP_LOGON_USER_STATE					104									//玩家退出
-//玩家退出
-struct DBR_GP_UserQuitInfo
-{
-	DWORD							dwUserID;							//用户ID
-	BYTE							byOnlineMask;						//在线标志 1大厅在线 ，2正在游戏，3游戏断线，4离线
-};
 #pragma endregion
 
 #pragma region MDM_SERVICE 服务命令

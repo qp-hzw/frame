@@ -12,10 +12,6 @@ protected:
 	IDataBase					   *m_TreasureDB;					    //财富数据库
 	IDataBase					   *m_PlatformDB;					    //平台数据库
 
-	//配置变量
-protected:
-	tagGameServiceOption *			m_pGameServiceOption;				//服务配置
-
 	//组件变量
 protected:
 	IGameServiceManager *			m_pIGameServiceManager;				//服务管理
@@ -37,12 +33,6 @@ public:
 	virtual bool StartService(){return true;}
 	//停止服务
 	virtual bool ConcludeService(){return true;}
-
-	//配置参数
-public:
-	//服务配置
-	virtual tagGameServiceOption * GetGameServiceOption() { return m_pGameServiceOption; }
-
 
 	//系统事件
 public:

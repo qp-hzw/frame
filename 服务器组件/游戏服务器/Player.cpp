@@ -115,7 +115,7 @@ bool CPlayer::ModifyUserTreasure(DWORD dwTableID, BYTE byTableMode, BYTE byRound
 
 
 //设置参数
-bool CPlayer::SetUserParameter(DWORD dwClientAddr, WORD wBindIndex, TCHAR szMachineID[LEN_MACHINE_ID], bool bAndroidUser, 
+bool CPlayer::SetUserParameter(DWORD dwClientAddr, TCHAR szMachineID[LEN_MACHINE_ID], bool bAndroidUser, 
 									   bool bClientReady, const double &dLongitude, const double &dLatitude)
 {
 	//效验状态
@@ -126,7 +126,6 @@ bool CPlayer::SetUserParameter(DWORD dwClientAddr, WORD wBindIndex, TCHAR szMach
 	m_bClientReady=bClientReady;
 
 	//连接属性
-	m_wBindIndex=wBindIndex;
 	m_dwClientAddr=dwClientAddr;
 	lstrcpyn(m_szMachineID,szMachineID,CountArray(m_szMachineID));
 

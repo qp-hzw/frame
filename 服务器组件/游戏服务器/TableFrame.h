@@ -72,11 +72,6 @@ protected:
 protected:
 	ITableFrameSink	*				m_pITableFrameSink;					//桌子接口
 
-
-	//配置信息
-protected:
-	tagGameServiceOption *			m_pGameServiceOption;				//服务配置
-
 	//游戏记录
 protected:
 	CGameScoreRecordArray			m_GameScoreRecordActive;			//游戏记录
@@ -105,9 +100,6 @@ public:
 	virtual WORD GetTableID() { return m_wTableID; }
 	//设置密码
 	virtual void SetTableID(DWORD dwTableID){ m_wTableID=dwTableID; }
-
-	//服务配置
-	virtual tagGameServiceOption * GetGameServiceOption() { return m_pGameServiceOption; }
 
 	//获取状态
 	virtual BYTE GetGameStatus() { return m_cbGameStatus; }

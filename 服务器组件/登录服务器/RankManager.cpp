@@ -3,6 +3,8 @@
 #include "DataBasePacket.h"
 #include "GameCtrl.h"
 
+RankManager* RankManager::s_instance = NULL;
+
 RankManager::RankManager()
 {
 	m_vecArry[0] = &vecTodayWast;
@@ -60,6 +62,16 @@ RankManager::~RankManager(void)
 	UnLock();
 }
 
+
+RankManager* RankManager::Instance()
+{
+	if(s_instance == NULL)
+	{
+		s_instance = new RankManager();
+	}
+
+	return s_instance;
+}
 
 void RankManager::Init()
 {

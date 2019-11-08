@@ -8,9 +8,6 @@
 //构造函数
 CDataBaseEngineSink::CDataBaseEngineSink()
 {
-	//配置变量
-	m_pGameServiceOption=NULL;
-
 	//组件变量
 	m_pIGameServiceManager=NULL;
 	m_pIGameDataBaseEngineSink=NULL;
@@ -43,9 +40,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineStart(IUnknownEx * pIUnknownEx)
 //停止事件
 bool CDataBaseEngineSink::OnDataBaseEngineConclude(IUnknownEx * pIUnknownEx)
 {
-	//配置变量
-	m_pGameServiceOption=NULL;
-
 	//组件变量
 	m_pIGameServiceManager=NULL;
 
@@ -263,7 +257,7 @@ bool CDataBaseEngineSink::On_DBR_Logon_UserID(DWORD dwContextID, VOID * pData, W
 	m_TreasureDB->AddParameter(TEXT("@strPassword"),pLogonUserID->szPassword);
 	m_TreasureDB->AddParameter(TEXT("@strClientIP"),szClientAddr);
 	m_TreasureDB->AddParameter(TEXT("@strMachineID"),pLogonUserID->szMachineID);
-	m_TreasureDB->AddParameter(TEXT("@dwGameID"),m_pGameServiceOption->dwGameID);
+	m_TreasureDB->AddParameter(TEXT("@dwGameID"),g_GameCtrl->GetServerID());
 
 	//输出参数
 	TCHAR szDescribeString[128]=TEXT("");
@@ -534,8 +528,8 @@ bool CDataBaseEngineSink::OnRequestWriteGameScore(DWORD dwContextID, VOID * pDat
 
 	//属性信息
 	//TODONOW 
-	m_TreasureDB->AddParameter(TEXT("@wKindID"),m_pGameServiceOption->dwGameID);
-	m_TreasureDB->AddParameter(TEXT("@wServerID"),m_pGameServiceOption->dwServerID);
+	m_TreasureDB->AddParameter(TEXT("@wKindID"),g_GameCtrl->GetServerID());
+	m_TreasureDB->AddParameter(TEXT("@wServerID"),g_GameCtrl->GetServerID());
 	m_TreasureDB->AddParameter(TEXT("@strClientIP"),szClientAddr);
 
 	//执行查询
@@ -707,8 +701,8 @@ bool CDataBaseEngineSink::OnRequestLeaveGameServer(DWORD dwContextID, VOID * pDa
 
 	//其他参数
 	//TODONOW 
-	m_TreasureDB->AddParameter(TEXT("@wKindID"),m_pGameServiceOption->dwGameID);
-	m_TreasureDB->AddParameter(TEXT("@wServerID"),m_pGameServiceOption->dwServerID);
+	m_TreasureDB->AddParameter(TEXT("@wKindID"),g_GameCtrl->GetServerID());
+	m_TreasureDB->AddParameter(TEXT("@wServerID"),g_GameCtrl->GetServerID());
 	m_TreasureDB->AddParameter(TEXT("@strClientIP"),szClientAddr);
 	m_TreasureDB->AddParameter(TEXT("@strMachineID"),pLeaveGameServer->szMachineID);
 
@@ -738,8 +732,8 @@ bool CDataBaseEngineSink::OnRequestGameScoreRecord(DWORD dwContextID, VOID * pDa
 	//房间信息
 	m_TreasureDB->ResetParameter();
 	//TODONOW 
-	m_TreasureDB->AddParameter(TEXT("@wKindID"),m_pGameServiceOption->dwGameID);
-	m_TreasureDB->AddParameter(TEXT("@wServerID"),m_pGameServiceOption->dwServerID);
+	m_TreasureDB->AddParameter(TEXT("@wKindID"),g_GameCtrl->GetServerID());
+	m_TreasureDB->AddParameter(TEXT("@wServerID"),g_GameCtrl->GetServerID());
 
 	//桌子信息
 	m_TreasureDB->AddParameter(TEXT("@wTableID"),pGameScoreRecord->wTableID);
@@ -898,8 +892,8 @@ bool CDataBaseEngineSink::OnRequestMatchFee(DWORD dwContextID, VOID * pData, WOR
 	m_TreasureDB->AddParameter(TEXT("@dwUserID"),pMatchFee->dwUserID);
 	m_TreasureDB->AddParameter(TEXT("@dwMatchFee"),pMatchFee->dwMatchFee);
 	//TODONOW 
-	m_TreasureDB->AddParameter(TEXT("@wKindID"),m_pGameServiceOption->dwGameID);
-	m_TreasureDB->AddParameter(TEXT("@wServerID"),m_pGameServiceOption->dwServerID);
+	m_TreasureDB->AddParameter(TEXT("@wKindID"),g_GameCtrl->GetServerID());
+	m_TreasureDB->AddParameter(TEXT("@wServerID"),g_GameCtrl->GetServerID());
 	m_TreasureDB->AddParameter(TEXT("@strClientIP"),szClientAddr);
 	m_TreasureDB->AddParameter(TEXT("@dwMatchID"),pMatchFee->dwMatchID);
 	m_TreasureDB->AddParameter(TEXT("@dwMatchNO"),pMatchFee->dwMatchNO);
@@ -1016,8 +1010,8 @@ bool CDataBaseEngineSink::OnRequestMatchReward(DWORD dwContextID, VOID * pData, 
 	m_TreasureDB->AddParameter(TEXT("@dwGold"),pMatchReward->dwGold);
 	m_TreasureDB->AddParameter(TEXT("@dwMedal"),pMatchReward->dwMedal);
 	//TODONWO 
-	m_TreasureDB->AddParameter(TEXT("@wKindID"),m_pGameServiceOption->dwGameID);
-	m_TreasureDB->AddParameter(TEXT("@wServerID"),m_pGameServiceOption->dwServerID);
+	m_TreasureDB->AddParameter(TEXT("@wKindID"),g_GameCtrl->GetServerID());
+	m_TreasureDB->AddParameter(TEXT("@wServerID"),g_GameCtrl->GetServerID());
 	m_TreasureDB->AddParameter(TEXT("@strClientIP"),szClientAddr);
 
 	//结果处理
@@ -1049,8 +1043,8 @@ bool CDataBaseEngineSink::OnRequestMatchQuit(DWORD dwContextID, VOID * pData, WO
 	m_TreasureDB->AddParameter(TEXT("@dwUserID"),pMatchFee->dwUserID);
 	m_TreasureDB->AddParameter(TEXT("@dwMatchFee"),pMatchFee->dwMatchFee);
 	//TOODNOW 
-	m_TreasureDB->AddParameter(TEXT("@wKindID"),m_pGameServiceOption->dwGameID);
-	m_TreasureDB->AddParameter(TEXT("@wServerID"),m_pGameServiceOption->dwServerID);
+	m_TreasureDB->AddParameter(TEXT("@wKindID"),g_GameCtrl->GetServerID());
+	m_TreasureDB->AddParameter(TEXT("@wServerID"),g_GameCtrl->GetServerID());
 	m_TreasureDB->AddParameter(TEXT("@strClientIP"),szClientAddr);
 	m_TreasureDB->AddParameter(TEXT("@dwMatchID"),pMatchFee->dwMatchID);
 	m_TreasureDB->AddParameter(TEXT("@dwMatchNO"),pMatchFee->dwMatchNO);
@@ -1081,7 +1075,7 @@ bool CDataBaseEngineSink::OnWriteCurrentStock( DWORD dwContextID, VOID * pData, 
 	//房间信息
 	m_TreasureDB->ResetParameter();
 
-	m_TreasureDB->AddParameter(TEXT("@wServerID"),m_pGameServiceOption->dwServerID);
+	m_TreasureDB->AddParameter(TEXT("@wServerID"),g_GameCtrl->GetServerID());
 	m_TreasureDB->AddParameter(TEXT("@ConfigName"),1);
 
 	TCHAR  extend[50] = TEXT("");
@@ -1122,7 +1116,7 @@ VOID CDataBaseEngineSink::OnClearDB()
 {
 	//构造参数
 	m_TreasureDB->ResetParameter();
-	m_TreasureDB->AddParameter(TEXT("ServerID"),m_pGameServiceOption->dwServerID);
+	m_TreasureDB->AddParameter(TEXT("ServerID"),g_GameCtrl->GetServerID());
 
 	//执行查询
 	LONG lResultCode=m_TreasureDB->ExecuteProcess(TEXT("GSP_GR_ClearRoomLocker"),true);

@@ -42,7 +42,7 @@ private:
 	//函数定义
 public:
 	//构造函数
-	CPlayer();
+	CPlayer(DWORD dwSocketID, STR_CMD_LC_LOGON_PLATFORM* userinfo);
 	//析构函数
 	~CPlayer(){}
 
@@ -80,10 +80,6 @@ public:
 	//椅子号码
 	 WORD GetChairID() { return m_UserInfo.wChairID; }
 
-	//用户状态
-	 BYTE GetUserStatus() { return m_UserInfo.cbUserStatus; }
-	 bool SetUserStatus(BYTE cbUserStatus, WORD wTableID, WORD wChairID);
-
 	//设置断线标志 GameID  TODONOW
 	 void SetOfflineGameID(DWORD dwOfflineGameID){m_dwOfflineGameID = dwOfflineGameID;}
 	//获取断线标志 GameID  TODONOW
@@ -103,12 +99,10 @@ public:
 	//机器标识
 	 LPCTSTR GetMachineID() { return m_szMachineID; }
 
-
 	//登录信息
 public:
 	//请求标识
 	virtual DWORD GetDBQuestID() { return m_dwDBQuestID++; }
-	
 
 	//积分信息
 public:
@@ -130,36 +124,6 @@ public:
 	virtual SCORE GetUserGold(){ return m_UserInfo.lGold; };
 	//设置用户金币
 	virtual void SetUserGold(SCORE lGold){ m_UserInfo.lGold = lGold; }
-
-	//积分信息
-public:
-	//用户胜率
-	virtual WORD GetUserWinRate();
-	//用户输率
-	virtual WORD GetUserLostRate();
-	//用户和率
-	virtual WORD GetUserDrawRate();
-	//用户逃率
-	virtual WORD GetUserFleeRate();
-	//游戏局数
-	virtual DWORD GetUserPlayCount() { return m_UserInfo.dwWinCount+m_UserInfo.dwLostCount+m_UserInfo.dwDrawCount+m_UserInfo.dwFleeCount; }
-
-	//修改接口
-public:
-	//更新用户财富信息
-	virtual bool ModifyUserTreasure(DWORD dwTableID, BYTE byTableMode, BYTE byRound, SCORE lUserTreasuse, BYTE byWin);
-
-	//参数接口
-public:
-	//设置参数
-	virtual bool SetUserParameter(DWORD dwClientAddr, WORD wBindIndex, TCHAR szMachineID[LEN_MACHINE_ID], bool bAndroidUser, 
-		bool bClientReady, const double &dLongitude, const double &dLatitude);
-
-	//辅助函数
-private:
-	//重置数据
-	VOID ResetUserItem();
-
 };
 
 #endif

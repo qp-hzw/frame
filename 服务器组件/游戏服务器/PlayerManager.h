@@ -17,12 +17,18 @@ public:
 	static bool InsertPlayer(CPlayer * * pIServerUserResult, tagUserInfo & UserInfo, tagUserInfoPlus & UserInfoPlus);
 	//删
 	static bool DeletePlayer(CPlayer * pPlayer);
+	//删
+	static bool DeletePlayerByID(DWORD dwUserID);
+	//删
+	static bool DeletePlayerBySocketID(DWORD dwSocketID);
 	//删 所有
 	static bool DeleteAllPlayer();
 	//查
 	static CPlayer * FindPlayerByEnum(WORD wEnumIndex);
 	//查
 	static CPlayer * FindPlayerByID(DWORD dwUserID);
+	//查
+	static CPlayer * FindPlayerBySocketID(DWORD dwSocketID);
 
 	//统计函数
 public:

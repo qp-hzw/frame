@@ -18,9 +18,12 @@ public:
 	RankManager();
 	~RankManager(void);
 
+	static RankManager* Instance();
 	void Init();
 
 protected:
+	static RankManager* s_instance;
+
 	RANK_VEC vecTodayWast;		//今日消耗房卡
 	RANK_VEC vecTodayWin;		//今日胜场
 	RANK_VEC vecYseterdatWast; //昨日消耗房卡

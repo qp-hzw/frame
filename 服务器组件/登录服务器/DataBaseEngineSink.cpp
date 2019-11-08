@@ -36,10 +36,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 {
 	switch (wRequestID)
 	{
-	case DBR_GP_LOGON_USER_STATE: //用户Sockt连接关闭
-		{
-			return On_DBR_GP_QUIT(dwContextID,pData,wDataSize);
-		}
 	case DBR_CL_LOGON_ACCOUNTS:			//帐号登录
 		{
 			return On_DBR_Logon_Accounts(dwContextID,pData,wDataSize);
@@ -56,16 +52,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 		{
 			return On_DBR_QueryScoreInfo(dwContextID,pData,wDataSize);
 		}
-#pragma region 启动命令
-	case DBR_GP_ONLINE_COUNT_INFO:			//在线统计 -- 发给数据库
-		{
-			return OnRequestOnLineCountInfo(dwContextID,pData,wDataSize);
-		}
-	case DBR_UPDATA_MARQUEE:				//加载跑马灯消息
-		{
-			return On_DBR_UPDATA_MARQUEE(dwContextID,pData,wDataSize);
-		}
-#pragma endregion 
 	case DBR_CL_SERVICE_USER_FEEDBACK:			//玩家反馈
 		{
 			return On_DBR_Service_UserFeedback(dwContextID,pData,wDataSize);
@@ -1669,90 +1655,6 @@ bool CDataBaseEngineSink::On_DBO_Other_ExchangeInfo(DWORD dwContextID, DWORD dwE
 	return true;
 }
 
-#pragma region 启动命令
-//在线统计 -- 发给数据库
-bool CDataBaseEngineSink::OnRequestOnLineCountInfo(DWORD dwContextID, VOID * pData, WORD wDataSize)
-{
-
-	if (wDataSize != sizeof(DBR_GP_OnLineCountInfo)) return false;
-
-	//变量定义
-	DBR_GP_OnLineCountInfo * pOnLineCountInfo=(DBR_GP_OnLineCountInfo *)pData;
-
-	//构造信息
-	TCHAR szOnLineCountGame[2048]=TEXT("");
-	for (WORD i=0; i<pOnLineCountInfo->dwGameCount; i++)
-	{
-		INT nLength=lstrlen(szOnLineCountGame);
-		_sntprintf(&szOnLineCountGame[nLength],CountArray(szOnLineCountGame)-nLength,
-			TEXT("%ld:%ld;"),
-			pOnLineCountInfo->OnLineCountGame[i].dwGameID,
-			pOnLineCountInfo->OnLineCountGame[i].dwOnLineCount);
-	}
-
-
-	//构造参数
-	m_PlatformDB->ResetParameter();
-	m_PlatformDB->AddParameter(TEXT("@byCompanyID"),_MYSTERY);
-	m_PlatformDB->AddParameter(TEXT("@dwGameCount"),pOnLineCountInfo->dwGameCount);
-	m_PlatformDB->AddParameter(TEXT("@dwOnLineCountSum"),pOnLineCountInfo->dwOnLineCountSum);
-	m_PlatformDB->AddParameter(TEXT("@strOnLineCountGame"),szOnLineCountGame);
-
-	//执行命令
-	m_PlatformDB->ExecuteProcess(TEXT("GSP_GP_OnLineCountInfo"),false);
-
-	return true;
-
-}
-
-//加载跑马灯消息
-bool CDataBaseEngineSink::On_DBR_UPDATA_MARQUEE(DWORD dwContextID, VOID * pData, WORD wDataSize)
-{
-	//构造参数
-	m_PlatformDB->ResetParameter();
-	m_PlatformDB->AddParameter(TEXT("@byCompanyID"),_MYSTERY);
-
-	//执行命令
-	long lResultCode = m_PlatformDB->ExecuteProcess(TEXT("GSP_GP_UPDATA_MARQUEE"),true);
-
-	//变量定义
-	WORD wPacketSize=0;
-	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
-	STR_DBO_UPDATA_MARQUEE * pDbo=NULL;
-	while ((lResultCode == DB_SUCCESS) && (m_PlatformDB->IsRecordsetEnd()==false))
-	{
-		//发送信息
-		if ((wPacketSize+sizeof(STR_DBO_UPDATA_MARQUEE))>sizeof(cbBuffer))
-		{
-			g_AttemperEngineSink->OnEventDataBaseResult(DBO_UPDATA_MARQUEE,dwContextID,cbBuffer,wPacketSize);
-			wPacketSize=0;
-		}
-
-		//读取信息
-		pDbo=(STR_DBO_UPDATA_MARQUEE *)(cbBuffer+wPacketSize);
-		pDbo->byMask  = 1; //新增数据
-		pDbo->dwMarqueeID  =  m_PlatformDB->GetValue_DWORD(TEXT("MarqueeID"));
-		pDbo->dwMaruqeeTime = m_PlatformDB->GetValue_DWORD(TEXT("MaruqeeTime"));
-		m_PlatformDB->GetValue_SystemTime(TEXT("StartTime"), pDbo->timeStartTime);
-		m_PlatformDB->GetValue_SystemTime(TEXT("EndTime"), pDbo->timeEndTime);
-		m_PlatformDB->GetValue_String(TEXT("MarqueeMsg"),pDbo->szMarqueeMsg,CountArray(pDbo->szMarqueeMsg));
-
-		//设置位移
-		wPacketSize+=sizeof(STR_DBO_UPDATA_MARQUEE);
-
-		//移动记录
-		m_PlatformDB->MoveToNext();
-	}
-	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_UPDATA_MARQUEE,dwContextID,cbBuffer,wPacketSize);
-
-	g_AttemperEngineSink->OnEventDataBaseResult(DBO_UPDATA_MARQUEE_FINISH,dwContextID,NULL,0);
-
-	return true;
-
-}
-
-#pragma endregion
-
 //查询用户金币房卡
 bool CDataBaseEngineSink::On_DBR_QueryScoreInfo(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
@@ -1806,26 +1708,6 @@ VOID CDataBaseEngineSink::On_DBO_QueryScoreInfo(DWORD dwContextID, DWORD dwError
 	}
 
 	return;
-}
-
-//用户Socket连接关闭
-bool CDataBaseEngineSink::On_DBR_GP_QUIT(DWORD dwContextID, VOID * pData, WORD wDataSize)
-{
-
-	//效验参数
-	if (wDataSize!=sizeof(DBR_GP_UserQuitInfo)) return false;
-
-	DBR_GP_UserQuitInfo* groupInfo = (DBR_GP_UserQuitInfo*)pData;
-	//构造参数
-	m_PlatformDB->ResetParameter();
-
-	m_PlatformDB->AddParameter(TEXT("@dwUserID"),groupInfo->dwUserID);
-	m_PlatformDB->AddParameter(TEXT("@byOnlineMask"),groupInfo->byOnlineMask);
-
-	//执行输出
-	m_PlatformDB->ExecuteProcess(TEXT("GSP_CL_Quit"),true);	
-
-	return true;
 }
 
 //更新排行榜用户信息
@@ -2139,15 +2021,6 @@ bool CDataBaseEngineSink::On_DBR_Logon_Register(DWORD dwContextID, VOID * pData,
 	//请求处理
 	STR_DBR_CL_LOGON_REGISTER * pDBRLogonRegister=(STR_DBR_CL_LOGON_REGISTER *)pData;
 
-	//Socket判断
-	tagBindParameter * pBindParameter=(tagBindParameter *)pDBRLogonRegister->pBindParameter;
-	if (pBindParameter->dwSocketID!=dwContextID) return true;
-
-	//转化地址
-	TCHAR szClientAddr[16]=TEXT("");
-	BYTE * pClientAddr=(BYTE *)&pBindParameter->dwClientAddr;
-	_sntprintf_s(szClientAddr,CountArray(szClientAddr),TEXT("%d.%d.%d.%d"),pClientAddr[0],pClientAddr[1],pClientAddr[2],pClientAddr[3]);
-
 	//构造参数
 	m_AccountsDB->ResetParameter();
 	m_AccountsDB->AddParameter(TEXT("@byMYSTERY"), _MYSTERY);
@@ -2155,7 +2028,7 @@ bool CDataBaseEngineSink::On_DBR_Logon_Register(DWORD dwContextID, VOID * pData,
 	m_AccountsDB->AddParameter(TEXT("@strPassword"),pDBRLogonRegister->szPassword);
 	m_AccountsDB->AddParameter(TEXT("@strNickName"),pDBRLogonRegister->szNickName);
 	m_AccountsDB->AddParameter(TEXT("@cbGender"),pDBRLogonRegister->cbGender);
-	m_AccountsDB->AddParameter(TEXT("@strClientIP"),szClientAddr);
+	m_AccountsDB->AddParameter(TEXT("@strClientIP"),TEXT(""));
 	m_AccountsDB->AddParameter(TEXT("@strMobilePhone"),pDBRLogonRegister->strMobilePhone);
 	m_AccountsDB->AddParameter(TEXT("@strMachineID"),pDBRLogonRegister->szMachineID);
 	m_AccountsDB->AddParameter(TEXT("@dwProxyID"),pDBRLogonRegister->dwProxyID);
@@ -2185,15 +2058,6 @@ bool CDataBaseEngineSink::On_DBR_Logon_Platform(DWORD dwContextID, VOID * pData,
 	//请求处理
 	STR_DBR_CL_LOGON_PLATFORM * pDBRLogonPlatform=(STR_DBR_CL_LOGON_PLATFORM *)pData;
 
-	//Socket判断
-	tagBindParameter * pBindParameter=(tagBindParameter *)pDBRLogonPlatform->pBindParameter;
-	if (pBindParameter->dwSocketID!=dwContextID) return true;
-
-	//转化地址
-	TCHAR szClientAddr[16]=TEXT("");
-	BYTE * pClientAddr=(BYTE *)&pBindParameter->dwClientAddr;
-	_sntprintf_s(szClientAddr,CountArray(szClientAddr),TEXT("%d.%d.%d.%d"),pClientAddr[0],pClientAddr[1],pClientAddr[2],pClientAddr[3]);
-
 	//构造参数
 	m_AccountsDB->ResetParameter();
 	m_AccountsDB->AddParameter(TEXT("@byMystery"), _MYSTERY);
@@ -2203,7 +2067,7 @@ bool CDataBaseEngineSink::On_DBR_Logon_Platform(DWORD dwContextID, VOID * pData,
 	m_AccountsDB->AddParameter(TEXT("@cbGender"), pDBRLogonPlatform->cbGender);
 	m_AccountsDB->AddParameter(TEXT("@strHeadUrl"), pDBRLogonPlatform->strHeadUrl);
 	m_AccountsDB->AddParameter(TEXT("@strMachineID"), pDBRLogonPlatform->szMachineID);
-	m_AccountsDB->AddParameter(TEXT("@strClientIP"), szClientAddr);
+	m_AccountsDB->AddParameter(TEXT("@strClientIP"), TEXT(""));
 	m_AccountsDB->AddParameter(TEXT("@dwProxyID"), pDBRLogonPlatform->dwProxyID);
 
 	//输出参数

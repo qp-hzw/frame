@@ -4,12 +4,12 @@
 std::vector<CPlayer*> CPlayerManager::s_PlayerArray;
 
 //增
-bool CPlayerManager::InsertPlayer(CPlayer * * pIServerUserResult, tagUserInfo & UserInfo, tagUserInfoPlus & UserInfoPlus)
+bool CPlayerManager::InsertPlayer(DWORD dwSocketID, STR_CMD_LC_LOGON_PLATFORM* UserInfo)
 {
 	CPlayer * pPlayer=NULL;
 	try
 	{
-		pPlayer=new CPlayer(UserInfo, UserInfoPlus);
+		pPlayer=new CPlayer(dwSocketID, UserInfo);
 	}
 	catch (...)
 	{
@@ -19,9 +19,6 @@ bool CPlayerManager::InsertPlayer(CPlayer * * pIServerUserResult, tagUserInfo & 
 
 	//插入用户
 	s_PlayerArray.push_back(pPlayer);
-
-	//设置变量
-	*pIServerUserResult=pPlayer;
 
 	return true;
 }
@@ -34,6 +31,36 @@ bool CPlayerManager::DeletePlayer(CPlayer * pPlayer)
 	for(auto ite = s_PlayerArray.begin(); ite != s_PlayerArray.end(); ite++)
 	{
 		if(*ite == pPlayer)
+		{
+			ite = s_PlayerArray.erase(ite);
+			break;
+		}
+	}
+
+	return true;
+}
+
+//删
+bool CPlayerManager::DeletePlayerByID(DWORD dwUserID)
+{
+	for(auto ite = s_PlayerArray.begin(); ite != s_PlayerArray.end(); ite++)
+	{
+		if( (*ite)->GetUserID() == dwUserID)
+		{
+			ite = s_PlayerArray.erase(ite);
+			break;
+		}
+	}
+
+	return true;
+}
+
+//删
+bool CPlayerManager::DeletePlayerBySocketID(DWORD dwSocketID)
+{
+	for(auto ite = s_PlayerArray.begin(); ite != s_PlayerArray.end(); ite++)
+	{
+		if( (*ite)->GetSocketID() == dwSocketID)
 		{
 			ite = s_PlayerArray.erase(ite);
 			break;
@@ -68,7 +95,6 @@ CPlayer * CPlayerManager::FindPlayerByID(DWORD dwUserID)
 
 	return NULL;
 }
-
 //查
 CPlayer * CPlayerManager::FindPlayerBySocketID(DWORD dwScoketID)
 {
@@ -79,4 +105,20 @@ CPlayer * CPlayerManager::FindPlayerBySocketID(DWORD dwScoketID)
 	}
 
 	return NULL;
+}
+//查 俱乐部所有
+std::vector<CPlayer*> CPlayerManager::FindPlayerByClubID(DWORD dwClubID)
+{
+	std::vector<CPlayer*> vec_play;
+	vec_play.clear();
+
+	/* TODONOW 需要增加俱乐部管理类
+	for(auto player : s_PlayerArray)
+	{
+		if(player && player->GetSocketID() == dwScoketID)
+			return player;
+	}
+	*/
+
+	return vec_play;
 }
