@@ -1,7 +1,7 @@
 #include "Player.h"
 
 //构造函数
-CPlayer::CPlayer(tagUserInfo & UserInfo, tagUserInfoPlus & UserInfoPlus)
+CPlayer::CPlayer(tagUserInfo & UserInfo)
 {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// 需要重点查看
@@ -12,24 +12,24 @@ CPlayer::CPlayer(tagUserInfo & UserInfo, tagUserInfoPlus & UserInfoPlus)
 
 
 	//登录信息
-	m_dwLogonTime=UserInfoPlus.dwLogonTime;
-	m_dwInoutIndex=UserInfoPlus.dwInoutIndex;
+	m_dwLogonTime=UserInfo.dwLogonTime;
+	m_dwInoutIndex=UserInfo.dwInoutIndex;
 
 	//连接信息
-	m_wBindIndex=UserInfoPlus.wBindIndex;
-	m_dwClientAddr=UserInfoPlus.dwClientAddr;
-	lstrcpyn(m_szMachineID,UserInfoPlus.szMachineID,CountArray(m_szMachineID));
+	m_wBindIndex=UserInfo.wBindIndex;
+	m_dwClientAddr=UserInfo.dwClientAddr;
+	lstrcpyn(m_szMachineID,UserInfo.szMachineID,CountArray(m_szMachineID));
 
 	//辅助变量
 	m_bClientReady=false;
 	m_bModifyScore=false;
-	m_bAndroidUser=UserInfoPlus.bAndroidUser;
-	lstrcpyn(m_szLogonPass,UserInfoPlus.szPassword,CountArray(m_szLogonPass));
+	m_bAndroidUser=UserInfo.bAndroidUser;
+	lstrcpyn(m_szLogonPass,UserInfo.szPassword,CountArray(m_szLogonPass));
 
 	//托管调整
-	if ((UserInfoPlus.lRestrictScore>0L)&&(UserInfo.lScore>UserInfoPlus.lRestrictScore))
+	if ((UserInfo.lRestrictScore>0L)&&(UserInfo.lScore>UserInfo.lRestrictScore))
 	{
-		m_UserInfo.lScore=UserInfoPlus.lRestrictScore;
+		m_UserInfo.lScore=UserInfo.lRestrictScore;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////

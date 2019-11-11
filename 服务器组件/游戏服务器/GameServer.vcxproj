@@ -203,6 +203,7 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClInclude Include="AttemperEngineSink.h" />
     <ClInclude Include="DataBaseEngineSink.h" />
     <ClInclude Include="DataBasePacket.h" />
+    <ClInclude Include="TableFrameBase.h" />
     <ClInclude Include="HandleFromCenter.h" />
     <ClInclude Include="HandleFromDB.h" />
     <ClInclude Include="HandleFromGate.h" />

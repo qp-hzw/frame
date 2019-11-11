@@ -27,11 +27,6 @@ public:
 	CAttemperEngineSink				m_AttemperEngineSink;				//调度钩子
 	CDataBaseEngineSink				m_DataBaseEngineSink;	  		    //数据钩子
 
-	//组件配置
-protected:
-	tagGameServiceAttrib			m_GameServiceAttrib;				//服务属性
-	tagGameServiceOption			m_GameServiceOption;				//服务配置
-
 	//subgame_dll_name
 protected:
 	std::string			            m_subgame_dll_name;				    //子游戏dll名字

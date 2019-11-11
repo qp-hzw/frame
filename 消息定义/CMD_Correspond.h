@@ -1,7 +1,7 @@
 #ifndef CMD_CORRESPOND_HEAD_FILE
 #define CMD_CORRESPOND_HEAD_FILE
 
-#include "CMD_STR_Correspond.h"
+#include "STR_CMD_Correspond.h"
 
 /*
 ** 简要描述:  协调服 与 其他进程(登录服, 游戏服, web后台) 消息

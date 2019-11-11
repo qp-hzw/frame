@@ -880,6 +880,7 @@ bool CHandleFromGate::On_CMD_LC_Logon_RepeatLogon(DWORD UserID, DWORD dwScoketID
 //升级提示（版本校验）
 bool CHandleFromGate::On_CMD_LC_Logon_UpdateNotify(DWORD dwVersionCheck, DWORD dwSocketID)
 {
+	/*
 	DWORD serverFrameVersion = Get_Framework_Version(PLATFORM_VERSION);  //服务端 frame 版本
 	DWORD clientFrameVersion = dwVersionCheck; //client  Hall 版本
 
@@ -899,6 +900,7 @@ bool CHandleFromGate::On_CMD_LC_Logon_UpdateNotify(DWORD dwVersionCheck, DWORD d
 	UpdateNotify.dwCurrentServerVersion = serverFrameVersion;
 	//发送消息
 	g_GameCtrl->SendData(dwSocketID, MDM_LOGON, CMD_LC_LOGON_UPDATE_NOTIFY, &UpdateNotify, sizeof(UpdateNotify));
+	*/
 
 	return true;
 }

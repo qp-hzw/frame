@@ -10,7 +10,7 @@ int main(int argc, char **argv)
 
 	while(true)
 	{
-		Sleep(10000000000);
+		//Sleep(10000000000);
 	}
 
 	return 0;

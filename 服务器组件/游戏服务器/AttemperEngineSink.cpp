@@ -67,51 +67,6 @@ bool CAttemperEngineSink::OnAttemperEngineStart(IUnknownEx * pIUnknownEx)
 	return true;
 }
 
-//控制事件
-bool CAttemperEngineSink::OnEventControl(WORD wIdentifier, VOID * pData, WORD wDataSize)
-{
-	switch (wIdentifier)
-	{
-	case CT_CONNECT_CORRESPOND:		//连接协调
-		{
-			g_TCPSocketEngine->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
-			return true;
-		}
-	case CT_LOAD_SERVICE_CONFIG:	//加载配置
-		{
-			//加载机器
-			//g_GameCtrl->PostDataBaseRequest(0L,DBR_GR_LOAD_ANDROID_USER,0L,NULL,0L);
-
-			//加载断线重连数据 && 数据库置空对应的桌子的所有数据
-			STR_DBR_GR_LOAD_OFFLINE  dbr;
-			dbr.byMystery = _MYSTERY;
-			dbr.dwGameID = (g_GameCtrl->GetServerID()) & 0xFFFFFF00;
-			g_GameCtrl->PostDataBaseRequest(DBR_GR_LOAD_OFFLINE,0L,&dbr,sizeof(dbr));
-
-			return true;
-		}
-	case CT_TRY_TO_STOP_SERVICE:	//停止服务
-		{
-			//通知用户解散
-			//g_GameCtrl->SendGameMessage(pITargerUserItem,TEXT("服务器即将关闭维护，请稍后回来"),SMT_CHAT|SMT_EJECT|SMT_CLOSE_LINK|SMT_CLOSE_GAME);
-
-			//解散所有游戏
-			CTableManager::DeleteAllTable();
-
-			//停止加载机器人、分配用户机器人等定时器
-			g_GameCtrl->KillTimer(IDI_LOAD_ANDROID_USER);
-
-			//延迟关闭，确保写分等数据库存储过程执行
-			g_GameCtrl->ConcludeService();
-
-			break;
-		}
-	}
-
-	return false;
-}
-
-
 //时间事件
 bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 {

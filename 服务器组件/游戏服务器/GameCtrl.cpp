@@ -1,5 +1,17 @@
 #include "GameCtrl.h"
 
+#define MDM_CM_SYSTEM				1000								//系统命令
+#define SUB_CM_SYSTEM_MESSAGE		1									//系统消息
+
+
+//系统消息
+struct CMD_CM_SystemMessage
+{
+	WORD							wType;								//消息类型
+	WORD							wLength;							//消息长度
+	TCHAR							szString[1024];						//消息内容
+};
+
 //全局变量
 CGameCtrl                  *g_GameCtrl = NULL; 
 ITCPNetworkEngine		   *g_TCPNetworkEngine = NULL;				    //socket::server
@@ -19,10 +31,6 @@ CGameCtrl::CGameCtrl(std::string dll_name)
 
 	m_subgame_dll_name = dll_name;
 	m_ServerID = 0;
-
-	//组件配置
-	ZeroMemory(&m_GameServiceAttrib,sizeof(m_GameServiceAttrib));
-	ZeroMemory(&m_GameServiceOption,sizeof(m_GameServiceOption));
 }
 
 //析构函数
@@ -109,8 +117,8 @@ int CGameCtrl::InitializeService()
 	if (m_TCPSocketEngine->SetServiceID(NETWORK_CORRESPOND)==false) return 11;
 
 	/***************************************************  socket::server 配置信息 *************************************************/
-	//配置网络
-	if(m_TCPNetworkEngine->SetServiceParameter(m_GameServiceOption.wGameServerPort)==false) return 12;
+	//配置网络 -- TODONOW 由center统一分配
+	//if(m_TCPNetworkEngine->SetServiceParameter(m_GameServiceOption.wGameServerPort)==false) return 12;
 
 	/***************************************************  log 配置信息 *************************************************/
 	//考虑到游戏服到现在才能知道ServerID, 因此只能将log的配置信息写到这里

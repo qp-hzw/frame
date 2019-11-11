@@ -4,6 +4,12 @@
 #include "GameCtrl.h"
 //#include <algorithm>
 
+//结束原因
+#define GER_NORMAL					0x00								//常规结束
+#define GER_DISMISS					0x01								//游戏解散
+#define GER_USER_LEAVE				0x02								//用户离开
+#define GER_NETWORK_ERROR			0x03								//网络错误
+
 //////////////////////////////////////////////////////////////////////////////////
 //校验GPS距离
 #define CHECK_USER_GPS_DISTANCE		200									//玩家GPS在多少距离内提示玩家
@@ -203,8 +209,6 @@ bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 
 		ZeroMemory(m_bAgree,sizeof(m_bAgree));
 
-		if (m_pITableFrameSink!=NULL) m_pITableFrameSink->RepositionSink();
-
 		//状态切换为坐下，可以自由离开
 		for (WORD wChairID = 0;wChairID<m_wChairCount;wChairID++)
 		{
@@ -262,8 +266,6 @@ bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 		m_cbTableMode = 0;
 		SetTableID(0);
 		ZeroMemory(m_bAgree,sizeof(m_bAgree));
-		if (m_pITableFrameSink!=NULL) m_pITableFrameSink->RepositionSink();
-
 		return true;
 	}
 
@@ -309,9 +311,6 @@ bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 		}
 	}
 
-	//重置桌子
-	if (m_pITableFrameSink!=NULL) m_pITableFrameSink->RepositionSink();
-
 	//踢出检测
 	{
 		for (WORD i=0;i<m_wChairCount;i++)
@@ -325,7 +324,7 @@ bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 			{
 				//发送消息
 				LPCTSTR pszMessage=TEXT("由于系统维护，当前游戏桌子禁止用户继续游戏！");
-				SendGameMessage(pIServerUserItem,pszMessage,SMT_EJECT|SMT_CHAT|SMT_CLOSE_GAME);
+				SendGameMessage(pIServerUserItem,pszMessage,0);
 
 				//用户起立
 				PlayerUpTable(pIServerUserItem);
@@ -1195,7 +1194,7 @@ bool CTableFrame::SendGameMessage(CPlayer * pIServerUserItem, LPCTSTR lpszMessag
 	if (pIServerUserItem==NULL) return false;
 
 	//发送消息
-	return g_GameCtrl->SendGameMessage(pIServerUserItem,lpszMessage,wType);
+	return g_GameCtrl->SendGameMessage(pIServerUserItem,lpszMessage,0);
 }
 
 
@@ -1236,11 +1235,11 @@ bool CTableFrame::OnEventUserOffLine(CPlayer * pIServerUserItem)
 
 		if (m_pITableFrameSink!=NULL)
 		{
-			m_pITableFrameSink->OnActionUserNetCut(wChairID,pIServerUserItem,false);
+			//m_pITableFrameSink->OnActionUserNetCut(wChairID,pIServerUserItem,false);
 		}
 		else
 		{
-			m_pITableFrameSink->OnActionUserNetCutT(wChairID,pIServerUserItem,false);
+			//m_pITableFrameSink->OnActionUserNetCutT(wChairID,pIServerUserItem,false);
 		}
 
 		return true;
@@ -1376,7 +1375,7 @@ bool CTableFrame::OnEventTimer(DWORD dwTimerID, WPARAM dwBindParameter)
 bool CTableFrame::OnEventSocketGame(WORD wSubCmdID, VOID * pData, WORD wDataSize, CPlayer * pIServerUserItem)
 {
 	//效验参数
-	bool ret = m_pITableFrameSink->OnGameMessage(wSubCmdID,pData,wDataSize,pIServerUserItem);
+	bool ret = m_pITableFrameSink->OnGameMessage(wSubCmdID,pData,wDataSize,GetPlayerChair(pIServerUserItem));
 	if(!ret)
 	{
 	}
@@ -1389,7 +1388,7 @@ bool CTableFrame::OnEventSocketGame(WORD wSubCmdID, VOID * pData, WORD wDataSize
 bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSize, CPlayer * pIServerUserItem)
 {
 	//游戏处理 此处处理的应该是只有200的主消息号 TODONOW 细看
-	if (m_pITableFrameSink->OnFrameMessage(wSubCmdID,pData,wDataSize,pIServerUserItem)==true) return true;
+	if (m_pITableFrameSink->OnFrameMessage(wSubCmdID,pData,wDataSize,GetPlayerChair(pIServerUserItem))==true) return true;
 
 	//默认处理
 	switch (wSubCmdID)
@@ -1413,7 +1412,7 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 			g_GameCtrl->SendData(pIServerUserItem,MDM_G_FRAME,CMD_GR_FRAME_GAME_STATUS,&GameStatus,sizeof(GameStatus));
 
 			//发送场景
-			m_pITableFrameSink->OnEventSendGameScene(wChairID,pIServerUserItem,m_cbGameStatus,true);
+			m_pITableFrameSink->OnEventSendGameScene(wChairID,m_cbGameStatus,true);
 
 			//发送解散面板状态 -- 只有处于解散状态 才会发送
 			if(m_bUnderDissState)
@@ -1495,7 +1494,7 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 			//事件通知
 			if (m_pITableFrameSink!=NULL)
 			{
-				m_pITableFrameSink->OnActionUserOnReady(wChairID,pIServerUserItem,pData,wDataSize);
+				//m_pITableFrameSink->OnActionUserOnReady(wChairID,pIServerUserItem,pData,wDataSize);
 			}
 
 			pIServerUserItem->SetUserStatus(US_READY,m_wTableID,wChairID);
@@ -1700,37 +1699,17 @@ WORD CTableFrame::GetSitUserCount()
 	return wUserCount;
 }
 
-//桌子状况
-WORD CTableFrame::GetTableUserInfo(tagTableUserInfo & TableUserInfo)
+WORD CTableFrame::GetPlayerChair(CPlayer* pPlayer)
 {
-	//设置变量
-	ZeroMemory(&TableUserInfo,sizeof(TableUserInfo));
-
-	//用户分析
-	for (WORD i=0;i<m_wChairCount;i++)
+	for(int i =0; i<m_player_list.size(); i++)
 	{
-		//获取用户
-		CPlayer * pIServerUserItem=GetTableUserItem(i);
-		if (pIServerUserItem==NULL) continue;
-
-		//用户类型
-		if (pIServerUserItem->IsAndroidUser()==false)
+		if(m_player_list.at(i) == pPlayer)
 		{
-			TableUserInfo.wTableUserCount++;
-		}
-		else
-		{
-			TableUserInfo.wTableAndroidCount++;
-		}
-
-		//准备判断
-		if (pIServerUserItem->GetUserStatus()==US_READY)
-		{
-			TableUserInfo.wTableReadyCount++;
+			return i;
 		}
 	}
 
-	return TableUserInfo.wTableAndroidCount+TableUserInfo.wTableUserCount;
+	return INVALID_CHAIR;
 }
 
 //桌子状态
@@ -1743,7 +1722,7 @@ bool CTableFrame::SendTableStatus()
 	//构造数据
 	TableStatus.wTableID = m_wTableID;
 
-	g_GameCtrl->SendData(BG_COMPUTER, MDM_GR_STATUS, CMD_GR_TABLE_STATUS, &TableStatus, sizeof(TableStatus));
+	//g_GameCtrl->SendData(BG_COMPUTER, MDM_GR_STATUS, CMD_GR_TABLE_STATUS, &TableStatus, sizeof(TableStatus));
 
 	return true;
 }

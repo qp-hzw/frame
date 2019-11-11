@@ -8,10 +8,6 @@
 //构造函数
 CDataBaseEngineSink::CDataBaseEngineSink()
 {
-	//组件变量
-	m_pIGameServiceManager=NULL;
-	m_pIGameDataBaseEngineSink=NULL;
-
 	return;
 }
 
@@ -40,9 +36,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineStart(IUnknownEx * pIUnknownEx)
 //停止事件
 bool CDataBaseEngineSink::OnDataBaseEngineConclude(IUnknownEx * pIUnknownEx)
 {
-	//组件变量
-	m_pIGameServiceManager=NULL;
-
 	return true;
 }
 
@@ -839,7 +832,7 @@ bool CDataBaseEngineSink::OnRequestLoadAndroidUser(DWORD dwContextID, VOID * pDa
 	//发送信息
 	WORD wHeadSize=sizeof(GameAndroidInfo)-sizeof(GameAndroidInfo.AndroidParameter);
 	WORD wDataSize_=GameAndroidInfo.wAndroidCount*sizeof(GameAndroidInfo.AndroidParameter[0]);
-	g_AttemperEngineSink->OnEventDataBaseResult(DBR_GR_GAME_ANDROID_INFO,dwContextID,&GameAndroidInfo,wHeadSize+wDataSize_);
+	//g_AttemperEngineSink->OnEventDataBaseResult(DBR_GR_GAME_ANDROID_INFO,dwContextID,&GameAndroidInfo,wHeadSize+wDataSize_);
 
 	return true;
 

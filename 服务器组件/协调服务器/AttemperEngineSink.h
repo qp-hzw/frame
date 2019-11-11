@@ -29,11 +29,6 @@ public:
 	//停止事件
 	virtual bool OnAttemperEngineConclude(IUnknownEx * pIUnknownEx){return true;}
 
-	//事件接口
-public:
-	//控制事件
-	virtual bool OnEventControl(WORD wIdentifier, VOID * pData, WORD wDataSize){return false;}
-
 	//socket::client
 public:
 	//连接事件

@@ -51,7 +51,7 @@ private:
 	//函数定义
 public:
 	//构造函数
-	CPlayer(tagUserInfo & UserInfo, tagUserInfoPlus & UserInfoPlus);
+	CPlayer(tagUserInfo & UserInfo);
 	//析构函数
 	~CPlayer(){}
 

@@ -7,26 +7,6 @@
 #include "PlayerManager.h"
 #include "DataBasePacket.h"
 
-//绑定参数
-struct tagBindParameter
-{
-	//连接属性
-	DWORD							dwSocketID;							//网络标识
-	DWORD							dwClientAddr;						//连接地址
-	DWORD							dwActiveTime;						//激活时间
-	//用户属性
-	CPlayer *				        pCPlayer;					        //用户接口
-};
-
-//系统消息
-struct tagSystemMessage
-{
-	DWORD							dwLastTime;						   //发送时间
-	DBR_GR_SystemMessage            SystemMessage;                     //系统消息
-};
-
-
-//////////////////////////////////////////////////////////////////////////////////
 
 //调度钩子
 class CAttemperEngineSink : public IAttemperEngineSink
@@ -55,9 +35,6 @@ public:
 	virtual bool OnAttemperEngineConclude(IUnknownEx * pIUnknownEx){return true;}
 
 public:
-	//控制事件
-	virtual bool OnEventControl(WORD wIdentifier, VOID * pData, WORD wDataSize);
-
 	//定时器事件
 	virtual bool OnEventTimer(DWORD dwTimerID, WPARAM wBindParam);
 	//数据库事件

@@ -14,7 +14,7 @@ private:
 	//²éÕÒº¯Êý
 public:
 	//Ôö
-	static bool InsertPlayer(CPlayer * * pIServerUserResult, tagUserInfo & UserInfo, tagUserInfoPlus & UserInfoPlus);
+	static bool InsertPlayer(CPlayer * * pIServerUserResult, tagUserInfo & UserInfo);
 	//É¾
 	static bool DeletePlayer(CPlayer * pPlayer);
 	//É¾

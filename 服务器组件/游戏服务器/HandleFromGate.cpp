@@ -45,10 +45,6 @@ bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwSocketID, VOID * p
 		{
 			return On_CMD_GC_User_ModifyUserTreasure(dwSocketID, pData, wDataSize);
 		}
-	case DBR_GR_GAME_ANDROID_INFO:		//机器信息
-		{
-			return OnDBGameAndroidInfo(dwSocketID,pData,wDataSize);
-		}
 
 	case DBO_GR_LOAD_OFFLINE:		//加载断线重连返回
 		{
@@ -325,9 +321,7 @@ void CHandleFromGate::ActiveUserItem(CPlayer **pIServerUserItem, DWORD dwSocketI
 
 	//用户变量
 	tagUserInfo UserInfo;
-	tagUserInfoPlus UserInfoPlus;
 	ZeroMemory(&UserInfo,sizeof(UserInfo));
-	ZeroMemory(&UserInfoPlus,sizeof(UserInfoPlus));
 
 	//属性资料
 	UserInfo.dwUserID = pDBOLogon->dwUserID;
@@ -369,26 +363,26 @@ void CHandleFromGate::ActiveUserItem(CPlayer **pIServerUserItem, DWORD dwSocketI
 	UserInfo.dLongitude = pDBOLogon->dLongitude;
 
 	//登录信息
-	UserInfoPlus.dwLogonTime=(DWORD)time(NULL);
-	UserInfoPlus.dwInoutIndex=pDBOLogon->dwInoutIndex;
+	UserInfo.dwLogonTime=(DWORD)time(NULL);
+	UserInfo.dwInoutIndex=pDBOLogon->dwInoutIndex;
 
 	//用户权限
-	UserInfoPlus.dwUserRight=pDBOLogon->dwUserRight;
-	UserInfoPlus.dwMasterRight=pDBOLogon->dwMasterRight;
+	UserInfo.dwUserRight=pDBOLogon->dwUserRight;
+	UserInfo.dwMasterRight=pDBOLogon->dwMasterRight;
 
 	//辅助变量
 	bool bAndroidUser = false;						//用户类型，真人/机器人
-	UserInfoPlus.bAndroidUser = bAndroidUser;
-	UserInfoPlus.lRestrictScore=0L;//屏蔽每局封顶
-	lstrcpyn(UserInfoPlus.szPassword,pDBOLogon->szPassword,CountArray(UserInfoPlus.szPassword));
+	UserInfo.bAndroidUser = bAndroidUser;
+	UserInfo.lRestrictScore=0L;//屏蔽每局封顶
+	lstrcpyn(UserInfo.szPassword,pDBOLogon->szPassword,CountArray(UserInfo.szPassword));
 
 	//连接信息
-	//UserInfoPlus.wBindIndex=wBindIndex;
-	//UserInfoPlus.dwClientAddr=pBindParameter->dwClientAddr;
-	lstrcpyn(UserInfoPlus.szMachineID,pDBOLogon->szMachineID,CountArray(UserInfoPlus.szMachineID));
+	//UserInfo.wBindIndex=wBindIndex;
+	//UserInfo.dwClientAddr=pBindParameter->dwClientAddr;
+	lstrcpyn(UserInfo.szMachineID,pDBOLogon->szMachineID,CountArray(UserInfo.szMachineID));
 
 	//激活用户 -- 设置用户信息
-	CPlayerManager::InsertPlayer(pIServerUserItem, UserInfo, UserInfoPlus);
+	CPlayerManager::InsertPlayer(pIServerUserItem, UserInfo);
 
 	//错误判断 -- 设置用户pIServerUserItem信息失败
 	if (pIServerUserItem == NULL)
@@ -537,27 +531,6 @@ bool CHandleFromGate::SwitchUserItemConnect(CPlayer * pIServerUserItem, TCHAR sz
 #pragma endregion
 
 
-
-//机器信息
-bool CHandleFromGate::OnDBGameAndroidInfo(DWORD dwSocketID, VOID * pData, WORD wDataSize)
-{
-	//变量定义
-	DBO_GR_GameAndroidInfo * pGameAndroidInfo=(DBO_GR_GameAndroidInfo *)pData;
-	WORD wHeadSize=sizeof(DBO_GR_GameAndroidInfo)-sizeof(pGameAndroidInfo->AndroidParameter);
-
-	//效验参数
-	ASSERT((wDataSize>=wHeadSize)&&(wDataSize==(wHeadSize+pGameAndroidInfo->wAndroidCount*sizeof(pGameAndroidInfo->AndroidParameter[0]))));
-	if ((wDataSize<wHeadSize)||(wDataSize!=(wHeadSize+pGameAndroidInfo->wAndroidCount*sizeof(pGameAndroidInfo->AndroidParameter[0])))) return false;
-
-	//设置机器
-	if (pGameAndroidInfo->lResultCode==DB_SUCCESS)
-	{
-		//m_AndroidUserManager.SetAndroidStock(pGameAndroidInfo->AndroidParameter,pGameAndroidInfo->wAndroidCount);
-	}
-
-	return true;
-}
-
 //加载断线重连返回
 bool CHandleFromGate::On_DBO_GR_LOAD_OFFLINE(DWORD dwSocketID, VOID * pData, WORD wDataSize)
 {
@@ -592,7 +565,7 @@ bool CHandleFromGate::On_SUB_CG_User_SitDown(VOID * pData, WORD wDataSize, DWORD
 	BYTE cbUserStatus=pIServerUserItem->GetUserStatus();
 
 	//重复判断
-	if (pUserSitDown->wTableID < MAX_TABLE)
+	//if (pUserSitDown->wTableID < MAX_TABLE)
 	{
 		CTableFrame * pTableFrame=CTableManager::FindTableByTableID(pUserSitDown->wTableID);
 		if (pTableFrame->GetTableUserItem(pUserSitDown->wChairID)==pIServerUserItem) return true;
@@ -809,7 +782,7 @@ bool CHandleFromGate::On_SUB_CG_User_RefuseSit(VOID * pData, WORD wDataSize, DWO
 	//发送消息
 	TCHAR szDescribe[256]=TEXT("");
 	lstrcpyn(szDescribe,TEXT("此桌有玩家设置了不与您同桌游戏！"),CountArray(szDescribe));
-	g_GameCtrl->SendRoomMessage(pRepulseIServerUserItem,szDescribe,SMT_EJECT|SMT_CHAT|SMT_CLOSE_GAME);
+	g_GameCtrl->SendRoomMessage(pRepulseIServerUserItem,szDescribe,0);
 
 	//弹起玩家
 	pTableFrame->PlayerUpTable(pRepulseIServerUserItem);
@@ -847,7 +820,7 @@ bool CHandleFromGate::On_SUB_CG_User_KickUser(VOID * pData, WORD wDataSize, DWOR
 		_sntprintf_s(szMessage,CountArray(szMessage),TEXT("由于玩家 [ %s ] 正在游戏中,您不能将它踢出游戏！"),pITargetUserItem->GetNickName());
 
 		//发送消息
-		g_GameCtrl->SendRoomMessage(pIServerUserItem,szMessage,SMT_EJECT);
+		g_GameCtrl->SendRoomMessage(pIServerUserItem,szMessage,0);
 		return true;
 	}
 
@@ -867,7 +840,7 @@ bool CHandleFromGate::On_SUB_CG_User_KickUser(VOID * pData, WORD wDataSize, DWOR
 			_sntprintf_s(szMessage,CountArray(szMessage),TEXT("由于玩家 [ %s ] 正在使用防踢卡,您无法将它踢出游戏！"),pITargetUserItem->GetNickName());
 
 			//发送消息
-			g_GameCtrl->SendRoomMessage(pIServerUserItem,szMessage,SMT_EJECT);
+			g_GameCtrl->SendRoomMessage(pIServerUserItem,szMessage,0);
 
 			return true; 
 		}
@@ -884,7 +857,7 @@ bool CHandleFromGate::On_SUB_CG_User_KickUser(VOID * pData, WORD wDataSize, DWOR
 		_sntprintf_s(szMessage,CountArray(szMessage),TEXT("你已被%s请离桌子！"),pIServerUserItem->GetNickName());
 
 		//发送消息
-		g_GameCtrl->SendGameMessage(pITargetUserItem,szMessage,SMT_CHAT|SMT_CLOSE_GAME);
+		g_GameCtrl->SendGameMessage(pITargetUserItem,szMessage,0);
 
 		CTableFrame * pTableFrame=CTableManager::FindTableByTableID(wTargerTableID);
 		if (pTableFrame->PlayerUpTable(pITargetUserItem)==false) return true;
@@ -2572,7 +2545,7 @@ bool CHandleFromGate::SendUserInfoPacket(CPlayer *pIServerUserItem, DWORD dwSock
 	if (dwSocketID == INVALID_DWORD)
 	{
 		//TODO 电脑群发是什么意思？？？
-		g_GameCtrl->SendData(BG_COMPUTER, MDM_GR_LOGON, CMD_GC_LOGON_GET_USER_INFO, pUserInfo, sizeof(tagUserInfo));
+		//g_GameCtrl->SendData(BG_COMPUTER, MDM_GR_LOGON, CMD_GC_LOGON_GET_USER_INFO, pUserInfo, sizeof(tagUserInfo));
 	}
 	else
 	{
@@ -2586,37 +2559,6 @@ bool CHandleFromGate::SendUserInfoPacket(CPlayer *pIServerUserItem, DWORD dwSock
 CPlayer * CHandleFromGate::GetBindUserItem(WORD wBindIndex)
 {
 	return NULL;
-}
-
-//道具类型
-WORD CHandleFromGate::GetPropertyType(WORD wPropertyIndex)
-{
-	switch(wPropertyIndex)
-	{
-	case PROPERTY_ID_CAR:	case PROPERTY_ID_EGG: 	case PROPERTY_ID_CLAP: 	case PROPERTY_ID_KISS: 	case PROPERTY_ID_BEER:
-	case PROPERTY_ID_CAKE: 	case PROPERTY_ID_RING:  case PROPERTY_ID_BEAT: 	case PROPERTY_ID_BOMB:  case PROPERTY_ID_SMOKE:
-	case PROPERTY_ID_VILLA: case PROPERTY_ID_BRICK: case PROPERTY_ID_FLOWER: 
-		{
-			return PT_TYPE_PRESENT;
-		};
-	case PROPERTY_ID_TWO_CARD: 	case PROPERTY_ID_FOUR_CARD:  case PROPERTY_ID_SCORE_CLEAR:     case PROPERTY_ID_ESCAPE_CLEAR:
-	case PROPERTY_ID_TRUMPET:	case PROPERTY_ID_TYPHON:     case PROPERTY_ID_GUARDKICK_CARD:  case PROPERTY_ID_POSSESS:
-	case PROPERTY_ID_BLUERING_CARD: case PROPERTY_ID_YELLOWRING_CARD: case PROPERTY_ID_WHITERING_CARD: case PROPERTY_ID_REDRING_CARD:
-	case PROPERTY_ID_VIPROOM_CARD: 
-		{
-			return PT_TYPE_PROPERTY;
-		};
-	}
-
-	ASSERT(false);
-
-	return PT_TYPE_ERROR;
-}
-
-//设置参数
-void CHandleFromGate::SetMobileUserParameter(CPlayer * pIServerUserItem,BYTE cbDeviceType,WORD wBehaviorFlags,WORD wPageTableCount)
-{
-	if(wPageTableCount > MAX_TABLE)wPageTableCount=MAX_TABLE;
 }
 
 //群发数据

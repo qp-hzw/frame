@@ -71,7 +71,7 @@ tagServerItem* CServerItemManager::FindItemByKindID(DWORD dwKindID)
 //查所有
 std::vector<tagServerItem*> CServerItemManager::FindAllGameServer()
 {
-	vector<tagServerItem*> vec_server;
+	std::vector<tagServerItem*> vec_server;
 	vec_server.clear();
 
 	for(auto item : s_server_list)
@@ -85,7 +85,7 @@ std::vector<tagServerItem*> CServerItemManager::FindAllGameServer()
 //查所有
 std::vector<tagServerItem*> CServerItemManager::FindAllLobbyServer()
 {
-	vector<tagServerItem*> vec_server;
+	std::vector<tagServerItem*> vec_server;
 	vec_server.clear();
 
 	for(auto item : s_server_list)

@@ -4,12 +4,12 @@
 std::vector<CPlayer*> CPlayerManager::s_PlayerArray;
 
 //Ôö
-bool CPlayerManager::InsertPlayer(CPlayer * * pIServerUserResult, tagUserInfo & UserInfo, tagUserInfoPlus & UserInfoPlus)
+bool CPlayerManager::InsertPlayer(CPlayer * * pIServerUserResult, tagUserInfo & UserInfo)
 {
 	CPlayer * pPlayer=NULL;
 	try
 	{
-		pPlayer=new CPlayer(UserInfo, UserInfoPlus);
+		pPlayer=new CPlayer(UserInfo);
 	}
 	catch (...)
 	{

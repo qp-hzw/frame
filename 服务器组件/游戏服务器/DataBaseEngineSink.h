@@ -12,14 +12,6 @@ protected:
 	IDataBase					   *m_TreasureDB;					    //财富数据库
 	IDataBase					   *m_PlatformDB;					    //平台数据库
 
-	//组件变量
-protected:
-	IGameServiceManager *			m_pIGameServiceManager;				//服务管理
-
-	//查询接口
-protected:
-	IGameDataBaseEngineSink *		m_pIGameDataBaseEngineSink;			//数据接口
-
 	//函数定义
 public:
 	//构造函数

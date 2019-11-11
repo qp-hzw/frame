@@ -86,8 +86,6 @@ struct DBR_GP_UserQuitInfo
 //逻辑事件
 #define DBO_GR_LOTTERY_RESULT		105
 
-//配置事件
-#define DBR_GR_GAME_ANDROID_INFO	202									//机器信息
 
 //游戏事件
 #define DBO_GR_PROPERTY_FAILURE		401									//道具失败
@@ -267,6 +265,30 @@ struct STR_DBO_GR_MODIFY_USER_TREASURE
 //游戏积分
 struct DBR_GR_WriteGameScore
 {
+	//变更信息
+struct tagVariationInfo
+{
+	//积分信息
+	SCORE							lScore;								//用户分数
+	SCORE							lGrade;								//用户成绩
+	SCORE							lInsure;							//用户银行
+	SCORE							lRevenue;							//游戏税收	
+	SCORE							lChoushui;							//抽水值
+	DWORD							dwChoushuiType;						//抽水类型
+
+	//游戏信息
+	DWORD							dwWinCount;							//胜利盘数
+	DWORD							dwLostCount;						//失败盘数
+	DWORD							dwDrawCount;						//和局盘数
+	DWORD							dwFleeCount;						//逃跑盘数
+	DWORD							dwPlayTimeCount;					//游戏时长
+
+	//全局信息
+	DWORD							dwUserMedal;						//用户奖牌
+	DWORD							dwExperience;						//用户经验
+	LONG							lLoveLiness;						//用户魅力
+};
+
 	//用户信息
 	DWORD							dwUserID;							//用户标识
 	DWORD							dwClientAddr;						//连接地址
@@ -356,13 +378,6 @@ struct DBR_GR_LeaveGameServer
 	DWORD							dwInoutIndex;						//记录索引
 	DWORD							dwLeaveReason;						//离开原因
 	DWORD							dwOnLineTimeCount;					//在线时长
-
-	//成绩变量
-	//tagVariationInfo				RecordInfo;							//记录信息
-	//tagVariationInfo				VariationInfo;						//提取信息
-
-	////控制值(不需要)
-	//SCORE							lControlScore;						//控制值
 
 	//系统信息
 	DWORD							dwClientAddr;						//连接地址
@@ -462,17 +477,23 @@ struct DBO_GR_GameParameter
 //机器信息
 struct DBO_GR_GameAndroidInfo
 {
+	//机器参数
+	struct tagAndroidParameter
+	{
+		DWORD							dwUserID;							//用户标识
+		DWORD							dwServiceTime;						//服务时间
+		SCORE							lMinTakeScore;						//携带积分
+		SCORE							lMaxTakeScore;						//携带积分
+		DWORD							dwMinPlayDraw;						//游戏局数
+		DWORD							dwMaxPlayDraw;						//游戏局数
+		DWORD							dwMinReposeTime;					//休息时间
+		DWORD							dwMaxReposeTime;					//休息时间
+		DWORD							dwServiceGender;					//服务类型
+	};
+
 	LONG							lResultCode;						//结果代码
 	WORD							wAndroidCount;						//用户数目
 	tagAndroidParameter				AndroidParameter[MAX_ANDROID];		//机器信息
-};
-
-//道具信息
-struct DBO_GR_GamePropertyInfo
-{
-	LONG							lResultCode;						//结果代码
-	BYTE							cbPropertyCount;					//道具数目
-	tagPropertyInfo					PropertyInfo[MAX_PROPERTY];			//道具信息
 };
 
 //道具成功

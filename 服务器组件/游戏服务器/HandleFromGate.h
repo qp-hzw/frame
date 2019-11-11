@@ -138,9 +138,6 @@ protected:
 	#pragma region 待处理
 	//数据事件
 protected:
-	//机器信息
-	static bool OnDBGameAndroidInfo(DWORD dwContextID, VOID * pData, WORD wDataSize);
-
 	//加载断线重连
 	static bool On_DBO_GR_LOAD_OFFLINE(DWORD dwContextID, VOID * pData, WORD wDataSize);
 	
@@ -158,13 +155,9 @@ protected:
 public:
 	//绑定用户
 	static CPlayer * GetBindUserItem(WORD wBindIndex);
-	//道具类型
-	static WORD GetPropertyType(WORD wPropertyIndex);
 
 	//辅助函数
 protected:
-	//设置参数
-	static void SetMobileUserParameter(CPlayer * pCPlayer,BYTE cbDeviceType,WORD wBehaviorFlags,WORD wPageTableCount);
 	//群发数据
 	static bool SendDataBatchToMobileUser(WORD wCmdTable, WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize);
 #pragma endregion

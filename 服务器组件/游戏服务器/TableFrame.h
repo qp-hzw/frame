@@ -4,6 +4,7 @@
 #include <vector>
 #include "Stdafx.h"
 #include "Player.h"
+#include "TableFrameBase.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 #define GAME_CONCLUDE_CONTINUE  0xFF //大局结束并续费
@@ -14,7 +15,20 @@
 #define GAME_STATUS_PLAY			100									//游戏状态	TODO 细看，改成桌子状态
 
 //////////////////////////////////////////////////////////////////////////////////
+//时间标识
 
+//调度事件范围
+#define IDI_MAIN_MODULE_START		1									//起始标识
+#define IDI_MAIN_MODULE_FINISH		99									//终止标识
+
+//桌子事件范围
+#define IDI_TABLE_MODULE_START		10000								//起始标识
+#define IDI_TABLE_MODULE_FINISH		50000								//终止标识
+
+//回调事件范围
+#define TIME_TABLE_SINK_RANGE		40									//标识范围
+#define TIME_TABLE_MODULE_RANGE		50									//标识范围
+//////////////////////////////////////////////////////////////////////////////////
 
 //数组定义
 typedef CWHArray<tagGameScoreRecord *> CGameScoreRecordArray;			//记录数组
@@ -271,8 +285,9 @@ public:
 	//用户数目
 	WORD GetSitUserCount();
 
-	//用户信息
-	WORD GetTableUserInfo(tagTableUserInfo & TableUserInfo);
+	//获取本桌玩家
+	WORD GetPlayerChair(CPlayer* pPlayer);
+
 #pragma endregion
 
 	//用户事件

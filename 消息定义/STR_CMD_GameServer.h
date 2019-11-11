@@ -384,27 +384,6 @@ struct CMD_GR_UserInviteReq
 	DWORD							dwUserID;							//用户 I D
 };
 
-//用户分数
-struct CMD_GR_UserScore
-{
-	DWORD							dwUserID;							//用户标识
-	tagUserScore					UserScore;							//积分信息
-};
-
-//用户分数
-struct CMD_GR_MobileUserScore
-{
-	DWORD							dwUserID;							//用户标识
-	tagMobileUserScore				UserScore;							//积分信息
-};
-
-//用户状态
-struct CMD_GR_UserStatus
-{
-	DWORD							dwUserID;							//用户标识
-	tagUserStatus					UserStatus;							//用户状态
-};
-
 //请求失败
 struct CMD_GR_RequestFailure
 {
@@ -542,19 +521,6 @@ struct CMD_GR_SetUserRight
 	BYTE							cbLimitPlayGame;					//游戏权限
 	BYTE							cbLimitSendWisper;					//发送消息
 	BYTE							cbLimitLookonGame;					//旁观权限
-};
-
-//房间设置
-struct CMD_GR_OptionCurrent
-{
-	DWORD							dwRuleMask;							//规则掩码
-	tagServerOptionInfo				ServerOptionInfo;					//房间配置
-};
-
-//房间设置
-struct CMD_GR_ServerOption
-{
-	tagServerOptionInfo				ServerOptionInfo;					//房间配置
 };
 
 //踢出所有用户

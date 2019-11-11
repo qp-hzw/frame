@@ -11,7 +11,7 @@ struct tagClubTableUserInfo
 	TCHAR	szUserName[LEN_NICKNAME];					//玩家名字
 	BYTE	bySex;										//性别
 	WORD	wLevel;										//等级
-	TCHAR	szHeadUrl[LEN_URL];							//头像地址
+	TCHAR	szHeadUrl[LEN_HEAD_URL];							//头像地址
 
 	BYTE	byClubRole;									//玩家职务 0 群主; 1管理; 2一般成员
 	BYTE	byClubReputation;							//玩家在工会中的声望等级
@@ -738,7 +738,7 @@ struct STR_CMD_LC_CLUB_TABLE_USER_LIST
 	TCHAR	szUserName[LEN_NICKNAME];					//玩家名字
 	BYTE	bySex;										//性别
 	WORD	wLevel;										//等级
-	TCHAR	szHeadUrl[LEN_URL];							//头像地址
+	TCHAR	szHeadUrl[LEN_HEAD_URL];							//头像地址
 
 	BYTE	byClubRole;									//玩家职务 0 群主; 1管理; 2一般成员
 	BYTE	byClubReputation;							//玩家在工会中的声望等级
@@ -981,7 +981,7 @@ struct STR_CMD_LC_CLUB_MEMBER_MANAGER
 	BYTE	byClubReputation;							//玩家在工会中的声望等级
 
 	BYTE	byUserState;								//玩家状态  0在线 1离线 2游戏中
-	TCHAR	szHeadUrl[LEN_URL];							//头像地址
+	TCHAR	szHeadUrl[LEN_HEAD_URL];							//头像地址
 };
 
 //请求成员数据 完成
@@ -1062,7 +1062,7 @@ struct STR_CMD_LC_CLUB_APPLICANT_LIST
 	BYTE	byUserLevel;									//玩家等级
 	TCHAR	szNote[128];								//加入说明
 
-	TCHAR	szHeadUrl[LEN_URL];							//头像地址
+	TCHAR	szHeadUrl[LEN_HEAD_URL];							//头像地址
 };
 
 //申请人列表 结束
@@ -1285,7 +1285,7 @@ struct STR_CMD_LC_ROOM_STATE
 	DWORD	dwChairID;
 
 	DWORD	dwCustomID;
-	TCHAR	szHeadUrl[LEN_URL];
+	TCHAR	szHeadUrl[LEN_HEAD_URL];
 	TCHAR	szUserName[LEN_NICKNAME];
 	TCHAR	szKindName[LEN_KIND];
 

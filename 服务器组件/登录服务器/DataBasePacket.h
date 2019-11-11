@@ -679,7 +679,7 @@ struct STR_DBO_LC_CLUB_JOIN_CLUB_MESSAGE
 	TCHAR	szUserName[LEN_NICKNAME];					//申请玩家昵称
 
 	DWORD	dwCustomID;									//自定义标识
-	TCHAR	szHeadUrl[LEN_URL];							//头像地址
+	TCHAR	szHeadUrl[LEN_HEAD_URL];							//头像地址
 };
 
 //踢出退出 请求
