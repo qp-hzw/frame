@@ -33,9 +33,6 @@
 //模板文件
 #include "../../../../share/依赖项/全局定义/Array.h"
 
-//配置文件
-#include "../../../../share/依赖项/全局定义/Version.h"
-
 /*** Other ***/
 //平台定义
 #include "..\..\消息定义\CMD_Correspond.h"
@@ -45,7 +42,6 @@
 
 //组件定义
 #include "../../../../share\依赖项\服务核心\ServiceCoreHead.h"
-#include "../../../../share\依赖项\服务核心\WHIniData.h"
 #include "../../../../share\依赖项\服务核心\WHModule.h"
 #include "../../../../share\依赖项\服务核心\log.h"
 

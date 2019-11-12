@@ -175,4 +175,7 @@
 
 #define LEN_MAX_RECORD_SIZE				 4096								//录像大小
 #define LEN_MAX_SERVICE_MEG_SIZE		 50									//客服消息大小
+
+
+#define SOCKET_TCP_PACKET			1024*4                              //网络缓冲
 #endif
