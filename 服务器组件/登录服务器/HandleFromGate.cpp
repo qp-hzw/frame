@@ -753,12 +753,13 @@ bool CHandleFromGate::On_SUB_CL_Logon_Register(VOID * pData, WORD wDataSize, DWO
 	//处理消息
 	STR_SUB_CL_LOGON_REGISTER * pSUBLogonRegister=(STR_SUB_CL_LOGON_REGISTER *)pData;
 
+	/*
 	//效验版本
 	if ( On_CMD_LC_Logon_UpdateNotify(pSUBLogonRegister->dwVersionCheck, dwSocketID) )
 	{
 		return true;
 	}
-	
+	*/
 
 	//变量定义
 	STR_DBR_CL_LOGON_REGISTER DBRLogonRegister;

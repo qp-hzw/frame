@@ -1,6 +1,7 @@
 #ifndef STR_CMD_GAME_SERVER_HEAD_FILE
 #define STR_CMD_GAME_SERVER_HEAD_FILE
 
+#pragma pack(1)
 
 #pragma region ¸¨Öúºê
 

@@ -1,7 +1,7 @@
 #ifndef STR_CMD_LONGON_HEAD_FILE
 #define STR_CMD_LONGON_HEAD_FILE
 
-#include "Stdafx.h"
+#pragma pack(1)
 
 #pragma region 辅助结构体
 ////桌子上的玩家信息
@@ -1408,6 +1408,5 @@ struct STR_CMD_LC_GAME_QUERY_GAMEID
 	DWORD	dwGameID;				//可用的GameID;
 };
 #pragma endregion
-#pragma pack()
 
 #endif

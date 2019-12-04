@@ -1,6 +1,8 @@
 #ifndef STR_CMD_CORRESPOND_HEAD_FILE
 #define STR_CMD_CORRESPOND_HEAD_FILE
 
+#pragma pack(1)
+
 #pragma region  MDM_REGISTER 注册模块
 //游戏房间
 struct tagServerItem

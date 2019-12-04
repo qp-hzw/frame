@@ -198,8 +198,6 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClCompile Include="TableManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\消息定义\CMD_GameServer.h" />
-    <ClInclude Include="..\..\消息定义\STR_CMD_GameServer.h" />
     <ClInclude Include="AttemperEngineSink.h" />
     <ClInclude Include="DataBaseEngineSink.h" />
     <ClInclude Include="DataBasePacket.h" />

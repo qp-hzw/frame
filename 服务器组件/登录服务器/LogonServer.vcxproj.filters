@@ -45,13 +45,7 @@
     <ClInclude Include="Stdafx.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\消息定义\CMD_LogonServer.h">
-      <Filter>消息定义</Filter>
-    </ClInclude>
     <ClInclude Include="DataBasePacket.h">
-      <Filter>消息定义</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\消息定义\CMD_STR_LogonServer.h">
       <Filter>消息定义</Filter>
     </ClInclude>
     <ClInclude Include="GameCtrl.h">

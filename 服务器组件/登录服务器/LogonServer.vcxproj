@@ -191,8 +191,6 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClCompile Include="GameCtrl.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\消息定义\CMD_LogonServer.h" />
-    <ClInclude Include="..\..\消息定义\CMD_STR_LogonServer.h" />
     <ClInclude Include="AttemperEngineSink.h" />
     <ClInclude Include="DataBaseEngineSink.h" />
     <ClInclude Include="DataBasePacket.h" />
