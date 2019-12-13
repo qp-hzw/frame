@@ -440,26 +440,6 @@ VOID CHandleFromGate::OnEventUserLogon(CPlayer * pIServerUserItem, bool bAlready
 		SendUserInfoPacket(pIServerUserItemSend, pIServerUserItem->GetSocketID());
 	}
 
-	/* 4. 桌子信息 */
-	CMD_GR_TableInfo TableInfo;
-	ZeroMemory(&TableInfo, sizeof(CMD_GR_TableInfo));
-
-	//赋值
-	TableInfo.wTableCount = (WORD)CTableManager::TableCount();
-	for (WORD i=0; i<TableInfo.wTableCount; i++)
-	{
-		CTableFrame *pTableFrame = CTableManager::FindTableByIndex(i);
-		if(NULL == pTableFrame) continue;
-
-		//TableInfo.TableStatusArray[i].cbTableLock = pTableFrame->IsTableLocked()?TRUE:FALSE;
-		//TableInfo.TableStatusArray[i].cbPlayStatus = pTableFrame->IsTableStarted()?TRUE:FALSE;
-	}
-
-	//桌子状态
-	WORD wHeadSize=sizeof(TableInfo)-sizeof(TableInfo.TableStatusArray);
-	WORD wSendSize=wHeadSize+TableInfo.wTableCount*sizeof(TableInfo.TableStatusArray[0]);
-	g_GameCtrl->SendData(pIServerUserItem->GetSocketID(), MDM_GR_STATUS, CMD_GR_TABLE_INFO, &TableInfo, wSendSize);
-
 	/* 5. 发送玩家信息		TODO  */
 	if (!bAlreadyOnLine)
 	{

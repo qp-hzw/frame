@@ -460,22 +460,6 @@ struct CMD_GR_ChairUserInfoReq
 };
 #pragma endregion
 
-#pragma region MDM_GR_STATUS 状态命令
-//桌子信息
-struct CMD_GR_TableInfo
-{
-	WORD							wTableCount;						//桌子数目
-	tagTableStatus					TableStatusArray[512];				//桌子状态
-};
-
-//桌子状态
-struct CMD_GR_TableStatus
-{
-	WORD							wTableID;							//桌子号码
-	tagTableStatus					TableStatus;						//桌子状态
-};
-#pragma endregion
-
 #pragma region MDM_GR_MANAGE 管理命令
 //发送警告
 struct CMD_GR_SendWarning

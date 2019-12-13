@@ -106,17 +106,6 @@
 
 #pragma endregion
 
-#pragma region MDM_GR_STATUS 状态命令
-/* *********************************************************************************
-**						 MAIN:3   MDM_GR_STATUS    状态命令
-** *********************************************************************************/
-#define MDM_GR_STATUS				3									//状态信息
-
-#define CMD_GR_TABLE_INFO			100									//桌子信息
-#define CMD_GR_TABLE_STATUS			101									//桌子状态
-
-#pragma endregion
-
 #pragma region  MDM_GR_MATCH 比赛命令
 /* *********************************************************************************
 **						MAIN:7   MDM_GR_MATCH    比赛命令

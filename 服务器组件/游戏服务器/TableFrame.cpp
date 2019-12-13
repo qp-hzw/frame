@@ -1748,15 +1748,6 @@ WORD CTableFrame::GetPlayerChair(CPlayer* pPlayer)
 //桌子状态
 bool CTableFrame::SendTableStatus()
 {
-	//变量定义
-	CMD_GR_TableStatus TableStatus;
-	ZeroMemory(&TableStatus, sizeof(TableStatus));
-
-	//构造数据
-	TableStatus.wTableID = m_wTableID;
-
-	//g_GameCtrl->SendData(BG_COMPUTER, MDM_GR_STATUS, CMD_GR_TABLE_STATUS, &TableStatus, sizeof(TableStatus));
-
 	return true;
 }
 
