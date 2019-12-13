@@ -112,6 +112,10 @@ bool CHandleFromGate::OnTCPNetworkMainUser(WORD wSubCmdID, VOID *pData, WORD wDa
 		{
 			return On_SUB_CG_User_StandUp(pData,wDataSize,dwSocketID);
 		}
+	case SUB_CG_USER_READY:			//用户准备
+		{
+			return On_SUB_CG_User_Ready(pData, wDataSize, dwSocketID);
+		}
 	case SUB_CG_USER_INVITE_USER:	//邀请用户
 		{
 			return On_SUB_CG_User_InviteUser(pData,wDataSize,dwSocketID);
@@ -132,7 +136,7 @@ bool CHandleFromGate::OnTCPNetworkMainUser(WORD wSubCmdID, VOID *pData, WORD wDa
 		{
 			return On_SUB_CG_USER_CREATE_ROOM(pData,wDataSize,dwSocketID);
 		}
-	case SUB_CG_CLUB_CREATE_TABLE:	//创建桌子
+	case SUB_CG_CLUB_CREATE_TABLE:	//创建桌子	牌友圈的桌子
 		{
 			return On_SUB_CG_USER_CREATE_TABLE(pData,wDataSize,dwSocketID);
 		}
@@ -568,7 +572,7 @@ bool CHandleFromGate::On_SUB_CG_User_SitDown(VOID * pData, WORD wDataSize, DWORD
 	//if (pUserSitDown->wTableID < MAX_TABLE)
 	{
 		CTableFrame * pTableFrame=CTableManager::FindTableByTableID(pUserSitDown->wTableID);
-		if (pTableFrame->GetTableUserItem(pUserSitDown->wChairID)==pIServerUserItem) return true;
+		//if (pTableFrame->GetTableUserItem(pUserSitDown->wChairID)==pIServerUserItem) return true;
 	}
 
 	//用户判断
@@ -651,7 +655,7 @@ bool CHandleFromGate::On_SUB_CG_User_SitDown(VOID * pData, WORD wDataSize, DWORD
 	//坐下处理
 	CTableFrame * pTableFrame=CTableManager::FindTableByTableID(wRequestTableID);
 	if(pTableFrame != NULL) 
-		pTableFrame->PlayerSitTable(wRequestChairID,pIServerUserItem,pUserSitDown->szPassword);
+		pTableFrame->PlayerSitTable(wRequestChairID,pIServerUserItem,pUserSitDown->szPassword, NULL);
 
 	return true;
 }
@@ -715,6 +719,35 @@ bool CHandleFromGate::On_SUB_CG_User_StandUp(VOID * pData, WORD wDataSize, DWORD
 		//用户站起
 		if ( !pTableFrame->PlayerUpTable(pIServerUserItem) ) 
 			return true;
+	}
+
+	return true;
+}
+
+//用户准备
+bool CHandleFromGate::On_SUB_CG_User_Ready(VOID * pData, WORD wDataSize, DWORD dwSocketID) 
+{
+	//数据校验
+	if (wDataSize != sizeof(STR_SUB_CG_USER_READY))
+		return false;
+
+	//获取数据
+	STR_SUB_CG_USER_READY *m_pUserReady = (STR_SUB_CG_USER_READY *)pData;
+
+	//获取用户
+	CPlayer * pIServerUserItem = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	//校验
+	if (pIServerUserItem == NULL)
+		return false;
+
+	WORD wRequestTableID = m_pUserReady->wTableID;
+	WORD wRequestChairID = m_pUserReady->wChairID;
+
+	//准备处理
+	CTableFrame *pTableFrame = CTableManager::FindTableByTableID(wRequestTableID);
+	if (pTableFrame != NULL)
+	{
+		pTableFrame->PlayerReady(wRequestChairID, pIServerUserItem);
 	}
 
 	return true;
@@ -953,7 +986,7 @@ bool CHandleFromGate::On_SUB_CG_USER_CREATE_ROOM(VOID * pData, WORD wDataSize, D
 {
 	//获取用户
 	WORD wBindIndex = LOWORD(dwSocketID);
-	CPlayer *pIServerUserItem = GetBindUserItem(wBindIndex);
+	CPlayer *pIServerUserItem = GetBindUserItem(wBindIndex);	//要去看下为啥能根据socketid查询用户
 
 	//用户校验
 	if (pIServerUserItem==NULL) 
@@ -1038,7 +1071,7 @@ bool CHandleFromGate::CreateTableNormal(tagTableRule * pCfg, CPlayer *pIServerUs
 	}
 
 	//寻找空闲房间
-	CTableFrame *pCurrTableFrame = GetNextEmptyTable();
+	CTableFrame *pCurrTableFrame = GetNextEmptyTable();  
 
 	//桌子判断
 	if(NULL == pCurrTableFrame)
@@ -1519,7 +1552,7 @@ bool CHandleFromGate::On_CMD_GC_JOIN_TABLE( DWORD dwSocketID, VOID * pData, WORD
 	}
 
 	/* 4. 桌子校验 */
-	DWORD dwPassword = pJoin->dwTableID;
+	DWORD dwPassword = pJoin->dwTableID;		//这里校验有问题
 	if(dwPassword == 0)
 	{
 		SendRequestFailure(pIServerUserItem, TEXT("房间号错误,请重新尝试"), REQUEST_FAILURE_PASSWORD);
@@ -2558,7 +2591,16 @@ bool CHandleFromGate::SendUserInfoPacket(CPlayer *pIServerUserItem, DWORD dwSock
 //绑定用户
 CPlayer * CHandleFromGate::GetBindUserItem(WORD wBindIndex)
 {
-	return NULL;
+	CPlayer *pPlayer = NULL;
+
+	//获取用户
+	pPlayer = CPlayerManager::FindPlayerBySocketID(wBindIndex);
+	if (pPlayer == NULL)
+	{
+		return NULL;
+	}
+
+	return pPlayer;
 }
 
 //群发数据
@@ -2955,11 +2997,14 @@ DWORD CHandleFromGate::GenerateTablePassword()
 //寻找下一个空桌子
 CTableFrame* CHandleFromGate::GetNextEmptyTable()
 {
+	//建立对象
+	CTableFrame *pTableFrame = NULL;
+
 	//寻找下一个空桌子
 	for (WORD i=0;i<CTableManager::TableCount();i++)
 	{
 		//获取对象
-		CTableFrame *pTableFrame = CTableManager::FindTableByIndex(i);
+		pTableFrame = CTableManager::FindTableByIndex(i);
 
 		//桌子判断
 		if ( (NULL != pTableFrame) && 
@@ -2970,7 +3015,17 @@ CTableFrame* CHandleFromGate::GetNextEmptyTable()
 		}
 	}
 
-	return NULL;
+	//考虑如果桌子满了是否要new一个新桌子
+	if (pTableFrame == NULL)
+	{
+		pTableFrame = CTableManager::CreateTable();		//建桌函数待添加CreateTable
+		if (pTableFrame == NULL)
+		{
+			//创建失败了
+			return NULL;
+		}
+	}
+	return pTableFrame;
 }
 
 //根据密码寻找指定桌子
@@ -3097,7 +3152,7 @@ bool CHandleFromGate::HandleCreateTable(CTableFrame *pCurTableFrame, CPlayer *pI
 	DWORD dwPassword = GenerateTablePassword();
 
 	//设置桌子属性
-	//pCurTableFrame->SetTableOwner(pIServerUserItem->GetUserID());
+	pCurTableFrame->SetTableOwner(pIServerUserItem->GetUserID());	//设置桌主
 	pCurTableFrame->SetTableID(dwPassword);
 
 	//设置房间自动解散，默认一分钟 -- 这里是指不开始游戏 自动一分钟后解散

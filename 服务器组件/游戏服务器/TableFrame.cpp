@@ -47,6 +47,7 @@ enum PLAYER_OP_ERRORCODE
 
 	CHAIR_USERD=4,         //椅子上已经有人
 	CHAIR_INVALID=5,       //椅子号不正确
+	STATUS_ERR = 6,			//没坐下就要准备
 };
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -601,11 +602,14 @@ int CTableFrame::PlayerSitTable(WORD wChairID, CPlayer * pPlayer, LPCTSTR lpszPa
 	//3. Player
 	pPlayer->SetUserStatus(US_SIT, m_wTableID, wChairID);
 
+	//subgame处理  //是否要改成客户端传???
+	m_pITableFrameSink->OnActionUserSitDown(wChairID, NULL, false);
+
 	//4. notify client TODOLATER
 
 	//4. notify center TODOLATER
 
-	return true;
+	return 0;
 }
 //玩家站起
 bool CTableFrame::PlayerUpTable(CPlayer *pPlayer)
@@ -617,6 +621,9 @@ bool CTableFrame::PlayerUpTable(CPlayer *pPlayer)
 	//2. Table
 	WORD wChairID = pPlayer->GetChairID();
 	m_player_list.at(wChairID) = NULL;
+
+	//subgame
+	m_pITableFrameSink->OnActionUserStandUp(wChairID, NULL, false);
 
 	//3. Player
 	pPlayer->SetUserStatus(US_IN_TABLE, m_wTableID, INVALID_CHAIR);
@@ -645,6 +652,21 @@ int CTableFrame::PlayerLeaveTable(CPlayer* pPlayer)
 	//4. notify client TODOLATER
 
 	//4. notify center TODOLATER
+}
+//玩家准备
+int CTableFrame::PlayerReady(WORD wChairID, CPlayer* pPlayer) 
+{
+	//准备校验
+	int ret = CanPlayerReady(pPlayer);
+	if (ret != 0)	return ret;
+
+	//Player
+	pPlayer->SetUserStatus(US_READY, m_wTableID, wChairID);
+
+	//subgame
+	m_pITableFrameSink->OnActionUserOnReady(wChairID, NULL, NULL, 0);
+
+	return 0;
 }
 
 //玩家能否加入
@@ -695,6 +717,17 @@ int CTableFrame::CanPlayerUpTable(CPlayer* pPlayer)
 //玩家能否离开
 int CTableFrame::CanPlayerLeaveTable(CPlayer* pPlayer)
 {
+	return 0;
+}
+////玩家是否能准备
+int CTableFrame::CanPlayerReady(CPlayer* pPlayer) 
+{
+	//校验
+	if (pPlayer == NULL)  return PLAYER_NOT_EXISIT;
+
+	//只有做下才能准备
+	if (pPlayer->GetUserStatus() != US_SIT)	return STATUS_ERR;
+
 	return 0;
 }
 
@@ -1199,12 +1232,12 @@ bool CTableFrame::SendGameMessage(CPlayer * pIServerUserItem, LPCTSTR lpszMessag
 
 
 //发送场景
-bool CTableFrame::SendGameScene(CPlayer * pIServerUserItem, VOID * pData, WORD wDataSize)
+bool CTableFrame::SendGameScene(IServerUserItem * pIServerUserItem, VOID * pData, WORD wDataSize)
 {
 	//用户效验
 	if ((pIServerUserItem==NULL)) return false;
 
-	g_GameCtrl->SendData(pIServerUserItem,MDM_G_FRAME,CMD_GR_FRAME_GAME_OPTION,pData,wDataSize);
+	g_GameCtrl->SendData((CPlayer* )pIServerUserItem,MDM_G_FRAME,CMD_GR_FRAME_GAME_OPTION,pData,wDataSize);
 
 	return true;
 }
@@ -1412,7 +1445,7 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 			g_GameCtrl->SendData(pIServerUserItem,MDM_G_FRAME,CMD_GR_FRAME_GAME_STATUS,&GameStatus,sizeof(GameStatus));
 
 			//发送场景
-			m_pITableFrameSink->OnEventSendGameScene(wChairID,m_cbGameStatus,true);
+			m_pITableFrameSink->OnEventSendGameScene(wChairID, m_cbGameStatus, true);
 
 			//发送解散面板状态 -- 只有处于解散状态 才会发送
 			if(m_bUnderDissState)

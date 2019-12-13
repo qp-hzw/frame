@@ -1,3 +1,4 @@
+#include "Stdafx.h"
 #include "TableManager.h"
 #include "TableFrame.h"
 
@@ -6,7 +7,18 @@ std::vector<CTableFrame*>	               CTableManager::s_TableArray;					//桌子
 //增
 CTableFrame* CTableManager::CreateTable()
 {
-	return NULL;
+	//构建
+	CTableFrame *pTableFrame = NULL;
+
+	//new
+	pTableFrame = new CTableFrame();
+	if (pTableFrame == NULL)
+		return false;
+
+	//加入vector
+	s_TableArray.push_back(pTableFrame);
+
+	return pTableFrame;
 }
 
 //删

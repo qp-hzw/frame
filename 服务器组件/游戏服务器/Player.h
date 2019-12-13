@@ -1,6 +1,7 @@
 #ifndef C_PLAYER_H
 #define C_PLAYER_H
 #include "Stdafx.h"
+#include "TableFrameBase.h"
 
 //用户状态
 enum US_STATUS
@@ -9,13 +10,14 @@ enum US_STATUS
 	US_IN_TABLE = 2,   //在table中 -- 站立(旁观)状态
 	US_SIT = 3,        //坐下状态
 	US_PLAYING = 4,    //游戏状态
+	US_READY = 5
 
 };
 
 #define US_READY					0x03								//同意状态
 #define US_OFFLINE					0x06								//断线状态
 
-class  CPlayer
+class  CPlayer : public IServerUserItem
 {
 	DWORD                           m_dwSocketID;                       //scoketID
 
@@ -87,7 +89,7 @@ public:
 	//桌子号码
 	 WORD GetTableID() { return m_UserInfo.wTableID; }
 	//椅子号码
-	 WORD GetChairID() { return m_UserInfo.wChairID; }
+	 virtual WORD GetChairID() { return m_UserInfo.wChairID; }
 
 	//用户状态
 	 BYTE GetUserStatus() { return m_UserInfo.cbUserStatus; }

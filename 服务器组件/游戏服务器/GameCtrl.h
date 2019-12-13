@@ -21,6 +21,7 @@ public:
 	IAttemperEngine					*m_AttemperEngine;					//调度引擎
 	ITCPNetworkEngine				*m_TCPNetworkEngine;				//socket::server
 	ITCPSocketEngine				*m_TCPSocketEngine;					//socket::client -> 目标服务器 协调服
+	//ITableFrameSink					*m_TableFrameSink;					//Sub桌子对象
 
 	//回调对象
 public:
@@ -32,6 +33,7 @@ protected:
 	std::string			            m_subgame_dll_name;				    //子游戏dll名字
 	
 	DWORD                           m_ServerID;                         //serverid
+	WORD							m_wGameServerPort;				//游戏端口
 
 	//函数定义
 public:

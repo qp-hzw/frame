@@ -39,7 +39,7 @@ public:
 	//请求事件
 	virtual bool OnDataBaseEngineRequest(WORD wRequestID, DWORD dwContextID, VOID * pData, WORD wDataSize);
 
-#pragma region  MDM_LOGON 登陆模块
+#pragma region  MDM_LOGON DengLu
 	/* **************************【MAIN:1    MDM_LOGON    登陆】*************************************/
 protected:
 	//帐号登录
@@ -169,7 +169,7 @@ protected:
 	//领取排行榜奖励
 	bool OnReceiveRankReward(DWORD dwContextID, void * pData, WORD wDataSize);
 
-#pragma region 启动命令
+#pragma region Start
 	//启动命令
 protected:
 	//在线信息

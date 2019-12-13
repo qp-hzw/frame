@@ -25,7 +25,7 @@ bool CHandleFromCenter::OnTCPSocketMainRegister(WORD wSubCmdID, VOID * pData, WO
 	case CPO_REGISTER_SUCESS:		//注册完成
 		{
 			//开启socket::server服务
-			if(g_GameCtrl->StartNetworkService() != 0)
+			if(!g_GameCtrl->StartNetworkService())
 			{
 				g_GameCtrl->ConcludeService();
 				return true;

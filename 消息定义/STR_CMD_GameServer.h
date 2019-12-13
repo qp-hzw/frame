@@ -420,6 +420,13 @@ struct CMD_GF_OnlinePlayers
 	WORD wOnlinePlayers;			//在线人数
 };
 
+//用户准备
+struct STR_SUB_CG_USER_READY
+{
+	WORD							wTableID;							//桌子位置
+	WORD							wChairID;							//椅子位置
+};
+
 //////////////////////////////////////////////////////////////////////////////////
 
 //规则标志

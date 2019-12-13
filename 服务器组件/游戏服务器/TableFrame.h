@@ -166,6 +166,15 @@ public:
 
 #pragma endregion
 
+	//子游戏与框架接口函数
+public:
+	// 1金币; 2私有; 3比赛
+	virtual int GameType() { return 2; }
+	//is roboot
+	virtual bool IsRobot(WORD wChairID) { return true; }
+	//get player base info
+	virtual BASE_PLAYERINFO GetPlayerBaseInfo(WORD wChairID) { BASE_PLAYERINFO i; return i; }
+
 #pragma region 游戏流程函数
 	//自身调用，与子游戏无关
 public:
@@ -263,6 +272,8 @@ public:
 	bool PlayerUpTable(CPlayer * pIServerUserItem);
 	//玩家离开
 	int PlayerLeaveTable(CPlayer* pPlayer);
+	//玩家准备
+	int PlayerReady(WORD wChairID, CPlayer* pPlayer);
 
 	//玩家动作辅助函数
 private:
@@ -270,13 +281,14 @@ private:
 	int CanPlayerSitTable(CPlayer* pPlayer, WORD &wChairID);
 	int CanPlayerUpTable(CPlayer* pPlayer);
 	int CanPlayerLeaveTable(CPlayer* pPlayer);
+	int CanPlayerReady(CPlayer* pPlayer);
 
 #pragma endregion
 
 	//功能接口
 public:
 	//发送场景
-	virtual bool SendGameScene(CPlayer * pIServerUserItem, VOID * pData, WORD wDataSize);
+	virtual bool SendGameScene(IServerUserItem * pIServerUserItem, VOID * pData, WORD wDataSize);
 
 #pragma region 桌子动作
 public:
