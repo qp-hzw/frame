@@ -32,7 +32,6 @@ CGameCtrl::CGameCtrl(std::string dll_name)
 
 	m_subgame_dll_name = dll_name;
 	m_ServerID = 0;
-	m_wGameServerPort = _MIN_SERVER_PORT;
 }
 
 //析构函数
@@ -121,9 +120,6 @@ int CGameCtrl::InitializeService()
 	/***************************************************  socket::server 配置信息 *************************************************/
 	//配置网络 -- TODONOW 由center统一分配
 	//if(m_TCPNetworkEngine->SetServiceParameter(m_GameServiceOption.wGameServerPort)==false) return 12;
-	//测试
-	if (m_TCPNetworkEngine->SetServiceParameter(m_wGameServerPort) == false) return 12;
-	m_wGameServerPort++;
 
 	/***************************************************  log 配置信息 *************************************************/
 	//考虑到游戏服到现在才能知道ServerID, 因此只能将log的配置信息写到这里
@@ -168,6 +164,15 @@ bool CGameCtrl::StartNetworkService()
 	}
 
 	return true;
+}
+
+//配置端口
+int CGameCtrl::SetNetworkPort(WORD Port)
+{
+	if (m_TCPNetworkEngine->SetServiceParameter(Port) == false)
+		return -1;
+
+	return 0;
 }
 
 //获取ITableFrameSink

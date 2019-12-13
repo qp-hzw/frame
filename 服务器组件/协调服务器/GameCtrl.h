@@ -48,7 +48,7 @@ public:
 	bool SendDataBatch(WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize);
 
 public:
-	int GeneratePort2Game(int& port);
+	int GeneratePort2Game(WORD& port);
 };
            
 extern CGameCtrl                   *g_GameCtrl;                          

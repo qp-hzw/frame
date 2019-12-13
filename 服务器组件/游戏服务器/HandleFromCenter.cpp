@@ -24,6 +24,22 @@ bool CHandleFromCenter::OnTCPSocketMainRegister(WORD wSubCmdID, VOID * pData, WO
 	{
 	case CPO_REGISTER_SUCESS:		//注册完成
 		{
+			//校验
+			if (sizeof(tagServerItem) != wDataSize)
+				return false;
+
+			//获取数据
+			tagServerItem *pServerItem = (tagServerItem *)pData;
+
+			CLog::Log(log_debug, "port:%d", pServerItem->wServerPort);
+
+			//配置端口
+			if (0 != g_GameCtrl->SetNetworkPort(pServerItem->wServerPort))
+			{
+				g_GameCtrl->ConcludeService();
+				return true;
+			}
+
 			//开启socket::server服务
 			if(!g_GameCtrl->StartNetworkService())
 			{

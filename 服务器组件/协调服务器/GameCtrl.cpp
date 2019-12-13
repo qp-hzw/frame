@@ -124,7 +124,7 @@ bool CGameCtrl::SendDataBatch(WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WOR
 
 
 /*为GameServer自动生成端口*/
-int CGameCtrl::GeneratePort2Game(int& port)
+int CGameCtrl::GeneratePort2Game(WORD& port)
 {
 	/*
 	** 1. 读取所有m_GameMap中所有的ServerID的端口 -- 以后需要查看GameServer list运行情况的时候, 可以改为存储在数据库

@@ -1406,6 +1406,9 @@ struct STR_CMD_LC_GAME_QUERY_GAMEID
 	TCHAR							szDescribeString[LEN_MESSAGE_DESCRIBE];	//描述消息
 
 	DWORD	dwGameID;				//可用的GameID;
+	TCHAR							szIPAddr[LEN_IP_ADDR];					//ip地址
+	DWORD							dwPort;									//ip端口
+
 };
 #pragma endregion
 

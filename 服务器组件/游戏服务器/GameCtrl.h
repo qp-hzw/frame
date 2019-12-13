@@ -33,7 +33,6 @@ protected:
 	std::string			            m_subgame_dll_name;				    //子游戏dll名字
 	
 	DWORD                           m_ServerID;                         //serverid
-	WORD							m_wGameServerPort;				//游戏端口
 
 	//函数定义
 public:
@@ -52,6 +51,9 @@ public:
 	//启动socket::server
 	bool StartNetworkService();
 
+	//配置端口
+	int SetNetworkPort(WORD Port);
+
 	//获取ITableFrameSink
 	ITableFrameSink* GetITableFrameSink();
 
@@ -67,7 +69,6 @@ protected:
 	int InitializeService();
 	//启动内核
 	int StartKernelService();
-
 
 	/*********************** 消息发送 Socket::Server -> Socket::Client ***********************/
 public:
