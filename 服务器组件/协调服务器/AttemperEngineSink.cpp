@@ -73,15 +73,19 @@ bool CAttemperEngineSink::DoServerRegister(TCP_Command Command, VOID * pData, WO
 	lstrcpyn(ServerItem.szServerName,pItem->szServerName,CountArray(ServerItem.szServerName));
 	lstrcpyn(ServerItem.szServerAddr,pItem->szServerAddr,CountArray(ServerItem.szServerAddr));
 
-	//获取端口-由center配置
-	g_GameCtrl->GeneratePort2Game(ServerItem.wServerPort);
+	//游戏服获取端口-由center配置
+	if(GAME_TYPE == ServerItem.byServerType)
+	{
+		g_GameCtrl->GeneratePort2Game(pItem->wServerPort);
+	}
 
+	ServerItem.wServerPort = pItem->wServerPort;
 	CServerItemManager::InsertItem(ServerItem);
 
 	CLog::Log(log_debug, "port:%d", ServerItem.wServerPort);
 
 	//发送 注册完成
-	g_GameCtrl->SendData(dwSocketID,MDM_REGISTER,CPO_REGISTER_SUCESS, &ServerItem, sizeof(ServerItem));
+	g_GameCtrl->SendData(dwSocketID,MDM_REGISTER,CPO_REGISTER_SUCESS, &ServerItem.wServerPort, sizeof(ServerItem.wServerPort));
 
 	return true;
 }

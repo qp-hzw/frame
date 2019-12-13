@@ -149,7 +149,7 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		ServerItem.byServerType = GAME_TYPE;
 		//lstrcpyn(RegisterServer.szServerName, m_pGameServiceOption->szServerName, CountArray(RegisterServer.szServerName));
 		lstrcpyn(ServerItem.szServerAddr,TEXT("127.0.0.1"),CountArray(ServerItem.szServerAddr));
-		ServerItem.wServerPort = 9988; //TODONOW 这里的端口看下什么时候获取合适
+		ServerItem.wServerPort = 0;
 
 		//发送数据
 		g_TCPSocketEngine->SendData(MDM_REGISTER,CPR_REGISTER_SERVER,&ServerItem,sizeof(ServerItem));
