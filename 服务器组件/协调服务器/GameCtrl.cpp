@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "GameCtrl.h"
+#include "ServerItemManager.h"
 
 //全局变量
 IAttemperEngine			   *g_AttemperEngine = NULL;					//调度引擎
@@ -119,4 +120,67 @@ bool CGameCtrl::SendData(DWORD dwSocketID, WORD wMainCmdID, WORD wSubCmdID, VOID
 bool CGameCtrl::SendDataBatch(WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize)
 {
 	return m_TCPNetworkEngine->SendDataBatch(wMainCmdID, wSubCmdID, pData, wDataSize);
+}
+
+
+/*为GameServer自动生成端口*/
+int CGameCtrl::GeneratePort2Game(int& port)
+{
+	/*
+	** 1. 读取所有m_GameMap中所有的ServerID的端口 -- 以后需要查看GameServer list运行情况的时候, 可以改为存储在数据库
+	** 2. 过滤不符合规则的端口
+	** 3. 找到 最小的port 和 最大的port 
+	** 4. 最小的 +1 或者 最大的port -1
+	** 5. 配置最新的port
+	**
+	** _MAX_SERVER_PORT - _MIN_SERVER_PORT < 1500  -- 因为Gate.port = Game.port + 1500
+	*/
+
+	//寻找最大 和  最小的ServerPort
+	int iMinServerPort = _MAX_SERVER_PORT;
+	int iMaxServerPort = _MIN_SERVER_PORT;
+
+	//遍历m_GameMap
+	std::vector<tagServerItem*> ALLGameServer= CServerItemManager::FindAllGameServer();
+	for (auto item : ALLGameServer)
+	{
+		if(!item) continue;
+
+		//数据校验 port不正确则 continue
+		if (item->wServerPort < _MIN_SERVER_PORT
+			|| item->wServerPort > _MAX_SERVER_PORT)
+		{
+			continue;
+		}
+
+		//获取最小的port
+		iMinServerPort = (item->wServerPort < iMinServerPort) ? item->wServerPort : iMinServerPort;
+		//获取最大的port
+		iMaxServerPort = (item->wServerPort > iMaxServerPort) ? item->wServerPort : iMaxServerPort;
+
+	}
+
+	//数据校验 -- 数据错误
+	if ((iMinServerPort < _MIN_SERVER_PORT) || (iMaxServerPort > _MAX_SERVER_PORT))
+	{
+		return 1;
+	}
+
+	//端口已满
+	if ((iMinServerPort == _MIN_SERVER_PORT) && (iMaxServerPort == _MAX_SERVER_PORT))
+	{
+		return 2;
+	}
+
+	//优先选用 低端口
+	if (iMinServerPort > _MIN_SERVER_PORT)
+	{
+		port = iMinServerPort - 1;
+	}
+	else
+	{
+		port = iMaxServerPort - 1;
+	}
+
+	return 0;
 }
