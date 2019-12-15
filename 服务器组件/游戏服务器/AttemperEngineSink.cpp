@@ -151,6 +151,10 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		lstrcpyn(ServerItem.szServerAddr,TEXT("127.0.0.1"),CountArray(ServerItem.szServerAddr));
 		ServerItem.wServerPort = 0;
 
+		//≤‚ ‘kindID
+		ServerItem.dwServerID = 15<<16;
+		CLog::Log(log_debug, "ServerID:%d", ServerItem.dwServerID);
+
 		//∑¢ÀÕ ˝æ›
 		g_TCPSocketEngine->SendData(MDM_REGISTER,CPR_REGISTER_SERVER,&ServerItem,sizeof(ServerItem));
 

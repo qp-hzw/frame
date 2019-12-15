@@ -662,6 +662,8 @@ bool CHandleFromGate::On_MDM_GAME(WORD wSubCmdID, VOID * pData, WORD wDataSize, 
 			CPR.dwKindID = pSub->dwKindID;
 			CPR.dwSocketID = dwSocketID;
 
+			CLog::Log(log_debug, "Game KindID: %d", CPR.dwKindID);
+
 			g_TCPSocketEngine->SendData(MDM_TRANSFER, CPR_LP_CREATE_TABLE, &CPR, sizeof(CPR));
 
 			return true;

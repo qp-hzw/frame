@@ -101,6 +101,8 @@ bool CHandleFromCenter::OnTCPSocketMainTransfer(WORD wSubCmdID, VOID * pData, WO
 			CMD.dwGameID = pCPO->dwGameID;
 			CMD.dwResultCode = pCPO->dwResultCode;
 			memcpy(CMD.szDescribeString, pCPO->szDescribeString, sizeof(CMD.szDescribeString));
+			CopyMemory(CMD.szIPAddr, pCPO->szIPAddr, sizeof(CMD.szIPAddr));
+			CMD.dwPort = pCPO->dwPort;
 
 			g_GameCtrl->SendData(pCPO->dwSocketID, MDM_GAME, CMD_LC_GAME_QUERY_GAMEID, &CMD, sizeof(CMD));
 			return true;

@@ -66,6 +66,9 @@ struct STR_CPO_PL_CREATE_TABLE
 	DWORD	dwGameID;				//可用的GameID;
 
 	DWORD	dwSocketID;									//客户端SocketID
+
+	TCHAR	szIPAddr[LEN_IP_ADDR];					//ip地址
+	DWORD	dwPort;									//ip端口
 };
 #pragma endregion
 

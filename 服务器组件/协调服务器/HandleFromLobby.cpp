@@ -55,6 +55,8 @@ bool CHandleFromLobby::OnTCPNetworkMainTransfer(WORD wSubCmdID, VOID * pData, WO
 			//获取到游戏服KindID匹配的数据
 			tagServerItem *pItem = CServerItemManager::FindItemByKindID(pCPR->dwKindID); 
 
+			//校验游戏服是否可用
+
 			//CPO构造
 			STR_CPO_PL_CREATE_TABLE CPO;
 			ZeroMemory(&CPO, sizeof(CPO));
@@ -70,6 +72,8 @@ bool CHandleFromLobby::OnTCPNetworkMainTransfer(WORD wSubCmdID, VOID * pData, WO
 				CPO.dwResultCode = 0;
 				CPO.dwGameID = pItem->dwServerID & 0x00FFFF00;
 				CPO.dwSocketID = pCPR->dwSocketID;
+				CopyMemory(CPO.szIPAddr, pItem->szServerAddr, sizeof(TCHAR)*LEN_IP_ADDR);
+				CPO.dwPort = pItem->wServerPort;
 			}
 
 			//发送消息
