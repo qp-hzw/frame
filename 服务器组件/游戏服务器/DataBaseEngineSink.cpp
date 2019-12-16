@@ -54,6 +54,7 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 		{
 			bSucceed = On_DBR_GP_QUIT(dwContextID,pData,wDataSize,dwUserID);
 		}
+		break;
 	case DBR_CG_LOGON_USERID:			//I D 登录
 		{
 			bSucceed = On_DBR_Logon_UserID(dwContextID,pData,wDataSize,dwUserID);
@@ -259,6 +260,8 @@ bool CDataBaseEngineSink::On_DBR_Logon_UserID(DWORD dwContextID, VOID * pData, W
 	//执行查询
 	LONG lResultCode = m_TreasureDB->ExecuteProcess(TEXT("GSP_CG_Logon_UserID"),true);
 
+	CLog::Log(log_debug, "lResultCode: %d", lResultCode);
+
 	//结果处理
 	CDBVarValue DBVarValue;
 	m_TreasureDB->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
@@ -281,7 +284,7 @@ bool CDataBaseEngineSink::On_DBR_GP_QUIT(DWORD dwContextID, VOID * pData, WORD w
 	m_TreasureDB->AddParameter(TEXT("@byOnlineMask"),groupInfo->byOnlineMask);
 
 	//执行输出
-	m_TreasureDB->ExecuteProcess(TEXT("GSP_CL_Quit"),false);	
+	m_TreasureDB->ExecuteProcess(TEXT("GSP_CL_Quit"),false);	  //没有这个存储过程
 
 	return true;
 

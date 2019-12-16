@@ -11,6 +11,7 @@ CPlayer::CPlayer(tagUserInfo & UserInfo)
 	//属性变量
 	CopyMemory(&m_UserInfo,&UserInfo,sizeof(UserInfo));
 
+	m_dwSocketID = UserInfo.dwSocketId;
 
 	//登录信息
 	m_dwLogonTime=UserInfo.dwLogonTime;

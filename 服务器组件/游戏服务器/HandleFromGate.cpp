@@ -380,6 +380,8 @@ void CHandleFromGate::ActiveUserItem(CPlayer **pIServerUserItem, DWORD dwSocketI
 	UserInfo.lRestrictScore=0L;//屏蔽每局封顶
 	lstrcpyn(UserInfo.szPassword,pDBOLogon->szPassword,CountArray(UserInfo.szPassword));
 
+	UserInfo.dwSocketId = dwSocketID;
+
 	//连接信息
 	//UserInfo.wBindIndex=wBindIndex;
 	//UserInfo.dwClientAddr=pBindParameter->dwClientAddr;
@@ -407,7 +409,7 @@ void CHandleFromGate::ActiveUserItem(CPlayer **pIServerUserItem, DWORD dwSocketI
 	OnEventUserLogon(*pIServerUserItem, false);
 }
 
-//用户登录
+//用户登录   这里崩溃
 VOID CHandleFromGate::OnEventUserLogon(CPlayer * pIServerUserItem, bool bAlreadyOnLine)
 {
 	//获取参数
