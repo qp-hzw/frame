@@ -104,6 +104,13 @@ bool CHandleFromCenter::OnTCPSocketMainTransfer(WORD wSubCmdID, VOID * pData, WO
 			CopyMemory(CMD.szIPAddr, pCPO->szIPAddr, sizeof(CMD.szIPAddr));
 			CMD.dwPort = pCPO->dwPort;
 
+
+			CLog::Log(log_debug, "Return Ip: %s", CMD.szIPAddr);
+			CLog::Log(log_debug, "Return Port: %d", CMD.dwPort);
+			CLog::Log(log_debug, "Return Des: %s", CMD.szDescribeString);
+			CLog::Log(log_debug, "Return GameID: %d", CMD.dwGameID);
+			CLog::Log(log_debug, "Return Code: %d", CMD.dwResultCode);
+
 			g_GameCtrl->SendData(pCPO->dwSocketID, MDM_GAME, CMD_LC_GAME_QUERY_GAMEID, &CMD, sizeof(CMD));
 			return true;
 		}

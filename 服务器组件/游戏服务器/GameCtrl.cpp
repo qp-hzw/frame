@@ -105,6 +105,9 @@ int CGameCtrl::InitializeService()
 	IUnknownEx * pIAttemperEngineSink=static_cast<IAttemperEngineSink*>(&m_AttemperEngineSink);
 	IUnknownEx * pIDataBaseEngineSink=static_cast<IUnknownEx*>(&m_DataBaseEngineSink);
 
+	//配置游戏ServerID
+	if (0 == SubGameDll->GetKindIDToFrame())	return 8;
+	SetServerID((SubGameDll->GetKindIDToFrame()) << 16);
 
 	/***************************************************  AttemperEngine 配置信息 *************************************************/
 	//AttemperEngine设置 Attemper钩子

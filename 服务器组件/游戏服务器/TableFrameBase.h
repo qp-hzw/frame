@@ -304,6 +304,8 @@ public:
 	virtual SCORE QueryLessEnterScore(WORD wChairID, IServerUserItem * pIServerUserItem) = NULL;
 	//查询是否扣服务费
 	virtual bool QueryBuckleServiceCharge(WORD wChairID) = NULL;
+	//获取KindID	frame交互
+	virtual DWORD GetKindIDToFrame() = NULL;
 
 	//游戏事件
 public:
