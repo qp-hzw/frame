@@ -1420,8 +1420,8 @@ bool CTableFrame::OnEventSocketGame(WORD wSubCmdID, VOID * pData, WORD wDataSize
 //框架事件
 bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSize, CPlayer * pIServerUserItem)
 {
-	//游戏处理 此处处理的应该是只有200的主消息号 TODONOW 细看
-	if (m_pITableFrameSink->OnFrameMessage(wSubCmdID,pData,wDataSize,GetPlayerChair(pIServerUserItem))==true) return true;
+	//游戏处理 此处处理的应该是只有200的主消息号 TODONOW 细看	崩溃
+	//if (m_pITableFrameSink->OnFrameMessage(wSubCmdID,pData,wDataSize,GetPlayerChair(pIServerUserItem))==true) return true;
 
 	//默认处理
 	switch (wSubCmdID)
@@ -1527,7 +1527,7 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 			//事件通知
 			if (m_pITableFrameSink!=NULL)
 			{
-				//m_pITableFrameSink->OnActionUserOnReady(wChairID,pIServerUserItem,pData,wDataSize);
+				m_pITableFrameSink->OnActionUserOnReady(wChairID, NULL, NULL, 0);
 			}
 
 			pIServerUserItem->SetUserStatus(US_READY,m_wTableID,wChairID);

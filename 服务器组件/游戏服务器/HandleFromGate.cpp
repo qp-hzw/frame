@@ -209,12 +209,18 @@ bool CHandleFromGate::OnTCPNetworkMainFrame(WORD wSubCmdID, VOID * pData, WORD w
 	if (pIServerUserItem==NULL) return false;
 
 	//处理过虑
-	WORD wTableID=pIServerUserItem->GetTableID();
+	DWORD wTableID=pIServerUserItem->GetTableID();
 	WORD wChairID=pIServerUserItem->GetChairID();
 	if ((wTableID==INVALID_TABLE)||(wChairID==INVALID_CHAIR)) return true;
 
 	//消息处理 
 	CTableFrame * pTableFrame=CTableManager::FindTableByTableID(wTableID);
+	if (pTableFrame == NULL)
+	{
+		CLog::Log(log_error, "pTableFrame == NULL");
+		return false;
+	}
+
 	return pTableFrame->OnEventSocketFrame(wSubCmdID,pData,wDataSize,pIServerUserItem);
 }
 
@@ -409,7 +415,7 @@ void CHandleFromGate::ActiveUserItem(CPlayer **pIServerUserItem, DWORD dwSocketI
 	OnEventUserLogon(*pIServerUserItem, false);
 }
 
-//用户登录   这里崩溃
+//用户登录 
 VOID CHandleFromGate::OnEventUserLogon(CPlayer * pIServerUserItem, bool bAlreadyOnLine)
 {
 	//获取参数
@@ -968,7 +974,7 @@ bool CHandleFromGate::On_SUB_CG_USER_CREATE_ROOM(VOID * pData, WORD wDataSize, D
 {
 	//获取用户
 	WORD wBindIndex = LOWORD(dwSocketID);
-	CPlayer *pIServerUserItem = GetBindUserItem(wBindIndex);	//要去看下为啥能根据socketid查询用户
+	CPlayer *pIServerUserItem = GetBindUserItem(wBindIndex);
 
 	//用户校验
 	if (pIServerUserItem==NULL) 
@@ -1037,7 +1043,8 @@ bool CHandleFromGate::CreateTableNormal(tagTableRule * pCfg, CPlayer *pIServerUs
 	//检查加入门票
 	if(!CheckCreateTableTicket(pCfg, pIServerUserItem))
 	{
-		return true; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
+		CLog::Log(log_debug, "门票不够: %d", pCfg->GameMode);
+		//return true; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
 	} 
 
 	//用户效验
@@ -1534,7 +1541,7 @@ bool CHandleFromGate::On_CMD_GC_JOIN_TABLE( DWORD dwSocketID, VOID * pData, WORD
 	}
 
 	/* 4. 桌子校验 */
-	DWORD dwPassword = pJoin->dwTableID;		//这里校验有问题
+	DWORD dwPassword = pJoin->dwTableID;	
 	if(dwPassword == 0)
 	{
 		SendRequestFailure(pIServerUserItem, TEXT("房间号错误,请重新尝试"), REQUEST_FAILURE_PASSWORD);
@@ -2576,7 +2583,7 @@ CPlayer * CHandleFromGate::GetBindUserItem(WORD wBindIndex)
 	CPlayer *pPlayer = NULL;
 
 	//获取用户
-	pPlayer = CPlayerManager::FindPlayerBySocketID(wBindIndex);
+	pPlayer = CPlayerManager::FindPlayerByEnum(wBindIndex);
 	if (pPlayer == NULL)
 	{
 		return NULL;
@@ -2953,7 +2960,7 @@ DWORD CHandleFromGate::GenerateTablePassword()
 
 			//桌子状态判断
 			if ( (NULL != pTableFrame) && 
-				 (0 < pTableFrame->GetSitUserCount() ) && 
+				 (0 < pTableFrame->GetSitUserCount() ) &&
 				 (dwPassword == pTableFrame->GetTableID()) )
 			{
 				bFind = true;
@@ -3132,6 +3139,8 @@ bool CHandleFromGate::HandleCreateTable(CTableFrame *pCurTableFrame, CPlayer *pI
 	//生成桌子密码，房间号 = 前面 + TABLEID
 	srand(static_cast<unsigned int >(time(NULL)));
 	DWORD dwPassword = GenerateTablePassword();
+
+	CLog::Log(log_debug, "PassWord: %d", dwPassword);
 
 	//设置桌子属性
 	pCurTableFrame->SetTableOwner(pIServerUserItem->GetUserID());	//设置桌主

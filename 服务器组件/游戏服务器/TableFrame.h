@@ -47,7 +47,7 @@ class CTableFrame : public ITableFrame
 #pragma region 成员变量
 	/****************************************** 静态数据 **************************************************/
 private:
-	WORD							m_wTableID;							//桌子号码		从0开始，在桌子初始化的时候已经赋值
+	DWORD							m_wTableID;							//桌子号码		从0开始，在桌子初始化的时候已经赋值
 	WORD							m_wChairCount;						//椅子数目
 
 	BYTE							m_cbTableMode;						//桌子游戏模式  房卡场, 金币场, 房卡金币场, 比赛场
@@ -111,7 +111,7 @@ public:
 #pragma region 桌子属性设置与获取
 public:
 	//桌子编号
-	virtual WORD GetTableID() { return m_wTableID; }
+	virtual DWORD GetTableID() { return m_wTableID; }
 	//设置密码
 	virtual void SetTableID(DWORD dwTableID){ m_wTableID=dwTableID; }
 
@@ -145,6 +145,8 @@ public:
 	{
 		memcpy(&m_tagTableRule, pRule, sizeof(m_tagTableRule));
 		m_wChairCount = pRule->PlayerCount;
+		m_player_list.resize(m_wChairCount, NULL);
+		m_user_list.resize(m_wChairCount, NULL);
 		SetTableMode(pRule->GameMode);
 	};
 
