@@ -284,7 +284,7 @@ bool CDataBaseEngineSink::On_DBR_GP_QUIT(DWORD dwContextID, VOID * pData, WORD w
 	m_TreasureDB->AddParameter(TEXT("@byOnlineMask"),groupInfo->byOnlineMask);
 
 	//执行输出
-	m_TreasureDB->ExecuteProcess(TEXT("GSP_CL_Quit"),false);	  //没有这个存储过程
+	m_TreasureDB->ExecuteProcess(TEXT("GSP_CL_Quit"),false);	  
 
 	return true;
 

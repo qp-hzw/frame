@@ -294,7 +294,7 @@ public:
 	//复位接口
 	virtual VOID RepositionSink() = NULL;
 	//配置接口
-	virtual bool Initialization(IUnknownEx * pIUnknownEx) = NULL;
+	virtual bool Initialization(ITableFrame *pTableFrame) = NULL;
 
 	//查询接口
 public:
@@ -314,7 +314,7 @@ public:
 	//游戏结束
 	virtual bool OnEventGameConclude(WORD wChairID, IServerUserItem * pIServerUserItem, BYTE cbReason) = NULL;
 	//发送场景
-	virtual bool OnEventSendGameScene(WORD wChairID, BYTE cbGameStatus, bool bSendSecret) = NULL;
+	virtual bool OnEventSendGameScene(WORD wChairID, IServerUserItem *pIServerUserItem, BYTE cbGameStatus, bool bSendSecret) = NULL;
 
 	//事件接口
 public:

@@ -2,6 +2,7 @@
 #include "TableFrame.h"
 #include "DataBasePacket.h"
 #include "GameCtrl.h"
+#include <iostream>
 //#include <algorithm>
 
 //结束原因
@@ -597,7 +598,8 @@ int CTableFrame::PlayerSitTable(WORD wChairID, CPlayer * pPlayer, LPCTSTR lpszPa
 	if (ret !=0) return ret;
 
 	//2. Table
-	m_player_list[wChairID] = pPlayer;
+	//m_player_list[wChairID] = pPlayer;
+	m_user_list[wChairID] = pPlayer;
 
 	//3. Player
 	pPlayer->SetUserStatus(US_SIT, m_wTableID, wChairID);
@@ -642,9 +644,17 @@ int CTableFrame::PlayerLeaveTable(CPlayer* pPlayer)
 	if(ret!=0) return ret;
 
 	//2. Table
-	auto ite = find(m_user_list.begin(), m_user_list.end(), pPlayer);
-	if(ite != m_user_list.end())
-		ite = m_user_list.erase(ite);
+	auto ite1 = find(m_user_list.begin(), m_user_list.end(), pPlayer);
+	if (ite1 != m_user_list.end())
+	{
+		*ite1 = NULL;
+	}
+
+	auto ite2 = find(m_player_list.begin(), m_player_list.end(), pPlayer);
+	if (ite2 != m_player_list.end())
+	{
+		*ite2 = NULL;
+	}
 
 	//3. Player
 	pPlayer->SetUserStatus(US_FREE, INVALID_TABLE, INVALID_CHAIR);
@@ -660,11 +670,41 @@ int CTableFrame::PlayerReady(WORD wChairID, CPlayer* pPlayer)
 	int ret = CanPlayerReady(pPlayer);
 	if (ret != 0)	return ret;
 
-	//Player
-	pPlayer->SetUserStatus(US_READY, m_wTableID, wChairID);
+	//获取参数
+	DWORD	dwTableID = pPlayer->GetTableID();
 
-	//subgame
-	m_pITableFrameSink->OnActionUserOnReady(wChairID, NULL, NULL, 0);
+	//设置用户状态为准备
+	pPlayer->SetUserStatus(US_READY, dwTableID, wChairID);
+
+	//给客户端发送准备行为
+	CMD_GF_GameStatus GameStatus;
+	ZeroMemory(&GameStatus, sizeof(GameStatus));
+
+	//赋值
+	GameStatus.cbUserAction = pPlayer->GetUserStatus();
+	tagUserInfo *pUserInfo = pPlayer->GetUserInfo();
+	CopyMemory(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
+
+	//广播发送
+	for (auto it = m_user_list.begin(); it != m_user_list.end(); it++)
+	{
+		if ((*it) != NULL)
+		{
+			g_GameCtrl->SendData(*it, MDM_USER, SUB_GR_USER_STATUS, &GameStatus, sizeof(GameStatus));
+		}
+	}
+
+	//判断三个玩家是否都准备
+	WORD ReadyNum = 0;
+	for (auto it = m_user_list.begin(); it != m_user_list.end(); it++)
+	{
+		if ((*it) != NULL && (US_READY == (*it)->GetUserStatus()))
+			ReadyNum++;
+	}
+
+	//三个玩家准备 开始游戏	//不在子游戏处理
+	if (ReadyNum >= m_tagTableRule.PlayerCount)
+		StartGame();
 
 	return 0;
 }
@@ -1428,24 +1468,58 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 	{
 	case SUB_RG_FRAME_OPTION:	//游戏配置
 		{
-			//效验参数
-			if (wDataSize!=sizeof(CMD_GF_GameOption)) return false;
-
 			//变量定义
 			CMD_GF_GameOption * pGameOption=(CMD_GF_GameOption *)pData;
 
-			//获取属性
-			WORD wChairID=pIServerUserItem->GetChairID();
-			BYTE cbUserStatus=pIServerUserItem->GetUserStatus();
+			//玩家加入房间  将在房间里的所有玩家信息发送给新玩家
+			for (auto it = m_user_list.begin(); it != m_user_list.end(); it++)
+			{
+				if ((*it) != NULL)
+				{
+					//获取属性
+					WORD wChairID = (*it)->GetChairID();
+					BYTE cbUserStatus = (*it)->GetUserStatus();
+
+					//发送状态
+					CMD_GF_GameStatus GameStatus;
+					GameStatus.cbUserAction = cbUserStatus;
+
+					tagUserInfo *pUserInfo = (*it)->GetUserInfo();
+					memset(&GameStatus.UserInfo, 0, sizeof(tagUserInfo));
+					memcpy(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
+
+					CLog::Log(log_debug, "wChairID: %d", GameStatus.UserInfo.wChairID);
+					CLog::Log(log_debug, "dwTableID: %d", GameStatus.UserInfo.wTableID);
+
+					g_GameCtrl->SendData(pIServerUserItem, MDM_USER, SUB_GR_USER_STATUS, &GameStatus, sizeof(GameStatus));
+				}
+			}
+
+			//再把新玩家信息发送给所有玩家
+			WORD wChairID = pIServerUserItem->GetChairID();
+			BYTE cbUserStatus = pIServerUserItem->GetUserStatus();
 
 			//发送状态
-			CMD_GF_GameStatus GameStatus;
-			GameStatus.cbGameStatus=m_cbGameStatus;
+			CMD_GF_GameStatus GameStatus1;
+			GameStatus1.cbUserAction = cbUserStatus;
 
-			g_GameCtrl->SendData(pIServerUserItem,MDM_G_FRAME,CMD_GR_FRAME_GAME_STATUS,&GameStatus,sizeof(GameStatus));
+			tagUserInfo *pUserInfo = pIServerUserItem->GetUserInfo();
+			memset(&GameStatus1.UserInfo, 0, sizeof(tagUserInfo));
+			memcpy(&GameStatus1.UserInfo, pUserInfo, sizeof(tagUserInfo));
+
+			for (auto it = m_user_list.begin(); it != m_user_list.end(); it++)
+			{
+				if ((*it) != NULL && (*it) != pIServerUserItem)
+				{
+					g_GameCtrl->SendData((*it), MDM_USER, SUB_GR_USER_STATUS, &GameStatus1, sizeof(GameStatus1));
+				}
+			}
+
+			//初始化接口
+			m_pITableFrameSink->Initialization(this);
 
 			//发送场景
-			m_pITableFrameSink->OnEventSendGameScene(wChairID, m_cbGameStatus, true);
+			m_pITableFrameSink->OnEventSendGameScene(wChairID, pIServerUserItem, m_cbGameStatus, true);
 
 			//发送解散面板状态 -- 只有处于解散状态 才会发送
 			if(m_bUnderDissState)
@@ -1766,6 +1840,8 @@ bool CTableFrame::SendRequestFailure(CPlayer * pIServerUserItem, LPCTSTR pszDesc
 	WORD wDataSize=CountStringBuffer(RequestFailure.szDescribeString);
 	WORD wHeadSize=sizeof(RequestFailure)-sizeof(RequestFailure.szDescribeString);
 	g_GameCtrl->SendData(pIServerUserItem,MDM_USER,SUB_GR_REQUEST_FAILURE,&RequestFailure,wHeadSize+wDataSize);
+
+	std::wcout << "TF: " << pszDescribe << std::endl;
 
 	return true;
 }

@@ -92,7 +92,7 @@ WORD CPlayer::GetUserFleeRate()
 }
 
 //…Ë÷√◊¥Ã¨
-bool CPlayer::SetUserStatus(BYTE cbUserStatus, WORD wTableID, WORD wChairID)
+bool CPlayer::SetUserStatus(BYTE cbUserStatus, DWORD wTableID, WORD wChairID)
 {
 	m_UserInfo.wTableID=wTableID;
 	m_UserInfo.wChairID=wChairID;

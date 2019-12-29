@@ -148,7 +148,7 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		ServerItem.dwServerID = g_GameCtrl->GetServerID();
 		ServerItem.byServerType = GAME_TYPE;
 		//lstrcpyn(RegisterServer.szServerName, m_pGameServiceOption->szServerName, CountArray(RegisterServer.szServerName));
-		lstrcpyn(ServerItem.szServerAddr,TEXT("127.0.0.1"),CountArray(ServerItem.szServerAddr));
+		lstrcpyn(ServerItem.szServerAddr,TEXT("192.168.1.105"),CountArray(ServerItem.szServerAddr));
 		ServerItem.wServerPort = 0;
 
 		CLog::Log(log_debug, "ServerID:%d", ServerItem.dwServerID);
@@ -203,7 +203,18 @@ bool CAttemperEngineSink::OnEventTCPNetworkShut(DWORD dwClientAddr, DWORD dwActi
 	//获取用户
 	CPlayer * pPlayer=  CPlayerManager::FindPlayerBySocketID(dwSocketID);
 
-	//Club俱乐部 玩家掉线的处理
+	//桌子处理
+	if (pPlayer != NULL)
+	{
+		DWORD passWord = pPlayer->GetTableID();
+
+		CTableFrame *pTableFrame = CTableManager::FindTableByTableID(passWord);
+		if (pTableFrame == NULL)
+			return false;
+
+		//玩家离开
+		pTableFrame->PlayerLeaveTable(pPlayer);
+	}
 
 	//用户处理
 	if (pPlayer!=NULL)
@@ -211,7 +222,7 @@ bool CAttemperEngineSink::OnEventTCPNetworkShut(DWORD dwClientAddr, DWORD dwActi
 		bool bIsExsit = false; //是否属于断线
 
 		//变量定义
-		WORD wTableID=pPlayer->GetTableID();
+		DWORD wTableID=pPlayer->GetTableID();
 
 		//断线处理
 		if (wTableID!=INVALID_TABLE)
@@ -237,7 +248,10 @@ bool CAttemperEngineSink::OnEventTCPNetworkShut(DWORD dwClientAddr, DWORD dwActi
 		}
 		else
 		{
-			pPlayer->SetUserStatus(US_FREE,INVALID_TABLE,INVALID_CHAIR);
+			//删除用户
+			CPlayerManager::DeletePlayer(pPlayer);
+			delete pPlayer;
+			return true;
 		}
 
 		//玩家状态变化

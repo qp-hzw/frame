@@ -423,8 +423,6 @@ struct CMD_GF_OnlinePlayers
 //用户准备
 struct STR_SUB_CG_USER_READY
 {
-	WORD							wTableID;							//桌子位置
-	WORD							wChairID;							//椅子位置
 };
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -595,9 +593,6 @@ struct CMD_GR_MatchDesc
 //游戏配置
 struct CMD_GF_GameOption
 {
-	BYTE							cbAllowLookon;						//旁观标志
-	DWORD							dwFrameVersion;						//框架版本
-	DWORD							dwClientVersion;					//游戏版本
 };
 
 //旁观配置
@@ -616,8 +611,8 @@ struct CMD_GF_LookonStatus
 //游戏环境
 struct CMD_GF_GameStatus
 {
-	BYTE							cbGameStatus;						//游戏状态
-	BYTE							cbAllowLookon;						//旁观标志
+	BYTE							cbUserAction;							//游戏状态
+	tagUserInfo				UserInfo;								//玩家信息
 };
 
 //用户聊天

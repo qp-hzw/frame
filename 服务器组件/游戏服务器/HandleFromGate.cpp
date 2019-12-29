@@ -1,6 +1,7 @@
 #include "HandleFromGate.h"
 #include "GameCtrl.h"
 #include "TableManager.h"
+#include <iostream>
 
 bool CHandleFromGate::HandlePacket(TCP_Command Command, VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
@@ -198,6 +199,7 @@ bool CHandleFromGate::OnTCPNetworkMainGame(WORD wSubCmdID, VOID * pData, WORD wD
 	CTableFrame * pTableFrame=CTableManager::FindTableByTableID(wTableID);
 	return pTableFrame->OnEventSocketGame(wSubCmdID,pData,wDataSize,pIServerUserItem);
 }
+
 //框架处理
 bool CHandleFromGate::OnTCPNetworkMainFrame(WORD wSubCmdID, VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
@@ -248,8 +250,11 @@ bool CHandleFromGate::On_SUB_CG_Logon_UserID(VOID * pData, WORD wDataSize, DWORD
 	//切换判断 TODONOW 重点查看
 	if( NULL != pIServerUserItem )
 	{
-		return SwitchUserItemConnect(pIServerUserItem, pLogonUserID->szMachineID, 
-			pLogonUserID->dLongitude, pLogonUserID->dLatitude);
+		//return SwitchUserItemConnect(pIServerUserItem, pLogonUserID->szMachineID, 
+				//pLogonUserID->dLongitude, pLogonUserID->dLatitude);
+
+		CPlayerManager::DeletePlayer(pIServerUserItem);
+		delete pIServerUserItem;				//改
 	}
 	
 
@@ -436,24 +441,6 @@ VOID CHandleFromGate::OnEventUserLogon(CPlayer * pIServerUserItem, bool bAlready
 	
 	/* 2. 发送玩家自己的信息给客户端 */
 	SendUserInfoPacket(pIServerUserItem, pIServerUserItem->GetSocketID());
-
-	/* 3. 发送登录游戏服的所有用户信息给该用户 */
-	WORD wUserIndex = 0;
-	CPlayer *pIServerUserItemSend = NULL;
-	while (true)
-	{
-		pIServerUserItemSend = CPlayerManager::FindPlayerByEnum(wUserIndex++);
-		if (pIServerUserItemSend == NULL) break;
-		if (pIServerUserItemSend == pIServerUserItem) continue;
-		SendUserInfoPacket(pIServerUserItemSend, pIServerUserItem->GetSocketID());
-	}
-
-	/* 5. 发送玩家信息		TODO  */
-	if (!bAlreadyOnLine)
-	{
-		SendUserInfoPacket(pIServerUserItem,INVALID_DWORD);
-	}
-
 
 	/* 7. 广播在线人数		TODONOW 客户端没用到该消息号 */
 	CMD_GF_OnlinePlayers OnlinePlayers;
@@ -715,28 +702,19 @@ bool CHandleFromGate::On_SUB_CG_User_StandUp(VOID * pData, WORD wDataSize, DWORD
 //用户准备
 bool CHandleFromGate::On_SUB_CG_User_Ready(VOID * pData, WORD wDataSize, DWORD dwSocketID) 
 {
-	//数据校验
-	if (wDataSize != sizeof(STR_SUB_CG_USER_READY))
-		return false;
-
-	//获取数据
-	STR_SUB_CG_USER_READY *m_pUserReady = (STR_SUB_CG_USER_READY *)pData;
-
 	//获取用户
 	CPlayer * pIServerUserItem = CPlayerManager::FindPlayerBySocketID(dwSocketID);
 	//校验
 	if (pIServerUserItem == NULL)
 		return false;
 
-	WORD wRequestTableID = m_pUserReady->wTableID;
-	WORD wRequestChairID = m_pUserReady->wChairID;
+	//获取桌子
+	CTableFrame *pTableFrame = CTableManager::FindTableByTableID(pIServerUserItem->GetTableID());
+	if (pTableFrame == NULL)
+		return false;
 
 	//准备处理
-	CTableFrame *pTableFrame = CTableManager::FindTableByTableID(wRequestTableID);
-	if (pTableFrame != NULL)
-	{
-		pTableFrame->PlayerReady(wRequestChairID, pIServerUserItem);
-	}
+	pTableFrame->PlayerReady(pIServerUserItem->GetChairID(), pIServerUserItem);
 
 	return true;
 }
@@ -1041,14 +1019,14 @@ bool CHandleFromGate::On_SUB_CG_USER_CREATE_TABLE(VOID * pData, WORD wDataSize, 
 bool CHandleFromGate::CreateTableNormal(tagTableRule * pCfg, CPlayer *pIServerUserItem, STR_SUB_CG_USER_CREATE_ROOM* pCreateRoom)
 {
 	//检查加入门票
-	if(!CheckCreateTableTicket(pCfg, pIServerUserItem))
+	//if(!CheckCreateTableTicket(pCfg, pIServerUserItem))
 	{
 		CLog::Log(log_debug, "门票不够: %d", pCfg->GameMode);
 		//return true; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
 	} 
 
 	//用户效验
-	if (INVALID_CHAIR != pIServerUserItem->GetChairID()) 
+	if (INVALID_CHAIR != pIServerUserItem->GetChairID())   //有问题
 	{
 		SendRequestFailure(pIServerUserItem, TEXT("正在游戏中,无法创建房间！"), REQUEST_FAILURE_NORMAL);
 		return true;//TODONOW 如果为false 客户端就断线重连了， 之后修改掉
@@ -2549,6 +2527,8 @@ bool CHandleFromGate::SendRequestFailure(CPlayer * pIServerUserItem, LPCTSTR psz
 
 	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, SUB_GR_REQUEST_FAILURE, &RequestFailure, sizeof(CMD_GR_RequestFailure));
 
+	std::wcout << "HFG: " << pszDescribe << std::endl;
+
 	return true;
 }
 
@@ -3004,16 +2984,14 @@ CTableFrame* CHandleFromGate::GetNextEmptyTable()
 		}
 	}
 
-	//考虑如果桌子满了是否要new一个新桌子
+	//创建桌子
+	pTableFrame = CTableManager::CreateTable();		//建桌函数待添加CreateTable
 	if (pTableFrame == NULL)
 	{
-		pTableFrame = CTableManager::CreateTable();		//建桌函数待添加CreateTable
-		if (pTableFrame == NULL)
-		{
-			//创建失败了
-			return NULL;
-		}
+		//创建失败了
+		return NULL;
 	}
+
 	return pTableFrame;
 }
 

@@ -4,18 +4,17 @@
 #include "TableFrameBase.h"
 
 //用户状态
-enum US_STATUS
+enum User_Action
 {
-	US_FREE = 1,       //没有状态 -- 没有在Table中
-	US_IN_TABLE = 2,   //在table中 -- 站立(旁观)状态
-	US_SIT = 3,        //坐下状态
-	US_PLAYING = 4,    //游戏状态
-	US_READY = 5
-
+	US_SIT,        //坐下动作
+	US_IN_TABLE,   //在table中 -- 站立(旁观)动作
+	US_READY,
+	US_LEAVE,		//玩家离开
+	US_OFFLINE,    //掉线动作
+	US_PLAYING,    //游戏状态
+	US_NULL,
+	US_FREE,       //没有状态 -- 没有在Table中
 };
-
-#define US_READY					0x03								//同意状态
-#define US_OFFLINE					0x06								//断线状态
 
 class  CPlayer : public IServerUserItem
 {
@@ -87,13 +86,13 @@ public:
 	/**********************************  游戏动态数据 ****************************************/
 public:
 	//桌子号码
-	 WORD GetTableID() { return m_UserInfo.wTableID; }
+	 DWORD GetTableID() { return m_UserInfo.wTableID; }
 	//椅子号码
 	 virtual WORD GetChairID() { return m_UserInfo.wChairID; }
 
 	//用户状态
 	 BYTE GetUserStatus() { return m_UserInfo.cbUserStatus; }
-	 bool SetUserStatus(BYTE cbUserStatus, WORD wTableID, WORD wChairID);
+	 bool SetUserStatus(BYTE cbUserStatus, DWORD wTableID, WORD wChairID);
 
 	//设置断线标志 GameID  TODONOW
 	 void SetOfflineGameID(DWORD dwOfflineGameID){m_dwOfflineGameID = dwOfflineGameID;}

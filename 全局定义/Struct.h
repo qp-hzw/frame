@@ -34,6 +34,10 @@ struct tagUserInfo
 {
 	//基本属性
 	DWORD							dwUserID;							//用户 I D
+	DWORD							wTableID;						//桌子索引
+	WORD							wChairID;							//椅子索引
+	BYTE							cbUserStatus;						//用户状态
+
 	TCHAR							szNickName[LEN_NICKNAME];			//用户昵称
 	DWORD							dwGroupID;							//社团 I D
 	TCHAR							szGroupName[LEN_GROUP_NAME];		//社团名字
@@ -48,10 +52,7 @@ struct tagUserInfo
 	BYTE							cbMemberOrder;						//会员等级
 	BYTE							cbMasterOrder;						//管理等级
 
-	//用户状态
-	WORD							wTableID;							//桌子索引
-	WORD							wChairID;							//椅子索引
-	BYTE							cbUserStatus;						//用户状态
+	
 
 	//积分信息
 	SCORE							lScore;								//用户分数
