@@ -120,11 +120,20 @@ bool CTableFrame::StartGame()
 	//删除自动解散定时器
 	KillGameTimer(IDI_ROOM_AUTO_DISMISS);
 
-	//用户状态
+	//player状态
 	for(int i=0; i< m_player_list.size(); i++)
 	{
 		if(!m_player_list.at(i)) continue;
 		m_player_list.at(i)->SetUserStatus(US_PLAYING,m_wTableID,i);
+	}
+
+	//user状态
+	for (int i = 0; i< m_player_list.size(); i++)
+	{
+		if (!m_player_list.at(i)) continue;
+
+		if (US_READY == m_player_list.at(i)->GetUserStatus())
+		m_player_list.at(i)->SetUserStatus(US_PLAYING, m_wTableID, i);
 	}
 
 	//发送状态 TODOLATER  删除
@@ -171,18 +180,33 @@ bool CTableFrame::HandleXJGameEnd(BYTE byRound, BYTE byTableMode_NO_USER, SCORE 
 	//3 房卡金币模式           0                       房卡
 	//3 房卡金币模式           非0					   金币
 
+	//设置player、user状态
+	for (int i = 0; i< m_player_list.size(); i++)
+	{
+		if (!m_player_list.at(i)) continue;
+		m_player_list.at(i)->SetUserStatus(US_SIT, m_wTableID, i);
+	}
+
+	for (int i = 0; i< m_user_list.size(); i++)
+	{
+		if (!m_user_list.at(i)) continue;
+
+		if (US_PLAYING == m_player_list.at(i)->GetUserStatus())
+			m_player_list.at(i)->SetUserStatus(US_SIT, m_wTableID, i);
+	}
+
 	//房间规则
 	tagTableRule* pCfg = (tagTableRule*)GetCustomRule();
 	BYTE byTableMode = pCfg->GameMode;
 
 	//更新用户财富 对应数据库 round =1 
-	XJModifyUserTreasure(byTableMode, byRound, lUserTreasure, pCfg);
+	//XJModifyUserTreasure(byTableMode, byRound, lUserTreasure, pCfg);
 
 	//更新用户任务状态
-	XJUpdateGameTaskStatus(byTableMode, byRound); //TODONOW 暂时只为房卡的
+	//XJUpdateGameTaskStatus(byTableMode, byRound); //TODONOW 暂时只为房卡的
 
 	//扣除用户门票 -- 对应数据库 round = 0
-	XJGameTickets(byTableMode, byRound);
+	//XJGameTickets(byTableMode, byRound);
 
 	//事件通知
 	STR_DBR_CLUB_TABLE_INFO Dbr;
@@ -192,7 +216,7 @@ bool CTableFrame::HandleXJGameEnd(BYTE byRound, BYTE byTableMode_NO_USER, SCORE 
 	Dbr.byCurrentRound = 1;//这是一个增量 TODONOW 后面修改
 	Dbr.byMask = 2;
 	
-	g_GameCtrl->PostDataBaseRequest(DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
+	//g_GameCtrl->PostDataBaseRequest(DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
 
 	return true;
 }
@@ -585,10 +609,23 @@ int CTableFrame::PlayerEnterTable(CPlayer * pPlayer)
 	//3. Player
 	pPlayer->SetUserStatus(US_IN_TABLE, m_wTableID, INVALID_CHAIR);
 
-	//4. notify client TODOLATER
+	//Sendto Client
+	CMD_GF_GameStatus GameStatus;
+	ZeroMemory(&GameStatus, sizeof(GameStatus));
 
-	//5. notify center TODOLATER
+	//赋值
+	GameStatus.cbUserAction = pPlayer->GetUserStatus();
+	tagUserInfo *pUserInfo = pPlayer->GetUserInfo();
+	CopyMemory(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
 
+	//广播发送
+	for (auto it = m_user_list.begin(); it != m_user_list.end(); it++)
+	{
+		if ((*it) != NULL)
+		{
+			g_GameCtrl->SendData(*it, MDM_USER, SUB_GR_USER_STATUS, &GameStatus, sizeof(GameStatus));
+		}
+	}
 }
 //玩家坐下
 int CTableFrame::PlayerSitTable(WORD wChairID, CPlayer * pPlayer, LPCTSTR lpszPassword, bool bCheckUserGPS)
@@ -598,18 +635,29 @@ int CTableFrame::PlayerSitTable(WORD wChairID, CPlayer * pPlayer, LPCTSTR lpszPa
 	if (ret !=0) return ret;
 
 	//2. Table
-	//m_player_list[wChairID] = pPlayer;
+	m_player_list[wChairID] = pPlayer;
 	m_user_list[wChairID] = pPlayer;
 
 	//3. Player
 	pPlayer->SetUserStatus(US_SIT, m_wTableID, wChairID);
 
-	//subgame处理  //是否要改成客户端传???
-	m_pITableFrameSink->OnActionUserSitDown(wChairID, NULL, false);
+	//给client发送坐下
+	CMD_GF_GameStatus GameStatus;
+	ZeroMemory(&GameStatus, sizeof(GameStatus));
 
-	//4. notify client TODOLATER
+	//赋值
+	GameStatus.cbUserAction = pPlayer->GetUserStatus();
+	tagUserInfo *pUserInfo = pPlayer->GetUserInfo();
+	CopyMemory(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
 
-	//4. notify center TODOLATER
+	//广播发送
+	for (auto it = m_user_list.begin(); it != m_user_list.end(); it++)
+	{
+		if ((*it) != NULL)
+		{
+			g_GameCtrl->SendData(*it, MDM_USER, SUB_GR_USER_STATUS, &GameStatus, sizeof(GameStatus));
+		}
+	}
 
 	return 0;
 }
@@ -624,15 +672,26 @@ bool CTableFrame::PlayerUpTable(CPlayer *pPlayer)
 	WORD wChairID = pPlayer->GetChairID();
 	m_player_list.at(wChairID) = NULL;
 
-	//subgame
-	m_pITableFrameSink->OnActionUserStandUp(wChairID, NULL, false);
-
 	//3. Player
 	pPlayer->SetUserStatus(US_IN_TABLE, m_wTableID, INVALID_CHAIR);
 
-	//4. notify client TODOLATER
+	//发送给客户端
+	CMD_GF_GameStatus GameStatus;
+	ZeroMemory(&GameStatus, sizeof(GameStatus));
 
-	//4. notify center TODOLATER
+	//赋值
+	GameStatus.cbUserAction = pPlayer->GetUserStatus();
+	tagUserInfo *pUserInfo = pPlayer->GetUserInfo();
+	CopyMemory(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
+
+	//广播发送
+	for (auto it = m_user_list.begin(); it != m_user_list.end(); it++)
+	{
+		if ((*it) != NULL)
+		{
+			g_GameCtrl->SendData(*it, MDM_USER, SUB_GR_USER_STATUS, &GameStatus, sizeof(GameStatus));
+		}
+	}
 
 	return true;
 }
@@ -659,9 +718,23 @@ int CTableFrame::PlayerLeaveTable(CPlayer* pPlayer)
 	//3. Player
 	pPlayer->SetUserStatus(US_FREE, INVALID_TABLE, INVALID_CHAIR);
 
-	//4. notify client TODOLATER
+	//发送给客户端
+	CMD_GF_GameStatus GameStatus;
+	ZeroMemory(&GameStatus, sizeof(GameStatus));
 
-	//4. notify center TODOLATER
+	//赋值
+	GameStatus.cbUserAction = pPlayer->GetUserStatus();
+	tagUserInfo *pUserInfo = pPlayer->GetUserInfo();
+	CopyMemory(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
+
+	//广播发送
+	for (auto it = m_user_list.begin(); it != m_user_list.end(); it++)
+	{
+		if ((*it) != NULL)
+		{
+			g_GameCtrl->SendData(*it, MDM_USER, SUB_GR_USER_STATUS, &GameStatus, sizeof(GameStatus));
+		}
+	}
 }
 //玩家准备
 int CTableFrame::PlayerReady(WORD wChairID, CPlayer* pPlayer) 
@@ -701,6 +774,8 @@ int CTableFrame::PlayerReady(WORD wChairID, CPlayer* pPlayer)
 		if ((*it) != NULL && (US_READY == (*it)->GetUserStatus()))
 			ReadyNum++;
 	}
+
+	CLog::Log(log_debug, "ReadyNum: %d", ReadyNum);
 
 	//三个玩家准备 开始游戏	//不在子游戏处理
 	if (ReadyNum >= m_tagTableRule.PlayerCount)
@@ -1489,7 +1564,6 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 					memcpy(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
 
 					CLog::Log(log_debug, "wChairID: %d", GameStatus.UserInfo.wChairID);
-					CLog::Log(log_debug, "dwTableID: %d", GameStatus.UserInfo.wTableID);
 
 					g_GameCtrl->SendData(pIServerUserItem, MDM_USER, SUB_GR_USER_STATUS, &GameStatus, sizeof(GameStatus));
 				}
@@ -1700,6 +1774,8 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 				return false;
 
 			STR_SUB_RG_FRAME_ASK_DISMISS *pApply = (STR_SUB_RG_FRAME_ASK_DISMISS*)pData;
+
+			CLog::Log(log_debug, "ChairID: %d, Agree: %d", pApply->dwApplyUserID, pApply->cbAgree);
 
 			//1. 解散校验
 			if (0 == pApply->cbAgree)

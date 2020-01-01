@@ -11,6 +11,8 @@ bool CPlayerManager::InsertPlayer(CPlayer * * pIServerUserResult, tagUserInfo & 
 	try
 	{
 		pPlayer=new CPlayer(UserInfo);
+		if (pPlayer == NULL)
+			throw;
 	}
 	catch (...)
 	{

@@ -191,12 +191,18 @@ bool CHandleFromGate::OnTCPNetworkMainGame(WORD wSubCmdID, VOID * pData, WORD wD
 	if (pIServerUserItem==NULL) return false;
 
 	//处理过虑
-	WORD wTableID=pIServerUserItem->GetTableID();
+	DWORD wTableID=pIServerUserItem->GetTableID();
 	WORD wChairID=pIServerUserItem->GetChairID();
 	if ((wTableID==INVALID_TABLE)||(wChairID==INVALID_CHAIR)) return true;
 
 	//消息处理 
 	CTableFrame * pTableFrame=CTableManager::FindTableByTableID(wTableID);
+	if (pTableFrame == NULL)
+	{
+		CLog::Log(log_error, "pTableFrame == NULL 未找到桌子");
+		return false;
+	}
+
 	return pTableFrame->OnEventSocketGame(wSubCmdID,pData,wDataSize,pIServerUserItem);
 }
 
@@ -951,8 +957,7 @@ bool CHandleFromGate::OnTcpNetworkQueryLottery(VOID * pData, WORD wDataSize, DWO
 bool CHandleFromGate::On_SUB_CG_USER_CREATE_ROOM(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
 	//获取用户
-	WORD wBindIndex = LOWORD(dwSocketID);
-	CPlayer *pIServerUserItem = GetBindUserItem(wBindIndex);
+	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerBySocketID(dwSocketID);
 
 	//用户校验
 	if (pIServerUserItem==NULL) 
@@ -1046,6 +1051,9 @@ bool CHandleFromGate::CreateTableNormal(tagTableRule * pCfg, CPlayer *pIServerUs
 		SendRequestFailure(pIServerUserItem,TEXT("服务器桌子已满,请稍后重试！"),REQUEST_FAILURE_NORMAL);
 		return true ; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
 	}
+
+	//设置房间状态
+	pCurrTableFrame->SetGameStatus(GAME_STATUS_FREE);
 
 	//设置通用房间规则  
 	pCurrTableFrame->SetCommonRule(pCfg);
@@ -1472,8 +1480,7 @@ bool CHandleFromGate::WriteClubRoomToDB(STR_DBR_CLUB_ROOM_INFO* pTableInfo)
 bool CHandleFromGate::On_SUB_User_JoinFkRoom(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
 	//校验用户
-	WORD wBindIndex = LOWORD(dwSocketID);
-	CPlayer *pIServerUserItem = GetBindUserItem(wBindIndex);
+	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerBySocketID(dwSocketID);
 	if (NULL == pIServerUserItem) return false;
 
 	//校验数据包
@@ -1499,8 +1506,7 @@ bool CHandleFromGate::On_SUB_User_JoinFkRoom(VOID * pData, WORD wDataSize, DWORD
 bool CHandleFromGate::On_CMD_GC_JOIN_TABLE( DWORD dwSocketID, VOID * pData, WORD wDataSize)
 {
 	/* 1. 校验用户 */
-	WORD wBindIndex = LOWORD(dwSocketID);
-	CPlayer *pIServerUserItem = GetBindUserItem(wBindIndex);
+	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerBySocketID(dwSocketID);
 	if (NULL == pIServerUserItem) return false;
 
 	/* 2. 校验数据包 */
@@ -2980,6 +2986,7 @@ CTableFrame* CHandleFromGate::GetNextEmptyTable()
 			 (0 == pTableFrame->GetSitUserCount()) && 
 			 (0 == pTableFrame->GetCreateTableUser()) ) 
 		{
+			CLog::Log(log_debug, "寻找到空桌子");
 			return pTableFrame;
 		}
 	}
@@ -2992,6 +2999,7 @@ CTableFrame* CHandleFromGate::GetNextEmptyTable()
 		return NULL;
 	}
 
+	CLog::Log(log_debug, "创建空桌子");
 	return pTableFrame;
 }
 

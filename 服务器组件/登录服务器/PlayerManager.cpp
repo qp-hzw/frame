@@ -10,6 +10,8 @@ bool CPlayerManager::InsertPlayer(DWORD dwSocketID, STR_CMD_LC_LOGON_PLATFORM* U
 	try
 	{
 		pPlayer=new CPlayer(dwSocketID, UserInfo);
+		if (pPlayer == NULL)
+			throw;
 	}
 	catch (...)
 	{
