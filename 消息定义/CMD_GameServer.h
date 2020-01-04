@@ -152,9 +152,6 @@
 #define SUB_CG_COM_CHECK_USER_IP			8								//请求校验用户IP信息
 #define CMD_GC_COM_CHECK_USER_IP			108								//校验用户IP信息返回
 
-//用户准备
-#define SUB_GF_USER_READY					4								//用户准备
-
 //用户聊天
 #define SUB_RG_FRAME_CHAT					7								//用户聊天
 #define CMD_GR_FRAME_CHAT					107								//用户聊天

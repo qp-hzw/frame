@@ -1657,31 +1657,6 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 			}
 			return true;
 		}
-	case SUB_GF_USER_READY:		//用户准备
-		{
-			//获取属性
-			WORD wChairID=pIServerUserItem->GetChairID();
-			BYTE cbUserStatus=pIServerUserItem->GetUserStatus();
-
-			//效验状态
-			if (GetTableUserItem(wChairID)!=pIServerUserItem) return false;
-
-			//效验状态
-			if (cbUserStatus!=US_SIT) 
-			{
-				return true;
-			}
-
-			//事件通知
-			if (m_pITableFrameSink!=NULL)
-			{
-				m_pITableFrameSink->OnActionUserOnReady(wChairID, NULL, NULL, 0);
-			}
-
-			pIServerUserItem->SetUserStatus(US_READY,m_wTableID,wChairID);
-
-			return true;
-		}
 	case SUB_RG_FRAME_CHAT:		//用户聊天
 		{
 			//效验参数

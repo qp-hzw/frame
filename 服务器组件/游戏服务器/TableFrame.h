@@ -23,7 +23,7 @@
 
 //桌子事件范围
 #define IDI_TABLE_MODULE_START		10000								//起始标识
-#define IDI_TABLE_MODULE_FINISH		50000								//终止标识
+#define IDI_TABLE_MODULE_FINISH		50010000								//终止标识
 
 //回调事件范围
 #define TIME_TABLE_SINK_RANGE		40									//标识范围

@@ -108,10 +108,10 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 	{
 		//桌子号码
 		DWORD dwTableTimerID=dwTimerID-IDI_TABLE_MODULE_START;
-		WORD wTableIndex=(WORD)(dwTableTimerID/TIME_TABLE_MODULE_RANGE);
+		DWORD wTableIndex=(DWORD)(dwTableTimerID/TIME_TABLE_MODULE_RANGE);
 
 		//时间通知
-		CTableFrame * pTableFrame= CTableManager::FindTableByIndex(wTableIndex);
+		CTableFrame * pTableFrame= CTableManager::FindTableByTableID(wTableIndex);
 		if(pTableFrame != NULL)
 			return pTableFrame->OnEventTimer(dwTableTimerID%TIME_TABLE_MODULE_RANGE,wBindParam);
 	}
@@ -148,7 +148,7 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		ServerItem.dwServerID = g_GameCtrl->GetServerID();
 		ServerItem.byServerType = GAME_TYPE;
 		//lstrcpyn(RegisterServer.szServerName, m_pGameServiceOption->szServerName, CountArray(RegisterServer.szServerName));
-		lstrcpyn(ServerItem.szServerAddr,TEXT("192.168.1.105"),CountArray(ServerItem.szServerAddr));
+		lstrcpyn(ServerItem.szServerAddr,TEXT("127.20.10.4"),CountArray(ServerItem.szServerAddr));
 		ServerItem.wServerPort = 0;
 
 		CLog::Log(log_debug, "ServerID:%d", ServerItem.dwServerID);
