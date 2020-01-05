@@ -93,7 +93,7 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		TCHAR szInernet_ip[32] = TEXT("0.0.0.0");
 		//GetInternetIP(szInernet_ip);
 		//lstrcpyn(CPR.szServerAddr,szInernet_ip ,CountArray(CPR.szServerAddr));
-		lstrcpyn(ServerItem.szServerAddr,TEXT("127.0.0.1"),CountArray(ServerItem.szServerAddr));
+		lstrcpyn(ServerItem.szServerAddr,TEXT("10.211.55.4"),CountArray(ServerItem.szServerAddr));
 
 		//·¢ËÍÊý¾Ý
 		g_TCPSocketEngine->SendData(MDM_REGISTER,CPR_REGISTER_SERVER,&ServerItem,sizeof(ServerItem));

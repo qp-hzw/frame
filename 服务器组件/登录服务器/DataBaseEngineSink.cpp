@@ -2149,11 +2149,7 @@ bool CDataBaseEngineSink::On_DBO_Logon_Platform(DWORD dwContextID, DWORD dwResul
 	DBOLogonPlatform.dwResultCode=dwResultCode;
 	lstrcpyn(DBOLogonPlatform.szDescribeString,pszErrorString,CountArray(DBOLogonPlatform.szDescribeString));
 
-	//·¢ËÍ½á¹û
-	WORD wDataSize=CountStringBuffer(DBOLogonPlatform.szDescribeString);
-	WORD wHeadSize=sizeof(DBOLogonPlatform)-sizeof(DBOLogonPlatform.szDescribeString);
-
-	g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_LOGON_PLATFORM,dwContextID,&DBOLogonPlatform,wHeadSize+wDataSize);
+	g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_LOGON_PLATFORM,dwContextID,&DBOLogonPlatform,sizeof(DBOLogonPlatform));
 	return true;
 }
 

@@ -962,6 +962,7 @@ bool CHandleFromGate::On_SUB_CG_USER_CREATE_ROOM(VOID * pData, WORD wDataSize, D
 	//用户校验
 	if (pIServerUserItem==NULL) 
 	{
+		SendRequestFailure(pIServerUserItem,TEXT("创建房间数据大小不匹配！"),REQUEST_FAILURE_NORMAL);
 		return false;
 	}
 

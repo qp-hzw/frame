@@ -148,7 +148,8 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		ServerItem.dwServerID = g_GameCtrl->GetServerID();
 		ServerItem.byServerType = GAME_TYPE;
 		//lstrcpyn(RegisterServer.szServerName, m_pGameServiceOption->szServerName, CountArray(RegisterServer.szServerName));
-		lstrcpyn(ServerItem.szServerAddr,TEXT("127.20.10.4"),CountArray(ServerItem.szServerAddr));
+
+		lstrcpyn(ServerItem.szServerAddr,TEXT("114.116.227.62"),CountArray(ServerItem.szServerAddr));
 		ServerItem.wServerPort = 0;
 
 		CLog::Log(log_debug, "ServerID:%d", ServerItem.dwServerID);

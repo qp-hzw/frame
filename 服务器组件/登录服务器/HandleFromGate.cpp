@@ -757,7 +757,7 @@ bool CHandleFromGate::On_SUB_CL_Logon_Register(VOID * pData, WORD wDataSize, DWO
 
 	/*
 	//效验版本
-	if ( On_CMD_LC_Logon_UpdateNotify(pSUBLogonRegister->dwVersionCheck, dwSocketID) )
+	if ( !On_CMD_LC_Logon_UpdateNotify(pSUBLogonRegister->dwVersionCheck, dwSocketID) )
 	{
 		return true;
 	}
@@ -795,7 +795,7 @@ bool CHandleFromGate::On_SUB_CL_Logon_Platform(VOID * pData, WORD wDataSize, DWO
 	STR_SUB_CL_LOGON_PLATFORM * pSUBLogonPlatform=(STR_SUB_CL_LOGON_PLATFORM *)pData;
 
 	//效验版本
-	if ( On_CMD_LC_Logon_UpdateNotify(pSUBLogonPlatform->dwVersionCheck, dwSocketID) )
+	if ( !On_CMD_LC_Logon_UpdateNotify(pSUBLogonPlatform->dwVersionCheck, dwSocketID) )
 	{
 		return true;
 	}
@@ -820,6 +820,7 @@ bool CHandleFromGate::On_SUB_CL_Logon_Platform(VOID * pData, WORD wDataSize, DWO
 //平台登录返回
 bool CHandleFromGate::On_CMD_LC_Logon_Platform(DWORD dwScoketID, VOID * pData, WORD wDataSize)
 {
+	CLog::Log(log_debug, "On_CMD_LC_Logon_Platform 0");
 	//效验参数
 	if(wDataSize != sizeof(STR_CMD_LC_LOGON_PLATFORM)) return false;
 
@@ -829,6 +830,7 @@ bool CHandleFromGate::On_CMD_LC_Logon_Platform(DWORD dwScoketID, VOID * pData, W
 	//如果登录失败, 直接返回
 	if(DB_SUCCESS != pCMD->dwResultCode)
 	{
+		CLog::Log(log_debug, "On_CMD_LC_Logon_Platform 1");
 		g_GameCtrl->SendData(dwScoketID, MDM_LOGON, CMD_LC_LOGON_ACCOUNTS, pCMD, sizeof(STR_CMD_LC_LOGON_PLATFORM));
 		return true;
 	}
