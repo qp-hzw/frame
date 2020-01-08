@@ -91,9 +91,8 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 
 		//设置变量
 		TCHAR szInernet_ip[32] = TEXT("0.0.0.0");
-		//GetInternetIP(szInernet_ip);
-		//lstrcpyn(CPR.szServerAddr,szInernet_ip ,CountArray(CPR.szServerAddr));
-		lstrcpyn(ServerItem.szServerAddr,TEXT("10.211.55.4"),CountArray(ServerItem.szServerAddr));
+		CWHIP::GetInternetIP(szInernet_ip);
+		lstrcpyn(ServerItem.szServerAddr,szInernet_ip ,CountArray(ServerItem.szServerAddr));
 
 		//发送数据
 		g_TCPSocketEngine->SendData(MDM_REGISTER,CPR_REGISTER_SERVER,&ServerItem,sizeof(ServerItem));

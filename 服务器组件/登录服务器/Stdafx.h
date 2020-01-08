@@ -37,6 +37,7 @@
 #include "../../../../share\依赖项\服务核心\ServiceCoreHead.h"
 #include "../../../../share\依赖项\服务核心\WHModule.h"
 #include "../../../../share\依赖项\服务核心\log.h"
+#include "../../../../share\依赖项\服务核心\ip.h"
 
 #include "../../../../share\依赖项\内核引擎\KernelEngineHead.h"
 

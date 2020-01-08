@@ -149,7 +149,11 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		ServerItem.byServerType = GAME_TYPE;
 		//lstrcpyn(RegisterServer.szServerName, m_pGameServiceOption->szServerName, CountArray(RegisterServer.szServerName));
 
-		lstrcpyn(ServerItem.szServerAddr,TEXT("114.116.227.62"),CountArray(ServerItem.szServerAddr));
+		//…Ë÷√±‰¡ø
+		TCHAR szInernet_ip[32] = TEXT("0.0.0.0");
+		CWHIP::GetInternetIP(szInernet_ip);
+		lstrcpyn(ServerItem.szServerAddr,szInernet_ip ,CountArray(ServerItem.szServerAddr));
+
 		ServerItem.wServerPort = 0;
 
 		CLog::Log(log_debug, "ServerID:%d", ServerItem.dwServerID);
