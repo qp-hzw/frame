@@ -34,8 +34,6 @@
 #define SUB_CG_LOGON_USERID			1										//ID 登录
 #define CMD_GC_LOGON_USERID			101										//ID 登录返回
 
-#define CMD_GC_LOGON_GET_USER_INFO	102										//获得用户基本信息	USERID登录游戏服成功之后会发送给客户端
-
 #pragma endregion
 
 #pragma region MDM_USER 用户命令
@@ -94,16 +92,15 @@
 #define CMD_GC_USER_CREATE_GROUP_ROOM	205									//(可删除)#创建牌友圈房间返回
 
 #define SUB_GR_USER_SCORE				101									//用户分数		TODO 子游戏调用写分函数，大厅发送给客户端
-#define SUB_GR_USER_STATUS				102									//用户状态		TODO 设置用户状态时，会调用OnEventUserItemStatus，它会发送该消息给客户端
+#define SUB_GR_USER_STATUS				102									//用户动作
+#define CMD_ROOM_RULE					202									//房间信息
+
 #define SUB_GR_REQUEST_FAILURE			103									//请求失败		大部分失败消息都返回这个消息
 
 #define CMD_GC_USER_MODIFY_TREASURE		106									//修改用户财富信息返回
 
 #define SUB_GR_CREATE_OTHER_SUCCESS		129									//*替他人开房成功		TODO 删除，替他人开房成功放在开房成功中，不需要单独处理
 #define SUB_GR_JOIN_DWTABLE_SUCCESS		133									//*加入电玩房成功		逻辑处理和其他加入房间不同，貌似是加入成功就开始游戏了
-
-#define SUB_GF_ONLINE_PLAYERS			313									//*在线人数
-
 #pragma endregion
 
 #pragma region  MDM_GR_MATCH 比赛命令

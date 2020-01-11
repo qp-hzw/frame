@@ -57,6 +57,8 @@ CTableFrame::CTableFrame()
 {
 	//子游戏
 	m_pITableFrameSink= g_GameCtrl->GetITableFrameSink();
+	//初始化接口
+	m_pITableFrameSink->Initialization(this);
 	/******************** 静态属性 **********************/
 	m_wTableID=0;
 	m_wChairCount=0;
@@ -1596,12 +1598,16 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 				}
 			}
 
-			//初始化接口
-			m_pITableFrameSink->Initialization(this);
+			//发送房间规则
+			STR_CMD_ROOM_RULE room_rule;
+			memcpy(&room_rule.common, &m_tagTableRule, sizeof(room_rule.common));
+			room_rule.TableID = m_wTableID;	
+			g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_ROOM_RULE, &room_rule, sizeof(room_rule));
 
 			//发送场景
 			m_pITableFrameSink->OnEventSendGameScene(wChairID, pIServerUserItem, m_cbGameStatus, true);
 
+			
 			//发送解散面板状态 -- 只有处于解散状态 才会发送
 			if(m_bUnderDissState)
 			{

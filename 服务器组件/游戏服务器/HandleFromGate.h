@@ -143,11 +143,6 @@ protected:
 	//加载断线重连
 	static bool On_DBO_GR_LOAD_OFFLINE(DWORD dwContextID, VOID * pData, WORD wDataSize);
 	
-	//发送函数
-protected:
-	//发送用户信息
-	static bool SendUserInfoPacket(CPlayer * pCPlayer, DWORD dwSocketID);
-
 	//辅助函数
 protected:
 	//请求失败

@@ -132,16 +132,6 @@ struct tagTableRule
     DWORD szRetain10;
 };
 
-//创建房间成功返回
-struct STR_CMD_GC_USER_CREATE_ROOM_SUCCESS
-{
-	DWORD							dwPassword;				//房间密码
-	WORD							wChairID;				//用户椅子号
-	BYTE							byAllGameCount;			//总局数
-	BYTE							byGameMode;				//游戏模式 0-经典 1-疯狂加被
-	BYTE							byZhuangType;			//坐庄模式 0-抢庄 1-轮庄 2-固定庄
-	//BYTE							byMask;					//0 无动作; 1子游戏跳转场景
-};
 
 //club牌友圈创建桌子
 struct STR_SUB_CG_USER_CREATE_TABLE
@@ -175,17 +165,6 @@ struct STR_SUB_CG_USER_JOIN_TABLE_NO_PASS
 	DWORD							dwClubRoomID;	//俱乐部房间
 	double							dLongitude;		//经度
 	double							dLatitude;		//纬度
-};
-//加入房间成功返回
-struct STR_CMD_GC_USER_JOIN_ROOM_SUCCESS
-{
-	tagTableRule					strTableRule;			//大厅的房间规则
-	DWORD							dwRoomID;				//这里实际为TableID
-	WORD							wChairID;
-	WORD							wPlayerCount;
-	BYTE							byAllGameCount;			//总局数
-	BYTE							byGameMode;				//麻将：0-房卡模式  1-竞技模式 2-金币模式；  游戏模式 0-经典 1-疯狂加倍
-	BYTE							byZhuangType;			//坐庄模式 0-抢庄 1-轮庄 2-固定庄
 };
 
 //加入桌子 -- 加入大厅金币场桌子
@@ -426,6 +405,11 @@ struct STR_SUB_CG_USER_READY
 {
 };
 
+struct STR_CMD_ROOM_RULE
+{
+	tagTableRule common;			 //创建房间 frame通用房间规则
+	DWORD TableID;                   //房间号
+};
 //////////////////////////////////////////////////////////////////////////////////
 
 //规则标志

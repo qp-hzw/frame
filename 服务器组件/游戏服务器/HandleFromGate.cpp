@@ -435,7 +435,6 @@ VOID CHandleFromGate::OnEventUserLogon(CPlayer * pIServerUserItem, bool bAlready
 	ZeroMemory(&logon, sizeof(STR_CMD_GC_LOGON_USERID));
 	logon.lResultCode = 0;
 	logon.dwKindID = g_GameCtrl->GetKindID();
-	CLog::Log(log_debug, "kingID: %d", logon.dwKindID);
 	lstrcpyn(logon.szDescribeString, TEXT("用户登录成功"), CountArray(logon.szDescribeString));
 	
 	//TODONOW
@@ -444,29 +443,6 @@ VOID CHandleFromGate::OnEventUserLogon(CPlayer * pIServerUserItem, bool bAlready
 	//发送数据
 	g_GameCtrl->SendData(pIServerUserItem->GetSocketID(), MDM_GR_LOGON, CMD_GC_LOGON_USERID, &logon, sizeof(STR_CMD_GC_LOGON_USERID));
 	
-	/* 2. 发送玩家自己的信息给客户端 */
-	SendUserInfoPacket(pIServerUserItem, pIServerUserItem->GetSocketID());
-
-	/* 7. 广播在线人数		TODONOW 客户端没用到该消息号 */
-	CMD_GF_OnlinePlayers OnlinePlayers;
-	ZeroMemory(&OnlinePlayers, sizeof(CMD_GF_OnlinePlayers));
-
-	//赋值
-	for(WORD i=0;static_cast<DWORD>(i) < CPlayerManager::GetPlayerCount();i++)
-	{
-		if( CPlayerManager::FindPlayerByEnum(i)->GetUserStatus() != US_OFFLINE )
-			OnlinePlayers.wOnlinePlayers++;
-	}
-
-	//发送数据
-	for(WORD i=0;static_cast<DWORD>(i) < CPlayerManager::GetPlayerCount();i++)
-	{
-		CPlayer* pItem = CPlayerManager::FindPlayerByEnum(i);
-		if( pItem->GetUserStatus() != US_OFFLINE )
-		{
-			g_GameCtrl->SendData(pItem,MDM_USER,SUB_GF_ONLINE_PLAYERS,&OnlinePlayers,sizeof(CMD_GF_OnlinePlayers));
-		}
-	}
 
 	/* 11. 通知数据库改变 玩家状态 */
 	//TODONOWW
@@ -1080,17 +1056,8 @@ bool CHandleFromGate::CreateTableNormal(tagTableRule * pCfg, CPlayer *pIServerUs
 		}
 	}
 
-	//发送房间消息
-	STR_CMD_GC_USER_CREATE_ROOM_SUCCESS nCreate;
-	nCreate.dwPassword = pCurrTableFrame->GetTableID();
-	nCreate.wChairID = pIServerUserItem->GetChairID();
-	nCreate.byAllGameCount = pCfg->GameCount;
-	nCreate.byGameMode = pCfg->GameMode;
-	nCreate.byZhuangType = pCfg->RobBankType;
-	//nCreate.byMask = 0;
-
 	//发送创建房间成功消息
-	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_CREATE_ROOM_SUCCESS, &nCreate, sizeof(STR_CMD_GC_USER_CREATE_ROOM_SUCCESS));	
+	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_CREATE_ROOM_SUCCESS, NULL, 0);
 
 	return true;
 }
@@ -1177,22 +1144,8 @@ bool CHandleFromGate::CreateRoomClub(tagTableRule * pCfg, CPlayer *pIServerUserI
 
 	WriteClubRoomToDB(&Dbr);
 
-
-	//发送房间消息
-	STR_CMD_GC_USER_CREATE_ROOM_SUCCESS nCreate;
-
-	//added by WangChengQing 2018/9/11
-	//客户端会根据tableID(即password) 自动进入房间 -- 一键入局
-	//因此此处 不返回tableID
-	nCreate.dwPassword = 0;
-	nCreate.wChairID = pIServerUserItem->GetChairID();
-	nCreate.byAllGameCount = pCfg->GameCount;
-	nCreate.byGameMode = pCfg->GameMode;
-	nCreate.byZhuangType = pCfg->RobBankType;
-	//nCreate.byMask = 0;
-
 	//发送创建房间成功消息
-	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_CREATE_ROOM_SUCCESS, &nCreate, sizeof(STR_CMD_GC_USER_CREATE_ROOM_SUCCESS));	
+	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_CREATE_ROOM_SUCCESS, NULL, 0);	
 
 	//TODONOWW 需要发送给协调服, 然后协调服 发送给登录服.  登录服通知客户端实时刷新俱乐部房间
 	STR_CMD_LC_CLUB_ROOM_RE RECMD;
@@ -1276,16 +1229,8 @@ bool CHandleFromGate::CreateTableClub(STR_DBO_GC_CLUB_CREATE_TABLE * pDbo, CPlay
 		return false;
 	}
 	
-	/* 发送给client创建房间成功消息 */
-	STR_CMD_GC_USER_CREATE_ROOM_SUCCESS nCreate;
-	nCreate.dwPassword = pCurrTableFrame->GetTableID();
-	nCreate.wChairID = pIServerUserItem->GetChairID();
-	nCreate.byAllGameCount = pCfg->GameCount;
-	nCreate.byGameMode = pCfg->GameMode;
-	nCreate.byZhuangType = pCfg->RobBankType;
-
 	//发送创建房间成功消息
-	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_CLUB_CREATE_TABKE, &nCreate, sizeof(STR_CMD_GC_USER_CREATE_ROOM_SUCCESS));	
+	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_CLUB_CREATE_TABKE, NULL, 0);	
 
 	return true;
 }
@@ -1361,21 +1306,8 @@ bool CHandleFromGate::CreateTableHallGold(STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD *
 		return true ;//TODONOW 如果为false 客户端就断线重连了， 之后修改掉
 	}
 	
-	/* 发送给client创建房间成功消息 
-	TODONOW 因为客户端需要跳转场景, 创建成功并不会跳转, 所以此处发送加入成功的消息 added by WangChengQing
-	*/
-	STR_CMD_GC_USER_JOIN_ROOM_SUCCESS CMD;
-	memcpy(&CMD.strTableRule, pDbo->strCreateRoom.CommonRule, sizeof(CMD.strTableRule));
-
-	CMD.dwRoomID = pCurrTableFrame->GetTableID();
-	CMD.wChairID = pIServerUserItem->GetChairID();
-	CMD.byAllGameCount = pCfg->GameCount;
-	CMD.byGameMode = pCfg->GameMode;
-	CMD.byZhuangType = pCfg->RobBankType;
-	CMD.wPlayerCount = pCfg->PlayerCount;
-
 	//发送加入金币房间成功
-	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_JOIN_ROOM_SUCCESS, &CMD, sizeof(CMD));
+	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_JOIN_ROOM_SUCCESS, NULL, 0);
 
 	return true;
 }
@@ -1445,21 +1377,8 @@ bool CHandleFromGate::CreateTableAutoClub(STR_DBO_CG_USER_JOIN_TABLE_NO_PASS * p
 		return true; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
 	}
 	
-	/* 发送给client创建房间成功消息 
-	TODONOW 因为客户端需要跳转场景, 创建成功并不会跳转, 所以此处发送加入成功的消息 added by WangChengQing
-	*/
-	STR_CMD_GC_USER_JOIN_ROOM_SUCCESS CMD;
-	memcpy(&CMD.strTableRule, pDbo->strCreateRoom.CommonRule, sizeof(CMD.strTableRule));
-
-	CMD.dwRoomID = pCurrTableFrame->GetTableID();
-	CMD.wChairID = pIServerUserItem->GetChairID();
-	CMD.byAllGameCount = pCfg->GameCount;
-	CMD.byGameMode = pCfg->GameMode;
-	CMD.byZhuangType = pCfg->RobBankType;
-	CMD.wPlayerCount = pCfg->PlayerCount;
-
 	//发送加入房卡房间成功
-	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_JOIN_ROOM_SUCCESS, &CMD, sizeof(CMD));
+	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_JOIN_ROOM_SUCCESS, NULL, 0);
 
 	return true;
 }
@@ -1604,18 +1523,8 @@ bool CHandleFromGate::On_CMD_GC_JOIN_TABLE( DWORD dwSocketID, VOID * pData, WORD
 		return false;
 	}
 	
-	/* 11. 发送给client */
-	STR_CMD_GC_USER_JOIN_ROOM_SUCCESS CMD;
-	memcpy(&CMD.strTableRule, pCfg, sizeof(CMD.strTableRule));
-	CMD.dwRoomID = dwPassword;
-	CMD.wChairID = wChairID;
-	CMD.byAllGameCount = pCfg->GameCount;
-	CMD.byGameMode = pCfg->GameMode;
-	CMD.byZhuangType = pCfg->RobBankType;
-	CMD.wPlayerCount = pCfg->PlayerCount;
-
 	//发送加入房卡房间成功
-	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_JOIN_ROOM_SUCCESS, &CMD, sizeof(CMD));
+	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_JOIN_ROOM_SUCCESS, NULL, 0);
 
 	return true;
 }
@@ -1756,20 +1665,8 @@ bool CHandleFromGate::On_CMD_GC_USER_JOIN_TABLE_NO_PASS( DWORD dwSocketID, VOID 
 		return false;
 	}
 
-	/* 11. 发送加入房间成功消息给客户端 */
-	STR_CMD_GC_USER_JOIN_ROOM_SUCCESS nJoin;
-	ZeroMemory(&nJoin, sizeof(STR_CMD_GC_USER_JOIN_ROOM_SUCCESS));
-	memcpy(&nJoin.strTableRule, pCfg, sizeof(nJoin.strTableRule));
-	//赋值
-	nJoin.dwRoomID = dwPassword;
-	nJoin.wChairID = wChairID;
-	nJoin.byAllGameCount = pCfg->GameCount;
-	nJoin.byGameMode = pCfg->GameMode;
-	nJoin.byZhuangType = pCfg->RobBankType;
-	nJoin.wPlayerCount = pCfg->PlayerCount;
-
 	//发送加入房卡房间成功
-	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_JOIN_ROOM_SUCCESS, &nJoin, sizeof(STR_CMD_GC_USER_JOIN_ROOM_SUCCESS));
+	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_JOIN_ROOM_SUCCESS, NULL, 0);
 
 	return true;
 }
@@ -1903,20 +1800,8 @@ bool CHandleFromGate::On_CMD_GC_USER_JOIN_TABLE_HALL_GOLD( DWORD dwSocketID, VOI
 		return false;
 	}
 
-	/* 11. 发送加入房间成功消息给客户端 */
-	STR_CMD_GC_USER_JOIN_ROOM_SUCCESS nJoin;
-	ZeroMemory(&nJoin, sizeof(STR_CMD_GC_USER_JOIN_ROOM_SUCCESS));
-	memcpy(&nJoin.strTableRule, pCfg, sizeof(nJoin.strTableRule));
-	//赋值
-	nJoin.dwRoomID = dwPassword;
-	nJoin.wChairID = wChairID;
-	nJoin.byAllGameCount = pCfg->GameCount;
-	nJoin.byGameMode = pCfg->GameMode;
-	nJoin.byZhuangType = pCfg->RobBankType;
-	nJoin.wPlayerCount = pCfg->PlayerCount;
-
 	//发送加入房间成功
-	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_JOIN_ROOM_SUCCESS, &nJoin, sizeof(STR_CMD_GC_USER_JOIN_ROOM_SUCCESS));
+	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_JOIN_ROOM_SUCCESS, NULL, 0);
 	return true;
 }
 
@@ -2261,23 +2146,8 @@ bool CHandleFromGate::On_CMD_GC_User_JoinGroupRoom(DWORD dwSocketID, VOID * pDat
 				//用户可以加入牌友圈房间
 				bHaveRoom = true;
 
-				//获取房间规则
-				tagTableRule *pSelfOption = (tagTableRule* )pTableFrame->GetCustomRule();
-
-				//构造加入成功消息
-				STR_CMD_GC_USER_JOIN_ROOM_SUCCESS nJoin;
-				ZeroMemory(&nJoin, sizeof(STR_CMD_GC_USER_JOIN_ROOM_SUCCESS));
-				memcpy(&nJoin.strTableRule, pSelfOption, sizeof(nJoin.strTableRule));
-				//赋值
-				nJoin.dwRoomID = pTableFrame->GetTableID();
-				nJoin.wChairID = wChairID;
-				nJoin.byAllGameCount = pSelfOption->GameCount;
-				nJoin.byGameMode = pSelfOption->GameMode;
-				nJoin.byZhuangType = pSelfOption->RobBankType;
-				nJoin.wPlayerCount = pSelfOption->PlayerCount;
-
 				//发送加入成功消息
-				g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_JOIN_ROOM_SUCCESS, &nJoin, sizeof(STR_CMD_GC_USER_JOIN_ROOM_SUCCESS));
+				g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_JOIN_ROOM_SUCCESS, NULL, 0);
 				break;
 			}
 		}
@@ -2333,29 +2203,11 @@ bool CHandleFromGate::On_SUB_User_JoinGoldRoom(VOID * pData, WORD wDataSize, DWO
 	if ( (INVALID_CHAIR != wChairID) && (NULL != pTableFrame) )
 	{
 		//已有空椅子，用户坐下
-		if(pTableFrame->PlayerSitTable(wChairID, pIServerUserItem, 0, true) != 0)
+		if(pTableFrame->PlayerSitTable(wChairID, pIServerUserItem, 0, true) == 0)
 		{
-			//获得金币房间规则
-			tagTableRule *pTableCfg = (tagTableRule*)pTableFrame->GetCustomRule();
-			if (NULL != pTableCfg)
-			{
-				//返回加入成功
-				STR_CMD_GC_USER_JOIN_ROOM_SUCCESS JoinSuccess;
-				ZeroMemory(&JoinSuccess, sizeof(JoinSuccess));
-				memcpy(&JoinSuccess.strTableRule, pTableCfg, sizeof(JoinSuccess.strTableRule));
-
-				//赋值
-				JoinSuccess.byGameMode = TABLE_MODE_GOLD;
-				JoinSuccess.wChairID = wChairID;
-				JoinSuccess.dwRoomID = pTableFrame->GetTableID();
-				JoinSuccess.byAllGameCount = pTableCfg->GameCount;
-				JoinSuccess.wPlayerCount = pTableCfg->PlayerCount;
-				JoinSuccess.byZhuangType = pTableCfg->RobBankType;
-
-				//发送数据
-				g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_JOIN_ROOM_SUCCESS, &JoinSuccess ,sizeof(STR_CMD_GC_USER_JOIN_ROOM_SUCCESS));
-				return true;
-			}
+			//发送数据
+			g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_JOIN_ROOM_SUCCESS, NULL, 0);
+			return true;
 		}	
 	}
 
@@ -2410,20 +2262,7 @@ bool CHandleFromGate::On_SUB_User_JoinGoldRoom(VOID * pData, WORD wDataSize, DWO
 	}
 
 	//返回加入成功
-	STR_CMD_GC_USER_JOIN_ROOM_SUCCESS JoinSuccess;
-	ZeroMemory(&JoinSuccess, sizeof(JoinSuccess));
-	memcpy(&JoinSuccess.strTableRule, &cfg, sizeof(JoinSuccess.strTableRule));
-
-	//赋值
-	JoinSuccess.byGameMode = 2;
-	JoinSuccess.wChairID = wChairID;
-	JoinSuccess.dwRoomID = pCurrTableFrame->GetTableID();
-	JoinSuccess.byAllGameCount = 0;
-	JoinSuccess.wPlayerCount = 4;
-	JoinSuccess.byZhuangType = 3;
-
-	//发送数据
-	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_JOIN_ROOM_SUCCESS, &JoinSuccess ,sizeof(STR_CMD_GC_USER_JOIN_ROOM_SUCCESS));
+	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_JOIN_ROOM_SUCCESS, NULL ,0);
 
 	return true;
 }
@@ -2496,26 +2335,6 @@ VOID CHandleFromGate::OnEventUserLogout(CPlayer * pIServerUserItem, DWORD dwLeav
 	//投递请求
 	g_GameCtrl->PostDataBaseRequest(DBR_GR_LEAVE_GAME_SERVER,0L,&LeaveGameServer,sizeof(LeaveGameServer));
 
-	//广播在线人数
-	CMD_GF_OnlinePlayers OnlinePlayers;
-	ZeroMemory(&OnlinePlayers, sizeof(CMD_GF_OnlinePlayers));
-
-	for(WORD i=0;i < static_cast<WORD>(CPlayerManager::GetPlayerCount());i++)
-	{
-		if( CPlayerManager::FindPlayerByEnum(i)->GetUserStatus() != US_OFFLINE )
-			OnlinePlayers.wOnlinePlayers++;
-	}
-
-	for(WORD i=0;i < static_cast<WORD>(CPlayerManager::GetPlayerCount());i++)
-	{
-		CPlayer* pItem = CPlayerManager::FindPlayerByEnum(i);
-		if( pItem->GetUserStatus() != US_OFFLINE )
-		{
-			g_GameCtrl->SendData(pItem,MDM_USER,SUB_GF_ONLINE_PLAYERS,&OnlinePlayers,sizeof(CMD_GF_OnlinePlayers));
-		}
-	}
-
-
 	return;
 }
 
@@ -2533,31 +2352,6 @@ bool CHandleFromGate::SendRequestFailure(CPlayer * pIServerUserItem, LPCTSTR psz
 	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, SUB_GR_REQUEST_FAILURE, &RequestFailure, sizeof(CMD_GR_RequestFailure));
 
 	std::wcout << "HFG: " << pszDescribe << std::endl;
-
-	return true;
-}
-
-//发送用户数据
-bool CHandleFromGate::SendUserInfoPacket(CPlayer *pIServerUserItem, DWORD dwSocketID)
-{
-	//效验参数
-	if (pIServerUserItem==NULL) return false;
-
-	//变量定义
-	tagUserInfo *pUserInfo = pIServerUserItem->GetUserInfo();
-	if(pUserInfo == NULL)
-		return false;
-
-	//发送数据
-	if (dwSocketID == INVALID_DWORD)
-	{
-		//TODO 电脑群发是什么意思？？？
-		//g_GameCtrl->SendData(BG_COMPUTER, MDM_GR_LOGON, CMD_GC_LOGON_GET_USER_INFO, pUserInfo, sizeof(tagUserInfo));
-	}
-	else
-	{
-		g_GameCtrl->SendData(dwSocketID, MDM_GR_LOGON, CMD_GC_LOGON_GET_USER_INFO, pUserInfo, sizeof(tagUserInfo));
-	}
 
 	return true;
 }
@@ -3095,16 +2889,9 @@ void CHandleFromGate::HandleCreateTableForOthers(CTableFrame *pCurTableFrame, CP
 	//添加房间信息进数据库  TODO 流程没有DBO函数，看看是否需要修改
 	AddOtherRoomInfo(&TableInfo);
 
-	//发送房间消息
-	STR_CMD_GC_USER_CREATE_ROOM_SUCCESS nCreate;
-	nCreate.dwPassword = dwPassword;
-	nCreate.wChairID = INVALID_CHAIR;
-	nCreate.byAllGameCount = pCfg->GameCount;
-	nCreate.byGameMode = pCfg->GameMode;
-	nCreate.byZhuangType = pCfg->RobBankType;
 
 	//发送创建房间成功消息
-	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_CREATE_ROOM_SUCCESS, &nCreate, sizeof(STR_CMD_GC_USER_CREATE_ROOM_SUCCESS));	
+	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_CREATE_ROOM_SUCCESS, NULL, 0);	
 
 	//替他人开房，首先扣除创建桌子用户的房卡 替他人开房只支持房卡模式
 	OnEventModifyUserTreasure(pIServerUserItem, dwPassword ,  TABLE_MODE_FK, 0,  -pCfg->lSinglePayCost, 0);
