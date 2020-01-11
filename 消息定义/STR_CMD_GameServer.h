@@ -56,6 +56,7 @@ struct STR_CMD_GC_LOGON_USERID
 {
 	LONG							lResultCode;								//错误代码
 	TCHAR							szDescribeString[LEN_MESSAGE_DESCRIBE];		//消息描述
+	DWORD							dwKindID;									//游戏KindID
 	DWORD							dwOffLineGameID;							//断线重连的游戏ID, 非0表示是断线重连
 };
 #pragma endregion

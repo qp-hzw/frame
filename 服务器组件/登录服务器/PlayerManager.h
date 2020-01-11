@@ -14,7 +14,7 @@ private:
 	//²éÕÒº¯Êý
 public:
 	//Ôö
-	static bool InsertPlayer(DWORD dwSocketID, STR_CMD_LC_LOGON_PLATFORM* UserInfoPlus);
+	static bool InsertPlayer(DWORD dwSocketID, tagUserInfo& UserInfoPlus);
 	//É¾
 	static bool DeletePlayer(CPlayer * pPlayer);
 	//É¾

@@ -256,11 +256,9 @@ bool CHandleFromGate::On_SUB_CG_Logon_UserID(VOID * pData, WORD wDataSize, DWORD
 	//切换判断 TODONOW 重点查看
 	if( NULL != pIServerUserItem )
 	{
-		//return SwitchUserItemConnect(pIServerUserItem, pLogonUserID->szMachineID, 
-				//pLogonUserID->dLongitude, pLogonUserID->dLatitude);
+		//return SwitchUserItemConnect(pIServerUserItem, pLogonUserID->szMachineID,
+			//pLogonUserID->dLongitude, pLogonUserID->dLatitude);
 
-		CPlayerManager::DeletePlayer(pIServerUserItem);
-		delete pIServerUserItem;				//改
 	}
 	
 
@@ -306,24 +304,23 @@ bool CHandleFromGate::On_CMD_GC_Logon_UserID(DWORD dwSocketID, VOID * pData, WOR
 	//在用户列表中获取 用户
 	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerByID(pDBOLogon->dwUserID);
 
-	/*
-	//重复登录判断 TODONOW
-	if (pIServerUserItem!=NULL)
-	{
-		//切换用户
-		SwitchUserItemConnect(pIServerUserItem, pDBOLogon->szMachineID, wBindIndex, pDBOLogon->dLongitude, pDBOLogon->dLatitude, 
-								pDBOLogon->cbDeviceType, pDBOLogon->wBehaviorFlags, pDBOLogon->wPageTableCount);
+	
+	////重复登录判断 TODONOW
+	//if (pIServerUserItem!=NULL)
+	//{
+	//	//切换用户
+	//	SwitchUserItemConnect(pIServerUserItem, pDBOLogon->szMachineID, pDBOLogon->dLongitude, pDBOLogon->dLatitude, 
+	//							pDBOLogon->cbDeviceType, pDBOLogon->wBehaviorFlags, pDBOLogon->wPageTableCount);
 
-		//提示消息
-		TCHAR szDescribe[128]=TEXT("");
-		_sntprintf_s(szDescribe,CountArray(szDescribe),
-			TEXT("【ID登录】【%ld重复登录2】"),
-			pIServerUserItem->GetUserID());
-		CLog::Log(szDescribe,log_warn);
+	//	//提示消息
+	//	TCHAR szDescribe[128]=TEXT("");
+	//	_sntprintf_s(szDescribe,CountArray(szDescribe),
+	//		TEXT("【ID登录】【%ld重复登录2】"),
+	//		pIServerUserItem->GetUserID());
 
-		return true;
-	}
-	*/
+	//	return true;
+	//}
+	
 
 	//激活用户
 	ActiveUserItem(&pIServerUserItem, dwSocketID, pDBOLogon);
@@ -437,6 +434,8 @@ VOID CHandleFromGate::OnEventUserLogon(CPlayer * pIServerUserItem, bool bAlready
 	STR_CMD_GC_LOGON_USERID logon;
 	ZeroMemory(&logon, sizeof(STR_CMD_GC_LOGON_USERID));
 	logon.lResultCode = 0;
+	logon.dwKindID = g_GameCtrl->GetKindID();
+	CLog::Log(log_debug, "kingID: %d", logon.dwKindID);
 	lstrcpyn(logon.szDescribeString, TEXT("用户登录成功"), CountArray(logon.szDescribeString));
 	
 	//TODONOW
@@ -1301,7 +1300,7 @@ bool CHandleFromGate::CreateTableHallGold(STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD *
 	//检查加入门票
 	if(!CheckCreateTableTicket(pCfg, pIServerUserItem))
 	{
-		return true; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
+		//return true; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
 	}
 
 	/* 第一步 寻找空闲房间 */
@@ -1317,6 +1316,7 @@ bool CHandleFromGate::CreateTableHallGold(STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD *
 	/* 第二步 生成桌子 */
 	srand(static_cast<unsigned int >(time(NULL)));
 	DWORD dwPassword = GenerateTablePassword();
+	CLog::Log(log_debug, "dwPassword: %d", dwPassword);
 
 	//设置桌子属性
 	//pCurTableFrame->SetTableOwner(pIServerUserItem->GetUserID());
@@ -1374,7 +1374,7 @@ bool CHandleFromGate::CreateTableHallGold(STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD *
 	CMD.byZhuangType = pCfg->RobBankType;
 	CMD.wPlayerCount = pCfg->PlayerCount;
 
-	//发送加入房卡房间成功
+	//发送加入金币房间成功
 	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_JOIN_ROOM_SUCCESS, &CMD, sizeof(CMD));
 
 	return true;
@@ -1778,8 +1778,7 @@ bool CHandleFromGate::On_CMD_GC_USER_JOIN_TABLE_NO_PASS( DWORD dwSocketID, VOID 
 bool CHandleFromGate::On_SUB_CG_USER_JOIN_GOLD_HALL_ROOM(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
 	//校验用户
-	WORD wBindIndex = LOWORD(dwSocketID);
-	CPlayer *pIServerUserItem = GetBindUserItem(wBindIndex);
+	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerBySocketID(dwSocketID);
 	if (NULL == pIServerUserItem) return true;
 
 	//校验数据包
@@ -1802,8 +1801,7 @@ bool CHandleFromGate::On_SUB_CG_USER_JOIN_GOLD_HALL_ROOM(VOID * pData, WORD wDat
 bool CHandleFromGate::On_CMD_GC_USER_JOIN_TABLE_HALL_GOLD( DWORD dwSocketID, VOID * pData, WORD wDataSize)
 {
 	/* 1. 校验用户 */
-	WORD wBindIndex = LOWORD(dwSocketID);
-	CPlayer *pIServerUserItem = GetBindUserItem(wBindIndex);
+	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerBySocketID(dwSocketID);
 	if (NULL == pIServerUserItem) return false;
 
 	/* 2. 校验数据包 */
@@ -1829,7 +1827,7 @@ bool CHandleFromGate::On_CMD_GC_USER_JOIN_TABLE_HALL_GOLD( DWORD dwSocketID, VOI
 	}
 
 	/* 4. 桌子校验 */
-	DWORD dwPassword = pJoin->dwPassword;
+	DWORD dwPassword = pJoin->dwPassword;	
 	if(dwPassword == 0)
 	{
 		SendRequestFailure(pIServerUserItem, TEXT("桌子号错误,请重新尝试"), REQUEST_FAILURE_PASSWORD);

@@ -4,7 +4,7 @@
 std::vector<CPlayer*> CPlayerManager::s_PlayerArray;
 
 //Ôö
-bool CPlayerManager::InsertPlayer(DWORD dwSocketID, STR_CMD_LC_LOGON_PLATFORM* UserInfo)
+bool CPlayerManager::InsertPlayer(DWORD dwSocketID, tagUserInfo& UserInfo)
 {
 	CPlayer * pPlayer=NULL;
 	try

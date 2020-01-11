@@ -731,8 +731,16 @@ bool CHandleFromGate::On_CMD_LC_Logon_Account(DWORD dwScoketID, VOID * pData, WO
 
 	//断线重连的处理
 
+	//设置UserInfo值
+	tagUserInfo UserInfo;
+	ZeroMemory(&UserInfo, sizeof(UserInfo));
+
+	UserInfo.dwSocketId = dwScoketID;
+	UserInfo.dwUserID = pCMD->dwUserID;
+
 	//玩家记录
-	CPlayerManager::InsertPlayer (dwScoketID, pCMD);
+	CPlayerManager::InsertPlayer (dwScoketID, UserInfo);
+	CPlayer* player = CPlayerManager::FindPlayerBySocketID(dwScoketID);
 
 	//发送登录成功
 	g_GameCtrl->SendData(dwScoketID, MDM_LOGON, CMD_LC_LOGON_ACCOUNTS, pCMD, sizeof(STR_CMD_LC_LOGON_PLATFORM));
@@ -841,7 +849,7 @@ bool CHandleFromGate::On_CMD_LC_Logon_Platform(DWORD dwScoketID, VOID * pData, W
 	//断线重连的处理
 
 	//玩家记录
-	CPlayerManager::InsertPlayer (dwScoketID, pCMD);
+	//CPlayerManager::InsertPlayer (dwScoketID, pCMD);
 
 	//发送登录成功
 	g_GameCtrl->SendData(dwScoketID,MDM_LOGON,CMD_LC_LOGON_PLATFORM, pCMD, sizeof(STR_CMD_LC_LOGON_PLATFORM));

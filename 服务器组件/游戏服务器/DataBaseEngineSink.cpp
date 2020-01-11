@@ -1283,7 +1283,7 @@ bool CDataBaseEngineSink::On_DBR_HALL_GOLD_TABLE_INFO(DWORD dwContextID, VOID * 
 
 	//构造参数
 	m_TreasureDB->ResetParameter();
-	m_TreasureDB->AddParameter(TEXT("@mystery"),_MYSTERY);
+	m_TreasureDB->AddParameter(TEXT("@FirmID"),_MYSTERY);
 	m_TreasureDB->AddParameter(TEXT("@dwUserID"),pTableInfo->dwUserID);
 	m_TreasureDB->AddParameter(TEXT("@dwKindID"),pTableInfo->dwKindID);
 	m_TreasureDB->AddParameter(TEXT("@byGameType"),pTableInfo->byGameType);
@@ -1924,7 +1924,7 @@ bool CDataBaseEngineSink::On_DBR_CG_USER_JOIN_TABLE_HALL_GOLD(DWORD dwContextID,
 	m_TreasureDB->AddParameter(TEXT("@byGameMod"), pDbReq->byGameMod);
 	m_TreasureDB->AddParameter(TEXT("@byType"), pDbReq->byType);
 	m_TreasureDB->AddParameter(TEXT("@dwKindID"), pDbReq->dwKindID);
-	m_TreasureDB->AddParameter(TEXT("@mystery"), _MYSTERY);
+	m_TreasureDB->AddParameter(TEXT("@dwFirmID"), _MYSTERY);
 
 	//执行查询
 	LONG lResultCode = m_TreasureDB->ExecuteProcess(TEXT("GSP_CG_USER_JOIN_GOLD_HALL_ROOM"), true);
@@ -1944,6 +1944,8 @@ bool CDataBaseEngineSink::On_DBR_CG_USER_JOIN_TABLE_HALL_GOLD(DWORD dwContextID,
 		StrToBin(szRealRoomRule, Dbo.strCreateRoom.SubGameRule, 256, 512);
 
 		Dbo.dwPassword = m_TreasureDB->GetValue_DWORD(TEXT("TableID"));
+
+		CLog::Log(log_debug, "Password: %d", Dbo.dwPassword);
 	}
 
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_GC_USER_JOIN_TABLE_HALL_GOLD,dwContextID,&Dbo,sizeof(Dbo));

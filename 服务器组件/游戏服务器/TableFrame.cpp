@@ -57,7 +57,6 @@ CTableFrame::CTableFrame()
 {
 	//子游戏
 	m_pITableFrameSink= g_GameCtrl->GetITableFrameSink();
-
 	/******************** 静态属性 **********************/
 	m_wTableID=0;
 	m_wChairCount=0;
@@ -832,6 +831,14 @@ int CTableFrame::CanPlayerUpTable(CPlayer* pPlayer)
 //玩家能否离开
 int CTableFrame::CanPlayerLeaveTable(CPlayer* pPlayer)
 {
+	//校验
+	if (pPlayer == NULL)
+		return 2;
+
+	//如果玩家在游戏中 不可离开
+	if (US_PLAYING == pPlayer->GetUserStatus())
+		return 1;
+
 	return 0;
 }
 ////玩家是否能准备

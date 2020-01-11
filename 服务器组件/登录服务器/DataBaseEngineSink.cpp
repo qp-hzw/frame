@@ -1438,13 +1438,14 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_GOLD_INFO(DWORD dwContextID, void * 
 	STR_SUB_CL_SERVICE_GOLD_INFO* pDbReq = (STR_SUB_CL_SERVICE_GOLD_INFO*)pData;
 
 #pragma region 请求金币大厅信息
-	m_TreasureDB->ResetParameter();
-	m_TreasureDB->AddParameter(TEXT("dwUserID"), pDbReq->dwUserID);
-	m_TreasureDB->AddParameter(TEXT("dwModID"), pDbReq->dwModID);
-	m_TreasureDB->AddParameter(TEXT("dwKindID"), pDbReq->dwKindID);
-	m_TreasureDB->AddParameter(TEXT("mystery"), _MYSTERY);
 
-	//执行查询
+	m_TreasureDB->ResetParameter();
+	m_TreasureDB->AddParameter(TEXT("@dwUserID"), pDbReq->dwUserID);
+	m_TreasureDB->AddParameter(TEXT("@dwModID"), pDbReq->dwModID);
+	m_TreasureDB->AddParameter(TEXT("@dwKindID"), pDbReq->dwKindID);
+	m_TreasureDB->AddParameter(TEXT("@dwFirmID"), _MYSTERY);
+
+	////执行查询
 	LONG lResultCode = m_TreasureDB->ExecuteProcess(TEXT("GSP_CL_SERVICE_GOLD_INFO"), true);
 
 	//列表发送
