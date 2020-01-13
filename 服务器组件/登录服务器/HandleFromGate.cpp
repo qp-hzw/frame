@@ -2165,12 +2165,6 @@ bool CHandleFromGate::On_CMD_LC_CLUB_NOTICE( DWORD dwScoketID, VOID * pData, WOR
 bool CHandleFromGate::On_CMD_LC_CLUB_NOTICE_BDCAST( DWORD dwScoketID, VOID * pData, WORD wDataSize)
 {
 	//TODONOW 需要实现
-	//校验参数
-	WORD Size = sizeof(STR_CMD_LC_SHOP_QUERY_RESULT);
-	if( wDataSize != Size) return false;
-
-	//处理消息
-	g_GameCtrl->SendData(dwScoketID, MDM_CLUB, CMD_LC_CLUB_ROOM_SETTING, pData, wDataSize);
 	return true;
 }
 

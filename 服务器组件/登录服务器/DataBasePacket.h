@@ -730,14 +730,6 @@ struct STR_DBR_CL_SHOP_QUERY
 	DWORD dwUserID;			//玩家ID
 	BYTE byGoodsType;		//物品类型 1rmb购买房卡  2rmb购买金币 3金币购买礼物 4积分购买礼物
 };
-//查询商城DBO
-struct STR_DBO_CL_SHOP_QUERY
-{
-	DWORD dwGoodsID;							//商品编号
-	BYTE  byDiscount;							//折扣
-	DWORD dbSpreadScore;						//推广积分
-	DWORD dwPrice;								//价格, rmb购买则是rmb的值， 金币购买则是金币值， 积分购买则是积分值
-};
 
 //钻石购买道具DBO
 struct STR_DBO_CL_SHOP_DIAMOND

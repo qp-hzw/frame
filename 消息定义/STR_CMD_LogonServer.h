@@ -1309,9 +1309,15 @@ struct STR_SUB_CL_SHOP_QUERY
 struct STR_CMD_LC_SHOP_QUERY_RESULT
 {
 	DWORD dwGoodsID;							//商品编号
+	TCHAR szGoodsName[LEN_NICKNAME];			//商品名字
+	BYTE  byExtraGiftType;						//额外赠送的财富类型1rmb 2金币 3房卡 4积分
+	DWORD dwExtraGiftCount;						//额外赠送的财富数量
+	BYTE  byMoneyType;							//购买需要的财富类型 1rmb 2金币 3房卡 4积分
+	DWORD dwMoneyCount;							//购买需要的财富数量
 	BYTE  byDiscount;							//折扣
-	DWORD dbSpreadScore;						//推广积分
-	DWORD dwPrice;								//价格, rmb购买则是rmb的值， 金币购买则是金币值， 积分购买则是积分值
+	DWORD dwLoveLiness;							//增加的魅力值
+	TCHAR szDescripe[128];						//商品描述
+	TCHAR szUrl[256];							//商品url地址
 };
 
 //查询商城结束

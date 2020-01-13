@@ -3787,25 +3787,30 @@ bool CDataBaseEngineSink::On_DBR_CL_SHOP_QUERY(DWORD dwContextID, VOID * pData, 
 	WORD wPacketSize=0;
 	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
 	wPacketSize=0;
-	STR_DBO_CL_SHOP_QUERY * pDBO=NULL;
+	STR_CMD_LC_SHOP_QUERY_RESULT * pDBO=NULL;
 	while ((lResultCode == DB_SUCCESS) && (m_PlatformDB->IsRecordsetEnd()==false))
 	{
 		//发送信息
-		if ((wPacketSize+sizeof(STR_DBO_CL_SHOP_QUERY))>sizeof(cbBuffer))
+		if ((wPacketSize+sizeof(STR_CMD_LC_SHOP_QUERY_RESULT))>sizeof(cbBuffer))
 		{
 			g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_SHOP_QUERY,dwContextID,cbBuffer,wPacketSize);
 			wPacketSize=0;
 		}
 
 		//读取信息
-		pDBO=(STR_DBO_CL_SHOP_QUERY *)(cbBuffer+wPacketSize);
+		pDBO=(STR_CMD_LC_SHOP_QUERY_RESULT *)(cbBuffer+wPacketSize);
 		pDBO->dwGoodsID=m_PlatformDB->GetValue_DWORD(TEXT("GoodsID"));
+		m_PlatformDB->GetValue_String (TEXT("GoodsName"), pDBO->szGoodsName, CountArray(pDBO->szGoodsName));
+		pDBO->byExtraGiftType=m_PlatformDB->GetValue_BYTE(TEXT("ExtraGiftType"));
+		pDBO->dwExtraGiftCount=m_PlatformDB->GetValue_DWORD(TEXT("ExtraGiftCount"));
+		pDBO->byMoneyType=m_PlatformDB->GetValue_BYTE(TEXT("MoneyType"));
+		pDBO->dwMoneyCount=m_PlatformDB->GetValue_DWORD(TEXT("MoneyCount"));
 		pDBO->byDiscount=m_PlatformDB->GetValue_BYTE(TEXT("Discount"));
-		pDBO->dbSpreadScore=m_PlatformDB->GetValue_DWORD(TEXT("SpreadScore"));
-		pDBO->dwPrice=m_PlatformDB->GetValue_DWORD(TEXT("Price"));
-
+		pDBO->dwLoveLiness=m_PlatformDB->GetValue_DWORD(TEXT("LoveLiness"));
+		m_PlatformDB->GetValue_String (TEXT("Descripe"), pDBO->szDescripe, CountArray(pDBO->szDescripe));
+		m_PlatformDB->GetValue_String (TEXT("Url"), pDBO->szUrl, CountArray(pDBO->szUrl));
 		//设置位移
-		wPacketSize+=sizeof(STR_DBO_CL_SHOP_QUERY);
+		wPacketSize+=sizeof(STR_CMD_LC_SHOP_QUERY_RESULT);
 
 		//移动记录
 		m_PlatformDB->MoveToNext();
