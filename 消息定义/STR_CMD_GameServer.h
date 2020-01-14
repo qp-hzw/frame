@@ -170,10 +170,8 @@ struct STR_SUB_CG_USER_JOIN_TABLE_NO_PASS
 //加入桌子 -- 加入大厅金币场桌子
 struct STR_SUB_CG_USER_JOIN_GOLD_HALL_ROOM
 {
-	DWORD							dwUserID;		//玩家ID
 	BYTE							byGameMod;		//游戏模式 金币大厅2
 	BYTE							byType;			//1.初级场   2.中级场   3.高级场   4.富豪场
-	DWORD							dwKindID;		//游戏ID
 };
 
 //断线重连

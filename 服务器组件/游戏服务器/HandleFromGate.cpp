@@ -1000,10 +1000,10 @@ bool CHandleFromGate::On_SUB_CG_USER_CREATE_TABLE(VOID * pData, WORD wDataSize, 
 bool CHandleFromGate::CreateTableNormal(tagTableRule * pCfg, CPlayer *pIServerUserItem, STR_SUB_CG_USER_CREATE_ROOM* pCreateRoom)
 {
 	//检查加入门票
-	//if(!CheckCreateTableTicket(pCfg, pIServerUserItem))
+	if(!CheckCreateTableTicket(pCfg, pIServerUserItem))
 	{
 		CLog::Log(log_debug, "门票不够: %d", pCfg->GameMode);
-		//return true; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
+		return true; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
 	} 
 
 	//用户效验
@@ -1039,6 +1039,13 @@ bool CHandleFromGate::CreateTableNormal(tagTableRule * pCfg, CPlayer *pIServerUs
 	if(pSubGameCfg != NULL)
 	{
 		pCurrTableFrame->SetSubGameRule(pSubGameCfg);
+	}
+
+	//  new  获取规则后初始化子游戏
+	if (!pCurrTableFrame->InitTableFrameSink())
+	{
+		SendRequestFailure(pIServerUserItem, TEXT("游戏初始化失败！"), REQUEST_FAILURE_NORMAL);
+		return true; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
 	}
 
 	//替他人开房
@@ -1113,6 +1120,13 @@ bool CHandleFromGate::CreateRoomClub(tagTableRule * pCfg, CPlayer *pIServerUserI
 	if(pSubGameCfg != NULL)
 	{
 		pCurrTableFrame->SetSubGameRule(pSubGameCfg);
+	}
+
+	// new  获取规则后初始化子游戏
+	if (!pCurrTableFrame->InitTableFrameSink())
+	{
+		SendRequestFailure(pIServerUserItem, TEXT("游戏初始化失败！"), REQUEST_FAILURE_NORMAL);
+		return true; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
 	}
 
 	/* 第六步 房间信息保存到数据库 */
@@ -1241,11 +1255,13 @@ bool CHandleFromGate::CreateTableHallGold(STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD *
 	//内部使用, 不校验指针
 	tagTableRule *pCfg = (tagTableRule*)pDbo->strCreateRoom.CommonRule;
 
+	//设置场次最低金币
+	pCfg->dwLevelGold = pDbo->dwMinGold;
 
 	//检查加入门票
-	if(!CheckCreateTableTicket(pCfg, pIServerUserItem))
+	if(!CheckJoinTableTicket(pCfg, pIServerUserItem))
 	{
-		//return true; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
+		return true; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
 	}
 
 	/* 第一步 寻找空闲房间 */
@@ -1267,6 +1283,9 @@ bool CHandleFromGate::CreateTableHallGold(STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD *
 	//pCurTableFrame->SetTableOwner(pIServerUserItem->GetUserID());
 	pCurrTableFrame->SetTableID(dwPassword);
 
+	//设置金币场场次
+	pCurrTableFrame->SetGoldType(pDbo->byGameType);
+
 	//设置房间自动解散，默认一分钟 -- 这里是指不开始游戏 自动一分钟后解散
 	pCurrTableFrame->SetTableAutoDismiss();
 
@@ -1286,6 +1305,13 @@ bool CHandleFromGate::CreateTableHallGold(STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD *
 	if(pSubGameCfg != NULL)
 	{
 		pCurrTableFrame->SetSubGameRule(pSubGameCfg);
+	}
+
+	//  new  获取规则后初始化子游戏
+	if (!pCurrTableFrame->InitTableFrameSink())
+	{
+		SendRequestFailure(pIServerUserItem, TEXT("游戏初始化失败！"), REQUEST_FAILURE_NORMAL);
+		return true; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
 	}
 
 	/* 用户坐下 */
@@ -1357,6 +1383,13 @@ bool CHandleFromGate::CreateTableAutoClub(STR_DBO_CG_USER_JOIN_TABLE_NO_PASS * p
 	if(pSubGameCfg != NULL)
 	{
 		pCurrTableFrame->SetSubGameRule(pSubGameCfg);
+	}
+
+	//  new  获取规则后初始化子游戏
+	if (!pCurrTableFrame->InitTableFrameSink())
+	{
+		SendRequestFailure(pIServerUserItem, TEXT("游戏初始化失败！"), REQUEST_FAILURE_NORMAL);
+		return true; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
 	}
 
 	/* 用户坐下 */
@@ -1688,7 +1721,7 @@ bool CHandleFromGate::On_SUB_CG_USER_JOIN_GOLD_HALL_ROOM(VOID * pData, WORD wDat
 	//数据定义
 	STR_SUB_CG_USER_JOIN_GOLD_HALL_ROOM *pJoin = (STR_SUB_CG_USER_JOIN_GOLD_HALL_ROOM *)pData;
 
-	//投递请求
+	//投递请求 数据库只负责查询到此场次的房间规则
 	g_GameCtrl->PostDataBaseRequest(DBR_CG_USER_JOIN_TABLE_HALL_GOLD, dwSocketID, pData,wDataSize);
 
 	return true;
@@ -1710,56 +1743,48 @@ bool CHandleFromGate::On_CMD_GC_USER_JOIN_TABLE_HALL_GOLD( DWORD dwSocketID, VOI
 
 	/* 3. 数据库校验 */
 	STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD *pJoin = (STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD *)pData;
-
 	if( pJoin->lResultCode != 0)//返回值不为0, 则认为身上金币不足 或者 不是本公司的人
 	{
 		SendRequestFailure(pIServerUserItem,TEXT("身上金币不足, 无法加入"),REQUEST_FAILURE_NORMAL);
 		return false;
 	}
 
-	if( pJoin->dwPassword == 0)//桌子号为空, 则认为没有找到对应的桌子
-	{
-		//如果没有找到金币大厅的桌子, 则直接创建一个金币大厅的桌子
-		return CreateTableHallGold(pJoin ,  pIServerUserItem);
-	}
-
-	/* 4. 桌子校验 */
-	DWORD dwPassword = pJoin->dwPassword;	
-	if(dwPassword == 0)
-	{
-		SendRequestFailure(pIServerUserItem, TEXT("桌子号错误,请重新尝试"), REQUEST_FAILURE_PASSWORD);
-		return false;
-	}
-
 	/* 5. 校验是否在之前的游戏中 */
 	WORD wOldTableID = pIServerUserItem->GetTableID(); //旧桌子号	
-	if(wOldTableID != INVALID_TABLE)
+	if (wOldTableID != INVALID_TABLE)
 	{
-		if(wOldTableID > CTableManager::TableCount())
+		if (wOldTableID > CTableManager::TableCount())
 		{
 			wOldTableID = INVALID_TABLE;
 		}
 		else
 		{
 			CTableFrame* pOldTable = CTableManager::FindTableByTableID(wOldTableID);
-			if(pOldTable == NULL || pOldTable->GetGameStatus() != GAME_STATUS_PLAY)
+			if (pOldTable == NULL || pOldTable->GetGameStatus() != GAME_STATUS_PLAY)
 			{
 				wOldTableID = INVALID_TABLE;
 			}
-		}	
+		}
 	}
-
 	if (INVALID_TABLE != wOldTableID)
 	{
-		SendRequestFailure(pIServerUserItem,TEXT("您已经在游戏中,不能进入其他房间"),REQUEST_FAILURE_NORMAL);
+		SendRequestFailure(pIServerUserItem, TEXT("您已经在游戏中,不能进入其他房间"), REQUEST_FAILURE_NORMAL);
 		return false;
 	}
-
-	/* 6. 寻找指定桌子 */
-	CTableFrame *pCurrTableFrame = GetDesignatedTable(dwPassword);
-	if(NULL == pCurrTableFrame)
+	
+	/* 6. 查找金币场是否有空椅子 */
+	WORD wChairID;
+	CTableFrame *pCurrTableFrame = GetGlodRoomEmptyChair(wChairID, pJoin->byGameType);
+	if (pCurrTableFrame == NULL)
 	{
-		SendRequestFailure(pIServerUserItem, TEXT("加入失败, 桌子不存在"), REQUEST_FAILURE_NORMAL);
+		//如果没有找到金币大厅的桌子, 则直接创建一个金币大厅的桌子
+		return CreateTableHallGold(pJoin, pIServerUserItem);
+	}
+
+	/* 4. 椅子校验 */
+	if(wChairID == INVALID_CHAIR)
+	{
+		SendRequestFailure(pIServerUserItem, TEXT("椅子号错误,请重新尝试"), REQUEST_FAILURE_PASSWORD);
 		return false;
 	}
 
@@ -1785,7 +1810,6 @@ bool CHandleFromGate::On_CMD_GC_USER_JOIN_TABLE_HALL_GOLD( DWORD dwSocketID, VOI
 	}
 
 	/* 10. 用户坐下 */
-	WORD wChairID = pCurrTableFrame->GetNullChairID();//寻找空椅子
 	if (wChairID != INVALID_CHAIR)
 	{
 		if(pCurrTableFrame->PlayerSitTable(wChairID, pIServerUserItem, 0, true) != 0)
@@ -2197,7 +2221,7 @@ bool CHandleFromGate::On_SUB_User_JoinGoldRoom(VOID * pData, WORD wDataSize, DWO
 
 	//寻找金币房空椅子
 	WORD wChairID;
-	CTableFrame *pTableFrame = GetGlodRoomEmptyChair(wChairID);
+	CTableFrame *pTableFrame = GetGlodRoomEmptyChair(wChairID, 2);
 
 	//找到金币房空椅子
 	if ( (INVALID_CHAIR != wChairID) && (NULL != pTableFrame) )
@@ -2817,7 +2841,7 @@ CTableFrame* CHandleFromGate::GetDesignatedTable(const DWORD &dwPassword)
 }
 
 //查找金币房空椅子
-CTableFrame* CHandleFromGate::GetGlodRoomEmptyChair(WORD &wChairID)
+CTableFrame* CHandleFromGate::GetGlodRoomEmptyChair(WORD &wChairID, BYTE byType)
 {
 	//变量定义
 	CTableFrame *pTableFrame = NULL;
@@ -2832,7 +2856,8 @@ CTableFrame* CHandleFromGate::GetGlodRoomEmptyChair(WORD &wChairID)
 		//桌子校验
 		if ( (NULL == pTableFrame) || 
 			 (pTableFrame->GetGameStatus() != GAME_STATUS_FREE) || 
-			 (pTableFrame->GetTableMode() != TABLE_MODE_GOLD))
+			 (pTableFrame->GetTableMode() != TABLE_MODE_GOLD) ||
+			(pTableFrame->GetGoldType() != byType))
 			continue;
 
 		//获取空椅子

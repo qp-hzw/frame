@@ -199,7 +199,7 @@ protected:
 	static CTableFrame* GetDesignatedTable(const DWORD &dwPassword);
 
     //查找金币房空椅子
-	static CTableFrame* GetGlodRoomEmptyChair(WORD &wChairID);
+	static CTableFrame* GetGlodRoomEmptyChair(WORD &wChairID, BYTE byType);
 
 	//加入桌子
 protected:

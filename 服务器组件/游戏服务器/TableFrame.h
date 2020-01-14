@@ -51,6 +51,7 @@ private:
 	WORD							m_wChairCount;						//椅子数目
 
 	BYTE							m_cbTableMode;						//桌子游戏模式  房卡场, 金币场, 房卡金币场, 比赛场
+	BYTE							m_cbGoldType;						//金币桌子 的场次
 
 	tagTableRule					m_tagTableRule;						//通用房间规则(client传给服务端大厅的)
 	tagTableSubGameRule				m_tagTableSubGameRule;				//子游戏特有房间规则(client传给子游戏的)
@@ -120,6 +121,11 @@ public:
 	//设置状态
 	virtual VOID SetGameStatus(BYTE cbGameStatus) { m_cbGameStatus=cbGameStatus; }
 
+	//设置金币场场次
+	void SetGoldType(BYTE byType) { m_cbGoldType = byType; }
+	//获取金币场场次
+	BYTE GetGoldType() { return m_cbGoldType; }
+
 	//设置桌主，第一个坐下的人
 	virtual void SetTableOwner(DWORD dwUserID) {m_dwTableOwner = dwUserID;}
 	//获得桌主，第一个坐下的人
@@ -157,6 +163,9 @@ public:
 	{
 		memcpy(&m_tagTableSubGameRule, pRule, sizeof(m_tagTableSubGameRule));
 	};
+
+	//初始化子游戏
+	bool InitTableFrameSink();
 
 	//房间是否处于解散状态
 	bool GetDismissState();

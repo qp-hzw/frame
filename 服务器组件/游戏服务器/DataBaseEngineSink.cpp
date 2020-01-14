@@ -1780,6 +1780,90 @@ int StrToBin(TCHAR* inWord, BYTE* OutBin, int source_len_begin, int source_len_e
 	return count;
 }
 
+// add lihao 
+int BinToStr(BYTE *inBin, TCHAR *OutWord, int begin, int end)
+{
+	int t = 0;
+
+	for (int i = begin; i < end; i++)
+	{
+		int t2 = inBin[i] >> 4;
+		int t3 = t2;
+
+		for (int j = 0; j < 2; j++)
+		{
+			if (t2 == 0)
+			{
+				OutWord[t++] = '0';
+			}
+			else if (t2 == 1)
+			{
+				OutWord[t++] = '1';
+			}
+			else if (t2 == 2)
+			{
+				OutWord[t++] = '2';
+			}
+			else if (t2 == 3)
+			{
+				OutWord[t++] = '3';
+			}
+			else if (t2 == 4)
+			{
+				OutWord[t++] = '4';
+			}
+			else if (t2 == 5)
+			{
+				OutWord[t++] = '5';
+			}
+			else if (t2 == 6)
+			{
+				OutWord[t++] = '6';
+			}
+			else if (t2 == 7)
+			{
+				OutWord[t++] = '7';
+			}
+			else if (t2 == 8)
+			{
+				OutWord[t++] = '8';
+			}
+			else if (t2 == 9)
+			{
+				OutWord[t++] = '9';
+			}
+			else if (t2 == 10)
+			{
+				OutWord[t++] = 'a';
+			}
+			else if (t2 == 11)
+			{
+				OutWord[t++] = 'b';
+			}
+			else if (t2 == 12)
+			{
+				OutWord[t++] = 'c';
+			}
+			else if (t2 == 13)
+			{
+				OutWord[t++] = 'd';
+			}
+			else if (t2 == 14)
+			{
+				OutWord[t++] = 'e';
+			}
+			else if (t2 == 15)
+			{
+				OutWord[t++] = 'f';
+			}
+			t2 = inBin[i] - (t3 << 4);
+		}
+	}
+
+	return 0;
+}
+
+
 //牌友圈创建桌子信息
 bool CDataBaseEngineSink::On_DBR_CG_CLUB_CREATE_TABLE(DWORD dwContextID, void *pData, WORD wDataSize)
 {
@@ -1916,14 +2000,35 @@ bool CDataBaseEngineSink::On_DBR_CG_USER_JOIN_TABLE_HALL_GOLD(DWORD dwContextID,
 	if (sizeof(STR_SUB_CG_USER_JOIN_GOLD_HALL_ROOM) != wDataSize)
 		return false;
 
+	//校验用户
+	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerBySocketID(dwContextID);
+	if (NULL == pIServerUserItem) return true;
+
 	STR_SUB_CG_USER_JOIN_GOLD_HALL_ROOM* pDbReq = (STR_SUB_CG_USER_JOIN_GOLD_HALL_ROOM*)pData;
+
+	////初始化一次金币场房间规则
+	//STR_SUB_CG_USER_CREATE_ROOM rule;
+	//ZeroMemory(&rule, sizeof(STR_SUB_CG_USER_CREATE_ROOM));
+
+	//tagTableRule *pTableRule = (tagTableRule *)rule.CommonRule;
+	//pTableRule->GameMode = 2;
+	//pTableRule->GameCount = 2;
+	//pTableRule->PlayerCount = 3;
+	//pTableRule->CellScore = 1;
+	//pTableRule->FangZhu = 0;
+	//pTableRule->dwLevelGold = 2000;   //1000 2000 4000 10000
+
+	//TCHAR tmpRealRoomRule[520] = { 0 };
+	//BinToStr(rule.CommonRule, tmpRealRoomRule, 0, 128);
+	//BinToStr(rule.SubGameRule, &tmpRealRoomRule[256], 128, 256);
 
 	//数据库传入参数
 	m_TreasureDB->ResetParameter();
-	m_TreasureDB->AddParameter(TEXT("@dwUserID"), pDbReq->dwUserID);
+	//m_TreasureDB->AddParameter(TEXT("@RoomRule"), tmpRealRoomRule);  //第一次添加用
+	m_TreasureDB->AddParameter(TEXT("@dwUserID"), pIServerUserItem->GetUserID());
 	m_TreasureDB->AddParameter(TEXT("@byGameMod"), pDbReq->byGameMod);
 	m_TreasureDB->AddParameter(TEXT("@byType"), pDbReq->byType);
-	m_TreasureDB->AddParameter(TEXT("@dwKindID"), pDbReq->dwKindID);
+	m_TreasureDB->AddParameter(TEXT("@dwKindID"), g_GameCtrl->GetKindID());
 	m_TreasureDB->AddParameter(TEXT("@dwFirmID"), _MYSTERY);
 
 	//执行查询
@@ -1932,20 +2037,21 @@ bool CDataBaseEngineSink::On_DBR_CG_USER_JOIN_TABLE_HALL_GOLD(DWORD dwContextID,
 	STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD Dbo;
 	ZeroMemory(&Dbo,sizeof(STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD));
 	Dbo.lResultCode = lResultCode;
-	Dbo.dwKindID =  pDbReq->dwKindID;
+	Dbo.dwKindID = g_GameCtrl->GetKindID();
 	Dbo.byGameType =  pDbReq->byType;
 
 	if(lResultCode == DB_SUCCESS)
 	{
-		TCHAR szRealRoomRule[2048];
+		TCHAR szRealRoomRule[520] = {0};
 		m_TreasureDB->GetValue_String(TEXT("RealRoomRule"), szRealRoomRule, sizeof(szRealRoomRule));
 
 		StrToBin(szRealRoomRule, Dbo.strCreateRoom.CommonRule, 0, 255);
 		StrToBin(szRealRoomRule, Dbo.strCreateRoom.SubGameRule, 256, 512);
 
-		Dbo.dwPassword = m_TreasureDB->GetValue_DWORD(TEXT("TableID"));
+		Dbo.dwMinGold = m_TreasureDB->GetValue_DWORD(TEXT("Gold"));
 
-		CLog::Log(log_debug, "Password: %d", Dbo.dwPassword);
+		//不使用数据库来控制加入房间流程 //只从数据库获取子游戏规则
+		//Dbo.dwPassword = m_TreasureDB->GetValue_DWORD(TEXT("TableID"));
 	}
 
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_GC_USER_JOIN_TABLE_HALL_GOLD,dwContextID,&Dbo,sizeof(Dbo));

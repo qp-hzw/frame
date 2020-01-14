@@ -57,12 +57,11 @@ CTableFrame::CTableFrame()
 {
 	//子游戏
 	m_pITableFrameSink= g_GameCtrl->GetITableFrameSink();
-	//初始化接口
-	m_pITableFrameSink->Initialization(this);
 	/******************** 静态属性 **********************/
 	m_wTableID=0;
 	m_wChairCount=0;
 	m_cbTableMode = 0;
+	m_cbGoldType = 0;
 
 	m_dwGroupID = 0;
 	m_dwCreateTableUser = 0;
@@ -107,6 +106,14 @@ void CTableFrame::SetTableAutoDismiss(DWORD dwMinutes)
 	SetGameTimer(IDI_ROOM_AUTO_DISMISS, dwMinutes*TIME_ROOM_AUTO_DISMISS, 1, NULL); 
 }
 
+//初始化子游戏
+bool CTableFrame::InitTableFrameSink()
+{
+	if (m_pITableFrameSink == NULL)
+		return false;
+
+	return m_pITableFrameSink->Initialization(this);
+}
 
 /***************************************   游戏流程函数    ***************************************************/
 //开始游戏
@@ -1763,7 +1770,7 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 
 			STR_SUB_RG_FRAME_ASK_DISMISS *pApply = (STR_SUB_RG_FRAME_ASK_DISMISS*)pData;
 
-			CLog::Log(log_debug, "ChairID: %d, Agree: %d", pApply->dwApplyUserID, pApply->cbAgree);
+			CLog::Log(log_debug, "UserID: %d, Agree: %d", pApply->dwApplyUserID, pApply->cbAgree);
 
 			//1. 解散校验
 			if (0 == pApply->cbAgree)

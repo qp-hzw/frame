@@ -356,8 +356,9 @@ struct STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD
 {
 	DWORD							dwKindID;		//游戏ID
 	BYTE							byGameType;		//初级场, 中级场, 高级场, 富豪场
-	DWORD							dwPassword;		//房间密码
+	//DWORD							dwPassword;		//房间密码
 	long							lResultCode;	//非0表示 没有找到可以加入的房间
+	DWORD							dwMinGold;		//进入房间所需的最小金币
 
 	STR_SUB_CG_USER_CREATE_ROOM		strCreateRoom;	//房间规则
 };
