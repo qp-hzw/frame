@@ -1,6 +1,6 @@
 #ifndef STR_CMD_GAME_SERVER_HEAD_FILE
 #define STR_CMD_GAME_SERVER_HEAD_FILE
-
+#include "../服务器组件/游戏服务器/TableFrameBase.h" //因为改结构体tagTableRule
 #pragma pack(1)
 
 #pragma region 辅助宏
@@ -68,68 +68,6 @@ struct STR_SUB_CG_USER_CREATE_ROOM
 {
 	BYTE CommonRule[LEN_PRIVATE_TABLE_RULE/2];						//通用房间规则
 	BYTE SubGameRule[LEN_PRIVATE_TABLE_RULE/2];						//子游戏房间规则
-};
-
-//通用房间规则
-struct tagTableRule
-{
-	/********************************* 大厅使用 ************************************/
-	BYTE	GameMode;				//游戏模式 0-房卡模式; 1-竞技模式;  2-金币模式;  3-房卡金币;
-	BYTE	RobBankType;			//坐庄模式 0-抢庄（抢注高者坐庄） 1-轮庄（轮流坐庄）2-固定（固定房主坐庄）  3-赢庄（赢的人坐庄） 4-摇骰子定庄（随机庄家）
-	BYTE	GameCount;				//游戏局数 0-无限局
-	BYTE	GameCountType;			//大局类型 是第一大局, 第二大局, 还是第三大局
-	BYTE	PlayerCount;			//玩家数量 0-任意人数可开
-	BYTE	cbPayType;				//支付方式，0房主支付、1AA制
-	DWORD	lSinglePayCost;			//金币场 入场门票  TODONOW 该字段仅在扣除门票的时候有用，其他的调用均是以前的, 可以删除
-	WORD	CellScore;				//*底分	  默认为1 -- 子游戏使用的是该字段
-	DWORD	MaxFan;					//*封顶番数 0-不封顶 
-	DWORD	LeaveScore;				//*离场分数 0-无限制         -- 已舍弃
-	DWORD	JoinScore;				//*入场设定 0-无限制         -- 已舍弃
-	BYTE	bRefuseSameIP;			//允许同IP    0-不允许 1-允许
-	BYTE	bDistanceIn300;			//允许300米	  0-不许云 1-允许
-	double	dLongitude;				//经度	
-	double	dLatitude;				//纬度	
-	BYTE	bCreateToOther;			//是否为他人开房 0-否 1-是
-	DWORD	FangZhu;				//*房主
-	BYTE	bAllowStranger;			//允许陌生人加入
-
-	/********************************** 牌友圈相关 ************************************/
-	BYTE	byClubCreate;			//0大厅创建 1 牌友圈普通创建  2牌友圈私密创建
-	DWORD	dwUserID;				//群主ID
-    DWORD	dwClubID;				//牌友群/俱乐部编号
-	DWORD	dwKindID;			    //游戏ID
-	BYTE	byGoldOrFK;				//(2.金币 1.房卡)
-
-	BYTE	bDissolve;				//是否允许解散 0允许 1不允许
-	DWORD	dwDissolveTime;			//解散时长 (分钟)
-
-	//金币房特用
-	DWORD	dwAmount;				//最低额度
-	DWORD	dwOwnerPercentage;		//群主提成
-    
-	BYTE	byMask;					//1 AA支付;  2大赢家支付
-	DWORD	dwDizhu;				//底注
-	//TODONOW 如果是在俱乐部的金币场,这里就是房主设置的; 
-	//如果是在大厅的房卡金币场,这里就是系统设置的; 
-	//如果是在大厅的金币场, 这里就是系统设置的
-    DWORD	dwLevelGold;			//进场的最小身价 
-
-	/************************************ 备用字段 ************************************/
-	BYTE byRetain1;
-    BYTE byRetain2;
-    BYTE byRetain3;
-	BYTE byRetain4;
-
-	DWORD szRetain1;
-    DWORD szRetain2;
-	DWORD szRetain3;
-    DWORD szRetain4;
-	DWORD szRetain5;
-    DWORD szRetain6;
-	DWORD szRetain7;
-    DWORD szRetain8;
-    DWORD szRetain9;
-    DWORD szRetain10;
 };
 
 

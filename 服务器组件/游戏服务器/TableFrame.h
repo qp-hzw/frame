@@ -7,12 +7,8 @@
 #include "TableFrameBase.h"
 
 //////////////////////////////////////////////////////////////////////////////////
-#define GAME_CONCLUDE_CONTINUE  0xFF //大局结束并续费
-#define GAME_CONCLUDE_NORMAL    0xFE //正常结束
 
-//游戏状态
-#define GAME_STATUS_FREE			0									//空闲状态
-#define GAME_STATUS_PLAY			100									//游戏状态	TODO 细看，改成桌子状态
+
 
 //////////////////////////////////////////////////////////////////////////////////
 //时间标识
@@ -232,7 +228,7 @@ public:
 	//发送数据
 	virtual bool SendTableData(WORD wChairID, WORD wSubCmdID);
 	//发送数据
-	virtual bool SendTableData(WORD wChairID, WORD wSubCmdID, VOID * pData, WORD wDataSize,WORD wMainCmdID=MDM_GF_GAME);
+	virtual bool SendTableData(WORD wChairID, WORD wSubCmdID, VOID * pData, WORD wDataSize);
 
 	//发送机器人用户
 public:

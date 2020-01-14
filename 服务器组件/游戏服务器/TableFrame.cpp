@@ -5,11 +5,6 @@
 #include <iostream>
 //#include <algorithm>
 
-//结束原因
-#define GER_NORMAL					0x00								//常规结束
-#define GER_DISMISS					0x01								//游戏解散
-#define GER_USER_LEAVE				0x02								//用户离开
-#define GER_NETWORK_ERROR			0x03								//网络错误
 
 //////////////////////////////////////////////////////////////////////////////////
 //校验GPS距离
@@ -892,7 +887,7 @@ bool CTableFrame::OnEventApplyDismissRoom(WORD wChairID, bool bAgree)
 				TEXT("请联系会长解散房间!"),
 				CountArray(cmdResult.szDescribeString));
 
-			SendTableData(wChairID,CMD_GR_FRMAE_ASK_DISMISS_RESULT,&cmdResult, sizeof(cmdResult), MDM_G_FRAME);
+			SendTableData(wChairID,CMD_GR_FRMAE_ASK_DISMISS_RESULT,&cmdResult, sizeof(cmdResult));
 			return true;
 		}
 
@@ -918,7 +913,7 @@ bool CTableFrame::OnEventApplyDismissRoom(WORD wChairID, bool bAgree)
 		lstrcpyn(VoteDismiss.szApplyUserNick, pApplyUserItem->GetUserInfo()->szNickName, CountArray(VoteDismiss.szApplyUserNick));
 
 		//给所有人发送 房间申请解散消息
-		SendTableData(INVALID_CHAIR, CMD_GR_FRMAE_VOTE_DISMISS, &VoteDismiss, sizeof(STR_CMD_GR_FRMAE_VOTE_DISMISS), MDM_G_FRAME);
+		SendTableData(INVALID_CHAIR, CMD_GR_FRMAE_VOTE_DISMISS, &VoteDismiss, sizeof(STR_CMD_GR_FRMAE_VOTE_DISMISS));
 
 		//设置房间处于解散状态
 		m_bUnderDissState = true;
@@ -945,7 +940,7 @@ bool CTableFrame::OnEventApplyDismissRoom(WORD wChairID, bool bAgree)
 		if(pApplyUserItem->GetUserID() == m_dwTableOwner)
 		{
 			//发送消息
-			SendTableData(INVALID_CHAIR, CMD_GR_FRAME_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT), MDM_G_FRAME);
+			SendTableData(INVALID_CHAIR, CMD_GR_FRAME_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT));
 
 			//结束游戏
 			HandleDJGameEnd(GAME_CONCLUDE_NORMAL);
@@ -954,7 +949,7 @@ bool CTableFrame::OnEventApplyDismissRoom(WORD wChairID, bool bAgree)
 		else		//不是房主解散，玩家直接起立
 		{
 			//发送消息,代替站起，客户端直接站起，并不是解散
-			SendTableData(wChairID, CMD_GR_FRAME_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT), MDM_G_FRAME);
+			SendTableData(wChairID, CMD_GR_FRAME_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT));
 
 			//用户站起			
 			if ( PlayerUpTable(pApplyUserItem) ) 
@@ -1021,7 +1016,7 @@ bool CTableFrame::OnEventVoteDismissRoom(WORD wChairID, bool bAgree)
 			DismissResult.cbDismiss = 1;
 
 			//广播房间解散成功消息			
-			SendTableData(INVALID_CHAIR, CMD_GR_FRAME_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT), MDM_G_FRAME);
+			SendTableData(INVALID_CHAIR, CMD_GR_FRAME_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT));
 
 			//设置房间不处于解散状态
 			m_bUnderDissState = false;
@@ -1044,7 +1039,7 @@ bool CTableFrame::OnEventVoteDismissRoom(WORD wChairID, bool bAgree)
 			DismissResult.cbDismiss = 2;
 
 			//广播房间解散失败消息			
-			SendTableData(INVALID_CHAIR, CMD_GR_FRAME_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT), MDM_G_FRAME);
+			SendTableData(INVALID_CHAIR, CMD_GR_FRAME_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT));
 
 			//设置房间不处于解散状态
 			m_bUnderDissState = false;
@@ -1056,7 +1051,7 @@ bool CTableFrame::OnEventVoteDismissRoom(WORD wChairID, bool bAgree)
 			DismissResult.cbDismiss = 0;
 
 			//广播玩家表决消息			
-			SendTableData(INVALID_CHAIR, CMD_GR_FRAME_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT), MDM_G_FRAME);
+			SendTableData(INVALID_CHAIR, CMD_GR_FRAME_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT));
 		}
 	}
 
@@ -1207,7 +1202,7 @@ bool CTableFrame::SendTableData(WORD wChairID, WORD wSubCmdID)
 }
 
 //发送数据
-bool CTableFrame::SendTableData(WORD wChairID, WORD wSubCmdID, VOID * pData, WORD wDataSize,WORD wMainCmdID)
+bool CTableFrame::SendTableData(WORD wChairID, WORD wSubCmdID, VOID * pData, WORD wDataSize)
 {
 	//用户群发
 	if (wChairID==INVALID_CHAIR)
@@ -1222,7 +1217,7 @@ bool CTableFrame::SendTableData(WORD wChairID, WORD wSubCmdID, VOID * pData, WOR
 			if(pIServerUserItem->GetTableID() != m_wTableID) continue;
 
 			//发送数据
-			g_GameCtrl->SendData(pIServerUserItem,wMainCmdID,wSubCmdID,pData,wDataSize);
+			g_GameCtrl->SendData(pIServerUserItem,MDM_GF_GAME,wSubCmdID,pData,wDataSize);
 		}
 
 		return true;
@@ -1234,7 +1229,7 @@ bool CTableFrame::SendTableData(WORD wChairID, WORD wSubCmdID, VOID * pData, WOR
 
 		if ((pIServerUserItem==NULL)) return false;
 		//发送数据
-		g_GameCtrl->SendData(pIServerUserItem,wMainCmdID,wSubCmdID,pData,wDataSize);
+		g_GameCtrl->SendData(pIServerUserItem,MDM_GF_GAME,wSubCmdID,pData,wDataSize);
 
 		return true;
 	}
@@ -1490,7 +1485,7 @@ bool CTableFrame::OnEventTimer(DWORD dwTimerID, WPARAM dwBindParameter)
 				DismissResult.cbClubQuit = 1;
 			}
 
-			SendTableData(INVALID_CHAIR, CMD_GR_FRAME_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT), MDM_G_FRAME);
+			SendTableData(INVALID_CHAIR, CMD_GR_FRAME_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT));
 
 			//通知子游戏解散房间
 			//空闲状态 直接解散
@@ -1523,7 +1518,7 @@ bool CTableFrame::OnEventTimer(DWORD dwTimerID, WPARAM dwBindParameter)
 				&& sysTime.wMinute == 0)
 			{
 				//向所有桌子上用户发送抽红包通知
-				SendTableData(INVALID_CHAIR,SUB_GR_LOTTERY_NOTIFY,NULL,0,MDM_G_FRAME);
+				SendTableData(INVALID_CHAIR,SUB_GR_LOTTERY_NOTIFY,NULL,0);
 			}
 			return true;
 		}
@@ -1702,7 +1697,7 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 			CMDChat.dwUserID = pTableChat->dwUserID;
 
 			//发送数据
-			SendTableData(INVALID_CHAIR, CMD_GR_FRAME_CHAT, &CMDChat, sizeof(STR_CMD_GR_FRAME_CHAT), MDM_G_FRAME);
+			SendTableData(INVALID_CHAIR, CMD_GR_FRAME_CHAT, &CMDChat, sizeof(STR_CMD_GR_FRAME_CHAT));
 
 			return true;
 		}	
