@@ -2890,7 +2890,7 @@ void CHandleFromGate::HandleCreateTableForOthers(CTableFrame *pCurTableFrame, CP
 	pCurTableFrame->SetTableID(dwPassword);
 
 	//设置房间自动解散,替他人开房，房间暂时保留十分钟
-	pCurTableFrame->SetTableAutoDismiss(10);
+	//pCurTableFrame->SetTableAutoDismiss(10);
 	pCurTableFrame->SetCreateTableUser(pIServerUserItem->GetUserID()); //设置创建玩家ID
 
 	//添加开房信息
@@ -2944,7 +2944,7 @@ bool CHandleFromGate::HandleCreateTable(CTableFrame *pCurTableFrame, CPlayer *pI
 	pCurTableFrame->SetTableID(dwPassword);
 
 	//设置房间自动解散，默认一分钟 -- 这里是指不开始游戏 自动一分钟后解散
-	pCurTableFrame->SetTableAutoDismiss();
+	//pCurTableFrame->SetTableAutoDismiss();
 	
 	//获得空椅子
 	WORD wChairID = pCurTableFrame->GetNullChairID(); 

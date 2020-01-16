@@ -176,7 +176,7 @@ public:
 	//子游戏与框架接口函数
 public:
 	// 1金币; 2私有; 3比赛
-	virtual int GameType() { return 2; }
+	virtual int GameType() { return m_tagTableRule.GameMode; }
 	//is roboot
 	virtual bool IsRobot(WORD wChairID) { return true; }
 	//get player base info

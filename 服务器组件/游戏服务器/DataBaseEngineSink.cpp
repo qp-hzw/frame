@@ -254,7 +254,7 @@ bool CDataBaseEngineSink::On_DBR_Logon_UserID(DWORD dwContextID, VOID * pData, W
 	m_TreasureDB->AddParameter(TEXT("@dwGameID"),g_GameCtrl->GetServerID());
 
 	//输出参数
-	TCHAR szDescribeString[128]=TEXT("");
+	TCHAR szDescribeString[127]=TEXT("");
 	m_TreasureDB->AddParameterOutput(TEXT("@strErrorDescribe"), szDescribeString, sizeof(szDescribeString),adParamOutput);
 
 	//执行查询

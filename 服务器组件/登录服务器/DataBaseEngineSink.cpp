@@ -1930,7 +1930,7 @@ bool CDataBaseEngineSink::On_DBR_Logon_Accounts(DWORD dwContextID, VOID * pData,
 	m_AccountsDB->AddParameter(TEXT("@ProxyID"),pDBRLogonAccounts->dwProxyID);
 
 	//输出参数
-	TCHAR szDescribeString[128]=TEXT("");
+	TCHAR szDescribeString[127]=TEXT("");
 	m_AccountsDB->AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
 
 	//执行查询

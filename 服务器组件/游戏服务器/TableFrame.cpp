@@ -283,8 +283,11 @@ bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 					g_TCPSocketEngine->SendData(MDM_USER,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
 				}
 
-				//2. 用户站起
-				PlayerUpTable(pIServerUserItem);			
+				//设置状态
+				pIServerUserItem->SetUserStatus(US_SIT, m_wTableID, wChairID);
+
+				//2. 用户离开
+				PlayerLeaveTable(pIServerUserItem);			
 			}
 		}
 
@@ -1557,6 +1560,12 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 			//变量定义
 			CMD_GF_GameOption * pGameOption=(CMD_GF_GameOption *)pData;
 
+			//发送房间规则
+			STR_CMD_ROOM_RULE room_rule;
+			memcpy(&room_rule.common, &m_tagTableRule, sizeof(room_rule.common));
+			room_rule.TableID = m_wTableID;
+			g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_ROOM_RULE, &room_rule, sizeof(room_rule));
+
 			//玩家加入房间  将在房间里的所有玩家信息发送给新玩家
 			for (auto it = m_user_list.begin(); it != m_user_list.end(); it++)
 			{
@@ -1599,12 +1608,6 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 					g_GameCtrl->SendData((*it), MDM_USER, SUB_GR_USER_STATUS, &GameStatus1, sizeof(GameStatus1));
 				}
 			}
-
-			//发送房间规则
-			STR_CMD_ROOM_RULE room_rule;
-			memcpy(&room_rule.common, &m_tagTableRule, sizeof(room_rule.common));
-			room_rule.TableID = m_wTableID;	
-			g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_ROOM_RULE, &room_rule, sizeof(room_rule));
 
 			//发送场景
 			m_pITableFrameSink->OnEventSendGameScene(wChairID, pIServerUserItem, m_cbGameStatus, true);

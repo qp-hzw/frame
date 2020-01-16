@@ -90,13 +90,13 @@ int CGameCtrl::InitializeService()
 	m_TCPSocketEngine = static_cast<ITCPSocketEngine*>(CWHModule::TCPSocketEngine());
 	m_TimerEngine = static_cast<ITimerEngine*>(CWHModule::TimerEngine());
 
-	ITableFrameSink *SubGameDll = static_cast<ITableFrameSink*>(CWHModule::SubGame(m_subgame_dll_name)); //此处只是校验
+	//读取子游戏配置文件
+	DWORD dwKindId = static_cast<DWORD >(CWHModule::SubGameCfg(m_subgame_dll_name)); //此处只是校验
 
 	if(m_AttemperEngine == NULL) return 1;
 	if(m_TCPNetworkEngine == NULL) return 2;
 	if(m_TCPSocketEngine == NULL) return 3;
 	if(m_TimerEngine == NULL) return 4;
-	if(SubGameDll == NULL) return 5;
 
 	g_TCPNetworkEngine = m_TCPNetworkEngine;
 	g_TCPSocketEngine = m_TCPSocketEngine;
@@ -106,8 +106,8 @@ int CGameCtrl::InitializeService()
 	IUnknownEx * pIDataBaseEngineSink=static_cast<IUnknownEx*>(&m_DataBaseEngineSink);
 
 	//配置游戏ServerID
-	if (0 == SubGameDll->GetKindIDToFrame())	return 8;
-	SetServerID((SubGameDll->GetKindIDToFrame()) << 16);
+	if (0 == dwKindId)	return 8;
+	SetServerID(dwKindId << 16);
 
 	/***************************************************  AttemperEngine 配置信息 *************************************************/
 	//AttemperEngine设置 Attemper钩子
