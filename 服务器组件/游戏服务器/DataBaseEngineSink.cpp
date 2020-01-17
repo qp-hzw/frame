@@ -27,9 +27,18 @@ bool CDataBaseEngineSink::OnDataBaseEngineStart(IUnknownEx * pIUnknownEx)
 	if(m_TreasureDB == NULL) return false;
 
 	//发起连接
-	m_PlatformDB->Connect(1);
-	m_TreasureDB->Connect(3);
+	bool bRet1 = m_PlatformDB->Connect(1);
+	bool bRet2 = m_TreasureDB->Connect(3);
 
+	if(!bRet1)
+	{
+		return false;
+	}
+
+	if(!bRet2)
+	{
+		return false;
+	}
 	return true;
 }
 
@@ -235,7 +244,6 @@ bool CDataBaseEngineSink::On_DBR_Logon_UserID(DWORD dwContextID, VOID * pData, W
 
 	//执行查询
 	STR_DBR_CG_LOGON_USERID *pLogonUserID = (STR_DBR_CG_LOGON_USERID *)pData;
-	dwUserID = pLogonUserID->dwUserID;
 
 	//转化地址
 	TCHAR szClientAddr[16]=TEXT("");
@@ -246,17 +254,25 @@ bool CDataBaseEngineSink::On_DBR_Logon_UserID(DWORD dwContextID, VOID * pData, W
 	}
 
 	//构造参数
+	CLog::Log(log_debug, "1");
 	m_TreasureDB->ResetParameter();
+	CLog::Log(log_debug, "2");
 	m_TreasureDB->AddParameter(TEXT("@dwUserID"),pLogonUserID->dwUserID);
+	CLog::Log(log_debug, "3");
 	m_TreasureDB->AddParameter(TEXT("@strPassword"),pLogonUserID->szPassword);
+	CLog::Log(log_debug, "4");
 	m_TreasureDB->AddParameter(TEXT("@strClientIP"),szClientAddr);
+	CLog::Log(log_debug, "5");
 	m_TreasureDB->AddParameter(TEXT("@strMachineID"),pLogonUserID->szMachineID);
+	CLog::Log(log_debug, "6");
 	m_TreasureDB->AddParameter(TEXT("@dwGameID"),g_GameCtrl->GetServerID());
 
+	CLog::Log(log_debug, "7");
 	//输出参数
-	TCHAR szDescribeString[127]=TEXT("");
+	TCHAR szDescribeString[128]=TEXT("");
 	m_TreasureDB->AddParameterOutput(TEXT("@strErrorDescribe"), szDescribeString, sizeof(szDescribeString),adParamOutput);
 
+	CLog::Log(log_debug, "8");
 	//执行查询
 	LONG lResultCode = m_TreasureDB->ExecuteProcess(TEXT("GSP_CG_Logon_UserID"),true);
 

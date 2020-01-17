@@ -237,12 +237,17 @@ bool CHandleFromGate::OnTCPNetworkMainFrame(WORD wSubCmdID, VOID * pData, WORD w
 //I D 登录
 bool CHandleFromGate::On_SUB_CG_Logon_UserID(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
+	CLog::Log(log_debug, "frame On_SUB_CG_Logon_UserID begin");
 	//效验参数
 	if (wDataSize != sizeof(STR_SUB_CG_LOGON_USERID)) return false;
 	STR_SUB_CG_LOGON_USERID *pLogonUserID = (STR_SUB_CG_LOGON_USERID *)pData;
 
 	//在用户列表获取用户
 	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerByID(pLogonUserID->dwUserID);
+
+	//删除 TODONOW 测试使用
+	CPlayerManager::DeletePlayer(pIServerUserItem);
+	
 
 	//非正常登录的用户不允许踢出
 	if (pIServerUserItem!=NULL)
@@ -295,14 +300,13 @@ bool CHandleFromGate::On_CMD_GC_Logon_UserID(DWORD dwSocketID, VOID * pData, WOR
 		ZeroMemory(&logonFail, sizeof(STR_CMD_GC_LOGON_USERID));
 		logonFail.lResultCode = 0;
 		lstrcpyn(logonFail.szDescribeString, pDBOLogon->szDescribeString, CountArray(logonFail.szDescribeString));
-
+		
+		CLog::Log(log_debug, "logon failed %d", pDBOLogon->lResultCode);
 		//发送数据
 		g_GameCtrl->SendData(dwSocketID, MDM_GR_LOGON, CMD_GC_LOGON_USERID, &logonFail, sizeof(STR_CMD_GC_LOGON_USERID));
 		return true;
 	}
 
-	//在用户列表中获取 用户
-	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerByID(pDBOLogon->dwUserID);
 
 	
 	////重复登录判断 TODONOW
@@ -321,15 +325,16 @@ bool CHandleFromGate::On_CMD_GC_Logon_UserID(DWORD dwSocketID, VOID * pData, WOR
 	//	return true;
 	//}
 	
+	CLog::Log(log_debug, "begin ActiveUserItem");
 
 	//激活用户
-	ActiveUserItem(&pIServerUserItem, dwSocketID, pDBOLogon);
+	ActiveUserItem(dwSocketID, pDBOLogon);
 
 	return true;
 }
 
 //ID登录成功，激活用户
-void CHandleFromGate::ActiveUserItem(CPlayer **pIServerUserItem, DWORD dwSocketID, 
+void CHandleFromGate::ActiveUserItem( DWORD dwSocketID, 
 		STR_DBO_CG_LOGON_USERID *pDBOLogon)
 {
 	if ( NULL == pDBOLogon )
@@ -401,26 +406,26 @@ void CHandleFromGate::ActiveUserItem(CPlayer **pIServerUserItem, DWORD dwSocketI
 	//UserInfo.dwClientAddr=pBindParameter->dwClientAddr;
 	lstrcpyn(UserInfo.szMachineID,pDBOLogon->szMachineID,CountArray(UserInfo.szMachineID));
 
+	CLog::Log(log_debug, "begin InsertPlayer");
 	//激活用户 -- 设置用户信息
-	CPlayerManager::InsertPlayer(pIServerUserItem, UserInfo);
+	CPlayerManager::InsertPlayer(dwSocketID, UserInfo);
+
+	//在用户列表中获取 用户
+	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerByID(UserInfo.dwUserID);
+
+	CLog::Log(log_debug, "voer InsertPlayer");
 
 	//错误判断 -- 设置用户pIServerUserItem信息失败
 	if (pIServerUserItem == NULL)
 	{
+		CLog::Log(log_debug, "voer InsertPlayer failed");
 		//断开用户
-		if (bAndroidUser==true)
-		{
-			//m_AndroidUserManager.DeleteAndroidUserItem(dwSocketID);
-		}
-		else
-		{
-			g_TCPNetworkEngine->CloseSocket(dwSocketID);
-		}
+		g_TCPNetworkEngine->CloseSocket(dwSocketID);
 		return;
 	}
 
 	//登录事件
-	OnEventUserLogon(*pIServerUserItem, false);
+	OnEventUserLogon(pIServerUserItem, false);
 }
 
 //用户登录 
@@ -440,16 +445,9 @@ VOID CHandleFromGate::OnEventUserLogon(CPlayer * pIServerUserItem, bool bAlready
 	//TODONOW
 	logon.dwOffLineGameID = pIServerUserItem -> GetOfflineGameID();
 
+	CLog::Log(log_debug, "send  1 101");
 	//发送数据
 	g_GameCtrl->SendData(pIServerUserItem->GetSocketID(), MDM_GR_LOGON, CMD_GC_LOGON_USERID, &logon, sizeof(STR_CMD_GC_LOGON_USERID));
-	
-
-	/* 11. 通知数据库改变 玩家状态 */
-	//TODONOWW
-	DBR_GP_UserQuitInfo quitInfo;
-	quitInfo.dwUserID = pIServerUserItem->GetUserID();
-	quitInfo.byOnlineMask = 2;
-	g_GameCtrl->PostDataBaseRequest(DBR_GP_GAME_USER_STATE,0, &quitInfo,sizeof(quitInfo));
 }
 
 //切换连接

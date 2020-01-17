@@ -5,7 +5,7 @@
 std::vector<CPlayer*> CPlayerManager::s_PlayerArray;
 
 //增
-bool CPlayerManager::InsertPlayer(CPlayer * * pIServerUserResult, tagUserInfo & UserInfo)
+bool CPlayerManager::InsertPlayer(DWORD dwSocketID, tagUserInfo & UserInfo)
 {
 	CPlayer * pPlayer=NULL;
 	try
@@ -22,9 +22,6 @@ bool CPlayerManager::InsertPlayer(CPlayer * * pIServerUserResult, tagUserInfo & 
 
 	//插入用户
 	s_PlayerArray.push_back(pPlayer);
-
-	//设置变量
-	*pIServerUserResult=pPlayer;
 
 	return true;
 }
