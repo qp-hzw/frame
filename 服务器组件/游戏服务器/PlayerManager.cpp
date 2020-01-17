@@ -104,7 +104,7 @@ CPlayer * CPlayerManager::FindPlayerBySocketID(DWORD dwScoketID)
 {
 	for(auto player : s_PlayerArray)
 	{
-		if(player && player->GetSocketID() == dwScoketID)
+		if(player && (player->GetSocketID() == dwScoketID))
 			return player;
 	}
 

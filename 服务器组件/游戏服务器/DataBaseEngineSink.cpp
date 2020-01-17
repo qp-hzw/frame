@@ -2001,6 +2001,7 @@ bool CDataBaseEngineSink::On_DBR_CG_JOIN_TABLE(DWORD dwContextID, void *pData, W
 	m_TreasureDB->AddParameter(TEXT("@dwUserID"), pDbReq->dwUserID);
 	m_TreasureDB->AddParameter(TEXT("@dwTableID"), pDbReq->dwTableID);
 
+	CLog::Log(log_debug, "GSP_CG_USER_JOIN_TABLE  begin 00 ");
 	//Ö´ÐÐ²éÑ¯
 	LONG lResultCode = m_TreasureDB->ExecuteProcess(TEXT("GSP_CG_USER_JOIN_TABLE"), false);
 	pDbReq->lResultCode = lResultCode;

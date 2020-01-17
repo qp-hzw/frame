@@ -1432,14 +1432,18 @@ bool CHandleFromGate::On_SUB_User_JoinFkRoom(VOID * pData, WORD wDataSize, DWORD
 {
 	//校验用户
 	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	CLog::Log(log_debug, "On_SUB_User_JoinFkRoom  begin 000 ");
 	if (NULL == pIServerUserItem) return false;
 
 	//校验数据包
 	if(wDataSize != sizeof(STR_SUB_CG_USER_JOIN_FK_ROOM))
 	{
+		CLog::Log(log_debug, "On_SUB_User_JoinFkRoom  begin 1111 ");
 		SendRequestFailure(pIServerUserItem,TEXT("加入牌友圈桌子数据错误"),REQUEST_FAILURE_NORMAL);
 		return false;
 	}
+
+	CLog::Log(log_debug, "On_SUB_User_JoinFkRoom  begin 22222 ");
 
 	//数据定义
 	STR_SUB_CG_USER_JOIN_FK_ROOM *pJoin = (STR_SUB_CG_USER_JOIN_FK_ROOM *)pData;
@@ -1456,6 +1460,7 @@ bool CHandleFromGate::On_SUB_User_JoinFkRoom(VOID * pData, WORD wDataSize, DWORD
 //加入桌子 返回 -- 需要密码
 bool CHandleFromGate::On_CMD_GC_JOIN_TABLE( DWORD dwSocketID, VOID * pData, WORD wDataSize)
 {
+	CLog::Log(log_debug, "On_CMD_GC_JOIN_TABLE  begin");
 	/* 1. 校验用户 */
 	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerBySocketID(dwSocketID);
 	if (NULL == pIServerUserItem) return false;
