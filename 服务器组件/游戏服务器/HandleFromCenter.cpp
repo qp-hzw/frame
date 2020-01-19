@@ -94,10 +94,10 @@ bool CHandleFromCenter::OnTCPSocketMainTransfer(WORD wSubCmdID, VOID * pData, WO
 					STR_CMD_GR_FRAME_DISMISS_RESULT DismissResult;
 					ZeroMemory(&DismissResult, sizeof(DismissResult));
 					DismissResult.cbDismiss = 1;
-					DismissResult.cbAgree = 1;					
+					//DismissResult.cbAgree = 1;					
 					if (pTableFrame->GetGameStatus() != GAME_STATUS_FREE)
 					{
-						DismissResult.cbClubQuit = 1;
+						//DismissResult.cbClubQuit = 1;
 					}
 					
 					pTableFrame->SendTableData(INVALID_CHAIR, CMD_GR_FRAME_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT));

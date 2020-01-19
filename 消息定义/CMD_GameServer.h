@@ -134,12 +134,11 @@
 #define CMD_GR_FRAME_GAME_DISSMISS			301							    //解散面板状态
 
 //解散房间
-#define SUB_RG_FRAME_ASK_DISMISS			2								//发起申请解散房间
-#define CMD_GR_FRMAE_VOTE_DISMISS			103								//广播房间申请解散
-#define CMD_GR_FRMAE_ASK_DISMISS_RESULT     202								//发起申请解散房间 结果
-
-#define	SUB_RG_FRAME_VOTE_DISMISS			3								//表决解散房间
-#define	CMD_GR_FRAME_DISMISS_RESULT			104								//广播表决解散房间结果
+#define SUB_RG_FRAME_ASK_DISMISS			21								//发起申请解散房间
+#define CMD_GR_FRMAE_ASK_DISMISS_RESULT     1210							//发起申请解散房间 结果
+#define	SUB_RG_FRAME_VOTE_DISMISS			22								//表决解散房间
+#define CMD_GR_FRMAE_VOTE_DISMISS			1220							//广播房间申请解散
+#define	CMD_GR_FRAME_DISMISS_RESULT			221								//广播表决解散房间结果
 
 //GPS测距
 #define SUB_CG_COM_CHECK_USER_GPS			5								//请求校验用户GPS位置信息
