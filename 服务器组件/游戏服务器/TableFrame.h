@@ -235,7 +235,7 @@ public:
 #pragma region 消息发送函数
 public:
 	//发送数据
-	bool SendTableData(WORD wChairID, WORD wSubCmdID, VOID * pData, WORD wDataSize, WORD wMainCmdID = MDM_GF_GAME);
+	virtual bool SendTableData(WORD wChairID, WORD wSubCmdID, VOID * pData, WORD wDataSize, WORD wMainCmdID = MDM_GF_GAME);
 
 	//系统消息
 public:
