@@ -233,35 +233,9 @@ public:
 #pragma endregion
 
 #pragma region 消息发送函数
-	//游戏用户
 public:
 	//发送数据
-	virtual bool SendTableData(WORD wChairID, WORD wSubCmdID);
-	//发送数据
-	virtual bool SendTableData(WORD wChairID, WORD wSubCmdID, VOID * pData, WORD wDataSize);
-	//传参发送数据
-	bool SendTableData(WORD wChairID, WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize);
-
-	//发送机器人用户
-public:
-	//发送数据
-	virtual bool SendAndroidUserData(WORD wChairID, WORD wSubCmdID);
-	//发送数据
-	virtual bool SendAndroidUserData(WORD wChairID, WORD wSubCmdID, VOID * pData, WORD wDataSize,WORD wMainCmdID=MDM_GF_GAME);
-
-	//旁观用户
-public:
-	//发送数据
-	virtual bool SendLookonData(WORD wChairID, WORD wSubCmdID);
-	//发送数据
-	virtual bool SendLookonData(WORD wChairID, WORD wSubCmdID, VOID * pData, WORD wDataSize);
-
-	//所有用户
-public:
-	//发送数据
-	virtual bool SendUserItemData(CPlayer * pIServerUserItem, WORD wSubCmdID);
-	//发送数据
-	virtual bool SendUserItemData(CPlayer * pIServerUserItem, WORD wSubCmdID, VOID * pData, WORD wDataSize);
+	bool SendTableData(WORD wChairID, WORD wSubCmdID, VOID * pData, WORD wDataSize, WORD wMainCmdID = MDM_GF_GAME);
 
 	//系统消息
 public:
