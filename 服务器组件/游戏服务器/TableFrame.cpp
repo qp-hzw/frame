@@ -101,6 +101,17 @@ void CTableFrame::SetTableAutoDismiss(DWORD dwMinutes)
 	SetGameTimer(IDI_ROOM_AUTO_DISMISS, dwMinutes*TIME_ROOM_AUTO_DISMISS, 1, NULL); 
 }
 
+//设置表决解散房间定时器
+void CTableFrame::SetVoteDismissRoom()
+{
+	SetGameTimer(IDI_VOTE_DISMISS_ROOM, TIME_VOTE_DISMISS_ROOM, 1, NULL);
+}
+//取消表决解散房间定时器
+void CTableFrame::KillVoteDismissRoom()
+{
+	KillGameTimer(IDI_VOTE_DISMISS_ROOM);
+}
+
 //初始化子游戏
 bool CTableFrame::InitTableFrameSink()
 {
@@ -886,201 +897,6 @@ int CTableFrame::CanPlayerReady(CPlayer* pPlayer)
 	return 0;
 }
 
-
-/****************************************    解散房间     ***************************************************/
-//申请解散房间
-bool CTableFrame::OnEventApplyDismissRoom(WORD wChairID, bool bAgree)
-{
-	//用户校验
-	CPlayer *pApplyUserItem = GetTableUserItem(wChairID);
-	if (NULL == pApplyUserItem)
-		return false;
-
-	//变量赋值
-	m_bAgree[wChairID] = bAgree;
-	//设置用户已经响应
-	m_bResponseDismiss[wChairID] = true;
-
-	//房间处于非空闲状态
-	if(GAME_STATUS_FREE != m_cbGameStatus)
-	{
-		//判断房间是否可以解散
-		tagTableRule* pCfg = (tagTableRule*)GetCustomRule();
-		//俱乐部模式 && 房间设置不可解散 时候才生效 金币场也不可以解散
-		if(((0 != pCfg->byClubCreate) && (1 == pCfg -> bDissolve)) || (pCfg->GameMode == 2)) 
-		{
-			STR_CMD_GR_FRMAE_ASK_DISMISS_RESULT cmdResult;
-			ZeroMemory(&cmdResult, sizeof(cmdResult));
-			cmdResult.lResultCode = -1;
-			lstrcpyn(cmdResult.szDescribeString,
-				TEXT("请联系会长解散房间!"),
-				CountArray(cmdResult.szDescribeString));
-
-			SendTableData(wChairID,CMD_GR_FRMAE_ASK_DISMISS_RESULT,&cmdResult, sizeof(cmdResult));
-			return true;
-		}
-
-
-		//设置自动响应定时器
-		SetGameTimer(IDI_VOTE_DISMISS_ROOM, TIME_VOTE_DISMISS_ROOM, 1, NULL);
-
-		//玩家点击解散房间，给其他玩家发送【同意/拒绝】弹框消息
-		STR_CMD_GR_FRMAE_VOTE_DISMISS VoteRet;
-		ZeroMemory(&VoteRet, sizeof(STR_CMD_GR_FRMAE_VOTE_DISMISS));
-
-		//赋值
-		VoteRet.cbApplyChair = wChairID;
-		VoteRet.cbAgree = -1;  
-		VoteRet.cbChairID = INVALID_CHAIR;
-
-		//广播投票结果消息让客户端弹出解散框
-		SendTableData(INVALID_CHAIR, CMD_GR_FRMAE_VOTE_DISMISS, &VoteRet, sizeof(STR_CMD_GR_FRMAE_VOTE_DISMISS));
-
-		//设置房间处于解散状态
-		m_bUnderDissState = true;
-		m_dissmisserChaiID = wChairID;
-
-		return true;
-	}
-	else		//房间处于空闲状态
-	{
-		//清空数据
-		ZeroMemory(m_bResponseDismiss, sizeof(m_bResponseDismiss));
-		ZeroMemory(m_bAgree, sizeof(m_bAgree));
-
-		//发送解散成功消息
-		STR_CMD_GR_FRAME_DISMISS_RESULT DismissResult;
-		ZeroMemory(&DismissResult, sizeof(DismissResult));
-		//赋值
-		DismissResult.cbDismiss = 1;  //直接解散
-
-		//判断玩家是不是桌主
-		if(pApplyUserItem->GetUserID() == m_dwTableOwner)
-		{
-			//发送消息
-			SendTableData(INVALID_CHAIR, CMD_GR_FRAME_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT));
-
-			//结束游戏
-			HandleDJGameEnd(GAME_CONCLUDE_NORMAL);
-			return true;
-		}
-		else		//不是房主解散，玩家直接离开
-		{
-			//发送消息,代替站起，客户端直接站起，并不是解散
-			SendTableData(wChairID, CMD_GR_FRAME_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT));
-
-			//用户离开			
-			if ( PlayerLeaveTable(pApplyUserItem) ) 
-			{
-				return false;
-			}			
-		}
-	}
-
-	return false;
-}
-
-//表决是否解散房间
-bool CTableFrame::OnEventVoteDismissRoom(WORD wChairID, bool bAgree)
-{
-	//用户校验
-	CPlayer *pVoteUserItem = GetTableUserItem(wChairID);
-	if (NULL == pVoteUserItem)			//TODO 为了解决用户掉线被游戏服删除，定时器到无法响应的bug，不进行用户校验
-		return false;
-
-	//变量赋值
-	m_bAgree[wChairID] = bAgree;
-	//设置用户已经响应
-	m_bResponseDismiss[wChairID] = true;
-
-	//向Client发送玩家投票结果
-	STR_CMD_GR_FRMAE_VOTE_DISMISS VoteDismissRet;
-	ZeroMemory(&VoteDismissRet, sizeof(STR_CMD_GR_FRMAE_VOTE_DISMISS));
-
-	//赋值
-	VoteDismissRet.cbAgree = (bAgree == true) ? 0 : 1;
-	VoteDismissRet.cbChairID = wChairID;
-	VoteDismissRet.cbApplyChair = m_dissmisserChaiID;
-
-	//广播发送
-	SendTableData(INVALID_CHAIR, CMD_GR_FRMAE_VOTE_DISMISS, &VoteDismissRet, sizeof(STR_CMD_GR_FRMAE_VOTE_DISMISS));
-
-	//房间处于非空闲状态
-	if(GAME_STATUS_FREE != m_cbGameStatus)
-	{
-		//变量定义
-		int nAgree = 0;						//同意解散玩家数
-		int nResponse = 0;					//响应玩家数
-		int nPlayer = GetSitUserCount();	//桌子玩家数
-
-		//获得同意玩家数和响应玩家数
-		for (int i=0; i<m_wChairCount; i++)
-		{
-			CPlayer *pTableUserItem = GetTableUserItem(i);
-			if(pTableUserItem == NULL) continue;
-			if(m_bAgree[i]) nAgree++;
-			if(m_bResponseDismiss[i]) nResponse++;
-		}
-
-		//构造解散结果数据
-		STR_CMD_GR_FRAME_DISMISS_RESULT DismissResult;
-		ZeroMemory(&DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT));
-
-		//所有玩家同意解散	（过半同意则解散房间）
-		if(static_cast<DOUBLE>(nAgree) > static_cast<DOUBLE>(nPlayer/2))
-		{
-			//清空数据
-			ZeroMemory(m_bResponseDismiss, sizeof(m_bResponseDismiss));
-			ZeroMemory(m_bAgree, sizeof(m_bAgree));
-			KillGameTimer(IDI_VOTE_DISMISS_ROOM);
-
-			//赋值
-			DismissResult.cbDismiss = 1;
-
-			//广播房间解散成功消息			
-			SendTableData(INVALID_CHAIR, CMD_GR_FRAME_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT));
-
-			//设置房间不处于解散状态
-			m_bUnderDissState = false;
-			m_dissmisserChaiID = 0xFF;
-
-			//游戏中，结束子游戏（大局结束）
-			if (m_pITableFrameSink!=NULL) 
-				m_pITableFrameSink->OnEventGameConclude(INVALID_CHAIR, NULL, GER_DISMISS);
-
-			return true;
-		}		
-		else if(nResponse == nPlayer)		//所有玩家响应，但有玩家未同意
-		{
-			//清空数据
-			ZeroMemory(m_bResponseDismiss, sizeof(m_bResponseDismiss));
-			ZeroMemory(m_bAgree, sizeof(m_bAgree));
-			KillGameTimer(IDI_VOTE_DISMISS_ROOM);
-
-			//赋值
-			DismissResult.cbDismiss = 2;
-
-			//广播房间解散失败消息			
-			SendTableData(INVALID_CHAIR, CMD_GR_FRAME_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT));
-
-			//设置房间不处于解散状态
-			m_bUnderDissState = false;
-			m_dissmisserChaiID = 0xFF;
-		}
-		else					//有玩家还未表决，中间状态
-		{
-			//赋值
-			DismissResult.cbDismiss = 0;
-
-			//广播玩家表决消息			
-			//SendTableData(INVALID_CHAIR, CMD_GR_FRAME_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT));
-		}
-	}
-
-	return false;
-}
-
-
 /*************************************    待整理    *************************************************/
 //写入录像记录 参数 小局数,数据和长度
 bool CTableFrame::WriteRecordInfo(WORD wXJCount,TCHAR strScore[], VOID* pData, DWORD dwDataSize)
@@ -1252,6 +1068,37 @@ bool CTableFrame::SendTableData(WORD wChairID, WORD wSubCmdID, VOID * pData, WOR
 		if ((pIServerUserItem==NULL)) return false;
 		//发送数据
 		g_GameCtrl->SendData(pIServerUserItem,MDM_GF_GAME,wSubCmdID,pData,wDataSize);
+
+		return true;
+	}
+
+	return false;
+}
+
+//传参发送数据
+bool CTableFrame::SendTableData(WORD wChairID,WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize)
+{
+	//用户群发
+	if (wChairID == INVALID_CHAIR)
+	{
+		for (auto it = m_user_list.begin(); it != m_user_list.end(); it++)   //这里旁观用户也会发送
+		{
+			if ((*it) != NULL)
+			{
+				g_GameCtrl->SendData((*it), wMainCmdID, wSubCmdID, pData, wDataSize);
+			}
+		}
+
+		return true;
+	}
+	else
+	{
+		//获取用户
+		CPlayer * pIServerUserItem = GetTableUserItem(wChairID);
+
+		if ((pIServerUserItem == NULL)) return false;
+		//发送数据
+		g_GameCtrl->SendData(pIServerUserItem, wMainCmdID, wSubCmdID, pData, wDataSize);
 
 		return true;
 	}
@@ -1454,7 +1301,7 @@ bool CTableFrame::OnEventTimer(DWORD dwTimerID, WPARAM dwBindParameter)
 			ZeroMemory(&DismissResult, sizeof(DismissResult));
 			DismissResult.cbDismiss = 1;
 			
-			SendTableData(INVALID_CHAIR, CMD_GR_FRAME_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT));
+			SendTableData(INVALID_CHAIR, CMD_GR_USER_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT));
 
 			//通知子游戏解散房间
 			//空闲状态 直接解散
@@ -1544,6 +1391,8 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 			memset(&GameStatus1.UserInfo, 0, sizeof(tagUserInfo));
 			memcpy(&GameStatus1.UserInfo, pUserInfo, sizeof(tagUserInfo));
 
+			std::wcout << GameStatus1.UserInfo.szHeadUrl << std::endl;
+
 			g_GameCtrl->SendData(pIServerUserItem, MDM_USER, SUB_GR_USER_STATUS, &GameStatus1, sizeof(GameStatus1));
 
 			// 2、再把新玩家信息发送给所有玩家
@@ -1572,6 +1421,7 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 					memset(&GameStatus.UserInfo, 0, sizeof(tagUserInfo));
 					memcpy(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
 
+					std::wcout << GameStatus.UserInfo.szHeadUrl << std::endl;
 					CLog::Log(log_debug, "wChairID: %d", GameStatus.UserInfo.wChairID);
 
 					g_GameCtrl->SendData(pIServerUserItem, MDM_USER, SUB_GR_USER_STATUS, &GameStatus, sizeof(GameStatus));
@@ -1729,43 +1579,43 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 
 			return true;
 		}
-	case SUB_RG_FRAME_ASK_DISMISS:		//申请解散房间
-		{
-			//用户校验
-			if (pIServerUserItem == NULL)
-			return false;
+	//case SUB_RG_FRAME_ASK_DISMISS:		//申请解散房间
+	//	{
+	//		//用户校验
+	//		if (pIServerUserItem == NULL)
+	//		return false;
 
-			STR_SUB_RG_FRAME_ASK_DISMISS *pApply = (STR_SUB_RG_FRAME_ASK_DISMISS*)pData;
+	//		STR_SUB_RG_FRAME_ASK_DISMISS *pApply = (STR_SUB_RG_FRAME_ASK_DISMISS*)pData;
 
-			CLog::Log(log_debug, "DISMISS UserID: %d", pIServerUserItem->GetUserID());
+	//		CLog::Log(log_debug, "DISMISS UserID: %d", pIServerUserItem->GetUserID());
 
-			//2. 校验房间是否已经处于解散状态
-			if (m_bUnderDissState)
-			{
-				return true;
-			}
+	//		//2. 校验房间是否已经处于解散状态
+	//		if (m_bUnderDissState)
+	//		{
+	//			return true;
+	//		}
 
-			//重新点击解散按钮，需要删除定时器，防止一个人不停点击解散，定时器到自动退出房间
-			KillGameTimer(IDI_VOTE_DISMISS_ROOM);
+	//		//重新点击解散按钮，需要删除定时器，防止一个人不停点击解散，定时器到自动退出房间
+	//		KillGameTimer(IDI_VOTE_DISMISS_ROOM);
 
-			OnEventApplyDismissRoom(pIServerUserItem->GetChairID(), true); //0为false  其他为true
+	//		OnEventApplyDismissRoom(pIServerUserItem->GetChairID(), true); //0为false  其他为true
 
-			return true;
-		}
-	case SUB_RG_FRAME_VOTE_DISMISS:		//表决解散房间
-		{
-			//数据包校验
-			if ( wDataSize != sizeof(STR_SUB_RG_FRAME_VOTE_DISMISS) )
-				return false;
+	//		return true;
+	//	}
+	//case SUB_RG_FRAME_VOTE_DISMISS:		//表决解散房间
+	//	{
+	//		//数据包校验
+	//		if ( wDataSize != sizeof(STR_SUB_RG_FRAME_VOTE_DISMISS) )
+	//			return false;
 
-			//变量定义
-			STR_SUB_RG_FRAME_VOTE_DISMISS *pVote = (STR_SUB_RG_FRAME_VOTE_DISMISS*)pData;
+	//		//变量定义
+	//		STR_SUB_RG_FRAME_VOTE_DISMISS *pVote = (STR_SUB_RG_FRAME_VOTE_DISMISS*)pData;
 
-			//解散成功
-			OnEventVoteDismissRoom(pIServerUserItem->GetChairID(), (pVote->cbAgree != 0 ));
-			return true;
+	//		//解散成功
+	//		OnEventVoteDismissRoom(pIServerUserItem->GetChairID(), (pVote->cbAgree != 0 ));
+	//		return true;
 
-		}
+	//	}
 	case SUB_CG_COM_CHECK_USER_GPS:		//请求校验GPS
 		{
 			//数据包校验
@@ -2424,6 +2274,191 @@ void CTableFrame::OnEventClubDismissRoom()
 {
 	m_pITableFrameSink->OnEventGameConclude(INVALID_CHAIR, NULL, GER_DISMISS);
 }
+
+/****************************************    解散房间     ***************************************************/
+//申请解散房间
+bool CTableFrame::OnEventApplyDismissRoom(WORD wChairID, bool bAgree)
+{
+	//用户校验
+	CPlayer *pApplyUserItem = GetTableUserItem(wChairID);
+	if (NULL == pApplyUserItem)
+		return false;
+
+	//变量赋值
+	m_bAgree[wChairID] = bAgree;
+	//设置用户已经响应
+	m_bResponseDismiss[wChairID] = true;
+
+	//房间处于非空闲状态
+	if (GAME_STATUS_FREE != GetGameStatus())
+	{
+		//判断房间是否可以解散
+		tagTableRule* pCfg = (tagTableRule*)GetCustomRule();
+		//俱乐部模式 && 房间设置不可解散 时候才生效 金币场也不可以解散
+		if (((0 != pCfg->byClubCreate) && (1 == pCfg->bDissolve)) || (pCfg->GameMode == 2))
+		{
+			STR_CMD_GR_FRMAE_ASK_DISMISS_RESULT cmdResult;
+			ZeroMemory(&cmdResult, sizeof(cmdResult));
+			cmdResult.lResultCode = -1;
+			lstrcpyn(cmdResult.szDescribeString,
+				TEXT("请联系会长解散房间!"),
+				CountArray(cmdResult.szDescribeString));
+
+			SendTableData(wChairID, MDM_USER, CMD_GR_USER_ASK_DISMISS_RESULT, &cmdResult, sizeof(cmdResult));
+			return true;
+		}
+
+		//设置自动响应定时器
+		SetVoteDismissRoom();
+
+		//玩家点击解散房间，给其他玩家发送【同意/拒绝】弹框消息
+		STR_CMD_GR_FRMAE_VOTE_DISMISS VoteRet;
+		ZeroMemory(&VoteRet, sizeof(STR_CMD_GR_FRMAE_VOTE_DISMISS));
+
+		//赋值
+		VoteRet.cbApplyChair = wChairID;
+		VoteRet.cbAgree = 1;
+		VoteRet.cbChairID = wChairID;
+
+		//广播投票结果消息让客户端弹出解散框
+		SendTableData(INVALID_CHAIR, MDM_USER, CMD_GR_USER_VOTE_DISMISS, &VoteRet, sizeof(STR_CMD_GR_FRMAE_VOTE_DISMISS));
+
+		//设置房间处于解散状态
+		m_bUnderDissState = true;
+		m_dissmisserChaiID = wChairID;
+
+		return true;
+	}
+	else		//房间处于空闲状态
+	{
+		//清空数据
+		ZeroMemory(&(m_bResponseDismiss), sizeof(m_bResponseDismiss));
+		ZeroMemory(&(m_bAgree), sizeof(m_bAgree));
+
+		//发送解散成功消息
+		STR_CMD_GR_FRAME_DISMISS_RESULT DismissResult;
+		ZeroMemory(&DismissResult, sizeof(DismissResult));
+		//赋值
+		DismissResult.cbDismiss = 1;  //直接解散
+
+		//判断玩家是不是桌主
+		if (pApplyUserItem->GetUserID() == GetTableOwner())
+		{
+			SendTableData(INVALID_CHAIR, MDM_USER, CMD_GR_USER_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT));
+
+			//结束游戏
+			HandleDJGameEnd(GAME_CONCLUDE_NORMAL);
+			return true;
+		}
+		else		//不是房主解散，玩家直接离开
+		{
+			//发送消息,代替站起，客户端直接站起，并不是解散
+			SendTableData(wChairID, MDM_USER, CMD_GR_USER_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT));
+
+			//用户离开			
+			if (PlayerLeaveTable(pApplyUserItem))
+			{
+				return false;
+			}
+		}
+	}
+
+	return false;
+}
+
+//表决是否解散房间
+bool CTableFrame::OnEventVoteDismissRoom(WORD wChairID, bool bAgree)
+{
+	//用户校验
+	CPlayer *pVoteUserItem = GetTableUserItem(wChairID);
+	if (NULL == pVoteUserItem)			//TODO 为了解决用户掉线被游戏服删除，定时器到无法响应的bug，不进行用户校验
+		return false;
+
+	//变量赋值
+	m_bAgree[wChairID] = bAgree;
+	//设置用户已经响应
+	m_bResponseDismiss[wChairID] = true;
+
+	//向Client发送玩家投票结果
+	STR_CMD_GR_FRMAE_VOTE_DISMISS VoteDismissRet;
+	ZeroMemory(&VoteDismissRet, sizeof(STR_CMD_GR_FRMAE_VOTE_DISMISS));
+
+	//赋值
+	VoteDismissRet.cbAgree = (bAgree == true) ? 1 : 0;
+	VoteDismissRet.cbChairID = wChairID;
+	VoteDismissRet.cbApplyChair = m_dissmisserChaiID;
+
+	//广播发送
+	SendTableData(INVALID_CHAIR, MDM_USER, CMD_GR_USER_VOTE_DISMISS, &VoteDismissRet, sizeof(STR_CMD_GR_FRMAE_VOTE_DISMISS));
+
+	//房间处于非空闲状态
+	if (GAME_STATUS_FREE != GetGameStatus())
+	{
+		//变量定义
+		int nAgree = 0;						//同意解散玩家数
+		int nResponse = 0;					//响应玩家数
+		int nPlayer = GetSitUserCount();	//桌子玩家数
+
+		//获得同意玩家数和响应玩家数
+		for (int i = 0; i < GetChairCount(); i++)
+		{
+			CPlayer *pTableUserItem = GetTableUserItem(i);
+			if (pTableUserItem == NULL) continue;
+			if (m_bAgree[i]) nAgree++;
+			if (m_bResponseDismiss[i]) nResponse++;
+		}
+
+		//构造解散结果数据
+		STR_CMD_GR_FRAME_DISMISS_RESULT DismissResult;
+		ZeroMemory(&DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT));
+
+		//所有玩家同意解散	（过半同意则解散房间）
+		if (static_cast<DOUBLE>(nAgree) > static_cast<DOUBLE>(nPlayer / 2))
+		{
+			//清空数据
+			ZeroMemory(&(m_bResponseDismiss), sizeof(m_bResponseDismiss));
+			ZeroMemory(&(m_bAgree), sizeof(m_bAgree));
+			KillVoteDismissRoom();
+
+			//赋值
+			DismissResult.cbDismiss = 1;
+
+			//广播房间解散成功消息			
+			SendTableData(INVALID_CHAIR, MDM_USER, CMD_GR_USER_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT));
+
+			//设置房间不处于解散状态
+			m_bUnderDissState = false;
+			m_dissmisserChaiID = 0xFF;
+
+			//游戏中，结束子游戏（大局结束）
+			ITableFrameSink * m_pITableFrameSink = GetTableFrameSink();
+			if (m_pITableFrameSink != NULL)
+				m_pITableFrameSink->OnEventGameConclude(INVALID_CHAIR, NULL, GER_DISMISS);
+
+			return true;
+		}
+		else if (nResponse == nPlayer)		//所有玩家响应，但有玩家未同意
+		{
+			//清空数据
+			ZeroMemory(&(m_bResponseDismiss), sizeof(m_bResponseDismiss));
+			ZeroMemory(&(m_bAgree), sizeof(m_bAgree));
+			KillVoteDismissRoom();
+
+			//赋值
+			DismissResult.cbDismiss = 2;
+
+			//广播房间解散失败消息			
+			SendTableData(INVALID_CHAIR, MDM_USER, CMD_GR_USER_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT));
+
+			//设置房间不处于解散状态
+			m_bUnderDissState = false;
+			m_dissmisserChaiID = 0xFF;
+		}
+	}
+
+	return false;
+}
+
 
 //房间是否处于解散状态
 bool CTableFrame::GetDismissState()

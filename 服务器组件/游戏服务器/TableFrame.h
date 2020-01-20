@@ -69,7 +69,7 @@ private:
 	std::vector<CPlayer*>			m_player_list;				        //游戏用户(坐在椅子上的玩家)
 	
 	//房间解散
-private:
+public:
 	bool							m_bAgree[MAX_CHAIR];					//同意解散
 	bool							m_bResponseDismiss[MAX_CHAIR];			//响应解散
 	bool							m_bUnderDissState;						//桌子是否处于解散状态
@@ -111,6 +111,11 @@ public:
 	virtual DWORD GetTableID() { return m_wTableID; }
 	//设置密码
 	virtual void SetTableID(DWORD dwTableID){ m_wTableID=dwTableID; }
+
+	//获取椅子数目
+	WORD GetChairCount() { return m_wChairCount; }
+	//获取子游戏组件
+	ITableFrameSink	* GetTableFrameSink() { return m_pITableFrameSink; }
 
 	//获取状态
 	virtual BYTE GetGameStatus() { return m_cbGameStatus; }
@@ -167,6 +172,11 @@ public:
 	bool GetDismissState();
 	//设置房间处于解散状态
 	void SetDismissState(bool bState);
+
+	//设置表决解散房间定时器
+	void SetVoteDismissRoom();
+	//取消表决解散房间定时器
+	void KillVoteDismissRoom();
 
 	//设置房间自动解散时间 added by lizhihu
 	virtual void SetTableAutoDismiss(DWORD dwMinutes = 1);
@@ -229,6 +239,8 @@ public:
 	virtual bool SendTableData(WORD wChairID, WORD wSubCmdID);
 	//发送数据
 	virtual bool SendTableData(WORD wChairID, WORD wSubCmdID, VOID * pData, WORD wDataSize);
+	//传参发送数据
+	bool SendTableData(WORD wChairID, WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize);
 
 	//发送机器人用户
 public:

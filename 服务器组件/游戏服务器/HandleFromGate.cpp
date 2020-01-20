@@ -177,6 +177,14 @@ bool CHandleFromGate::OnTCPNetworkMainUser(WORD wSubCmdID, VOID *pData, WORD wDa
 		{
 			return OnTcpNetworkQueryLottery(pData, wDataSize, dwSocketID);
 		}
+	case SUB_RG_USER_ASK_DISMISS:		//发起申请解散房间
+		{
+			return On_SUB_RG_USER_ASK_DISMISS(pData, wDataSize, dwSocketID);
+		}
+	case SUB_RG_USER_VOTE_DISMISS:		//表决解散房间
+		{
+			return On_SUB_RG_USER_VOTE_DISMISS(pData, wDataSize, dwSocketID);
+		}
 	}
 
 	return false;
@@ -810,6 +818,66 @@ bool CHandleFromGate::OnTcpNetworkQueryLottery(VOID * pData, WORD wDataSize, DWO
 
 	return g_GameCtrl->PostDataBaseRequest(DBR_GR_QUERY_LOTTERY,dwSocketID,&QueryLottery,sizeof(DBR_GR_QueryLottery));
 
+}
+
+//发起申请解散房间
+bool CHandleFromGate::On_SUB_RG_USER_ASK_DISMISS(VOID * pData, WORD wDataSize, DWORD dwSocketID)
+{
+	//2、用户校验
+	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	if (pIServerUserItem == NULL)
+		return false;
+
+	//3、房间校验
+	CTableFrame *pTableFrame = CTableManager::FindTableByTableID(pIServerUserItem->GetTableID());
+	if (pTableFrame == NULL)
+		return false;
+
+	STR_SUB_RG_FRAME_ASK_DISMISS *pApply = (STR_SUB_RG_FRAME_ASK_DISMISS*)pData;
+
+	CLog::Log(log_debug, "DISMISS UserID: %d", pIServerUserItem->GetUserID());
+
+	//2. 校验房间是否已经处于解散状态
+	if (pTableFrame->m_bUnderDissState)
+	{
+		return true;
+	}
+
+	//重新点击解散按钮，需要删除定时器，防止一个人不停点击解散，定时器到自动退出房间
+	pTableFrame->KillVoteDismissRoom();
+
+	pTableFrame->OnEventApplyDismissRoom(pIServerUserItem->GetChairID(), true); //0为false  其他为true
+
+	return true;
+}
+
+//表决解散房间
+bool CHandleFromGate::On_SUB_RG_USER_VOTE_DISMISS(VOID * pData, WORD wDataSize, DWORD dwSocketID)
+{
+	//1、数据包校验
+	if (sizeof(STR_SUB_RG_FRAME_VOTE_DISMISS) != wDataSize)
+		return false;
+
+	//2、用户校验
+	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	if (pIServerUserItem == NULL)
+		return false;
+
+	//3、房间校验
+	CTableFrame *pTableFrame = CTableManager::FindTableByTableID(pIServerUserItem->GetTableID());
+	if (pTableFrame == NULL)
+		return false;
+
+	//数据包校验
+	if (wDataSize != sizeof(STR_SUB_RG_FRAME_VOTE_DISMISS))
+		return false;
+
+	//变量定义
+	STR_SUB_RG_FRAME_VOTE_DISMISS *pVote = (STR_SUB_RG_FRAME_VOTE_DISMISS*)pData;
+
+	//解散成功
+	pTableFrame->OnEventVoteDismissRoom(pIServerUserItem->GetChairID(), (pVote->cbAgree != 0));
+	return true;
 }
 
 /***************************************【主消息 3】*******************************************************/
@@ -2987,7 +3055,6 @@ void CHandleFromGate::HallTableCreate(DWORD dwUserID, DWORD dwKindID, BYTE byGam
 	//投递请求
 	g_GameCtrl->PostDataBaseRequest(DBR_HALL_GOLD_TABLE_INFO, 0, &Dbr, sizeof(Dbr));
 }
-
 
 #pragma endregion
 

@@ -107,6 +107,11 @@ protected:
 	//请求抽奖
 	static bool OnTcpNetworkQueryLottery(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 
+	//发起申请解散房间
+	static bool On_SUB_RG_USER_ASK_DISMISS(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+	//表决解散房间
+	static bool On_SUB_RG_USER_VOTE_DISMISS(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+
     //抽奖结果
 	static bool OnDBLotteryResult( DWORD dwContextID, VOID * pData, WORD wDataSize );
 	
@@ -124,10 +129,7 @@ protected:
 	#pragma region 框架命令 MDM_FRAME
 	//框架命令 MDM_FRAME
 protected:
-	//申请解散房间
-	static bool On_SUB_Common_ApplyDismissRoom(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//表决是否解散房间
-	static bool On_SUB_Common_VoteDismissRoom(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+
 #pragma endregion
 
 	#pragma region 待处理

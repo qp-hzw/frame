@@ -150,9 +150,9 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		//lstrcpyn(RegisterServer.szServerName, m_pGameServiceOption->szServerName, CountArray(RegisterServer.szServerName));
 
 		//…Ë÷√±‰¡ø
-		TCHAR szInernet_ip[32] = TEXT("0.0.0.0");
-		//TCHAR szInernet_ip[32] = TEXT("192.168.1.5");
-		CWHIP::GetInternetIP(szInernet_ip);
+		//TCHAR szInernet_ip[32] = TEXT("0.0.0.0");
+		TCHAR szInernet_ip[32] = TEXT("192.168.1.5");
+		//CWHIP::GetInternetIP(szInernet_ip);
 		lstrcpyn(ServerItem.szServerAddr,szInernet_ip ,CountArray(ServerItem.szServerAddr));
 
 		ServerItem.wServerPort = 0;

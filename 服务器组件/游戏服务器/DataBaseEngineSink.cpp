@@ -254,29 +254,19 @@ bool CDataBaseEngineSink::On_DBR_Logon_UserID(DWORD dwContextID, VOID * pData, W
 	}
 
 	//构造参数
-	CLog::Log(log_debug, "1");
 	m_TreasureDB->ResetParameter();
-	CLog::Log(log_debug, "2");
 	m_TreasureDB->AddParameter(TEXT("@dwUserID"),pLogonUserID->dwUserID);
-	CLog::Log(log_debug, "3");
 	m_TreasureDB->AddParameter(TEXT("@strPassword"),pLogonUserID->szPassword);
-	CLog::Log(log_debug, "4");
 	m_TreasureDB->AddParameter(TEXT("@strClientIP"),szClientAddr);
-	CLog::Log(log_debug, "5");
 	m_TreasureDB->AddParameter(TEXT("@strMachineID"),pLogonUserID->szMachineID);
-	CLog::Log(log_debug, "6");
 	m_TreasureDB->AddParameter(TEXT("@dwGameID"),g_GameCtrl->GetServerID());
 
-	CLog::Log(log_debug, "7");
 	//输出参数
 	TCHAR szDescribeString[128]=TEXT("");
 	m_TreasureDB->AddParameterOutput(TEXT("@strErrorDescribe"), szDescribeString, sizeof(szDescribeString),adParamOutput);
 
-	CLog::Log(log_debug, "8");
 	//执行查询
 	LONG lResultCode = m_TreasureDB->ExecuteProcess(TEXT("GSP_CG_Logon_UserID"),true);
-
-	CLog::Log(log_debug, "lResultCode: %d", lResultCode);
 
 	//结果处理
 	CDBVarValue DBVarValue;
