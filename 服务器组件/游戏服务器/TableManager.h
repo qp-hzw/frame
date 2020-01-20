@@ -6,6 +6,7 @@
 
 class CTableFrame;
 
+//TODONOW 删除桌子的时候， 应该删除new 出来的
 class CTableManager
 {
 	//用户变量

@@ -1,8 +1,20 @@
 #include "Stdafx.h"
 #include "TableManager.h"
 #include "TableFrame.h"
+#include <thread>
+#include <chrono>
+using namespace std;
 
 std::vector<CTableFrame*>	               CTableManager::s_TableArray;					//桌子数组
+
+void DelayDeleteTable(CTableFrame * pTable)
+{
+	if(pTable == NULL) return;
+	CLog::Log(log_debug, "延迟 删除 桌子 %d", pTable->GetTableID());
+	std::this_thread::sleep_for(chrono::milliseconds(3000));
+
+	delete pTable;
+}
 
 //增
 CTableFrame* CTableManager::CreateTable()
@@ -35,8 +47,7 @@ bool CTableManager::DeleteTable(CTableFrame* pTable)
 		}
 	}
 
-	delete pTable;
-
+	//std::thread t2(DelayDeleteTable, pTable);
 	return true;
 }
 

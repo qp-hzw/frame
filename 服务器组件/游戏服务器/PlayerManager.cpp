@@ -2,9 +2,19 @@
 #include "PlayerManager.h"
 #include "Player.h"
 #include "GameCtrl.h"
+#include <thread>
+#include <chrono>
+using namespace std;
 
 std::vector<CPlayer*> CPlayerManager::s_PlayerArray;
 
+void CloseSocket(DWORD socketID)
+{
+	CLog::Log(log_debug, "延迟 删除 玩家 %d", socketID);
+	std::this_thread::sleep_for(chrono::milliseconds(3000));
+
+	g_TCPNetworkEngine->CloseSocket(socketID);
+}
 //增
 bool CPlayerManager::InsertPlayer(DWORD dwSocketID, tagUserInfo & UserInfo)
 {
@@ -35,7 +45,8 @@ bool CPlayerManager::DeletePlayer(CPlayer * pPlayer)
 	if (pPlayer==NULL) return false;
 
 	//关闭socket连接
-	g_TCPNetworkEngine->CloseSocket(pPlayer->GetSocketID());
+	std::thread t1(CloseSocket, pPlayer->GetSocketID());
+	//t1.join();
 
 	//删除list列表
 	for(auto ite = s_PlayerArray.begin(); ite != s_PlayerArray.end(); ite++)
@@ -56,7 +67,11 @@ bool CPlayerManager::DeletePlayerByID(DWORD dwUserID)
 	//关闭连接
 	CPlayer *player =  FindPlayerByID(dwUserID);
 	if(player != NULL)
-		g_TCPNetworkEngine->CloseSocket(player->GetSocketID());
+	{
+		//关闭socket连接
+		std::thread t1(CloseSocket, player->GetSocketID());
+		//t1.join();
+	}
 
 	//删除list
 	for(auto ite = s_PlayerArray.begin(); ite != s_PlayerArray.end(); ite++)
@@ -76,7 +91,11 @@ bool CPlayerManager::DeletePlayerBySocketID(DWORD dwSocketID)
 {
 	CPlayer *player =  FindPlayerBySocketID(dwSocketID);
 	if(player != NULL)
-		g_TCPNetworkEngine->CloseSocket(player->GetSocketID());
+	{
+		//关闭socket连接
+		std::thread t1(CloseSocket, player->GetSocketID());
+		//t1.join();
+	}
 
 	for(auto ite = s_PlayerArray.begin(); ite != s_PlayerArray.end(); ite++)
 	{
@@ -98,7 +117,9 @@ bool CPlayerManager::DeleteAllPlayer()
 	{
 		if(*ite)
 		{
-			g_TCPNetworkEngine->CloseSocket((*ite)->GetSocketID());
+			//关闭socket连接
+			std::thread t1(CloseSocket, (*ite)->GetSocketID());
+			//t1.join();
 		}
 	}
 

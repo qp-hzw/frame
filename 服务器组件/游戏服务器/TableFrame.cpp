@@ -230,7 +230,7 @@ bool CTableFrame::HandleXJGameEnd(BYTE byRound, BYTE byTableMode_NO_USER, SCORE 
 	return true;
 }
 
-//大局结束处理函数 TODONOWNOW
+//大局结束处理函数
 bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 {
 	//设置房间不处于解散状态
@@ -274,6 +274,9 @@ bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 			//用户处理
 			if (pIServerUserItem!=NULL)
 			{
+				//先让玩家站起
+				PlayerLeaveTable(pIServerUserItem);
+
 				//1. 若桌子用户属于断线状态，未重连
 				if ( US_OFFLINE == pIServerUserItem->GetUserStatus() )
 				{
@@ -1865,6 +1868,7 @@ bool CTableFrame::OnEventApplyDismissRoom(WORD wChairID, bool bAgree)
 		{
 			SendTableData(INVALID_CHAIR, CMD_GR_USER_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT), MDM_USER);
 
+			CLog::Log(log_debug, "解散房间 ");
 			//结束游戏
 			HandleDJGameEnd(GAME_CONCLUDE_NORMAL);
 			return true;

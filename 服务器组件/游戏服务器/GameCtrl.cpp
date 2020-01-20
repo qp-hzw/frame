@@ -114,7 +114,6 @@ int CGameCtrl::InitializeService()
 	if (m_TCPSocketEngine->SetServiceID(NETWORK_CORRESPOND)==false) return 11;
 
 	/***************************************************  SubGame 配置信息 *************************************************/
-	Sleep(2000);
 	//读取子游戏配置文件
 	DWORD dwKindId = static_cast<DWORD >(CWHModule::SubGameCfg(m_subgame_dll_name)); //此处只是校验
 	if (0 == dwKindId)	return 8;
