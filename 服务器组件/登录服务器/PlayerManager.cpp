@@ -129,14 +129,14 @@ std::vector<CPlayer*> CPlayerManager::FindPlayerByClubID(DWORD dwClubID)
 //增加断线玩家
 void CPlayerManager::AddOfflinePlayer(DWORD userID, DWORD serverID)
 {
-	CLog::Log(log_debug, "增加断线玩家 %d : %d", userID, serverID);
+	CLog::Log(log_debug, "增加断线玩家 %ld", userID);
 	s_OfflinePlayer[userID] = serverID;
 }
 
 //删除断线玩家
 void CPlayerManager::DeleteOfflinePlayer(DWORD userID)
 {
-	CLog::Log(log_debug, "删除断线玩家 %d", userID);
+	CLog::Log(log_debug, "删除断线玩家 %ld", userID);
 	s_OfflinePlayer.erase(userID);
 }
 

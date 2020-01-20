@@ -273,10 +273,7 @@ bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 
 			//用户处理
 			if (pIServerUserItem!=NULL)
-			{				
-				//2. 用户离开
-				PlayerLeaveTable(pIServerUserItem);		
-
+			{
 				//1. 若桌子用户属于断线状态，未重连
 				if ( US_OFFLINE == pIServerUserItem->GetUserStatus() )
 				{
@@ -287,11 +284,11 @@ bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 
 					//发送给协调服务器
 					g_TCPSocketEngine->SendData(MDM_USER,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
-
-					//删除用户
-					CPlayerManager::DeletePlayer(pIServerUserItem);
 				}
 			}
+
+			//删除用户
+			CPlayerManager::DeletePlayer(pIServerUserItem);
 		}
 
 		CTableManager::DeleteTable(this);

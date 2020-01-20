@@ -21,7 +21,6 @@ public:
 	IAttemperEngine					*m_AttemperEngine;					//调度引擎
 	ITCPNetworkEngine				*m_TCPNetworkEngine;				//socket::server
 	ITCPSocketEngine				*m_TCPSocketEngine;					//socket::client -> 目标服务器 协调服
-	//ITableFrameSink					*m_TableFrameSink;					//Sub桌子对象
 
 	//回调对象
 public:

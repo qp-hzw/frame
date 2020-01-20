@@ -90,9 +90,6 @@ int CGameCtrl::InitializeService()
 	m_TCPSocketEngine = static_cast<ITCPSocketEngine*>(CWHModule::TCPSocketEngine());
 	m_TimerEngine = static_cast<ITimerEngine*>(CWHModule::TimerEngine());
 
-	//读取子游戏配置文件
-	DWORD dwKindId = static_cast<DWORD >(CWHModule::SubGameCfg(m_subgame_dll_name)); //此处只是校验
-
 	if(m_AttemperEngine == NULL) return 1;
 	if(m_TCPNetworkEngine == NULL) return 2;
 	if(m_TCPSocketEngine == NULL) return 3;
@@ -105,10 +102,6 @@ int CGameCtrl::InitializeService()
 	IUnknownEx * pIAttemperEngineSink=static_cast<IAttemperEngineSink*>(&m_AttemperEngineSink);
 	IUnknownEx * pIDataBaseEngineSink=static_cast<IUnknownEx*>(&m_DataBaseEngineSink);
 
-	//配置游戏ServerID
-	if (0 == dwKindId)	return 8;
-	SetServerID(dwKindId << 16);
-
 	/***************************************************  AttemperEngine 配置信息 *************************************************/
 	//AttemperEngine设置 Attemper钩子
 	if (m_AttemperEngine->SetAttemperEngineSink(pIAttemperEngineSink)==false) return 6;
@@ -120,9 +113,12 @@ int CGameCtrl::InitializeService()
 	//协调服务
 	if (m_TCPSocketEngine->SetServiceID(NETWORK_CORRESPOND)==false) return 11;
 
-	/***************************************************  socket::server 配置信息 *************************************************/
-	//配置网络 -- TODONOW 由center统一分配
-	//if(m_TCPNetworkEngine->SetServiceParameter(m_GameServiceOption.wGameServerPort)==false) return 12;
+	/***************************************************  SubGame 配置信息 *************************************************/
+	Sleep(2000);
+	//读取子游戏配置文件
+	DWORD dwKindId = static_cast<DWORD >(CWHModule::SubGameCfg(m_subgame_dll_name)); //此处只是校验
+	if (0 == dwKindId)	return 8;
+	SetServerID(dwKindId << 16);
 
 	/***************************************************  log 配置信息 *************************************************/
 	//考虑到游戏服到现在才能知道ServerID, 因此只能将log的配置信息写到这里

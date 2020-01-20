@@ -63,6 +63,8 @@ bool CHandleFromCenter::OnTCPSocketMainServiceInfo(WORD wSubCmdID, VOID * pData,
 			if (wDataSize!=sizeof(tagOfflineUser)) return true;
 			tagOfflineUser * pOffline = (tagOfflineUser*) pData;
 
+			CLog::Log(log_debug, "2, 15 %d", pOffline->byMask);
+
 			if(pOffline->byMask == 1)//增加断线用户
 			{
 				CPlayerManager::AddOfflinePlayer(pOffline->dwUserID, pOffline->dwServerID);
