@@ -344,8 +344,6 @@ public:
 
 	//辅助函数
 public:
-	//桌子状态 -- ?? 通知center??
-	bool SendTableStatus();
 	//请求失败
 	bool SendRequestFailure(CPlayer * pIServerUserItem, LPCTSTR pszDescribe, LONG lErrorCode);
 
@@ -367,10 +365,6 @@ protected:
 	double GetDistance(double long1, double lat1, double long2, double lat2);
 
 #pragma endregion
-
-public:
-	//游戏记录
-	void RecordGameScore( DWORD dwStartGameTime=INVALID_DWORD);
 
 public:
 	//牌友圈群主解散房间, 通知子游戏处理

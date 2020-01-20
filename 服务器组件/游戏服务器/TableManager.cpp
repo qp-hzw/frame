@@ -35,6 +35,8 @@ bool CTableManager::DeleteTable(CTableFrame* pTable)
 		}
 	}
 
+	delete pTable;
+
 	return true;
 }
 

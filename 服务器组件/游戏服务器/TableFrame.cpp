@@ -3,15 +3,13 @@
 #include "DataBasePacket.h"
 #include "GameCtrl.h"
 #include <iostream>
+#include "TableManager.h"
 //#include <algorithm>
 
 
 //////////////////////////////////////////////////////////////////////////////////
 //校验GPS距离
 #define CHECK_USER_GPS_DISTANCE		200									//玩家GPS在多少距离内提示玩家
-
-#define IDI_GAME_CHECK				(TIME_TABLE_SINK_RANGE+2)			//超时标识
-#define TIME_GAME_CHECK				3600000								//超时时间
 
 //解散等待
 #define IDI_ROOM_AUTO_DISMISS		(TIME_TABLE_SINK_RANGE+3)			//房间自动解散定时器
@@ -149,9 +147,6 @@ bool CTableFrame::StartGame()
 		if (US_READY == m_player_list.at(i)->GetUserStatus())
 		m_player_list.at(i)->SetUserStatus(US_PLAYING, m_wTableID, i);
 	}
-
-	//发送状态 TODOLATER  删除
-	SendTableStatus();
 
 	/* 通知数据库, 桌子开始 */      
 	tagTableRule *pTableCfg = (tagTableRule*)GetCustomRule();
@@ -299,84 +294,10 @@ bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 			}
 		}
 
-		//设置桌子属性
-		m_cbGameStatus=GAME_STATUS_FREE;
-		m_dwGroupID = 0;
-		m_dwCreateTableUser = 0;
-		m_cbTableMode = 0;
-		m_cbGoldType = 0;
-		SetTableID(0);
-		ZeroMemory(m_bAgree,sizeof(m_bAgree));
+		CTableManager::DeleteTable(this);
 		return true;
 	}
 
-	//保存变量
-	m_cbGameStatus=cbGameStatus;
-	m_wCurGameRound++;
-
-	KillGameTimer(IDI_GAME_CHECK);
-
-	//游戏记录
-	RecordGameScore();
-
-	//结束设置
-	{
-		//变量定义
-		bool bOffLineWait=false;
-
-		//设置用户
-		for (WORD i=0;i<m_wChairCount;i++)
-		{
-			//获取用户
-			CPlayer * pIServerUserItem=GetTableUserItem(i);
-
-			//用户处理
-			if (pIServerUserItem!=NULL)
-			{
-				//设置状态
-				if (pIServerUserItem->GetUserStatus()==US_OFFLINE)
-				{
-					//断线处理
-					bOffLineWait=true;
-					PlayerUpTable(pIServerUserItem);
-				}
-				else
-				{
-					//设置状态
-					//pIServerUserItem->SetUserStatus(US_SIT,m_wTableID,i);
-
-					PlayerUpTable(pIServerUserItem);
-
-				}
-			}
-		}
-	}
-
-	//踢出检测
-	{
-		for (WORD i=0;i<m_wChairCount;i++)
-		{
-			//获取用户
-			if (m_player_list[i]==NULL) continue;
-			CPlayer * pIServerUserItem=m_player_list[i];
-
-			//关闭判断
-			if ((pIServerUserItem->GetMasterOrder()==0))
-			{
-				//发送消息
-				LPCTSTR pszMessage=TEXT("由于系统维护，当前游戏桌子禁止用户继续游戏！");
-				SendGameMessage(pIServerUserItem,pszMessage,0);
-
-				//用户起立
-				PlayerUpTable(pIServerUserItem);
-
-				continue;
-			}
-		}
-	}
-
-	//发送状态
-	SendTableStatus();
 
 	return true;
 }
@@ -1250,29 +1171,12 @@ bool CTableFrame::OnEventTimer(DWORD dwTimerID, WPARAM dwBindParameter)
 	//事件处理
 	switch (dwTimerID)
 	{
-	case IDI_GAME_CHECK:
-		{
-			KillGameTimer(IDI_GAME_CHECK);
-
-			//结束游戏
-			m_pITableFrameSink->OnEventGameConclude(INVALID_CHAIR,NULL,GER_DISMISS);
-
-			//发送状态
-			SendTableStatus();
-
-			return true;
-		}
 	case IDI_ROOM_AUTO_DISMISS:			//房间自动解散定时器
 		{
 			KillGameTimer(IDI_ROOM_AUTO_DISMISS);
-			//获得房主
-			CPlayer *pIServerUserItem = CPlayerManager::FindPlayerByID(m_dwTableOwner);
-			if ( NULL != pIServerUserItem)
-			{
-				//解散房间
-				OnEventApplyDismissRoom(pIServerUserItem->GetChairID(), true);
-			}
 
+			//结束游戏
+			m_pITableFrameSink->OnEventGameConclude(INVALID_CHAIR,NULL,GER_DISMISS);
 			return true;
 		}
 	case IDI_VOTE_DISMISS_ROOM:		//表决解散房间定时器
@@ -1701,12 +1605,6 @@ WORD CTableFrame::GetPlayerChair(CPlayer* pPlayer)
 	return INVALID_CHAIR;
 }
 
-//桌子状态
-bool CTableFrame::SendTableStatus()
-{
-	return true;
-}
-
 //请求失败
 bool CTableFrame::SendRequestFailure(CPlayer * pIServerUserItem, LPCTSTR pszDescribe, LONG lErrorCode)
 {
@@ -2104,92 +2002,6 @@ bool CTableFrame::EfficacyScoreRule(CPlayer * pIServerUserItem)
 	}
 
 	return true;
-}
-
-//游戏记录
-void CTableFrame::RecordGameScore(DWORD dwStartGameTime)
-{
-	//因定时类游戏只调startgame（）一次导致该类游戏无法写游戏记录，因此注释
-	//if (bDrawStarted==true)
-	{
-		//写入记录
-		if (true )//CServerRule::IsRecordGameScore(m_pGameServiceOption->dwServerRule)==true)
-		{
-			//变量定义
-			DBR_GR_GameScoreRecord GameScoreRecord;
-			ZeroMemory(&GameScoreRecord,sizeof(GameScoreRecord));
-
-			//设置变量
-			GameScoreRecord.wTableID=m_wTableID;
-			GameScoreRecord.dwPlayTimeCount=0;
-
-			//添加库存相关yang
-			//.wChangeStockScore = g_AttemperEngineSink->GetChangeStockScore();
-
-
-			//游戏时间
-			if(dwStartGameTime!=INVALID_DWORD)
-			{
-				CTime startTime(dwStartGameTime);
-				startTime.GetAsSystemTime(GameScoreRecord.SystemTimeStart);
-			}
-			else
-			{
-				GameScoreRecord.SystemTimeStart=m_SystemTimeStart;
-			}
-			GetLocalTime(&GameScoreRecord.SystemTimeConclude);
-
-			//用户积分
-			for (INT_PTR i=0;i<m_GameScoreRecordActive.GetCount();i++)
-			{
-				//获取对象
-				ASSERT(m_GameScoreRecordActive[i]!=NULL);
-				tagGameScoreRecord * pGameScoreRecord=m_GameScoreRecordActive[i];
-
-				//用户数目
-				if (pGameScoreRecord->cbAndroid==FALSE)
-				{
-					GameScoreRecord.wUserCount++;
-				}
-				else
-				{
-					GameScoreRecord.wAndroidCount++;
-				}
-
-				//奖牌统计
-				GameScoreRecord.dwUserMemal+=pGameScoreRecord->dwUserMemal;
-
-				//统计信息
-				if (pGameScoreRecord->cbAndroid==FALSE)
-				{
-					GameScoreRecord.lWasteCount-=(pGameScoreRecord->lScore+pGameScoreRecord->lRevenue);
-					GameScoreRecord.lRevenueCount+=pGameScoreRecord->lRevenue;
-				}
-
-				//成绩信息
-				if (GameScoreRecord.wRecordCount<CountArray(GameScoreRecord.GameScoreRecord))
-				{
-					WORD wIndex=GameScoreRecord.wRecordCount++;
-					CopyMemory(&GameScoreRecord.GameScoreRecord[wIndex],pGameScoreRecord,sizeof(tagGameScoreRecord));
-				}
-			}
-
-			//投递数据
-			if(GameScoreRecord.wUserCount > 0)
-			{
-				WORD wHeadSize=sizeof(GameScoreRecord)-sizeof(GameScoreRecord.GameScoreRecord);
-				WORD wDataSize=sizeof(GameScoreRecord.GameScoreRecord[0])*GameScoreRecord.wRecordCount;
-				g_GameCtrl->PostDataBaseRequest(DBR_GR_GAME_SCORE_RECORD,0,&GameScoreRecord,wHeadSize+wDataSize);
-			}
-		}
-
-		//清理记录
-		if (m_GameScoreRecordActive.GetCount()>0L)
-		{
-			m_GameScoreRecordActive.RemoveAll();
-		}
-	}
-
 }
 
 bool CTableFrame::SendAndroidUserData( WORD wChairID, WORD wSubCmdID )

@@ -1,6 +1,7 @@
 #include "Stdafx.h"
 #include "PlayerManager.h"
 #include "Player.h"
+#include "GameCtrl.h"
 
 std::vector<CPlayer*> CPlayerManager::s_PlayerArray;
 
@@ -33,6 +34,10 @@ bool CPlayerManager::DeletePlayer(CPlayer * pPlayer)
 {
 	if (pPlayer==NULL) return false;
 
+	//关闭socket连接
+	g_TCPNetworkEngine->CloseSocket(pPlayer->GetSocketID());
+
+	//删除list列表
 	for(auto ite = s_PlayerArray.begin(); ite != s_PlayerArray.end(); ite++)
 	{
 		if(*ite == pPlayer)
@@ -48,6 +53,12 @@ bool CPlayerManager::DeletePlayer(CPlayer * pPlayer)
 //删
 bool CPlayerManager::DeletePlayerByID(DWORD dwUserID)
 {
+	//关闭连接
+	CPlayer *player =  FindPlayerByID(dwUserID);
+	if(player != NULL)
+		g_TCPNetworkEngine->CloseSocket(player->GetSocketID());
+
+	//删除list
 	for(auto ite = s_PlayerArray.begin(); ite != s_PlayerArray.end(); ite++)
 	{
 		if( (*ite)->GetUserID() == dwUserID)
@@ -63,6 +74,10 @@ bool CPlayerManager::DeletePlayerByID(DWORD dwUserID)
 //删
 bool CPlayerManager::DeletePlayerBySocketID(DWORD dwSocketID)
 {
+	CPlayer *player =  FindPlayerBySocketID(dwSocketID);
+	if(player != NULL)
+		g_TCPNetworkEngine->CloseSocket(player->GetSocketID());
+
 	for(auto ite = s_PlayerArray.begin(); ite != s_PlayerArray.end(); ite++)
 	{
 		if( (*ite)->GetSocketID() == dwSocketID)
@@ -78,6 +93,16 @@ bool CPlayerManager::DeletePlayerBySocketID(DWORD dwSocketID)
 //删 所有
 bool CPlayerManager::DeleteAllPlayer()
 {
+	//关闭连接
+	for(auto ite = s_PlayerArray.begin(); ite != s_PlayerArray.end(); ite++)
+	{
+		if(*ite)
+		{
+			g_TCPNetworkEngine->CloseSocket((*ite)->GetSocketID());
+		}
+	}
+
+	//删除list
 	s_PlayerArray.clear();
 	return true;
 }
