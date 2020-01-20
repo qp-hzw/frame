@@ -13,6 +13,8 @@ bool CPlayerManager::InsertPlayer(DWORD dwSocketID, tagUserInfo & UserInfo)
 		pPlayer=new CPlayer(UserInfo);
 		if (pPlayer == NULL)
 			throw;
+
+		pPlayer->SetSocketID(dwSocketID);
 	}
 	catch (...)
 	{

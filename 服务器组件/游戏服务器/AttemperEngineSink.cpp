@@ -208,78 +208,31 @@ bool CAttemperEngineSink::OnEventTCPNetworkShut(DWORD dwClientAddr, DWORD dwActi
 {
 	//获取用户
 	CPlayer * pPlayer=  CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	if(pPlayer == NULL)
+		return true;
 
 	//桌子处理
-	if (pPlayer != NULL)
+	DWORD tableID = pPlayer->GetTableID();
+	CTableFrame *pTableFrame = CTableManager::FindTableByTableID(tableID);
+	if (pTableFrame != NULL) //如果在桌子里, 则暂不删除用户
 	{
-		DWORD passWord = pPlayer->GetTableID();
+		//table 广播
+		pTableFrame->PlayerOffline(pPlayer);
 
-		CTableFrame *pTableFrame = CTableManager::FindTableByTableID(passWord);
-		if (pTableFrame == NULL)
-			return false;
-
-		//玩家离开
-		pTableFrame->PlayerLeaveTable(pPlayer);
+		//发送给协调服, 由协调服通知登录服
+		tagOfflineUser data;
+		data.dwUserID = pPlayer->GetUserID();
+		data.dwServerID = g_GameCtrl->GetKindID(); //以后需要改成GameID
+		data.byMask = 1; //表示增加断线用户
+		g_TCPSocketEngine->SendData(MDM_USER,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
+	}
+	else //没有在桌子里, 则直接删除用户
+	{
+		//删除用户
+		CPlayerManager::DeletePlayer(pPlayer);
 	}
 
-	//用户处理
-	if (pPlayer!=NULL)
-	{
-		bool bIsExsit = false; //是否属于断线
-
-		//变量定义
-		DWORD wTableID=pPlayer->GetTableID();
-
-		//断线处理
-		if (wTableID!=INVALID_TABLE)
-		{
-			//是否需要处理断线重连
-			CTableFrame* pTableFrame = CTableManager::FindTableByTableID(wTableID);
-			if (( pTableFrame != NULL) && ( pTableFrame->OnEventUserOffLine(pPlayer)))
-			{
-				DWORD dwServerID = (g_GameCtrl->GetServerID()) &0xFFFFFF00;
-
-				//游戏服直接修改 TODONOW 暂时屏蔽
-				pPlayer->SetOfflineGameID(dwServerID);
-
-				//发送给协调服, 由协调服通知登录服
-				tagOfflineUser data;
-				data.dwUserID = pPlayer->GetUserID();
-				data.dwServerID = dwServerID;
-				data.byMask = 1; //表示增加断线用户
-				g_TCPSocketEngine->SendData(MDM_USER,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
-
-				bIsExsit = true;
-			}
-		}
-		else
-		{
-			//删除用户
-			CPlayerManager::DeletePlayer(pPlayer);
-			delete pPlayer;
-			return true;
-		}
-
-		//玩家状态变化
-		/* 情形三 游戏服 socket断掉的时候
-		**	1. 判断游戏列表中  是否存在
-		**	如果不在, 则登录服肯定连接了，应该设置为大厅在线
-		**	如果在, 则设置为游戏断线
-		*/
-		DBR_GP_UserQuitInfo quitInfo;
-		quitInfo.dwUserID = pPlayer->GetUserID();
-		if(bIsExsit)
-		{
-			quitInfo.byOnlineMask = 3;
-		}
-		else
-		{
-			quitInfo.byOnlineMask = 1;
-		}
-		g_GameCtrl->PostDataBaseRequest(DBR_GP_GAME_USER_STATE,dwSocketID, &quitInfo,sizeof(quitInfo));
-	}
-
-	return false;
+	return true;
 }
 
 //读取事件

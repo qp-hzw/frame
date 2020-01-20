@@ -224,7 +224,7 @@ bool CTableFrame::HandleXJGameEnd(BYTE byRound, BYTE byTableMode_NO_USER, SCORE 
 	return true;
 }
 
-//大局结束处理函数
+//大局结束处理函数 TODONOWNOW
 bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 {
 	//设置房间不处于解散状态
@@ -268,12 +268,12 @@ bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 			//用户处理
 			if (pIServerUserItem!=NULL)
 			{				
+				//2. 用户离开
+				PlayerLeaveTable(pIServerUserItem);		
+
 				//1. 若桌子用户属于断线状态，未重连
 				if ( US_OFFLINE == pIServerUserItem->GetUserStatus() )
 				{
-					//游戏服处理  TODONOW
-					pIServerUserItem->SetOfflineGameID(0);
-
 					//发送给协调服务器, 再转发给登录服
 					tagOfflineUser data;
 					data.dwUserID = pIServerUserItem->GetUserID();
@@ -281,13 +281,10 @@ bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 
 					//发送给协调服务器
 					g_TCPSocketEngine->SendData(MDM_USER,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
+
+					//删除用户
+					CPlayerManager::DeletePlayer(pIServerUserItem);
 				}
-
-				//设置状态
-				pIServerUserItem->SetUserStatus(US_SIT, m_wTableID, wChairID);
-
-				//2. 用户离开
-				PlayerLeaveTable(pIServerUserItem);			
 			}
 		}
 
@@ -787,6 +784,34 @@ int CTableFrame::PlayerReady(WORD wChairID, CPlayer* pPlayer)
 	//三个玩家准备 开始游戏	//不在子游戏处理
 	if (ReadyNum >= m_tagTableRule.PlayerCount)
 		StartGame();
+
+	return 0;
+}
+//玩家断线
+int CTableFrame::PlayerOffline(CPlayer* pPlayer) 
+{
+	CLog::Log(log_debug, "玩家%ld 掉线", pPlayer->GetUserID());
+
+	//设置用户状态为断线
+	pPlayer->SetUserStatus(US_OFFLINE, m_wTableID, pPlayer->GetChairID());
+
+	//给客户端发送准备行为
+	CMD_GF_GameStatus GameStatus;
+	ZeroMemory(&GameStatus, sizeof(GameStatus));
+
+	//赋值
+	GameStatus.cbUserAction = pPlayer->GetUserStatus();
+	tagUserInfo *pUserInfo = pPlayer->GetUserInfo();
+	CopyMemory(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
+
+	//广播发送
+	for (auto it = m_user_list.begin(); it != m_user_list.end(); it++)
+	{
+		if ((*it) != NULL)
+		{
+			g_GameCtrl->SendData(*it, MDM_USER, SUB_GR_USER_STATUS, &GameStatus, sizeof(GameStatus));
+		}
+	}
 
 	return 0;
 }
@@ -1364,54 +1389,6 @@ bool CTableFrame::SendGameScene(IServerUserItem * pIServerUserItem, VOID * pData
 
 	return true;
 }
-
-//断线事件
-bool CTableFrame::OnEventUserOffLine(CPlayer * pIServerUserItem)
-{
-	//参数效验
-	if (pIServerUserItem==NULL) return false;
-
-	//用户变量
-	tagUserInfo * pUserInfo=pIServerUserItem->GetUserInfo();
-	CPlayer * pITableUserItem=m_player_list[pUserInfo->wChairID];
-
-	//用户属性
-	WORD wChairID=pIServerUserItem->GetChairID();
-	BYTE cbUserStatus=pIServerUserItem->GetUserStatus();
-
-	//断线处理		不为空 并且 不为null  就进行断线重连		
-	if ( (cbUserStatus == US_PLAYING)  || (cbUserStatus == US_SIT) || (cbUserStatus == US_READY))
-	{
-		//校验用户
-		if (pIServerUserItem!=GetTableUserItem(wChairID)) return false;
-
-		//用户设置
-		pIServerUserItem->SetOldGameStatus(cbUserStatus);
-		pIServerUserItem->SetUserStatus(US_OFFLINE,m_wTableID,wChairID);
-
-		if (m_pITableFrameSink!=NULL)
-		{
-			//m_pITableFrameSink->OnActionUserNetCut(wChairID,pIServerUserItem,false);
-		}
-		else
-		{
-			//m_pITableFrameSink->OnActionUserNetCutT(wChairID,pIServerUserItem,false);
-		}
-
-		return true;
-
-	}
-	else	//非断线处理 
-	{
-		//用户起立  为了避免：若用户进入桌子，但游戏未开始就掉线，会导致无法重新加入房间，并且创建房间之后定时器到被踢出，暂时直接踢出
-		PlayerUpTable(pIServerUserItem);
-
-		return false;
-	}
-
-	return false;
-}
-
 
 //时间事件
 bool CTableFrame::OnEventTimer(DWORD dwTimerID, WPARAM dwBindParameter)

@@ -11,8 +11,6 @@ CPlayer::CPlayer(tagUserInfo & UserInfo)
 	//属性变量
 	CopyMemory(&m_UserInfo,&UserInfo,sizeof(UserInfo));
 
-	m_dwSocketID = UserInfo.dwSocketId;
-
 	//登录信息
 	m_dwLogonTime=UserInfo.dwLogonTime;
 	m_dwInoutIndex=UserInfo.dwInoutIndex;
@@ -45,8 +43,6 @@ CPlayer::CPlayer(tagUserInfo & UserInfo)
 
 	//属性变量
 	ZeroMemory(&m_UserProperty,sizeof(m_UserProperty));
-
-	m_dwOfflineGameID = 0;
 
 	return;
 }

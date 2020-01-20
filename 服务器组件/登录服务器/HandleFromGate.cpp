@@ -730,15 +730,13 @@ bool CHandleFromGate::On_CMD_LC_Logon_Account(DWORD dwScoketID, VOID * pData, WO
 	On_CMD_LC_Logon_RepeatLogon( pCMD->dwUserID, dwScoketID );
 
 	//断线重连的处理
-
-	//设置UserInfo值
-	tagUserInfo UserInfo;
-	ZeroMemory(&UserInfo, sizeof(UserInfo));
-
-	UserInfo.dwSocketId = dwScoketID;
-	UserInfo.dwUserID = pCMD->dwUserID;
+	pCMD->dwOffLineGameID  = CPlayerManager::FindOfflineGameID(pCMD->dwUserID);
 
 	//玩家记录
+	tagUserInfo UserInfo;
+	ZeroMemory(&UserInfo, sizeof(UserInfo));
+	UserInfo.dwUserID = pCMD->dwUserID;
+
 	CPlayerManager::InsertPlayer (dwScoketID, UserInfo);
 	CPlayer* player = CPlayerManager::FindPlayerBySocketID(dwScoketID);
 
@@ -828,7 +826,6 @@ bool CHandleFromGate::On_SUB_CL_Logon_Platform(VOID * pData, WORD wDataSize, DWO
 //平台登录返回
 bool CHandleFromGate::On_CMD_LC_Logon_Platform(DWORD dwScoketID, VOID * pData, WORD wDataSize)
 {
-	CLog::Log(log_debug, "On_CMD_LC_Logon_Platform 0");
 	//效验参数
 	if(wDataSize != sizeof(STR_CMD_LC_LOGON_PLATFORM)) return false;
 
@@ -838,7 +835,6 @@ bool CHandleFromGate::On_CMD_LC_Logon_Platform(DWORD dwScoketID, VOID * pData, W
 	//如果登录失败, 直接返回
 	if(DB_SUCCESS != pCMD->dwResultCode)
 	{
-		CLog::Log(log_debug, "On_CMD_LC_Logon_Platform 1");
 		g_GameCtrl->SendData(dwScoketID, MDM_LOGON, CMD_LC_LOGON_ACCOUNTS, pCMD, sizeof(STR_CMD_LC_LOGON_PLATFORM));
 		return true;
 	}

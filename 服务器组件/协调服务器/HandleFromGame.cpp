@@ -55,19 +55,10 @@ bool CHandleFromGame::OnTCPNetworkMainUserCollect(WORD wSubCmdID, VOID * pData, 
 	case SUB_CS_C_USER_OFFLINE:	//用户断线
 		{
 			//效验数据
-			if (wDataSize!=sizeof(STR_SUB_CS_C_USER_OFFLINE)) return false;
+			if (wDataSize!=sizeof(tagOfflineUser)) return true;
 
-			//消息处理
-			STR_SUB_CS_C_USER_OFFLINE * pUserOffLine=(STR_SUB_CS_C_USER_OFFLINE *)pData;
-
-			STR_SUB_CS_C_USER_OFFLINE data;
-			data.dwUserID = pUserOffLine->dwUserID;
-			data.dwGameID = pUserOffLine->dwGameID;
-			data.byMask = pUserOffLine->byMask;
-			
 			//发送通知 -- 全部登录服
-			g_GameCtrl->SendDataBatch(MDM_USER,SUB_CS_C_USER_OFFLINE_B,&data,sizeof(STR_SUB_CS_C_USER_OFFLINE));
-			
+			g_GameCtrl->SendDataBatch(MDM_USER,SUB_CS_C_USER_OFFLINE_B, pData, wDataSize);
 			return true;
 		}
 	}

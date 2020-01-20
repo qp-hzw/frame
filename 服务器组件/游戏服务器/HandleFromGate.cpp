@@ -213,19 +213,18 @@ bool CHandleFromGate::OnTCPNetworkMainFrame(WORD wSubCmdID, VOID * pData, WORD w
 	CPlayer * pIServerUserItem=CPlayerManager::FindPlayerBySocketID(dwSocketID);
 
 	//用户效验
-	ASSERT(pIServerUserItem!=NULL);
-	if (pIServerUserItem==NULL) return false;
+	if (pIServerUserItem==NULL)
+	{
+		CLog::Log(log_debug, "100, 1 玩家不存在");
+		return false;
+	}
 
-	//处理过虑
+	//桌子处理
 	DWORD wTableID=pIServerUserItem->GetTableID();
-	WORD wChairID=pIServerUserItem->GetChairID();
-	if ((wTableID==INVALID_TABLE)||(wChairID==INVALID_CHAIR)) return true;
-
-	//消息处理 
 	CTableFrame * pTableFrame=CTableManager::FindTableByTableID(wTableID);
 	if (pTableFrame == NULL)
 	{
-		CLog::Log(log_error, "pTableFrame == NULL");
+		CLog::Log(log_debug, "100, 1 桌子不存在");
 		return false;
 	}
 
@@ -237,36 +236,10 @@ bool CHandleFromGate::OnTCPNetworkMainFrame(WORD wSubCmdID, VOID * pData, WORD w
 //I D 登录
 bool CHandleFromGate::On_SUB_CG_Logon_UserID(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	CLog::Log(log_debug, "frame On_SUB_CG_Logon_UserID begin");
 	//效验参数
 	if (wDataSize != sizeof(STR_SUB_CG_LOGON_USERID)) return false;
 	STR_SUB_CG_LOGON_USERID *pLogonUserID = (STR_SUB_CG_LOGON_USERID *)pData;
-
-	//在用户列表获取用户
-	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerByID(pLogonUserID->dwUserID);
-
-	//删除 TODONOW 测试使用
-	CPlayerManager::DeletePlayer(pIServerUserItem);
 	
-
-	//非正常登录的用户不允许踢出
-	if (pIServerUserItem!=NULL)
-	{
-		//非正常登录的两种情况
-		//1. 该用户如果是机器用户, 但是从外地登录
-		//2. 该机器非机器用户, 但是在该进程上登录
-	}
-
-	
-	//切换判断 TODONOW 重点查看
-	if( NULL != pIServerUserItem )
-	{
-		//return SwitchUserItemConnect(pIServerUserItem, pLogonUserID->szMachineID,
-			//pLogonUserID->dLongitude, pLogonUserID->dLatitude);
-
-	}
-	
-
 	//变量定义
 	STR_DBR_CG_LOGON_USERID LogonUserID;
 	ZeroMemory(&LogonUserID,sizeof(LogonUserID));
@@ -290,52 +263,47 @@ bool CHandleFromGate::On_CMD_GC_Logon_UserID(DWORD dwSocketID, VOID * pData, WOR
 	if (wDataSize != sizeof(STR_DBO_CG_LOGON_USERID)) return false;
 	STR_DBO_CG_LOGON_USERID *pDBOLogon = (STR_DBO_CG_LOGON_USERID *)pData;
 
-	//判断在线
+	//发送登录结果
+	STR_CMD_GC_LOGON_USERID logon;
+	ZeroMemory(&logon, sizeof(STR_CMD_GC_LOGON_USERID));
+	logon.lResultCode = pDBOLogon->lResultCode;
+	logon.dwKindID = g_GameCtrl->GetKindID();
+	lstrcpyn(logon.szDescribeString, pDBOLogon->szDescribeString, CountArray(logon.szDescribeString));
+	//发送数据
+	g_GameCtrl->SendData(dwSocketID, MDM_GR_LOGON, CMD_GC_LOGON_USERID, &logon, sizeof(STR_CMD_GC_LOGON_USERID));
 
-	//用户登录失败，直接返回
-	if ( DB_SUCCESS != pDBOLogon->lResultCode )
-	{
-		//构造返回数据
-		STR_CMD_GC_LOGON_USERID logonFail;
-		ZeroMemory(&logonFail, sizeof(STR_CMD_GC_LOGON_USERID));
-		logonFail.lResultCode = 0;
-		lstrcpyn(logonFail.szDescribeString, pDBOLogon->szDescribeString, CountArray(logonFail.szDescribeString));
-		
-		CLog::Log(log_debug, "logon failed %d", pDBOLogon->lResultCode);
-		//发送数据
-		g_GameCtrl->SendData(dwSocketID, MDM_GR_LOGON, CMD_GC_LOGON_USERID, &logonFail, sizeof(STR_CMD_GC_LOGON_USERID));
+	//登录失败, 退出
+	if(pDBOLogon->lResultCode != 0)
 		return true;
+
+
+	//用户掉线判断
+	CPlayer *player = CPlayerManager::FindPlayerByID(pDBOLogon->dwUserID);
+	if(player == NULL)
+	{
+		ActiveUserItem(dwSocketID, pDBOLogon); //新增
+	}
+	else //断线情形 && 重复登录
+	{
+		player->SetSocketID(dwSocketID);
+
+		//重复登录, 需要给客户端发送重复消息
+
+		//断线情形
+		//无须特殊处理, 客户端会主动发送, [100,1]主动请求
+		tagOfflineUser data;
+		data.dwUserID = pDBOLogon->dwUserID;
+		data.byMask = 2; //表示删除断线用户
+		g_TCPSocketEngine->SendData(MDM_USER,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
 	}
 
-
-	
-	////重复登录判断 TODONOW
-	//if (pIServerUserItem!=NULL)
-	//{
-	//	//切换用户
-	//	SwitchUserItemConnect(pIServerUserItem, pDBOLogon->szMachineID, pDBOLogon->dLongitude, pDBOLogon->dLatitude, 
-	//							pDBOLogon->cbDeviceType, pDBOLogon->wBehaviorFlags, pDBOLogon->wPageTableCount);
-
-	//	//提示消息
-	//	TCHAR szDescribe[128]=TEXT("");
-	//	_sntprintf_s(szDescribe,CountArray(szDescribe),
-	//		TEXT("【ID登录】【%ld重复登录2】"),
-	//		pIServerUserItem->GetUserID());
-
-	//	return true;
-	//}
-	
-	CLog::Log(log_debug, "begin ActiveUserItem");
-
-	//激活用户
-	ActiveUserItem(dwSocketID, pDBOLogon);
-
+	int i = (player == NULL) ? 0 : 1;
+	CLog::Log(log_debug, "player is null %d", i);
 	return true;
 }
 
 //ID登录成功，激活用户
-void CHandleFromGate::ActiveUserItem( DWORD dwSocketID, 
-		STR_DBO_CG_LOGON_USERID *pDBOLogon)
+void CHandleFromGate::ActiveUserItem( DWORD dwSocketID, STR_DBO_CG_LOGON_USERID *pDBOLogon)
 {
 	if ( NULL == pDBOLogon )
 	{
@@ -352,7 +320,6 @@ void CHandleFromGate::ActiveUserItem( DWORD dwSocketID,
 	UserInfo.dwCustomID = pDBOLogon->dwCustomID;
 	lstrcpyn(UserInfo.szNickName,pDBOLogon->szNickName,CountArray(UserInfo.szNickName));
 	lstrcpyn(UserInfo.szHeadUrl,pDBOLogon->szHeadUrl,CountArray(UserInfo.szHeadUrl));
-
 
 	//用户资料
 	UserInfo.cbGender=pDBOLogon->cbGender;
@@ -399,91 +366,11 @@ void CHandleFromGate::ActiveUserItem( DWORD dwSocketID,
 	UserInfo.lRestrictScore=0L;//屏蔽每局封顶
 	lstrcpyn(UserInfo.szPassword,pDBOLogon->szPassword,CountArray(UserInfo.szPassword));
 
-	UserInfo.dwSocketId = dwSocketID;
-
 	//连接信息
-	//UserInfo.wBindIndex=wBindIndex;
-	//UserInfo.dwClientAddr=pBindParameter->dwClientAddr;
 	lstrcpyn(UserInfo.szMachineID,pDBOLogon->szMachineID,CountArray(UserInfo.szMachineID));
 
-	CLog::Log(log_debug, "begin InsertPlayer");
 	//激活用户 -- 设置用户信息
 	CPlayerManager::InsertPlayer(dwSocketID, UserInfo);
-
-	//在用户列表中获取 用户
-	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerByID(UserInfo.dwUserID);
-
-	CLog::Log(log_debug, "voer InsertPlayer");
-
-	//错误判断 -- 设置用户pIServerUserItem信息失败
-	if (pIServerUserItem == NULL)
-	{
-		CLog::Log(log_debug, "voer InsertPlayer failed");
-		//断开用户
-		g_TCPNetworkEngine->CloseSocket(dwSocketID);
-		return;
-	}
-
-	//登录事件
-	OnEventUserLogon(pIServerUserItem, false);
-}
-
-//用户登录 
-VOID CHandleFromGate::OnEventUserLogon(CPlayer * pIServerUserItem, bool bAlreadyOnLine)
-{
-	//获取参数
-	WORD wBindIndex = pIServerUserItem->GetBindIndex();
-	bool bAndroidUser = pIServerUserItem->IsAndroidUser();
-
-	/* 1. 构造返回数据 */
-	STR_CMD_GC_LOGON_USERID logon;
-	ZeroMemory(&logon, sizeof(STR_CMD_GC_LOGON_USERID));
-	logon.lResultCode = 0;
-	logon.dwKindID = g_GameCtrl->GetKindID();
-	lstrcpyn(logon.szDescribeString, TEXT("用户登录成功"), CountArray(logon.szDescribeString));
-	
-	//TODONOW
-	logon.dwOffLineGameID = pIServerUserItem -> GetOfflineGameID();
-
-	CLog::Log(log_debug, "send  1 101");
-	//发送数据
-	g_GameCtrl->SendData(pIServerUserItem->GetSocketID(), MDM_GR_LOGON, CMD_GC_LOGON_USERID, &logon, sizeof(STR_CMD_GC_LOGON_USERID));
-}
-
-//切换连接
-bool CHandleFromGate::SwitchUserItemConnect(CPlayer * pIServerUserItem, TCHAR szMachineID[LEN_MACHINE_ID],
-												const double &dLongitude, const double &dLatitude,
-												BYTE cbDeviceType, WORD wBehaviorFlags, WORD wPageTableCount)
-{
-	//效验参数
-	if (NULL == pIServerUserItem) 
-		return false;
-
-	//用户有效，断开已绑定的用户
-	if (INVALID_WORD != pIServerUserItem->GetBindIndex())	
-	{
-		//断开用户
-		if (pIServerUserItem->IsAndroidUser()==true)
-		{
-			//m_AndroidUserManager.DeleteAndroidUserItem(pSourceParameter->dwSocketID);
-		}
-		else
-		{
-			g_TCPNetworkEngine->CloseSocket(pIServerUserItem->GetSocketID());
-		}
-	}
-
-	//机器判断
-	LPCTSTR pszMachineID = pIServerUserItem->GetMachineID();
-	bool bSameMachineID = (lstrcmp(pszMachineID, szMachineID)==0);
-
-	//重新激活用户
-	pIServerUserItem->SetUserParameter(0, szMachineID, false, false, dLongitude, dLatitude);
-
-	//登录事件
-	OnEventUserLogon(pIServerUserItem,true);
-
-	return true;
 }
 
 #pragma endregion
@@ -1914,18 +1801,6 @@ bool CHandleFromGate::On_SUB_User_ReconnectRoom(VOID * pData, WORD wDataSize, DW
 	//发送数据
 	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_RECONNECT_ROOM, &ReJoinResult, sizeof(STR_CMD_GC_USER_RECONNECT_ROOM));
 
-	//断线重连成功，删除list
-	if (ReJoinResult.retCode == 0)
-	{
-		//游戏服处理  TODONOW
-		pIServerUserItem->SetOfflineGameID(0);
-
-		//发送给协调服, 再转发给登录服
-		tagOfflineUser data;
-		data.dwUserID = pIServerUserItem->GetUserID();
-		data.byMask = 2; //表示删除断线用户
-		g_TCPSocketEngine->SendData(MDM_USER,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
-	}
 	return true;
 }
 

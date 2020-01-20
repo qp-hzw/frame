@@ -1,5 +1,6 @@
 #include "HandleFromCenter.h"
 #include "GameCtrl.h"
+#include "PlayerManager.h"
 
 //消息分发处理函数
 bool CHandleFromCenter::HandlePacket(TCP_Command Command, VOID * pData, WORD wDataSize, WORD wServiceID)
@@ -58,6 +59,19 @@ bool CHandleFromCenter::OnTCPSocketMainServiceInfo(WORD wSubCmdID, VOID * pData,
 	{
 	case SUB_CS_C_USER_OFFLINE_B: //用户断线
 		{
+			//效验数据
+			if (wDataSize!=sizeof(tagOfflineUser)) return true;
+			tagOfflineUser * pOffline = (tagOfflineUser*) pData;
+
+			if(pOffline->byMask == 1)//增加断线用户
+			{
+				CPlayerManager::AddOfflinePlayer(pOffline->dwUserID, pOffline->dwServerID);
+			}
+			else if(pOffline->byMask == 2) //删除断线用户
+			{
+				CPlayerManager::DeleteOfflinePlayer(pOffline->dwUserID);
+			}
+
 			return true;
 		}
 	}

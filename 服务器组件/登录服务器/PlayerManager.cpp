@@ -2,6 +2,7 @@
 #include "Player.h"
 
 std::vector<CPlayer*> CPlayerManager::s_PlayerArray;
+std::map<DWORD, DWORD> CPlayerManager::s_OfflinePlayer;
 
 //增
 bool CPlayerManager::InsertPlayer(DWORD dwSocketID, tagUserInfo& UserInfo)
@@ -123,4 +124,31 @@ std::vector<CPlayer*> CPlayerManager::FindPlayerByClubID(DWORD dwClubID)
 	*/
 
 	return vec_play;
+}
+
+//增加断线玩家
+void CPlayerManager::AddOfflinePlayer(DWORD userID, DWORD serverID)
+{
+	CLog::Log(log_debug, "增加断线玩家 %d : %d", userID, serverID);
+	s_OfflinePlayer[userID] = serverID;
+}
+
+//删除断线玩家
+void CPlayerManager::DeleteOfflinePlayer(DWORD userID)
+{
+	CLog::Log(log_debug, "删除断线玩家 %d", userID);
+	s_OfflinePlayer.erase(userID);
+}
+
+//获得断线玩家数据
+DWORD CPlayerManager::FindOfflineGameID(DWORD userID)
+{
+	if(s_OfflinePlayer.end() != s_OfflinePlayer.find(userID))
+	{
+		return s_OfflinePlayer[userID];
+	}
+	else
+	{
+		return 0;
+	}
 }

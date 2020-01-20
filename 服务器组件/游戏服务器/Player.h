@@ -46,7 +46,6 @@ private:
 	DWORD							m_dwClientAddr;						//连接地址
 	TCHAR							m_szMachineID[LEN_MACHINE_ID];		//机器标识
 
-	DWORD							m_dwOfflineGameID;					//断线重连标志 
 	BYTE							m_OldGameStatus;					//用户断线之前的状态
 
 	//函数定义
@@ -60,6 +59,7 @@ public:
 public:
 	//用户SocketID
 	DWORD GetSocketID() { return m_dwSocketID;}
+	void SetSocketID(DWORD socketID){m_dwSocketID = socketID;}
 
 	//用户信息
 	tagUserInfo * GetUserInfo() { return &m_UserInfo; }
@@ -94,12 +94,7 @@ public:
 	 BYTE GetUserStatus() { return m_UserInfo.cbUserStatus; }
 	 bool SetUserStatus(BYTE cbUserStatus, DWORD wTableID, WORD wChairID);
 
-	//设置断线标志 GameID  TODONOW
-	 void SetOfflineGameID(DWORD dwOfflineGameID){m_dwOfflineGameID = dwOfflineGameID;}
-	//获取断线标志 GameID  TODONOW
-	 DWORD GetOfflineGameID(){return m_dwOfflineGameID; }
-	
-	//用户断线之前的状态
+	 //用户断线之前的状态
 	 BYTE GetOldGameStatus() { return m_OldGameStatus;}
 	 void SetOldGameStatus(BYTE gamestatus) { m_OldGameStatus = gamestatus;}
 

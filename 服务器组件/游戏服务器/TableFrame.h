@@ -281,6 +281,9 @@ public:
 	int PlayerLeaveTable(CPlayer* pPlayer);
 	//玩家准备
 	int PlayerReady(WORD wChairID, CPlayer* pPlayer);
+	//玩家断线
+	int PlayerOffline(CPlayer* pPlayer);
+
 
 	//玩家动作辅助函数
 private:
@@ -309,10 +312,6 @@ public:
 
 #pragma endregion
 
-	//用户事件
-public:
-	//断线事件
-	bool OnEventUserOffLine(CPlayer * pIServerUserItem);
 
 #pragma region 解散房间
 public:

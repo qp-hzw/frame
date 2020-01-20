@@ -37,18 +37,11 @@ private:
     //登录模块 辅助函数
 private:
 	//ID登录成功，激活用户（为了给pCPlayer赋值，传进去双指针，pCPlayer传进去的就是NULL）
-	static void ActiveUserItem(DWORD dwContextID, 
-		STR_DBO_CG_LOGON_USERID *pDBOLogon);
+	static void ActiveUserItem(DWORD dwContextID, STR_DBO_CG_LOGON_USERID *pDBOLogon);
 
-	//用户登录
-	static VOID OnEventUserLogon(CPlayer * pCPlayer, bool bAlreadyOnLine);
 	//用户登出
 	static VOID OnEventUserLogout(CPlayer * pCPlayer, DWORD dwLeaveReason);
 
-	//切换连接
-	static bool SwitchUserItemConnect(CPlayer *pCPlayer, TCHAR szMachineID[LEN_MACHINE_ID],
-								const double &dLongitude, const double &dLatitude, 
-								BYTE cbDeviceType=DEVICE_TYPE_PC, WORD wBehaviorFlags=0, WORD wPageTableCount=0);
 #pragma endregion
 
 	#pragma region  用户命令 MDM_USER
