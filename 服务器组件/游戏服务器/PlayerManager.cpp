@@ -10,7 +10,6 @@ std::vector<CPlayer*> CPlayerManager::s_PlayerArray;
 
 void CloseSocket(DWORD socketID)
 {
-	CLog::Log(log_debug, "延迟 删除 玩家 %d", socketID);
 	std::this_thread::sleep_for(chrono::milliseconds(3000));
 
 	g_TCPNetworkEngine->CloseSocket(socketID);
@@ -44,8 +43,13 @@ bool CPlayerManager::DeletePlayer(CPlayer * pPlayer)
 {
 	if (pPlayer==NULL) return false;
 
+	CLog::Log(log_debug, "延迟 删除 玩家 %d", pPlayer->GetSocketID());
+	
 	//关闭socket连接
 	std::thread t1(CloseSocket, pPlayer->GetSocketID());
+	t1.detach();
+
+
 	//t1.join();
 
 	//删除list列表

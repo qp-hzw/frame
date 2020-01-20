@@ -10,7 +10,6 @@ std::vector<CTableFrame*>	               CTableManager::s_TableArray;					//×À×Ó
 void DelayDeleteTable(CTableFrame * pTable)
 {
 	if(pTable == NULL) return;
-	CLog::Log(log_debug, "ÑÓ³Ù É¾³ý ×À×Ó %d", pTable->GetTableID());
 	std::this_thread::sleep_for(chrono::milliseconds(3000));
 
 	delete pTable;
@@ -47,7 +46,8 @@ bool CTableManager::DeleteTable(CTableFrame* pTable)
 		}
 	}
 
-	//std::thread t2(DelayDeleteTable, pTable);
+	std::thread t2(DelayDeleteTable, pTable);
+	t2.detach();
 	return true;
 }
 
