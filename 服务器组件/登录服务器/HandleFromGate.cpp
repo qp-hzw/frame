@@ -1008,20 +1008,16 @@ bool CHandleFromGate::On_CMD_LC_Service_UserFeedBack( DWORD dwScoketID, VOID * p
 //刷新用户信息
 bool CHandleFromGate::On_SUB_CL_Service_RefreshUserInfo(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//校验参数
-	ASSERT( wDataSize == sizeof(STR_SUB_CL_SERVICE_REFRESH_INFO));
-	if(wDataSize != sizeof(STR_SUB_CL_SERVICE_REFRESH_INFO)) return false;
-
-	//处理消息
-	STR_SUB_CL_SERVICE_REFRESH_INFO *pUserRequest = (STR_SUB_CL_SERVICE_REFRESH_INFO *)pData;
 	//定义变量
 	STR_DBR_CL_SERCIVR_REFRESH_INFO UserRequest;
 	ZeroMemory(&UserRequest,sizeof(UserRequest));
 
-	UserRequest.dwUserID = pUserRequest->dwUserID;
-
-	//投递请求
-	g_GameCtrl->PostDataBaseRequest(DBR_CL_SERVICE_REFRESH_USER_INFO, dwSocketID, &UserRequest, sizeof(UserRequest));
+	CPlayer *player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	if(player)
+	{
+		UserRequest.dwUserID = player->GetUserID();
+		g_GameCtrl->PostDataBaseRequest(DBR_CL_SERVICE_REFRESH_USER_INFO, dwSocketID, &UserRequest, sizeof(UserRequest));
+	}
 	return true;
 }
 
