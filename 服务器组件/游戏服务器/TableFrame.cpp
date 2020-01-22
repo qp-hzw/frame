@@ -233,6 +233,8 @@ bool CTableFrame::HandleXJGameEnd(BYTE byRound, BYTE byTableMode_NO_USER, SCORE 
 //大局结束处理函数
 bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 {
+	KillGameTimer(IDI_ROOM_AUTO_DISMISS);
+
 	//设置房间不处于解散状态
 	m_bUnderDissState = false;
 	m_dissmisserChaiID = 0xFF;
@@ -968,7 +970,7 @@ bool CTableFrame::OnEventTimer(DWORD dwTimerID, WPARAM dwBindParameter)
 			KillGameTimer(IDI_ROOM_AUTO_DISMISS);
 
 			//结束游戏
-			m_pITableFrameSink->OnEventGameConclude(INVALID_CHAIR,NULL,GER_DISMISS);
+			HandleDJGameEnd(GAME_CONCLUDE_NORMAL);
 			return true;
 		}
 	case IDI_VOTE_DISMISS_ROOM:		//表决解散房间定时器

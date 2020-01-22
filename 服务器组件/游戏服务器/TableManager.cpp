@@ -34,11 +34,13 @@ bool CTableManager::DeleteTable(CTableFrame* pTable)
 		if (*ite == pTable)
 		{
 			ite = s_TableArray.erase(ite);
+			delete pTable;
+			pTable = NULL;
 			break;
 		}
 	}
 
-	delete pTable;
+	
 	return true;
 }
 
@@ -50,6 +52,7 @@ bool CTableManager::DeleteTable(DWORD dwTableID)
 		if (*ite  && ((*ite)->GetTableID() == dwTableID))
 		{
 			delete *ite;
+			*ite = NULL;
 			ite = s_TableArray.erase(ite);
 			break;
 		}
@@ -64,7 +67,9 @@ bool CTableManager::DeleteAllTable()
 	for (auto ite = s_TableArray.begin(); ite != s_TableArray.end(); ite++)
 	{
 		delete *ite;
+		*ite = NULL;
 	}
+
 	s_TableArray.clear();
 	return true;
 }

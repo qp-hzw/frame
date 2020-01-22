@@ -45,6 +45,7 @@ bool CPlayerManager::DeletePlayer(CPlayer * pPlayer)
 		{
 			ite = s_PlayerArray.erase(ite);
 			delete pPlayer;
+			pPlayer = NULL;
 			break;
 		}
 	}
@@ -65,6 +66,7 @@ bool CPlayerManager::DeletePlayerByID(DWORD dwUserID)
 		{
 			ite = s_PlayerArray.erase(ite);
 			delete player;
+			player = NULL;
 			break;
 		}
 	}
@@ -83,6 +85,7 @@ bool CPlayerManager::DeletePlayerBySocketID(DWORD dwSocketID)
 		{
 			ite = s_PlayerArray.erase(ite);
 			delete player;
+			player = NULL;
 			break;
 		}
 	}
@@ -97,6 +100,7 @@ bool CPlayerManager::DeleteAllPlayer()
 	for(auto ite = s_PlayerArray.begin(); ite != s_PlayerArray.end(); ite++)
 	{
 		delete *ite;
+		*ite = NULL;
 	}
 
 	//É¾³ýlist
