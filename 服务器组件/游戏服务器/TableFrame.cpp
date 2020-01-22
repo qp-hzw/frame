@@ -290,8 +290,8 @@ bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 				}
 			}
 
-			//删除用户
-			CPlayerManager::DeletePlayer(pIServerUserItem);
+			//断开用户 socket
+			CPlayerManager::CloseSocket(pIServerUserItem);
 		}
 
 		CTableManager::DeleteTable(this);
@@ -569,9 +569,6 @@ int CTableFrame::PlayerSitTable(WORD wChairID, CPlayer * pPlayer, LPCTSTR lpszPa
 
 	//广播发送
 	SendTableData(INVALID_CHAIR, SUB_GR_USER_STATUS, &GameStatus, sizeof(GameStatus), MDM_USER);
-
-	//5. list
-	m_player_list.push_back(pPlayer);
 
 	return 0;
 }

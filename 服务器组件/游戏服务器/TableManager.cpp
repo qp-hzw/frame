@@ -7,14 +7,6 @@ using namespace std;
 
 std::vector<CTableFrame*>	               CTableManager::s_TableArray;					//桌子数组
 
-void DelayDeleteTable(CTableFrame * pTable)
-{
-	if(pTable == NULL) return;
-	std::this_thread::sleep_for(chrono::milliseconds(3000));
-
-	delete pTable;
-}
-
 //增
 CTableFrame* CTableManager::CreateTable()
 {
@@ -46,8 +38,7 @@ bool CTableManager::DeleteTable(CTableFrame* pTable)
 		}
 	}
 
-	std::thread t2(DelayDeleteTable, pTable);
-	t2.detach();
+	delete pTable;
 	return true;
 }
 
@@ -58,6 +49,7 @@ bool CTableManager::DeleteTable(DWORD dwTableID)
 	{
 		if (*ite  && ((*ite)->GetTableID() == dwTableID))
 		{
+			delete *ite;
 			ite = s_TableArray.erase(ite);
 			break;
 		}
@@ -69,6 +61,10 @@ bool CTableManager::DeleteTable(DWORD dwTableID)
 //删 所有
 bool CTableManager::DeleteAllTable()
 {
+	for (auto ite = s_TableArray.begin(); ite != s_TableArray.end(); ite++)
+	{
+		delete *ite;
+	}
 	s_TableArray.clear();
 	return true;
 }

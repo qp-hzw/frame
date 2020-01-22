@@ -10,3 +10,4 @@ Debug_Unicode
 *.exp
 子依赖项/.DS_Store
 .DS_Store
+服务器组件/全局定义/define/Release/define.log

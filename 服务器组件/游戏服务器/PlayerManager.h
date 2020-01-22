@@ -30,6 +30,9 @@ public:
 	//查
 	static CPlayer * FindPlayerBySocketID(DWORD dwSocketID);
 
+	//断开网络连接
+	 static void CloseSocket(CPlayer* player);
+
 	//统计函数
 public:
 	//在线人数

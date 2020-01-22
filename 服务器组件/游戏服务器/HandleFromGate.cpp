@@ -277,6 +277,7 @@ bool CHandleFromGate::On_CMD_GC_Logon_UserID(DWORD dwSocketID, VOID * pData, WOR
 	logon.lResultCode = pDBOLogon->lResultCode;
 	logon.dwKindID = g_GameCtrl->GetKindID();
 	lstrcpyn(logon.szDescribeString, pDBOLogon->szDescribeString, CountArray(logon.szDescribeString));
+
 	//发送数据
 	g_GameCtrl->SendData(dwSocketID, MDM_GR_LOGON, CMD_GC_LOGON_USERID, &logon, sizeof(STR_CMD_GC_LOGON_USERID));
 
@@ -298,15 +299,12 @@ bool CHandleFromGate::On_CMD_GC_Logon_UserID(DWORD dwSocketID, VOID * pData, WOR
 		//重复登录, 需要给客户端发送重复消息
 
 		//断线情形
-		//无须特殊处理, 客户端会主动发送, [100,1]主动请求
 		tagOfflineUser data;
 		data.dwUserID = pDBOLogon->dwUserID;
 		data.byMask = 2; //表示删除断线用户
-		g_TCPSocketEngine->SendData(MDM_USER,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
+		g_TCPSocketEngine->SendData(MDM_USER, SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
 	}
 
-	int i = (player == NULL) ? 0 : 1;
-	CLog::Log(log_debug, "player is null %d", i);
 	return true;
 }
 

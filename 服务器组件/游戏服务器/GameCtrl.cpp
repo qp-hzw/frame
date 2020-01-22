@@ -181,26 +181,10 @@ ITableFrameSink* CGameCtrl::GetITableFrameSink()
 }
 
 /************************************************消息发送*********************************************************/
-/*
-//发送数据
-bool CAttemperEngineSink::SendData(BYTE cbSendMask, WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize)
-{
-	//用户数据
-	g_TCPNetworkEngine->SendDataBatch(wMainCmdID,wSubCmdID,pData,wDataSize);
-
-	return true;
-}
-*/
-
 //发送数据
 bool CGameCtrl::SendData(DWORD dwSocketID, WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize)
 {
-	//发送数据
-	if (LOWORD(dwSocketID)!=INVALID_WORD)
-	{
-		//网络用户
-		m_TCPNetworkEngine->SendData(dwSocketID,wMainCmdID,wSubCmdID,pData,wDataSize);
-	}
+	m_TCPNetworkEngine->SendData(dwSocketID,wMainCmdID,wSubCmdID,pData,wDataSize);
 
 	return true;
 }
