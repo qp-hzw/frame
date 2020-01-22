@@ -43,7 +43,7 @@ class CTableFrame : public ITableFrame
 #pragma region 成员变量
 	/****************************************** 静态数据 **************************************************/
 private:
-	DWORD							m_wTableID;							//桌子号码		从0开始，在桌子初始化的时候已经赋值
+	DWORD							m_wTableID;							//桌子标志 6位
 	WORD							m_wChairCount;						//椅子数目
 
 	BYTE							m_cbTableMode;						//桌子游戏模式  房卡场, 金币场, 房卡金币场, 比赛场

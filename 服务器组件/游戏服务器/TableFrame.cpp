@@ -88,7 +88,6 @@ CTableFrame::~CTableFrame()
 	{
 		SafeDelete(m_pITableFrameSink);
 	}
-
 	return;
 }
 
@@ -239,6 +238,8 @@ bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 	m_bUnderDissState = false;
 	m_dissmisserChaiID = 0xFF;
 
+	//关闭所有定时器
+
 	//结束等待续费，玩家需要从准备状态退出为坐下
 	if (cbGameStatus == GAME_CONCLUDE_CONTINUE)
 	{
@@ -299,7 +300,6 @@ bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 		CTableManager::DeleteTable(this);
 		return true;
 	}
-
 
 	return true;
 }
@@ -817,11 +817,10 @@ CPlayer * CTableFrame::EnumLookonUserItem(WORD wEnumIndex)
 bool CTableFrame::SetGameTimer(DWORD dwTimerID, DWORD dwElapse, DWORD dwRepeat, WPARAM dwBindParameter)
 {
 	//效验参数
-	ASSERT((dwTimerID>0)&&(dwTimerID<TIME_TABLE_MODULE_RANGE));
-	if ((dwTimerID<=0)||(dwTimerID>=TIME_TABLE_MODULE_RANGE)) return false;
+	if ((dwTimerID<=0)||(dwTimerID>TIME_TABLE_MODULE_RANGE)) return false;
 
 	//设置时间
-	DWORD dwEngineTimerID=IDI_TABLE_MODULE_START+m_wTableID*TIME_TABLE_MODULE_RANGE;
+	DWORD dwEngineTimerID=IDI_TABLE_MODULE_START + m_wTableID*TIME_TABLE_MODULE_RANGE;
 	g_GameCtrl->SetTimer(dwEngineTimerID+dwTimerID,dwElapse,dwRepeat,dwBindParameter);
 
 	return true;
@@ -831,11 +830,10 @@ bool CTableFrame::SetGameTimer(DWORD dwTimerID, DWORD dwElapse, DWORD dwRepeat, 
 bool CTableFrame::KillGameTimer(DWORD dwTimerID)
 {
 	//效验参数
-	ASSERT((dwTimerID>0)&&(dwTimerID<=TIME_TABLE_MODULE_RANGE));
 	if ((dwTimerID<=0)||(dwTimerID>TIME_TABLE_MODULE_RANGE)) return false;
 
 	//删除时间
-	DWORD dwEngineTimerID=IDI_TABLE_MODULE_START+m_wTableID*TIME_TABLE_MODULE_RANGE;
+	DWORD dwEngineTimerID=IDI_TABLE_MODULE_START + m_wTableID*TIME_TABLE_MODULE_RANGE;
 	g_GameCtrl->KillTimer(dwEngineTimerID+dwTimerID);
 
 	return true;
@@ -845,15 +843,12 @@ bool CTableFrame::KillGameTimer(DWORD dwTimerID)
 DWORD CTableFrame::GetTimerLeftTickCount(DWORD dwTimerID)
 {
 	//效验参数
-	ASSERT((dwTimerID>0)&&(dwTimerID<=TIME_TABLE_MODULE_RANGE));
 	if ((dwTimerID<=0)||(dwTimerID>TIME_TABLE_MODULE_RANGE)) return false;
 
 	//删除时间
-	DWORD dwEngineTimerID=IDI_TABLE_MODULE_START+m_wTableID*TIME_TABLE_MODULE_RANGE;
+	DWORD dwEngineTimerID=IDI_TABLE_MODULE_START + m_wTableID*TIME_TABLE_MODULE_RANGE;
 	return g_GameCtrl->GetTimerLeftTickCount(dwEngineTimerID+dwTimerID);
-
 	return 0;
-
 }
 
 //发送数据

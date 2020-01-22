@@ -33,13 +33,13 @@ bool CTableManager::DeleteTable(CTableFrame* pTable)
 	{
 		if (*ite == pTable)
 		{
+			CLog::Log(log_debug, "Delete Table : %d", pTable->GetTableID() );
 			ite = s_TableArray.erase(ite);
-			delete pTable;
+			//delete pTable;
 			pTable = NULL;
 			break;
 		}
 	}
-
 	
 	return true;
 }

@@ -110,6 +110,8 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 		DWORD dwTableTimerID=dwTimerID-IDI_TABLE_MODULE_START;
 		DWORD wTableIndex=(DWORD)(dwTableTimerID/TIME_TABLE_MODULE_RANGE);
 
+		CLog::Log(log_debug, "OnEventTimer  %ld : %ld", wTableIndex, dwTableTimerID%TIME_TABLE_MODULE_RANGE);
+
 		//时间通知
 		CTableFrame * pTableFrame= CTableManager::FindTableByTableID(wTableIndex);
 		if(pTableFrame != NULL)
