@@ -5,12 +5,12 @@
 #include "Stdafx.h"
 #include "AttemperEngineSink.h"
 #include "DataBaseEngineSink.h"
+#include <map>
 
 //////////////////////////////////////////////////////////////////////////////////
 
 //网络标示
 #define NETWORK_CORRESPOND			1									//协调连接
-
 
 //服务单元
 class CGameCtrl
@@ -30,8 +30,11 @@ public:
 	//subgame_dll_name
 protected:
 	std::string			            m_subgame_dll_name;				    //子游戏dll名字
-	
 	DWORD                           m_ServerID;                         //serverid
+
+	rule_arry                       m_rule_arry;						//房间规则
+	BYTE							m_frame_rule_count;					//frame房间规则 条数
+	BYTE							m_subgame_rule_count;				//子游戏房间规则 条数
 
 	//函数定义
 public:
@@ -68,6 +71,11 @@ protected:
 	int InitializeService();
 	//启动内核
 	int StartKernelService();
+
+	//读取通用房间配置文件
+	void ReadFrameRoomRule();
+	//读取子游戏房间配置文件
+	void ReadSubGameRoomRule(int kindid);
 
 	/*********************** 消息发送 Socket::Server -> Socket::Client ***********************/
 public:

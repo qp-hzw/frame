@@ -302,6 +302,7 @@ bool CHandleFromGate::On_CMD_GC_Logon_UserID(DWORD dwSocketID, VOID * pData, WOR
 		tagOfflineUser data;
 		data.dwUserID = pDBOLogon->dwUserID;
 		data.byMask = 2; //表示删除断线用户
+		CLog::Log(log_debug, "2, 4 delete player");
 		g_TCPSocketEngine->SendData(MDM_USER, SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
 	}
 
@@ -665,7 +666,6 @@ bool CHandleFromGate::On_SUB_CG_User_RefuseSit(VOID * pData, WORD wDataSize, DWO
 bool CHandleFromGate::On_SUB_CG_User_KickUser(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
 	//效验参数
-	ASSERT(wDataSize==sizeof(CMD_GR_KickUser));
 	if (wDataSize!=sizeof(CMD_GR_KickUser)) return false;
 
 	//变量定义
@@ -680,7 +680,6 @@ bool CHandleFromGate::On_SUB_CG_User_KickUser(VOID * pData, WORD wDataSize, DWOR
 	if(pITargetUserItem==NULL) return true;
 
 	//用户效验
-	ASSERT((pIServerUserItem!=NULL)&&(pIServerUserItem->GetMemberOrder()>pITargetUserItem->GetMemberOrder()));
 	if ((pIServerUserItem==NULL)||(pIServerUserItem->GetMemberOrder()<=pITargetUserItem->GetMemberOrder())) return false;
 
 	//用户状态

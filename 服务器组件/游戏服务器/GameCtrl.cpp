@@ -1,5 +1,6 @@
-# include "Stdafx.h"
+#include "Stdafx.h"
 #include "GameCtrl.h"
+#include <iostream>
 
 #define MDM_CM_SYSTEM				1000								//系统命令
 #define SUB_CM_SYSTEM_MESSAGE		1									//系统消息
@@ -113,20 +114,20 @@ int CGameCtrl::InitializeService()
 	//协调服务
 	if (m_TCPSocketEngine->SetServiceID(NETWORK_CORRESPOND)==false) return 11;
 
+	/***************************************************  log 配置信息 *************************************************/
+	std::string log_nam= "GameServer.log";
+	CLog::Init(log_nam.c_str());
+
 	/***************************************************  SubGame 配置信息 *************************************************/
 	//读取子游戏配置文件
 	DWORD dwKindId = static_cast<DWORD >(CWHModule::SubGameCfg(m_subgame_dll_name)); //此处只是校验
 	if (0 == dwKindId)	return 8;
 	SetServerID(dwKindId << 16);
 
-	/***************************************************  log 配置信息 *************************************************/
-	//考虑到游戏服到现在才能知道ServerID, 因此只能将log的配置信息写到这里
-	//std::string log_nam= "GameServer-" + std::to_string(m_GameServiceOption.dwServerID) + ".log";
+	//读取房间规则配置文件
+	//ReadFrameRoomRule();
+	//ReadSubGameRoomRule(dwKindId);
 
-	std::string log_nam= "GameServer.log";
-	CLog::Init(log_nam.c_str());
-
-	CLog::Log(log_debug, "service create success");
 	return 0;
 }
 //启动内核
@@ -162,6 +163,85 @@ bool CGameCtrl::StartNetworkService()
 	}
 
 	return true;
+}
+
+//读取通用房间配置文件
+void CGameCtrl::ReadFrameRoomRule()
+{
+	//初始化数据
+	ZeroMemory(&m_rule_arry, sizeof(m_rule_arry));
+	m_frame_rule_count = 0;
+	m_subgame_rule_count = 0;
+
+	//打开文件
+	string file_path = "frame.rule";
+	int iRet = CWHCfg::Instance()->OpenFile(file_path);
+	if(iRet != 0 )
+	{
+		return ;
+	}
+
+	BYTE card_group_num = 0;
+	for(int i=0; i<20; i++)
+	{
+		char psz[20];
+		sprintf(psz, "RULE_%d", i);
+		string strTemp;
+		iRet = CWHCfg::Instance()->GetItemValue(psz, "head", strTemp);
+		if(iRet != 0) continue;
+		std::cout << strTemp << std::endl;
+		std::cout << strTemp.c_str() << std::endl;
+
+		m_frame_rule_count ++;
+		//swprintf(m_rule_arry.ItemArry[i].szHeadName, 15, L"%S", strTemp.c_str());
+
+		for(int j=0; j<4; j++)
+		{
+			char value[20];
+			sprintf(value, "value_%d", j);
+			iRet = CWHCfg::Instance()->GetItemValue(psz, value, strTemp);
+			if(iRet != 0) continue;
+			//swprintf(m_rule_arry.ItemArry[i].szItemValue[j], 10, L"%S", strTemp.c_str());
+		}
+	}
+
+	//关闭文件
+	CWHCfg::Instance()->CloseFile();
+}
+//读取子游戏房间配置文件
+void CGameCtrl::ReadSubGameRoomRule(int kindid)
+{
+	//打开文件
+	string file_path = std::to_string(kindid)+ ".rule";
+	int iRet = CWHCfg::Instance()->OpenFile(file_path);
+	if(iRet != 0 )
+	{
+		return ;
+	}
+
+	BYTE card_group_num = 0;
+	for(int i=0; i<20; i++)
+	{
+		char psz[20];
+		sprintf(psz, "RULE_%d", i);
+		string strTemp;
+		iRet = CWHCfg::Instance()->GetItemValue(psz, "head", strTemp);
+		if(iRet != 0) continue;
+		m_subgame_rule_count ++;
+		//swprintf(m_rule_arry.ItemArry[i].szHeadName, 15, L"%S", strTemp.c_str());
+
+		for(int j=0; j<4; j++)
+		{
+			char value[20];
+			sprintf(value, "value_%d", j);
+			iRet = CWHCfg::Instance()->GetItemValue(psz, value, strTemp);
+			if(iRet != 0) continue;
+			//swprintf(m_rule_arry.ItemArry[i].szItemValue[j], 10, L"%S", strTemp.c_str());
+		}
+	}
+
+	//关闭文件
+	CWHCfg::Instance()->CloseFile();
 }
 
 //配置端口

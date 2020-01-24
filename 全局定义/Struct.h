@@ -7,12 +7,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 //用户信息
 
-//桌子状态
-struct tagTableStatus
-{
-	BYTE							cbTableLock;						//锁定标志 TODONOW delete this
-	BYTE							cbPlayStatus;						//游戏标志 TODONOW delete this
-};
 
 //用户道具
 struct tagUserProperty
