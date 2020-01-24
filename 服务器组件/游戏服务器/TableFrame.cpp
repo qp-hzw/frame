@@ -543,7 +543,7 @@ int CTableFrame::PlayerEnterTable(CPlayer * pPlayer)
 	m_user_list.push_back(pPlayer);
 }
 //玩家坐下
-int CTableFrame::PlayerSitTable(WORD wChairID, CPlayer * pPlayer, LPCTSTR lpszPassword, bool bCheckUserGPS)
+int CTableFrame::PlayerSitTable(CPlayer * pPlayer, WORD wChairID, bool bCheckUserGPS)
 {
 	//1. 校验
 	int ret = CanPlayerSitTable(pPlayer, wChairID);
@@ -929,18 +929,6 @@ bool CTableFrame::SendGameMessage(CPlayer * pIServerUserItem, LPCTSTR lpszMessag
 
 	//发送消息
 	return g_GameCtrl->SendGameMessage(pIServerUserItem,lpszMessage,0);
-}
-
-
-//发送场景
-bool CTableFrame::SendGameScene(IServerUserItem * pIServerUserItem, VOID * pData, WORD wDataSize)
-{
-	//用户效验
-	if ((pIServerUserItem==NULL)) return false;
-
-	g_GameCtrl->SendData((CPlayer* )pIServerUserItem,MDM_G_FRAME,CMD_GR_FRAME_GAME_OPTION,pData,wDataSize);
-
-	return true;
 }
 
 //时间事件
@@ -1393,12 +1381,6 @@ bool CTableFrame::SendRequestFailure(CPlayer * pIServerUserItem, LPCTSTR pszDesc
 bool CTableFrame::EfficacyStartGame(WORD wReadyChairID)
 {
 	TCHAR szString[512]=TEXT("");
-
-	//电玩模式，游戏创建后立即开始
-	if (((tagTableRule*)GetCustomRule())->GameMode == TABLE_MODE_DW)
-	{
-		return true;
-	}  
 
 	//准备人数
 	WORD wReadyUserCount=0;

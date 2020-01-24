@@ -19,7 +19,7 @@
 struct tagTableRule
 {
 	/********************************* 大厅使用 ************************************/
-	BYTE	GameMode;				//游戏模式 0-房卡模式; 1-竞技模式;  2-金币模式;  3-房卡金币;
+	BYTE	GameMode;				//游戏模式 0房卡约局; 1比赛模式; 2金币模式; 3金币约局; 4牌友圈
 	BYTE	RobBankType;			//坐庄模式 0-抢庄（抢注高者坐庄） 1-轮庄（轮流坐庄）2-固定（固定房主坐庄）  3-赢庄（赢的人坐庄） 4-摇骰子定庄（随机庄家）
 	BYTE	GameCount;				//游戏局数 0-无限局
 	BYTE	GameCountType;			//大局类型 是第一大局, 第二大局, 还是第三大局
@@ -130,7 +130,7 @@ public:
 	//get player base info
 	virtual BASE_PLAYERINFO GetPlayerBaseInfo(WORD wChairID) = 0;
 
-		//配置参数
+	//配置参数
 public:
 	//读取通用房间规则
 	virtual VOID* GetCustomRule() = NULL;
@@ -171,11 +171,6 @@ public:
 public:
 	//发送数据
 	virtual bool SendTableData(WORD wChairID, WORD wSubCmdID, VOID * pData, WORD wDataSize, WORD wMainCmd =200) = NULL;
-
-	//功能接口
-public:
-	//发送场景
-	virtual bool SendGameScene(IServerUserItem * pIServerUserItem, VOID * pData, WORD wDataSize) = NULL;
 };
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -219,15 +214,6 @@ public:
 public:
 	//游戏消息
 	virtual bool OnGameMessage(WORD wSubCmdID, VOID * pData, WORD wDataSize, WORD wChairID) = NULL;
-
-public:
-	//用户坐下
-	virtual bool OnActionUserSitDown(WORD wChairID, IServerUserItem * pIServerUserItem, bool bLookonUser) = NULL;
-	//用户起立
-	virtual bool OnActionUserStandUp(WORD wChairID, IServerUserItem * pIServerUserItem, bool bLookonUser) = NULL;
-	//用户准备
-	virtual bool OnActionUserOnReady(WORD wChairID, IServerUserItem * pIServerUserItem, VOID * pData, WORD wDataSize) = NULL;
-
 };
 
 #endif

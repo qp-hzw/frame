@@ -47,10 +47,6 @@ private:
 	#pragma region  用户命令 MDM_USER
 	// 用户命令 MDM_USER
 protected:
-	//创建房间
-	static bool On_SUB_CG_USER_CREATE_ROOM(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//创建桌子(仅限 牌友圈)
-	static bool On_SUB_CG_USER_CREATE_TABLE(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//加入桌子 --需要密码
 	//需要数据库校验 1. 工会的房卡数 是否足够
 	//				 2. 非工会成员不能进入工会桌子
@@ -138,14 +134,14 @@ protected:
 	static bool SendDataBatchToMobileUser(WORD wCmdTable, WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize);
 #pragma endregion
 
-#pragma region  创建房间 && 创建桌子 && 加入桌子
-    //创建房间 && 创建桌子
-protected: 
-	//检查创建桌子的门票
-	static bool CheckCreateTableTicket(tagTableRule * pCfg, CPlayer *pCPlayer);
-
-    //创建普通桌子(1. 为自己创建桌子  2.为他人创建桌子)
-	static bool CreateTableNormal(tagTableRule * pCfg, CPlayer *pCPlayer, STR_SUB_CG_USER_CREATE_ROOM* pCreateRoom);
+	#pragma region  创建房间 && 创建桌子 && 加入桌子
+    //流程函数
+public: 
+	//申请创建房间
+	static bool On_SUB_CG_USER_CREATE_ROOM(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+	//设置房间规则
+	static bool On_SUB_CG_USER_SET_ROOM_RULE(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+	
 	//创建牌友圈房间
 	static bool CreateRoomClub(tagTableRule * pCfg, CPlayer *pCPlayer, STR_SUB_CG_USER_CREATE_ROOM* pCreateRoom);
 	//创建牌友圈桌子(先读取数据库中的房间规则)
@@ -157,12 +153,13 @@ protected:
 	//创建桌子 俱乐部桌子  -- 玩家进入俱乐部桌子时候, 如果没有找到可用的桌子,就会创建桌子
 	static bool CreateTableAutoClub(STR_DBO_CG_USER_JOIN_TABLE_NO_PASS* , CPlayer *pCPlayer);
 
-
-
-    //创建房间 && 创建桌子 辅助函数
+    //辅助函数
 protected: 
-    //为自己创建桌子
-	static bool HandleCreateTable(CTableFrame *pCurTableFrame, CPlayer *pCPlayer, tagTableRule *pCfg);
+	//校验 申请创建桌子
+	static bool CheckCreateRoom(CPlayer * player, BYTE gameMode);
+	//检查 创建桌子的门票
+	static bool CheckCreateTableTicket(tagTableRule * pCfg, CPlayer *pCPlayer);
+
 	//为他人创建桌子
 	static void HandleCreateTableForOthers(CTableFrame *pCurTableFrame, CPlayer *pCPlayer, tagTableRule *pCfg);
 
@@ -187,7 +184,7 @@ protected:
 
 #pragma endregion 
 
-#pragma region DB事件通知
+	#pragma region DB事件通知
 	//替他人开房
 public:
 	//添加替他人开房

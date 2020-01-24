@@ -3130,6 +3130,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_SETTING(DWORD dwContextID, VOID * 
 	TCHAR szRealRoomRule[2048];
 	m_AccountsDB->GetValue_String(TEXT("RealRoomRule"), szRealRoomRule, sizeof(szRealRoomRule));
 
+	/*
 	//构造新的房间规则字符串
 	STR_SUB_CG_USER_CREATE_ROOM strCreateRoom;
 	StrToBin(szRealRoomRule, strCreateRoom.CommonRule, 0, 255);
@@ -3232,6 +3233,8 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_SETTING(DWORD dwContextID, VOID * 
 
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_ROOM_SETTING,dwContextID,&CMD,sizeof(CMD));
 #pragma endregion
+
+	*/
 	return true;
 }
 

@@ -65,6 +65,9 @@ public:
 	//获取KindID
 	DWORD GetKindID(){return (m_ServerID & 0xFFFF0000) >> 16;}
 
+	//读取房间规则配置文件
+	rule_arry GetRoomRule(){return m_rule_arry;}
+
 	//辅助函数
 protected:
 	//配置组件

@@ -1736,6 +1736,7 @@ bool CDataBaseEngineSink::On_DBR_CG_CLUB_CREATE_TABLE(DWORD dwContextID, void *p
 		return false ;
 	}
 
+	/*
 	//获取到数据
 	STR_DBO_GC_CLUB_CREATE_TABLE Dbo;
 	ZeroMemory(&Dbo,sizeof(STR_DBO_GC_CLUB_CREATE_TABLE));
@@ -1764,7 +1765,9 @@ bool CDataBaseEngineSink::On_DBR_CG_CLUB_CREATE_TABLE(DWORD dwContextID, void *p
 	lResultCode = m_TreasureDB->ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_INFO_COST"), false);
 	Dbo.lResultCode = lResultCode;
 	return g_AttemperEngineSink->OnEventDataBaseResult(DBO_GC_CLUB_CREATE_TABLE,dwContextID,&Dbo,sizeof(Dbo));
+	*/
 
+	return true;
 }
 
 //加入桌子 不需要密码
@@ -1787,6 +1790,7 @@ bool CDataBaseEngineSink::On_DBR_CG_USER_JOIN_TABLE_NO_PASS(DWORD dwContextID, v
 	STR_DBO_CG_USER_JOIN_TABLE_NO_PASS Dbo;
 	ZeroMemory(&Dbo,sizeof(STR_DBO_CG_USER_JOIN_TABLE_NO_PASS));
 	Dbo.lResultCode = lResultCode;
+	/*
 	if(lResultCode == DB_SUCCESS)
 	{
 		TCHAR szRealRoomRule[2048];
@@ -1817,6 +1821,7 @@ bool CDataBaseEngineSink::On_DBR_CG_USER_JOIN_TABLE_NO_PASS(DWORD dwContextID, v
 		//执行查询
 		Dbo.lResultCode2 = m_TreasureDB->ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_INFO_COST"), false);
 	}
+	*/
 
 	return g_AttemperEngineSink->OnEventDataBaseResult(DBO_GC_USER_JOIN_TABLE_NO_PASS,dwContextID,&Dbo,sizeof(Dbo));
 }
@@ -1891,6 +1896,7 @@ bool CDataBaseEngineSink::On_DBR_CG_USER_JOIN_TABLE_HALL_GOLD(DWORD dwContextID,
 	Dbo.dwKindID = g_GameCtrl->GetKindID();
 	Dbo.byGameType =  pDbReq->byType;
 
+	/*
 	if(lResultCode == DB_SUCCESS)
 	{
 		TCHAR szRealRoomRule[520] = {0};
@@ -1904,6 +1910,7 @@ bool CDataBaseEngineSink::On_DBR_CG_USER_JOIN_TABLE_HALL_GOLD(DWORD dwContextID,
 		//不使用数据库来控制加入房间流程 //只从数据库获取子游戏规则
 		//Dbo.dwPassword = m_TreasureDB->GetValue_DWORD(TEXT("TableID"));
 	}
+	*/
 
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_GC_USER_JOIN_TABLE_HALL_GOLD,dwContextID,&Dbo,sizeof(Dbo));
 

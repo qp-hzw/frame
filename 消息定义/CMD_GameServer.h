@@ -60,8 +60,10 @@
 #define SUB_CG_USER_KICK_USER			16                                   //*踢出用户		TODO 让玩家起立，返回系统消息，踢出用户
 
 //创建|加入 房间
-#define SUB_CG_USER_CREATE_ROOM			17									//#创建房间
-#define CMD_GC_USER_CREATE_ROOM_SUCCESS	117									//#创建成功		TODO 创建房卡房间和牌友圈房间的返回，其实创建房间的成功返回应该都用该消息
+#define SUB_CG_USER_CREATE_ROOM			17									//申请创建房间
+#define CMD_GC_USER_GET_ROOM_RULE		117									//房间规则选择, 申请创建房间成功后发送
+#define SUB_CG_USER_SET_ROOM_RULE		217									//房间规则设置 返回
+#define CMD_GC_USER_ENTER_SUBGAME_ROOM	317									//进入子游戏
 
 #define SUB_CG_USER_JOIN_FK_ROOM		18									//#加入桌子 需要密码
 #define CMD_GC_USER_JOIN_ROOM_SUCCESS	118									//#加入成功		加入房卡/金币/牌友圈房间的返回

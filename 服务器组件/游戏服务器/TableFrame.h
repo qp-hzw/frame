@@ -155,6 +155,8 @@ public:
 		m_player_list.resize(m_wChairCount, NULL);
 		m_user_list.resize(m_wChairCount, NULL);
 		SetTableMode(pRule->GameMode);
+
+		InitTableFrameSink();
 	};
 
 	//读取子游戏特有房间规则
@@ -260,7 +262,7 @@ public:
 	//玩家加入
 	int PlayerEnterTable(CPlayer* pPlayer);
 	//玩家坐下		只有创建和加入房间时，用户坐下时需要校验GPS，故加此字段
-	int PlayerSitTable(WORD wChairID, CPlayer * pIServerUserItem, LPCTSTR lpszPassword=NULL, bool bCheckUserGPS = false);
+	int PlayerSitTable(CPlayer * pIServerUserItem, WORD wChairID = INVALID_CHAIR, bool bCheckUserGPS = false);
 	//玩家起立
 	bool PlayerUpTable(CPlayer * pIServerUserItem);
 	//玩家离开
@@ -281,11 +283,6 @@ private:
 
 #pragma endregion
 
-	//功能接口
-public:
-	//发送场景
-	virtual bool SendGameScene(IServerUserItem * pIServerUserItem, VOID * pData, WORD wDataSize);
-
 #pragma region 桌子动作
 public:
 	//获取空位
@@ -297,7 +294,6 @@ public:
 	WORD GetPlayerChair(CPlayer* pPlayer);
 
 #pragma endregion
-
 
 #pragma region 解散房间
 public:

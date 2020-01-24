@@ -32,6 +32,11 @@ public:
 public:
 	//桌子总数
 	static DWORD TableCount();
+
+	//辅助函数
+private:
+	//生产房间号
+	static DWORD GenerateTablePassword();
 };
 
 #endif
