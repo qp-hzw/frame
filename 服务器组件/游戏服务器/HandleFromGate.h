@@ -47,23 +47,6 @@ private:
 	#pragma region  用户命令 MDM_USER
 	// 用户命令 MDM_USER
 protected:
-	//加入桌子 --需要密码
-	//需要数据库校验 1. 工会的房卡数 是否足够
-	//				 2. 非工会成员不能进入工会桌子
-	static bool On_SUB_User_JoinFkRoom(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//加入桌子 -- 不需要密码
-	//需要数据库判断并返回可加入的桌子号
-	static bool On_SUB_CG_USER_JOIN_TABLE_NO_PASS(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	
-	//加入桌子 -- 加入大厅金币场桌子
-	//需要数据库判断并返回可加入的桌子号, 如果没有则会创建一个新的桌子
-	static bool On_SUB_CG_USER_JOIN_GOLD_HALL_ROOM(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//加入房间 -- 加入大厅金币场桌子 返回
-	static bool On_CMD_GC_USER_JOIN_TABLE_HALL_GOLD( DWORD dwContextID, VOID * pData, WORD wDataSize );
-	
-
-	//断线重连
-	static bool On_SUB_User_ReconnectRoom(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//解散房间
 	static bool On_SUB_User_DismissRoom(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//加入牌友圈房间返回
@@ -86,9 +69,6 @@ protected:
 
 	//请求更换位置
 	static bool OnTCPNetworkSubUserChairReq(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-
-	//请求房间列表
-	static bool OnTCPNetworkSubGetTableList(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 
 	//发起申请解散房间
 	static bool On_SUB_RG_USER_ASK_DISMISS(VOID * pData, WORD wDataSize, DWORD dwSocketID);
@@ -137,6 +117,20 @@ protected:
 	#pragma region  创建房间 && 创建桌子 && 加入桌子
     //流程函数
 public: 
+	//加入桌子 --需要密码
+	//需要数据库校验 1. 工会的房卡数 是否足够
+	//				 2. 非工会成员不能进入工会桌子
+	static bool On_SUB_User_JoinFkRoom(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+	//加入桌子 -- 不需要密码
+	//需要数据库判断并返回可加入的桌子号
+	static bool On_SUB_CG_USER_JOIN_TABLE_NO_PASS(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+	
+	//加入桌子 -- 加入大厅金币场桌子
+	//需要数据库判断并返回可加入的桌子号, 如果没有则会创建一个新的桌子
+	static bool On_SUB_CG_USER_JOIN_GOLD_HALL_ROOM(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+	//加入房间 -- 加入大厅金币场桌子 返回
+	static bool On_CMD_GC_USER_JOIN_TABLE_HALL_GOLD( DWORD dwContextID, VOID * pData, WORD wDataSize );
+
 	//申请创建房间
 	static bool On_SUB_CG_USER_CREATE_ROOM(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//设置房间规则
@@ -159,9 +153,6 @@ protected:
 	static bool CheckCreateRoom(CPlayer * player, BYTE gameMode);
 	//检查 创建桌子的门票
 	static bool CheckCreateTableTicket(tagTableRule * pCfg, CPlayer *pCPlayer);
-
-	//为他人创建桌子
-	static void HandleCreateTableForOthers(CTableFrame *pCurTableFrame, CPlayer *pCPlayer, tagTableRule *pCfg);
 
 	//牌友圈房间信息需要写入数据库
 	static bool WriteClubRoomToDB(STR_DBR_CLUB_ROOM_INFO* pTableInfo);

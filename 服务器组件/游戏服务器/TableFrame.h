@@ -239,6 +239,9 @@ public:
 	//发送数据
 	virtual bool SendTableData(WORD wChairID, WORD wSubCmdID, VOID * pData, WORD wDataSize, WORD wMainCmdID = MDM_GF_GAME);
 
+	//发送场景
+	virtual bool SendGameScene(IServerUserItem * pIServerUserItem, VOID * pData, WORD wDataSize);
+
 	//系统消息
 public:
 	//发送消息

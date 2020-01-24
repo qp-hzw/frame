@@ -1,5 +1,5 @@
-#ifndef GAME_SERVICE_HEAD_HEAD_FILE
-#define GAME_SERVICE_HEAD_HEAD_FILE
+#ifndef TABLE_FRAME_BASE_H
+#define TABLE_FRAME_BASE_H
 
 #define GAME_CONCLUDE_CONTINUE  0xFF //大局结束并续费
 #define GAME_CONCLUDE_NORMAL    0xFE //正常结束
@@ -20,26 +20,17 @@ struct tagTableRule
 {
 	/********************************* 大厅使用 ************************************/
 	BYTE	GameMode;				//游戏模式 0房卡约局; 1比赛模式; 2金币模式; 3金币约局; 4牌友圈
-	BYTE	RobBankType;			//坐庄模式 0-抢庄（抢注高者坐庄） 1-轮庄（轮流坐庄）2-固定（固定房主坐庄）  3-赢庄（赢的人坐庄） 4-摇骰子定庄（随机庄家）
+
 	BYTE	GameCount;				//游戏局数 0-无限局
-	BYTE	GameCountType;			//大局类型 是第一大局, 第二大局, 还是第三大局
 	BYTE	PlayerCount;			//玩家数量 0-任意人数可开
+
 	BYTE	cbPayType;				//支付方式，0房主支付、1AA制
-	DWORD	lSinglePayCost;			//金币场 入场门票  TODONOW 该字段仅在扣除门票的时候有用，其他的调用均是以前的, 可以删除
-	WORD	CellScore;				//*底分	  默认为1 -- 子游戏使用的是该字段
-	DWORD	MaxFan;					//*封顶番数 0-不封顶 
-	DWORD	LeaveScore;				//*离场分数 0-无限制         -- 已舍弃
-	DWORD	JoinScore;				//*入场设定 0-无限制         -- 已舍弃
+
 	BYTE	bRefuseSameIP;			//允许同IP    0-不允许 1-允许
 	BYTE	bDistanceIn300;			//允许300米	  0-不许云 1-允许
-	double	dLongitude;				//经度	
-	double	dLatitude;				//纬度	
-	BYTE	bCreateToOther;			//是否为他人开房 0-否 1-是
-	DWORD	FangZhu;				//*房主
 	BYTE	bAllowStranger;			//允许陌生人加入
 
 	/********************************** 牌友圈相关 ************************************/
-	BYTE	byClubCreate;			//0大厅创建 1 牌友圈普通创建  2牌友圈私密创建
 	DWORD	dwUserID;				//群主ID
     DWORD	dwClubID;				//牌友群/俱乐部编号
 	DWORD	dwKindID;			    //游戏ID
@@ -58,35 +49,19 @@ struct tagTableRule
 	//如果是在大厅的房卡金币场,这里就是系统设置的; 
 	//如果是在大厅的金币场, 这里就是系统设置的
     DWORD	dwLevelGold;			//进场的最小身价 
-
-	/************************************ 备用字段 ************************************/
-	BYTE byRetain1;
-    BYTE byRetain2;
-    BYTE byRetain3;
-	BYTE byRetain4;
-
-	DWORD szRetain1;
-    DWORD szRetain2;
-	DWORD szRetain3;
-    DWORD szRetain4;
-	DWORD szRetain5;
-    DWORD szRetain6;
-	DWORD szRetain7;
-    DWORD szRetain8;
-    DWORD szRetain9;
-    DWORD szRetain10;
 };
 
 /////////////////////////////////////////////////////////////////////
 //测试通过用  
 
 //用户接口
-interface IServerUserItem
+class IServerUserItem
 {
 public:
 //	//椅子号码
 	virtual WORD GetChairID() = NULL;
 };
+
 //玩家基础信息 DB use player base info
 struct BASE_PLAYERINFO
 {
@@ -120,7 +95,7 @@ struct BASE_PLAYERINFO
 /////////////////////////////////////////////////////////////////////
 
 //桌子接口
-interface ITableFrame : public IUnknownEx
+class ITableFrame : public IUnknownEx
 {
 public:
 	//游戏模式 0-房卡模式; 1-竞技模式;  2-金币模式;  3-房卡金币;
@@ -133,16 +108,16 @@ public:
 	//配置参数
 public:
 	//读取通用房间规则
-	virtual VOID* GetCustomRule() = NULL;
+	virtual void* GetCustomRule() = NULL;
 	//读取子游戏特有房间规则
-	virtual VOID * GetSubGameRule() = NULL;
+	virtual void * GetSubGameRule() = NULL;
 
 	//状态接口
 public:
 	//获取状态
 	virtual BYTE GetGameStatus() = NULL;
 	//设置状态
-	virtual VOID SetGameStatus(BYTE bGameStatus) = NULL;
+	virtual void SetGameStatus(BYTE bGameStatus) = NULL;
 
 	//控制接口
 public:
@@ -170,12 +145,14 @@ public:
 	//网络接口
 public:
 	//发送数据
-	virtual bool SendTableData(WORD wChairID, WORD wSubCmdID, VOID * pData, WORD wDataSize, WORD wMainCmd =200) = NULL;
+	virtual bool SendTableData(WORD wChairID, WORD wSubCmdID, void * pData, WORD wDataSize, WORD wMainCmd =200) = NULL;
+	//发送场景
+	virtual bool SendGameScene(IServerUserItem * pIServerUserItem, void * pData, WORD wDataSize) = NULL;
 };
 
 //////////////////////////////////////////////////////////////////////////////////
 //回调接口
-interface ITableFrameSink : public IUnknownEx
+class ITableFrameSink : public IUnknownEx
 {
 	//管理接口
 public:
@@ -187,7 +164,7 @@ public:
 	//管理接口
 public:
 	//复位接口
-	virtual VOID RepositionSink() = NULL;
+	virtual void RepositionSink() = NULL;
 	//配置接口
 	virtual bool Initialization(ITableFrame *pTableFrame) = NULL;
 
@@ -213,7 +190,7 @@ public:
 	//网络接口
 public:
 	//游戏消息
-	virtual bool OnGameMessage(WORD wSubCmdID, VOID * pData, WORD wDataSize, WORD wChairID) = NULL;
+	virtual bool OnGameMessage(WORD wSubCmdID, void * pData, WORD wDataSize, WORD wChairID) = NULL;
 };
 
 #endif

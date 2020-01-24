@@ -146,18 +146,9 @@ bool CTableFrame::StartGame()
 	/* 通知数据库, 桌子开始 */      
 	tagTableRule *pTableCfg = (tagTableRule*)GetCustomRule();
 	BYTE byClubOrHalGold = 0; //1表示俱乐部房间(房卡或者房卡金币模式);  2表示大厅的金币模式;  其他字段无须处理
-	BYTE byClubCreate = pTableCfg->byClubCreate;
 	BYTE GameMode = pTableCfg->GameMode;
 
-	if(( 1 == byClubCreate) || (2 == byClubCreate))
-	{
-		byClubOrHalGold = 1;
-	}
-	else if((0 == byClubCreate) && (2 == GameMode))
-	{
-		byClubOrHalGold = 2;
-	}
-	
+
 	//TODONOW 需要增加这个功能
 	//g_AttemperEngineSink->ClubTableStart(GetTableID(), byClubOrHalGold);
 
@@ -328,15 +319,16 @@ bool CTableFrame::XJGameTickets(BYTE byTableMode, BYTE byRound)
 
 	//俱乐部 房卡场| 房卡金币场  第一小局时候
 	if((byTableMode == TABLE_MODE_FK || byTableMode == TABLE_MODE_FK_GOLD)
-		&& (1 == byRound)
-		&&(pCfg->byClubCreate != 0))
+		&& (1 == byRound))
 	{
 		BYTE byPlayerNum = pCfg->PlayerCount;
+		/*
 		BYTE byGameCountType = pCfg->GameCountType;
 		SCORE cost = byPlayerNum * byGameCountType;
 
 		//扣除房卡
 		pOwnerUserItem->ModifyUserTreasure(GetTableID(), byTableMode, 0, -cost, 0);//创建房间时候的 byRount = 0
+		*/
 		return true;
 	}
 
@@ -346,12 +338,14 @@ bool CTableFrame::XJGameTickets(BYTE byTableMode, BYTE byRound)
 	{
 		if( pCfg->cbPayType == 0 )							//房主支付
 		{
+			/*
 			BYTE byPlayerNum = pCfg->PlayerCount;
 			BYTE byGameCountType = pCfg->GameCountType;
 			SCORE cost = byPlayerNum * byGameCountType;
 
 			//扣除房卡
 			pOwnerUserItem->ModifyUserTreasure(GetTableID(), byTableMode, 0, -cost, 0);//创建房间时候的 byRount = 0
+			*/
 		}
 		else if(pCfg->cbPayType == 1)						//AA支付
 		{
@@ -359,6 +353,7 @@ bool CTableFrame::XJGameTickets(BYTE byTableMode, BYTE byRound)
 			for (WORD i=0; i<m_wChairCount; i++)
 			{
 				//获取用户
+				/*
 				CPlayer *pIServerUserItem = GetTableUserItem(i);
 				if (pIServerUserItem == NULL) continue;
 
@@ -367,6 +362,7 @@ bool CTableFrame::XJGameTickets(BYTE byTableMode, BYTE byRound)
 
 				//扣除房卡 
 				pIServerUserItem->ModifyUserTreasure(GetTableID(), byTableMode, 0, -cost, 0);//创建房间时候的 byRount = 0
+				*/
 			} 
 		}	
 	}
@@ -383,7 +379,7 @@ bool CTableFrame::XJGameTickets(BYTE byTableMode, BYTE byRound)
 			CPlayer *pIServerUserItem = GetTableUserItem(i);
 			if (pIServerUserItem == NULL) continue;
 
-			SCORE cost =  pCfg->lSinglePayCost;
+			SCORE cost = 0;// pCfg->lSinglePayCost;
 
 			//扣除房卡 
 			pIServerUserItem->ModifyUserTreasure(GetTableID(), byTableMode, 0, -cost, 0);//创建房间时候的 byRount = 0
@@ -876,6 +872,17 @@ bool CTableFrame::SendTableData(WORD wChairID, WORD wSubCmdID, VOID * pData, WOR
 	}
 
 	return false;
+}
+
+//发送场景
+bool CTableFrame::SendGameScene(IServerUserItem * pIServerUserItem, VOID * pData, WORD wDataSize)
+{
+	//用户效验
+	if ((pIServerUserItem==NULL)) return false;
+
+	g_GameCtrl->SendData((CPlayer* )pIServerUserItem,MDM_G_FRAME,CMD_GR_FRAME_GAME_OPTION,pData,wDataSize);
+
+	return true;
 }
 
 //发送消息
@@ -1776,7 +1783,7 @@ bool CTableFrame::OnEventApplyDismissRoom(WORD wChairID, bool bAgree)
 		//判断房间是否可以解散
 		tagTableRule* pCfg = (tagTableRule*)GetCustomRule();
 		//俱乐部模式 && 房间设置不可解散 时候才生效 金币场也不可以解散
-		if (((0 != pCfg->byClubCreate) && (1 == pCfg->bDissolve)) || (pCfg->GameMode == 2))
+		if ((1 == pCfg->bDissolve) || (pCfg->GameMode == 2))
 		{
 			STR_CMD_GR_FRMAE_ASK_DISMISS_RESULT cmdResult;
 			ZeroMemory(&cmdResult, sizeof(cmdResult));

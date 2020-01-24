@@ -82,8 +82,6 @@
 #define SUB_GR_GET_TABLELIST			22									//获取房间列表		TODO 指的是竞技场的已开房间列表
 #define SUB_GR_GET_TABLELIST_RESULT		122									//房间列表返回		
 
-#define SUB_CG_USER_RECONNECT_ROOM		23									//#断线重连
-#define CMD_GC_USER_RECONNECT_ROOM		123									//#断线重连返回
 
 //解散房间
 #define SUB_RG_USER_ASK_DISMISS			24									//发起申请解散房间

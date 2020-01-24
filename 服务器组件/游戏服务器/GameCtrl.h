@@ -5,7 +5,6 @@
 #include "Stdafx.h"
 #include "AttemperEngineSink.h"
 #include "DataBaseEngineSink.h"
-#include <map>
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -32,10 +31,6 @@ protected:
 	std::string			            m_subgame_dll_name;				    //子游戏dll名字
 	DWORD                           m_ServerID;                         //serverid
 
-	rule_arry                       m_rule_arry;						//房间规则
-	BYTE							m_frame_rule_count;					//frame房间规则 条数
-	BYTE							m_subgame_rule_count;				//子游戏房间规则 条数
-
 	//函数定义
 public:
 	//构造函数
@@ -61,12 +56,10 @@ public:
 
 	//获取ServerID
 	DWORD GetServerID(){return m_ServerID; }
+	//设置ServerID
 	void SetServerID(DWORD serverid){m_ServerID = serverid;}
 	//获取KindID
 	DWORD GetKindID(){return (m_ServerID & 0xFFFF0000) >> 16;}
-
-	//读取房间规则配置文件
-	rule_arry GetRoomRule(){return m_rule_arry;}
 
 	//辅助函数
 protected:
@@ -74,11 +67,6 @@ protected:
 	int InitializeService();
 	//启动内核
 	int StartKernelService();
-
-	//读取通用房间配置文件
-	void ReadFrameRoomRule();
-	//读取子游戏房间配置文件
-	void ReadSubGameRoomRule(int kindid);
 
 	/*********************** 消息发送 Socket::Server -> Socket::Client ***********************/
 public:
@@ -119,6 +107,7 @@ public:
 	bool KillAllTimer();
 	//获取定时器剩余时间（毫秒）
 	DWORD GetTimerLeftTickCount(DWORD dwTimerID);
+
 };
 
 extern CGameCtrl                   *g_GameCtrl;                     
