@@ -34,10 +34,6 @@ bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwSocketID, VOID * p
 		{
 			return On_CMD_GC_Logon_UserID(dwSocketID, pData, wDataSize);
 		}
-	case DBO_CG_USER_CREATE_GROUP_ROOM:	//创建牌友圈房间返回
-		{
-			return On_CMD_GC_User_CreateGroupRoom(dwSocketID, pData, wDataSize);
-		}
 	case DBO_CG_USER_JOIN_GROUP_ROOM:	//加入牌友圈房间返回
 		{
 			return On_CMD_GC_User_JoinGroupRoom(dwSocketID, pData, wDataSize);
@@ -50,11 +46,6 @@ bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwSocketID, VOID * p
 	case DBO_GR_LOAD_OFFLINE:		//加载断线重连返回
 		{
 			return On_DBO_GR_LOAD_OFFLINE(dwSocketID,pData,wDataSize);
-		}
-
-	case DBO_GR_LOTTERY_RESULT:
-		{
-			return OnDBLotteryResult(dwSocketID,pData,wDataSize);
 		}
 	case DBO_GC_CLUB_CREATE_TABLE:	//club牌友圈创建桌子
 		{
@@ -121,10 +112,6 @@ bool CHandleFromGate::OnTCPNetworkMainUser(WORD wSubCmdID, VOID *pData, WORD wDa
 		{
 			return On_SUB_CG_User_InviteUser(pData,wDataSize,dwSocketID);
 		}
-	case SUB_CG_USER_REFUSE_SIT:	//拒绝玩家坐下
-		{
-			return On_SUB_CG_User_RefuseSit(pData,wDataSize,dwSocketID);
-		}
 	case SUB_CG_USER_KICK_USER:		//踢出用户
 		{
 			return On_SUB_CG_User_KickUser(pData,wDataSize,dwSocketID);
@@ -157,25 +144,9 @@ bool CHandleFromGate::OnTCPNetworkMainUser(WORD wSubCmdID, VOID *pData, WORD wDa
 		{
 			return On_SUB_User_ReconnectRoom(pData,wDataSize,dwSocketID);
 		}
-	case SUB_CG_USER_CREATE_GROUP_ROOM:	//创建牌友圈房间
-		{
-			return On_Sub_CG_User_CreateGroupRoom(pData,wDataSize,dwSocketID);
-		}
-	case SUB_CG_USER_JOIN_GROUP_ROOM:	//加入牌友圈房间
-		{
-			return On_Sub_CG_User_JoinGroupRoom(pData,wDataSize,dwSocketID);
-		}
-	case SUB_CG_USER_JOIN_GOLD_ROOM:	//加入金币房
-		{
-			return On_SUB_User_JoinGoldRoom(pData,wDataSize,dwSocketID);
-		}
 	case SUB_GR_GET_TABLELIST:			//获得开房列表
 		{
 			return OnTCPNetworkSubGetTableList(pData,wDataSize,dwSocketID);
-		}
-	case SUB_GR_QUERY_LOTTERY:			//请求抽奖
-		{
-			return OnTcpNetworkQueryLottery(pData, wDataSize, dwSocketID);
 		}
 	case SUB_RG_USER_ASK_DISMISS:		//发起申请解散房间
 		{
@@ -628,40 +599,6 @@ bool CHandleFromGate::On_SUB_CG_User_InviteUser(VOID * pData, WORD wDataSize, DW
 	return true;
 }
 
-//拒绝玩家坐下
-bool CHandleFromGate::On_SUB_CG_User_RefuseSit(VOID * pData, WORD wDataSize, DWORD dwSocketID)
-{
-	//效验数据
-	ASSERT(wDataSize==sizeof(CMD_GR_UserRepulseSit));
-	if (wDataSize!=sizeof(CMD_GR_UserRepulseSit)) return false;
-
-	//消息处理
-	CMD_GR_UserRepulseSit * pUserRepulseSit=(CMD_GR_UserRepulseSit *)pData;
-
-	//获取用户
-	WORD wBindIndex=LOWORD(dwSocketID);
-	CPlayer * pIServerUserItem=GetBindUserItem(wBindIndex);
-	if (pIServerUserItem==NULL) return false;
-
-	//获取桌子
-	CTableFrame * pTableFrame=CTableManager::FindTableByTableID(pUserRepulseSit->wTableID);
-
-	//获取用户
-	CPlayer * pRepulseIServerUserItem = pTableFrame->GetTableUserItem(pUserRepulseSit->wChairID);
-	if (pRepulseIServerUserItem==NULL) return true;
-	if(pRepulseIServerUserItem->GetUserID() != pUserRepulseSit->dwRepulseUserID)return true;
-
-	//发送消息
-	TCHAR szDescribe[256]=TEXT("");
-	lstrcpyn(szDescribe,TEXT("此桌有玩家设置了不与您同桌游戏！"),CountArray(szDescribe));
-	g_GameCtrl->SendRoomMessage(pRepulseIServerUserItem,szDescribe,0);
-
-	//弹起玩家
-	pTableFrame->PlayerUpTable(pRepulseIServerUserItem);
-
-	return true;
-}
-
 //踢出用户
 bool CHandleFromGate::On_SUB_CG_User_KickUser(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
@@ -798,23 +735,6 @@ bool CHandleFromGate::OnTCPNetworkSubGetTableList(VOID * pData, WORD wDataSize, 
 	}
 
 	return true;
-}
-
-//抽奖请求
-bool CHandleFromGate::OnTcpNetworkQueryLottery(VOID * pData, WORD wDataSize, DWORD dwSocketID)
-{
-	//参数校验
-	ASSERT(wDataSize==sizeof(CMD_GR_QueryLottery));
-	if(wDataSize!=sizeof(CMD_GR_QueryLottery))
-		return false;
-
-	CMD_GR_QueryLottery* pGetRankReward = (CMD_GR_QueryLottery*)pData;
-
-	DBR_GR_QueryLottery QueryLottery;
-	memcpy(&QueryLottery,pGetRankReward,sizeof(DBR_GR_QueryLottery));
-
-	return g_GameCtrl->PostDataBaseRequest(DBR_GR_QUERY_LOTTERY,dwSocketID,&QueryLottery,sizeof(DBR_GR_QueryLottery));
-
 }
 
 //发起申请解散房间
@@ -1869,197 +1789,6 @@ bool CHandleFromGate::On_SUB_User_ReconnectRoom(VOID * pData, WORD wDataSize, DW
 	return true;
 }
 
-//创建牌友圈房间
-bool CHandleFromGate::On_Sub_CG_User_CreateGroupRoom(VOID *pData, WORD wDataSize, DWORD dwSocketID)
-{	
-	//用户校验
-	WORD wBindIndex = LOWORD(dwSocketID);
-	CPlayer *pIServerUserItem = GetBindUserItem(wBindIndex);	
-	if (pIServerUserItem==NULL) return true;
-
-	//数据包校验
-	if(wDataSize != sizeof(STR_SUB_CG_USER_CREATE_GROUP_ROOM))
-		return true;
-
-	//SUB数据
-	STR_SUB_CG_USER_CREATE_GROUP_ROOM *pCreateRoom = (STR_SUB_CG_USER_CREATE_GROUP_ROOM*)pData;
-
-	//校验圈主是不是已经创建过牌友圈房间，创建过且房间都未坐满人，就不能再次创建房间
-	for (WORD i=0; i<CTableManager::TableCount(); i++)
-	{
-		//获取对象
-		CTableFrame *pGroupTable = CTableManager::FindTableByIndex(i);
-		if(NULL == pGroupTable) continue;
-
-		//是牌友圈房间，并且有一个桌子未开始游戏，则说明还有空桌子加入，不需要再创建房间
-		if ( pGroupTable->GetGroupID() == pCreateRoom->dwGroupID)
-		{
-			//返回创建成功
-			STR_CMD_GC_USER_CREATE_GROUP_ROOM CMDCreate;
-			ZeroMemory(&CMDCreate, sizeof(STR_CMD_GC_USER_CREATE_GROUP_ROOM));
-			CMDCreate.dwResultCode = DB_SUCCESS;
-			lstrcpyn(CMDCreate.szDescribeString, TEXT("牌友圈还有空房间"), sizeof(CMDCreate.szDescribeString));
-
-			//发送数据
-			g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_CREATE_GROUP_ROOM, &CMDCreate, sizeof(STR_CMD_GC_USER_CREATE_GROUP_ROOM));	
-
-			return true;
-		}
-	}
-
-	//构造DBR数据
-	STR_DBR_CG_USER_CREATE_GROUP_ROOM CreateGroupRoom;
-	ZeroMemory(&CreateGroupRoom, sizeof(STR_DBR_CG_USER_CREATE_GROUP_ROOM));
-
-	//赋值
-	memcpy_s(&CreateGroupRoom, sizeof(STR_DBR_CG_USER_CREATE_GROUP_ROOM), pCreateRoom, sizeof(STR_DBR_CG_USER_CREATE_GROUP_ROOM));
-
-	//投递请求
-	g_GameCtrl->PostDataBaseRequest(DBR_CG_USER_CREATE_GROUP_ROOM, dwSocketID, &CreateGroupRoom, sizeof(STR_DBR_CG_USER_CREATE_GROUP_ROOM));
-	
-	return true;
-}
-
-//创建牌友圈房间返回
-bool CHandleFromGate::On_CMD_GC_User_CreateGroupRoom(DWORD dwSocketID, VOID * pData, WORD wDataSize)
-{
-	//判断在线
-
-	//数据校验
-	ASSERT(wDataSize == sizeof(STR_DBO_CG_USER_CREATE_GROUP_ROOM));
-	if(wDataSize != sizeof(STR_DBO_CG_USER_CREATE_GROUP_ROOM))
-		return false;
-
-	//获取用户
-	WORD wBindIndex = LOWORD(dwSocketID);
-	CPlayer *pIServerUserItem = GetBindUserItem(wBindIndex);
-
-	//定义
-	STR_DBO_CG_USER_CREATE_GROUP_ROOM *pDBOGroup = (STR_DBO_CG_USER_CREATE_GROUP_ROOM *)pData;
-
-	//构造返回数据
-	STR_CMD_GC_USER_CREATE_GROUP_ROOM CMDCreate;
-	ZeroMemory(&CMDCreate, sizeof(STR_CMD_GC_USER_CREATE_GROUP_ROOM));
-
-	//赋值
-	CMDCreate.dwResultCode = pDBOGroup->dwResultCode;
-	lstrcpyn(CMDCreate.szDescribeString, pDBOGroup->szDescribeString, CountArray(CMDCreate.szDescribeString));
-	
-	//执行失败
-	if (DB_SUCCESS != pDBOGroup->dwResultCode )
-	{
-		g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_CREATE_GROUP_ROOM, &CMDCreate, sizeof(STR_CMD_GC_USER_CREATE_GROUP_ROOM));	
-		return true;
-	}
-
-	//房间规则
-	tagTableRule *pCfg = (tagTableRule* )pDBOGroup->rule;
-
-	//校验用户房卡
-	if ( pIServerUserItem->GetUserRoomCard() < pCfg->lSinglePayCost)
-	{
-		CMDCreate.dwResultCode = 1;
-		lstrcpyn(CMDCreate.szDescribeString, TEXT("房卡不足，请充值"), CountArray(CMDCreate.szDescribeString));
-
-		g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_CREATE_GROUP_ROOM, &CMDCreate, sizeof(STR_CMD_GC_USER_CREATE_GROUP_ROOM));	
-		return true;
-	}
-
-	//用户最多能创建的牌友圈房间数
-	WORD wCreateTableNum = static_cast<WORD> (pIServerUserItem->GetUserRoomCard() / pCfg->lSinglePayCost);
-	
-	//寻找空闲桌子，为牌友圈分配固定的桌子数
-	srand(static_cast<unsigned int >(time(NULL)));
-	int nTableNum = 0;
-	for (WORD i=0; i<CTableManager::TableCount(); i++)
-	{
-		//获取对象
-		CTableFrame *pGroupTable = CTableManager::FindTableByIndex(i);
-		if(NULL == pGroupTable) continue;
-
-		//桌子无人坐下，并且不是替别人开的房间
-		if ( (pGroupTable->GetSitUserCount()==0) && 
-			 (pGroupTable->GetCreateTableUser() == 0))
-		{
-			//牌友圈桌子数限制
-			if ( (nTableNum >= CTableManager::TableCount()) || 
-				 (NUM_MAX_GOURP_CREATE_ROOM == nTableNum) ||
-				 nTableNum >= wCreateTableNum)
-			{
-				break;
-			}
-
-			//设置桌子属性	
-			DWORD dwPassword = GenerateTablePassword();		
-			pGroupTable->SetTableID(dwPassword);
-			pGroupTable->SetGroupID(pDBOGroup->dwGroupID);			
-			pGroupTable->SetCommonRule(pCfg);
-			pGroupTable->SetCreateTableUser(pIServerUserItem->GetUserID());		//设置创建玩家ID
-
-			nTableNum++;
-
-			//TODO 需要添加开房信息
-		}
-	}
-
-	//发送创建成功消息
-	_sntprintf_s(CMDCreate.szDescribeString, CountArray(CMDCreate.szDescribeString), TEXT("您已经创建[%d]个牌友圈房间，扣除房卡[%ld]"), 
-		      nTableNum, nTableNum*pCfg->lSinglePayCost);
-	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_CREATE_GROUP_ROOM, &CMDCreate, sizeof(STR_CMD_GC_USER_CREATE_GROUP_ROOM));	
-
-	//扣除创建用户房卡
-	SCORE lDeductRoomCard = (-nTableNum)*((int)pCfg->lSinglePayCost);
-	
-	//
-	//OnEventUserOpenRoomCard(pIServerUserItem, pIServerUserItem->GetUserID(), lDeductRoomCard);
-
-	return true;
-}
-
-//加入牌友圈房间
-bool CHandleFromGate::On_Sub_CG_User_JoinGroupRoom(VOID * pData, WORD wDataSize, DWORD dwSocketID)
-{
-	//效验参数
-	ASSERT(wDataSize == sizeof(STR_SUB_CG_USER_JOIN_GROUP_ROOM));
-	if (wDataSize != sizeof(STR_SUB_CG_USER_JOIN_GROUP_ROOM)) return true;
-
-	//处理消息
-	STR_SUB_CG_USER_JOIN_GROUP_ROOM *pJoinGroupRoom = (STR_SUB_CG_USER_JOIN_GROUP_ROOM *)pData;
-
-	//绑定信息
-	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerBySocketID(dwSocketID);
-
-	//校验用户
-	if (NULL == pIServerUserItem)
-		return true;
-
-	//校验用户是不是在游戏中
-	WORD wOldTableID = pIServerUserItem->GetTableID();
-	WORD wOldChairID = pIServerUserItem->GetChairID();
-	BYTE cbUserStatus = pIServerUserItem->GetUserInfo()->cbUserStatus;
-
-	//用户在游戏中
-	if(wOldTableID != INVALID_TABLE || 
-		wOldChairID != INVALID_CHAIR ||
-		cbUserStatus == US_PLAYING )
-	{
-		SendRequestFailure(pIServerUserItem, TEXT("您已经在游戏中,不能进入其他房间!"), REQUEST_FAILURE_NORMAL);
-		return true;
-	}
-
-	//构造DBR数据
-	STR_DBR_CG_USER_JOIN_GROUP_ROOM JoinRoom;
-	ZeroMemory(&JoinRoom, sizeof(STR_DBR_CG_USER_JOIN_GROUP_ROOM));
-
-	//赋值
-	memcpy_s(&JoinRoom, sizeof(STR_DBR_CG_USER_JOIN_GROUP_ROOM), pJoinGroupRoom, sizeof(STR_DBR_CG_USER_JOIN_GROUP_ROOM));
-
-	//投递请求
-	g_GameCtrl->PostDataBaseRequest(DBR_CG_USER_JOIN_GROUP_ROOM, dwSocketID, &JoinRoom, sizeof(STR_DBR_CG_USER_JOIN_GROUP_ROOM));
-
-	return true;
-}
-
 //加入牌友圈房间返回
 bool CHandleFromGate::On_CMD_GC_User_JoinGroupRoom(DWORD dwSocketID, VOID * pData, WORD wDataSize)
 {
@@ -2125,111 +1854,6 @@ bool CHandleFromGate::On_CMD_GC_User_JoinGroupRoom(DWORD dwSocketID, VOID * pDat
 	{
 		SendRequestFailure(pIServerUserItem, TEXT("牌友圈房间已满或不存在已开房间，请联系管理"), REQUEST_FAILURE_PASSWORD);
 	}
-
-	return true;
-}
-
-//加入金币房间
-bool CHandleFromGate::On_SUB_User_JoinGoldRoom(VOID * pData, WORD wDataSize, DWORD dwSocketID)
-{
-	//用户效验
-	WORD wBindIndex = LOWORD(dwSocketID);
-	CPlayer *pIServerUserItem = GetBindUserItem(wBindIndex);		
-	if (NULL == pIServerUserItem) return true;
-
-	//数据包校验
-	if ( wDataSize != sizeof(CMD_GR_Create_Gold_Room) )
-		return false;
-
-	//数据定义
-	CMD_GR_Create_Gold_Room *pGoldRoom = (CMD_GR_Create_Gold_Room*)pData;
-
-	//校验用户桌子和椅子
-	if (pIServerUserItem->GetChairID()!=INVALID_CHAIR) 
-	{
-		SendRequestFailure(pIServerUserItem,TEXT("正在游戏中,无法加入！"),REQUEST_FAILURE_NORMAL);
-		return true;
-	}
-	if(pIServerUserItem->GetTableID()!=INVALID_TABLE)
-	{
-		SendRequestFailure(pIServerUserItem,TEXT("正在房间中,无法加入！"),REQUEST_FAILURE_NORMAL);
-		return true;
-	}
-	//校验用户金币	Modified by lizhihu 只和游戏底分校验
-	if( pIServerUserItem->GetUserGold() < pGoldRoom->dwCellScore )
-	{
-		SendRequestFailure(pIServerUserItem,TEXT("金币不足,无法加入！"),REQUEST_FAILURE_NORMAL);
-		return true;
-	}
-
-	//寻找金币房空椅子
-	WORD wChairID;
-	CTableFrame *pTableFrame = GetGlodRoomEmptyChair(wChairID, 2);
-
-	//找到金币房空椅子
-	if ( (INVALID_CHAIR != wChairID) && (NULL != pTableFrame) )
-	{
-		//已有空椅子，用户坐下
-		if(pTableFrame->PlayerSitTable(wChairID, pIServerUserItem, 0, true) == 0)
-		{
-			//发送数据
-			g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_JOIN_ROOM_SUCCESS, NULL, 0);
-			return true;
-		}	
-	}
-
-	//没有金币场空位置，重新创建一个金币房间
-	CTableFrame *pCurrTableFrame = GetNextEmptyTable();
-
-	//桌子校验
-	if(pCurrTableFrame == NULL)
-	{
-		SendRequestFailure(pIServerUserItem, TEXT("服务器已满,请稍后重试！"), REQUEST_FAILURE_NORMAL);
-		return true;
-	}
-
-	//配置金币房规则	写在这里没有通用性，最好的是在客户端配置，规则由每个客户端的子游戏决定，传过来
-	tagTableRule cfg;
-	ZeroMemory(&cfg, sizeof(tagTableRule));
-
-	cfg.GameMode = TABLE_MODE_GOLD;
-	cfg.GameCount = 0;
-	cfg.PlayerCount = 4;
-	cfg.RobBankType = 3;
-	cfg.CellScore = pGoldRoom->dwCellScore;
-	cfg.JoinScore = 500;
-	cfg.LeaveScore = 500;
-	cfg.MaxFan = 4;
-	/* 注释掉子游戏特有数据
-	cfg.ZhangMao = 1;					//长毛
-	cfg.XuanFengGang = 1;				//旋风杠
-	cfg.QiXiaoDui = 1;					//七小对
-	cfg.QingYiSe = 1;					//清一色
-	cfg.KaiHuaGang = 1;					//杠开
-	*/
-
-	//pCurrTableFrame->SetTableOwner(pIServerUserItem->GetUserID());
-	pCurrTableFrame->SetCommonRule(&cfg);
-
-	//寻找空椅子
-	wChairID = pCurrTableFrame->GetNullChairID();
-	if (wChairID != INVALID_CHAIR)
-	{
-		//用户坐下
-		if(!pCurrTableFrame->PlayerSitTable(wChairID, pIServerUserItem, 0, true) != 0)
-		{
-			SendRequestFailure(pIServerUserItem,TEXT("服务器已满,请稍后重试!"),REQUEST_FAILURE_NORMAL);
-			return true;
-		}		
-	}
-	else
-	{
-		SendRequestFailure(pIServerUserItem,TEXT("您已经在游戏中,无法加入!"),REQUEST_FAILURE_NORMAL);
-		return true;
-	}
-
-	//返回加入成功
-	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_JOIN_ROOM_SUCCESS, NULL ,0);
 
 	return true;
 }
@@ -2548,34 +2172,6 @@ void CHandleFromGate::LeaveTable(DWORD dwTableID, DWORD dwUserID)
 
 	//投递请求
 	g_GameCtrl->PostDataBaseRequest(DBR_GR_DELETE_TABLEUSER,0,&DeleteTableUser,sizeof(DBR_GP_DeleteTableUser));
-}
-
-//抽奖结果
-bool CHandleFromGate::OnDBLotteryResult( DWORD dwSocketID, VOID * pData, WORD wDataSize )
-{
-	//参数校验
-	ASSERT(wDataSize==sizeof(DBO_GR_LotteryResult));
-	if(wDataSize!=sizeof(DBO_GR_LotteryResult))
-		return false;
-
-	DBO_GR_LotteryResult *pLotteryResult = (DBO_GR_LotteryResult*)pData;
-
-	CMD_GR_LotteryResult LotteryResult;
-	ZeroMemory(&LotteryResult,sizeof(CMD_GR_LotteryResult));
-
-	LotteryResult.byIndex = pLotteryResult->byIndex;
-	LotteryResult.byType = pLotteryResult->byType;
-	LotteryResult.dwRewardCount = pLotteryResult->dwRewardCount;
-	lstrcpyn(LotteryResult.szDescribe,pLotteryResult->szDescribe,CountArray(LotteryResult.szDescribe));
-	lstrcpyn(LotteryResult.szPacketID,pLotteryResult->szPacketID,CountArray(LotteryResult.szPacketID));
-	//memcpy(&LotteryResult,pLotteryResult,sizeof(CMD_GP_LotteryResult));
-
-	wprintf(TEXT("pLottery:%d,%d,%d,%s,%s\n"),pLotteryResult->byType,pLotteryResult->byIndex,pLotteryResult->dwRewardCount,pLotteryResult->szPacketID,pLotteryResult->szDescribe);
-	wprintf(TEXT("Lottery:%d,%d,%d,%s,%s\n"),LotteryResult.byType,LotteryResult.byIndex,LotteryResult.dwRewardCount,LotteryResult.szPacketID,LotteryResult.szDescribe);
-
-	g_GameCtrl->SendData(dwSocketID,MDM_G_FRAME,SUB_GR_LOTTERY_RESULT,&LotteryResult,sizeof(CMD_GR_LotteryResult));
-
-	return true;
 }
 
 //Club牌友圈创建桌子

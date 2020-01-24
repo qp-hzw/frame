@@ -69,11 +69,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 			bSucceed = On_DBR_Logon_UserID(dwContextID,pData,wDataSize,dwUserID);
 		}
 		break;
-	case DBR_CG_USER_CREATE_GROUP_ROOM:	//创建牌友圈房间
-		{
-			bSucceed = On_DBR_User_CreateGroupRoom(dwContextID,pData,wDataSize,dwUserID);
-		}
-		break;
 	case DBR_CG_USER_JOIN_GROUP_ROOM:	//加入牌友圈房间
 		{
 			bSucceed = On_DBR_User_JoinGroupRoom(dwContextID,pData,wDataSize,dwUserID);
@@ -199,11 +194,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 	case DBR_GR_DELETE_TABLEUSER://删除桌用户
 		{
 			bSucceed = OnRequestDeleteUserToTable(dwContextID,pData,wDataSize);
-		}
-		break;
-	case DBR_GR_QUERY_LOTTERY:
-		{
-			bSucceed = OnQueryLottery(dwContextID,pData,wDataSize);
 		}
 		break;
 	case DBR_SC_TABLE_UPDATE_TASK_STATUS:		//更新游戏任务状态
@@ -364,70 +354,6 @@ bool CDataBaseEngineSink::On_DBO_Logon_UserID(DWORD dwContextID, const double &d
 	//发送数据
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_CG_LOGON_USERID, dwContextID, &LogonUserID, sizeof(STR_DBO_CG_LOGON_USERID));
 	return true;
-}
-
-//创建牌友圈房间
-bool CDataBaseEngineSink::On_DBR_User_CreateGroupRoom(DWORD dwContextID, VOID *pData, WORD wDataSize, DWORD &dwUserID)
-{
-	//数据
-	STR_DBR_CG_USER_CREATE_GROUP_ROOM *pDBRCreateGoupRoom = (STR_DBR_CG_USER_CREATE_GROUP_ROOM *)pData;
-	dwUserID = pDBRCreateGoupRoom->dwUserID;
-
-	//效验参数
-	ASSERT(wDataSize == sizeof(STR_DBR_CG_USER_CREATE_GROUP_ROOM));
-	if (wDataSize != sizeof(STR_DBR_CG_USER_CREATE_GROUP_ROOM)) return false;
-
-	tagTableRule *pCfg = (tagTableRule* )pDBRCreateGoupRoom->rule;
-	if (NULL == pCfg)
-		return false;
-
-	//构造输入参数
-	m_TreasureDB->ResetParameter();
-	m_TreasureDB->AddParameter(TEXT("@dwUserID"), pDBRCreateGoupRoom->dwUserID);
-	m_TreasureDB->AddParameter(TEXT("@dwGroupID"), pDBRCreateGoupRoom->dwGroupID);
-	m_TreasureDB->AddParameter(TEXT("@RoomPayCost"), pCfg->lSinglePayCost);
-
-	//输出参数
-	TCHAR szDescribeString[128]=TEXT("");
-	m_TreasureDB->AddParameterOutput(TEXT("@strErrorDescribe"), szDescribeString, sizeof(szDescribeString),adParamOutput);
-
-	//执行查询
-	LONG lResultCode = m_TreasureDB->ExecuteProcess(TEXT("GSP_CG_User_CreateGroupRoom"),true);
-
-	//结果处理
-	CDBVarValue DBVarValue;
-	m_TreasureDB->GetParameter(TEXT("@strErrorDescribe"), DBVarValue);
-
-	On_DBO_User_CreateGroupRoom(dwContextID, pDBRCreateGoupRoom->rule, lResultCode, CW2CT(DBVarValue.bstrVal));
-
-
-	return true;
-}
-
-//创建牌友圈房间返回
-VOID CDataBaseEngineSink::On_DBO_User_CreateGroupRoom(DWORD dwContextID, BYTE RULE[LEN_PRIVATE_TABLE_RULE], DWORD dwErrorCode, LPCTSTR pszErrorString)
-{
-	//构造数据
-	STR_DBO_CG_USER_CREATE_GROUP_ROOM CreateGroupRoom;
-	ZeroMemory(&CreateGroupRoom, sizeof(STR_DBO_CG_USER_CREATE_GROUP_ROOM));
-
-	//描述消息
-	CreateGroupRoom.dwResultCode = dwErrorCode;
-	lstrcpyn(CreateGroupRoom.szDescribeString, pszErrorString, sizeof(STR_DBO_CG_USER_CREATE_GROUP_ROOM) );
-
-	//执行成功
-	if(dwErrorCode == DB_SUCCESS)
-	{
-		//属性资料
-		CreateGroupRoom.dwUserID = m_TreasureDB->GetValue_DWORD(TEXT("UserID"));
-		CreateGroupRoom.dwGroupID = m_TreasureDB->GetValue_DWORD(TEXT("GroupID"));
-
-		//规则
-		memcpy_s(CreateGroupRoom.rule, sizeof(CreateGroupRoom.rule), RULE, sizeof(CreateGroupRoom.rule));
-	}
-
-	//发送数据
-	g_AttemperEngineSink->OnEventDataBaseResult(DBO_CG_USER_CREATE_GROUP_ROOM, dwContextID, &CreateGroupRoom, sizeof(STR_DBO_CG_USER_CREATE_GROUP_ROOM));
 }
 
 //加入牌友圈房间
@@ -1582,88 +1508,6 @@ bool CDataBaseEngineSink::OnUpdateTableInfo(DWORD dwTableID)
 //更新已开房信息
 bool CDataBaseEngineSink::OnUpdateEndTableInfo(DWORD dwTableID)
 {
-	return true;
-}
-
-
-
-//请求抽奖和抢红包
-bool CDataBaseEngineSink::OnQueryLottery(DWORD dwContextID, void * pData, WORD wDataSize)
-{
-	if (sizeof(DBR_GR_QueryLottery) < wDataSize)
-	{
-		return false;
-	}
-
-	DBR_GR_QueryLottery* pDbReq = (DBR_GR_QueryLottery*)pData;
-	//BYTE type = pDbReq->byType;
-
-	//获取一个1-100的随机数
-	srand((unsigned int)time(NULL)) ;
-	int index = rand() % 100 + 1;
-
-
-	m_TreasureDB->ResetParameter();
-	m_TreasureDB->AddParameter(TEXT("@UserID"), pDbReq->dwUserID);
-	m_TreasureDB->AddParameter(TEXT("@Type"), pDbReq->byType);
-	m_TreasureDB->AddParameter(TEXT("@Index"), index);
-	//输出变量
-	WCHAR szDescribe[128] = L"";
-	m_TreasureDB->AddParameterOutput(TEXT("@strErrorDescribe"),szDescribe,sizeof(szDescribe),adParamOutput);
-
-	//执行查询,执行抽奖
-	LONG lResultCode = m_TreasureDB->ExecuteProcess(TEXT("GSP_GP_ImplementLottery"), true);
-	//结果处理
-	CDBVarValue DBVarValue;
-	m_TreasureDB->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
-
-	if(lResultCode == DB_SUCCESS)
-	{
-		DBO_GR_LotteryResult LotteryResult;
-		ZeroMemory(&LotteryResult,sizeof(DBO_GR_LotteryResult));
-
-		LotteryResult.byIndex = -1;
-		LotteryResult.byType = m_TreasureDB->GetValue_INT(TEXT("RewardType"));
-		LotteryResult.dwRewardCount = m_TreasureDB->GetValue_DWORD(TEXT("RewardCount"));
-		m_TreasureDB->GetValue_String(TEXT("PacketID"),LotteryResult.szPacketID,CountArray(LotteryResult.szPacketID));
-		lstrcpyn(LotteryResult.szDescribe,CW2CT(DBVarValue.bstrVal),CountArray(LotteryResult.szDescribe));
-
-		//通知抽奖结果
-		g_AttemperEngineSink->OnEventDataBaseResult(DBO_GR_LOTTERY_RESULT,dwContextID,&LotteryResult,sizeof(DBO_GR_LotteryResult));
-
-		//if(LotteryResult.byType != 0)
-		//{
-		//	//获取更新用户金币房卡钻石
-		//	DBO_GR_ScoreInfo UserScoreInfo;
-		//	ZeroMemory(&UserScoreInfo,sizeof(DBO_GP_ScoreInfo));
-
-		//	UserScoreInfo.dwUserID = pDbReq->dwUserID;
-		//	UserScoreInfo.lGold = m_TreasureDB->GetValue_LONG(TEXT("Gold"));
-		//	UserScoreInfo.lOpenRoomCard = m_TreasureDB->GetValue_LONG(TEXT("OpenRoomCard"));
-		//	UserScoreInfo.lDiamond = m_TreasureDB->GetValue_LONG(TEXT("Diamond"));
-		//	UserScoreInfo.lRewardCard = m_TreasureDB->GetValue_LONG(TEXT("RewardCard"));
-		//	UserScoreInfo.lScore = m_TreasureDB->GetValue_LONG(TEXT("Score"));
-
-		//	//发送财富变更消息
-		//	g_AttemperEngineSink->OnEventDataBaseResult(DBO_QUERY_SCOREINFO,dwContextID,&UserScoreInfo,sizeof(DBO_GP_ScoreInfo));
-		//}
-	}else
-	{
-		//没有奖品，抽到空
-		DBO_GR_LotteryResult LotteryResult;
-		ZeroMemory(&LotteryResult,sizeof(DBO_GR_LotteryResult));
-
-		LotteryResult.byIndex = -1;
-		LotteryResult.byType = 0;
-		LotteryResult.dwRewardCount = 0;
-
-		lstrcpyn(LotteryResult.szPacketID,TEXT(""),CountArray(LotteryResult.szPacketID));
-		lstrcpyn(LotteryResult.szDescribe,TEXT("人品就差一点点，请再接再厉吧！"),CountArray(LotteryResult.szDescribe));
-
-		//通知抽奖结果
-		g_AttemperEngineSink->OnEventDataBaseResult(DBO_GR_LOTTERY_RESULT,dwContextID,&LotteryResult,sizeof(DBO_GR_LotteryResult));
-	}
-
 	return true;
 }
 

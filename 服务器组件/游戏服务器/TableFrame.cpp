@@ -19,10 +19,6 @@
 #define IDI_WAIT_CONTINUE			(TIME_TABLE_SINK_RANGE+4)			//等待续费标识
 #define TIME_WAIT_CONTINUE			20000L								//等待续费时间
 
-//红包事件
-#define IDI_WAIT_REDPACKET			(TIME_TABLE_SINK_RANGE+5)			//等待发红包标识
-#define TIME_WAIT_REDPACKET			60000L								//每分钟检测一次
-
 //表决解散房间
 #define IDI_VOTE_DISMISS_ROOM		(TIME_TABLE_SINK_RANGE+6)			//表决解散房间
 #define TIME_VOTE_DISMISS_ROOM		300000L								//事件 --5分钟 
@@ -1016,19 +1012,6 @@ bool CTableFrame::OnEventTimer(DWORD dwTimerID, WPARAM dwBindParameter)
 
 			HandleDJGameEnd(0xFE);
 
-			return true;
-		}
-	case IDI_WAIT_REDPACKET:
-		{
-			SYSTEMTIME sysTime; 
-			GetSystemTime(&sysTime);
-
-			if((sysTime.wHour == 8 || sysTime.wHour == 14 || sysTime.wHour == 20)
-				&& sysTime.wMinute == 0)
-			{
-				//向所有桌子上用户发送抽红包通知
-				SendTableData(INVALID_CHAIR,SUB_GR_LOTTERY_NOTIFY,NULL,0);
-			}
 			return true;
 		}
 	}

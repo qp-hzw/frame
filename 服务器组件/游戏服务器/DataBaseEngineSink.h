@@ -53,11 +53,6 @@ protected:
 
 	//主消息号3
 protected:
-	//创建牌友圈房间
-	bool On_DBR_User_CreateGroupRoom(DWORD dwContextID, VOID *pData, WORD wDataSize, DWORD &dwUserID);
-	//创建牌友圈房间返回
-	VOID On_DBO_User_CreateGroupRoom(DWORD dwContextID, BYTE RULE[LEN_PRIVATE_TABLE_RULE], DWORD dwErrorCode, LPCTSTR pszErrorString);
-
 	//加入牌友圈房间
 	bool On_DBR_User_JoinGroupRoom(DWORD dwContextID, VOID *pData, WORD wDataSize, DWORD &dwUserID);
 	//加入牌友圈房间返回
@@ -138,8 +133,6 @@ protected:
 	bool OnUpdateTableInfo(DWORD dwTableID);
 	//更新已开房信息
 	bool OnUpdateEndTableInfo(DWORD dwTableID);
-	//请求抽奖
-	bool OnQueryLottery(DWORD dwContextID, void * pData, WORD wDataSize);
 
 	//*********桌子信息记录函数**********
 	//更新游戏任务状态

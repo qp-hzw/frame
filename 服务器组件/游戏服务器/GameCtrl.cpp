@@ -124,9 +124,19 @@ int CGameCtrl::InitializeService()
 	if (0 == dwKindId)	return 8;
 	SetServerID(dwKindId << 16);
 
+
 	//读取房间规则配置文件
 	//ReadFrameRoomRule();
 	//ReadSubGameRoomRule(dwKindId);
+	memcpy(m_rule_arry.ItemArry[0].szHeadName, "局数", 15);
+	memcpy(m_rule_arry.ItemArry[0].szItemValue[0], "1", 10);
+	memcpy(m_rule_arry.ItemArry[0].szItemValue[1], "2", 10);
+	memcpy(m_rule_arry.ItemArry[0].szItemValue[2], "8", 10);
+	
+	memcpy(m_rule_arry.ItemArry[1].szHeadName, "玩家数", 15);
+	memcpy(m_rule_arry.ItemArry[1].szItemValue[0], "2", 10);
+	memcpy(m_rule_arry.ItemArry[1].szItemValue[1], "3", 10);
+	memcpy(m_rule_arry.ItemArry[1].szItemValue[2], "4", 10);
 
 	return 0;
 }

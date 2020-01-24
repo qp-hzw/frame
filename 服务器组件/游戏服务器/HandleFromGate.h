@@ -68,17 +68,8 @@ protected:
 
 	//断线重连
 	static bool On_SUB_User_ReconnectRoom(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//加入金币房
-	static bool On_SUB_User_JoinGoldRoom(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//解散房间
 	static bool On_SUB_User_DismissRoom(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//创建牌友圈房间
-	static bool On_Sub_CG_User_CreateGroupRoom(VOID *pData, WORD wDataSize, DWORD dwSocketID);
-	//创建牌友圈房间返回
-	static bool On_CMD_GC_User_CreateGroupRoom(DWORD dwContextID, VOID * pData, WORD wDataSize);
-
-	//加入牌友圈房间
-	static bool On_Sub_CG_User_JoinGroupRoom(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//加入牌友圈房间返回
 	static bool On_CMD_GC_User_JoinGroupRoom(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
@@ -94,8 +85,6 @@ protected:
 	static bool On_SUB_CG_User_Ready(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//邀请用户
 	static bool On_SUB_CG_User_InviteUser(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//拒绝玩家坐下
-	static bool On_SUB_CG_User_RefuseSit(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//踢出命用户
 	static bool On_SUB_CG_User_KickUser(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 
@@ -104,17 +93,12 @@ protected:
 
 	//请求房间列表
 	static bool OnTCPNetworkSubGetTableList(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//请求抽奖
-	static bool OnTcpNetworkQueryLottery(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 
 	//发起申请解散房间
 	static bool On_SUB_RG_USER_ASK_DISMISS(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//表决解散房间
 	static bool On_SUB_RG_USER_VOTE_DISMISS(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 
-    //抽奖结果
-	static bool OnDBLotteryResult( DWORD dwContextID, VOID * pData, WORD wDataSize );
-	
 	//Club牌友圈创建桌子
 	static bool On_CMD_CG_CLUB_CREATE_TABLE( DWORD dwContextID, VOID * pData, WORD wDataSize );
 
