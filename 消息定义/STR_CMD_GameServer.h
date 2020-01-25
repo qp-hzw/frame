@@ -87,6 +87,7 @@ struct STR_SUB_CG_USER_CREATE_ROOM
 //设置房间规则
 struct STR_SUB_CG_USER_SET_ROOM_RULE
 {
+	BYTE							byGameMode;				//游戏模式 0房卡约局; 1比赛模式; 2金币模式; 3金币约局; 4牌友圈
 	BYTE							byChoose[20];			//规则选择
 };
 

@@ -770,13 +770,13 @@ bool CHandleFromGate::On_SUB_CG_USER_SET_ROOM_RULE(VOID * pData, WORD wDataSize,
 	STR_SUB_CG_USER_SET_ROOM_RULE *pCmd = (STR_SUB_CG_USER_SET_ROOM_RULE *)pData;
 
 	//获取完整房间规则 TODONOW
-	RoomRuleManager::GetRoomRule(pCmd->byChoose);
-
-	tagTableRule * pCfg;  
+	tagTableRule cfg = RoomRuleManager::GetRoomRule(pCmd->byChoose);
+	cfg.GameMode = pCmd->byGameMode;
 	
 	//门票校验
-	if(!CheckCreateTableTicket(pCfg, player))
+	if(!CheckCreateTableTicket(&cfg, player))
 	{
+		CLog::Log(log_warn, "%ld create room failed;  check ticker failed ", player->GetUserID());
 		return true;
 	}
 
@@ -789,7 +789,7 @@ bool CHandleFromGate::On_SUB_CG_USER_SET_ROOM_RULE(VOID * pData, WORD wDataSize,
 	}
 
 	//设置桌子属性
-	pTableFrame->SetCommonRule(pCfg);
+	pTableFrame->SetCommonRule(&cfg);
 	pTableFrame->SetTableOwner(player->GetUserID());
 	
 	//用户坐下
@@ -2206,9 +2206,6 @@ bool CHandleFromGate::CheckJoinTableTicket(tagTableRule *pCfg, CPlayer *pIServer
 //检查创建桌子门票
 bool CHandleFromGate::CheckCreateTableTicket(tagTableRule *pCfg, CPlayer *pIServerUserItem)
 {
-	//内部调用, 不校验指针
-	//仅 大厅 使用, 俱乐部不使用该函数
-
 	switch( pCfg->GameMode )
 	{
 	case TABLE_MODE_FK://房卡模式
@@ -2231,7 +2228,8 @@ bool CHandleFromGate::CheckCreateTableTicket(tagTableRule *pCfg, CPlayer *pIServ
 				return false;
 			}
 			*/
-			break;
+
+			return true;
 		}
 	case TABLE_MODE_FK_GOLD://房卡金币场
 		{
@@ -2258,11 +2256,14 @@ bool CHandleFromGate::CheckCreateTableTicket(tagTableRule *pCfg, CPlayer *pIServ
 				SendRequestFailure(pIServerUserItem, TEXT("您正在创建房卡金币房, 因金币不足,无法创建"), REQUEST_FAILURE_NORMAL);
 				return false;
 			}
-			break;
+			return true;
+		}
+	default:
+		{
+			SendRequestFailure(pIServerUserItem, TEXT("创建房间 模式不正确, 无法创建"), REQUEST_FAILURE_NORMAL);
+			return false;
 		}
 	}
-
-	return false;
 }
 
 //创建桌子 -- 金币大厅

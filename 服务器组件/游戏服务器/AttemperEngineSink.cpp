@@ -153,8 +153,11 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 
 		//…Ë÷√±‰¡ø
 		TCHAR szInernet_ip[32] = TEXT("0.0.0.0");
-		//TCHAR szInernet_ip[32] = TEXT("192.168.1.5");
-		CWHIP::GetInternetIP(szInernet_ip);
+		if( 0 != CWHIP::GetInternetIP(szInernet_ip))
+		{
+			memcpy(szInernet_ip, TEXT("127.0.0.1"), CountArray(szInernet_ip));
+		}
+
 		lstrcpyn(ServerItem.szServerAddr,szInernet_ip ,CountArray(ServerItem.szServerAddr));
 
 		ServerItem.wServerPort = 0;

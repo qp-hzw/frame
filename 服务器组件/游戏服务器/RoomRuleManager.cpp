@@ -21,12 +21,13 @@ tagTableRule RoomRuleManager::GetRoomRule(byte value[20])
 	tagTableRule roomRule;
 	for(int i=0; i<20; i++)
 	{
-		m_rule_arry.ItemArry[i].szItemValue[value[i]];
-		TCHAR key[15];
-		memcpy(key, m_rule_arry.ItemArry[i].szHeadName, 15);
-
-		std::cout << m_rule_arry.ItemArry[i].szHeadName << ": " 
-			<<	m_rule_arry.ItemArry[i].szItemValue[value[i]] << std::endl;
+		TCHAR temp[15];
+		memcpy(temp, m_rule_arry.ItemArry[i].szHeadName, 15*sizeof(TCHAR));
+		string key_name = TCHAR2STRING(temp);
+		if(!key_name.empty())
+		{
+			SetRoomRule(roomRule, key_name, value[i]);
+		}
 	}
 
 	return roomRule;
@@ -35,15 +36,17 @@ tagTableRule RoomRuleManager::GetRoomRule(byte value[20])
 //读取通用房间配置文件
 void RoomRuleManager::ReadFrameRoomRule()
 {
-	memcpy(m_rule_arry.ItemArry[0].szHeadName, "局数", 15);
-	memcpy(m_rule_arry.ItemArry[0].szItemValue[0], "1", 10);
-	memcpy(m_rule_arry.ItemArry[0].szItemValue[1], "2", 10);
-	memcpy(m_rule_arry.ItemArry[0].szItemValue[2], "8", 10);
+	ZeroMemory(&m_rule_arry, sizeof(m_rule_arry));
+
+	memcpy(m_rule_arry.ItemArry[0].szHeadName, TEXT("GameCount"), 15*sizeof(TCHAR));
+	memcpy(m_rule_arry.ItemArry[0].szItemValue[0], TEXT("1"), 10*sizeof(TCHAR));
+	memcpy(m_rule_arry.ItemArry[0].szItemValue[1], TEXT("2"), 10*sizeof(TCHAR));
+	memcpy(m_rule_arry.ItemArry[0].szItemValue[2], TEXT("8"), 10*sizeof(TCHAR));
 	
-	memcpy(m_rule_arry.ItemArry[1].szHeadName, "玩家数", 15);
-	memcpy(m_rule_arry.ItemArry[1].szItemValue[0], "2", 10);
-	memcpy(m_rule_arry.ItemArry[1].szItemValue[1], "3", 10);
-	memcpy(m_rule_arry.ItemArry[1].szItemValue[2], "4", 10);
+	memcpy(m_rule_arry.ItemArry[1].szHeadName, TEXT("PlayerCount"), 15*sizeof(TCHAR));
+	memcpy(m_rule_arry.ItemArry[1].szItemValue[0], TEXT("2"), 10*sizeof(TCHAR));
+	memcpy(m_rule_arry.ItemArry[1].szItemValue[1], TEXT("3"), 10*sizeof(TCHAR));
+	memcpy(m_rule_arry.ItemArry[1].szItemValue[2], TEXT("4"), 10*sizeof(TCHAR));
 	return;
 
 
@@ -158,6 +161,8 @@ string RoomRuleManager::GetDescribe(string key_name)
 //根据字段名字, 为结构体对应字段赋值
 void RoomRuleManager::SetRoomRule(tagTableRule &roomrule, string key_name, byte value)
 {
+	std::cout << key_name.c_str() << std::endl;
+
 	if(key_name == "GameCount")
 	{
 		roomrule.GameCount = std::stoi(GetRoomValByKey(key_name, value));
