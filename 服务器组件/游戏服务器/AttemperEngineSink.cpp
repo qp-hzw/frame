@@ -153,7 +153,8 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 
 		//设置变量
 		TCHAR szInernet_ip[32] = TEXT("0.0.0.0");
-		if( 0 != CWHIP::GetInternetIP(szInernet_ip))
+		if( ( 0 != CWHIP::GetInternetIP(szInernet_ip)) ||
+			(_tcscmp(szInernet_ip, TEXT("0.0.0.0")) == 0))
 		{
 			memcpy(szInernet_ip, TEXT("127.0.0.1"), CountArray(szInernet_ip));
 		}
@@ -236,7 +237,6 @@ bool CAttemperEngineSink::OnEventTCPNetworkShut(DWORD dwClientAddr, DWORD dwActi
 		//删除用户
 		CPlayerManager::DeletePlayer(pPlayer);
 	}
-
 	return true;
 }
 
