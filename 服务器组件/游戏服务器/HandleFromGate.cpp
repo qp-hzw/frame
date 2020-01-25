@@ -1021,7 +1021,7 @@ bool CHandleFromGate::CreateTableHallGold(STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD *
 
 	
 	//发送加入金币房间成功
-	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_JOIN_ROOM_SUCCESS, NULL, 0);
+	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_ENTER_SUBGAME_ROOM, NULL, 0);
 
 	return true;
 }
@@ -1087,7 +1087,7 @@ bool CHandleFromGate::CreateTableAutoClub(STR_DBO_CG_USER_JOIN_TABLE_NO_PASS * p
 		}		
 	
 	//发送加入房卡房间成功
-	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_JOIN_ROOM_SUCCESS, NULL, 0);
+	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_ENTER_SUBGAME_ROOM, NULL, 0);
 
 	return true;
 }
@@ -1109,10 +1109,18 @@ bool CHandleFromGate::On_SUB_User_JoinFkRoom(VOID * pData, WORD wDataSize, DWORD
 {
 	//校验用户
 	CPlayer *player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
-	if (NULL == player) return false;
+	if (NULL == player)
+	{
+		CLog::Log(log_error, "加入房间 failed,  player is null");
+		return false;
+	}
 
 	//校验数据包
-	if(wDataSize != sizeof(STR_SUB_CG_USER_JOIN_FK_ROOM)) return false;
+	if(wDataSize != sizeof(STR_SUB_CG_USER_JOIN_FK_ROOM)) 
+	{
+		CLog::Log(log_error, "加入房间 failed,  struct size not same");
+		return false;
+	}
 
 	//数据定义
 	STR_SUB_CG_USER_JOIN_FK_ROOM *pJoin = (STR_SUB_CG_USER_JOIN_FK_ROOM *)pData;
@@ -1125,24 +1133,30 @@ bool CHandleFromGate::On_SUB_User_JoinFkRoom(VOID * pData, WORD wDataSize, DWORD
 	if(!pTable)
 	{
 		SendRequestFailure(player,TEXT("房间不存在, 请重新输入"),REQUEST_FAILURE_NORMAL);
+		CLog::Log(log_debug, "[%d] 加入房间 failed,  table is null",  player->GetUserID());
 		return false;
 	}
 
 	//门票校验 
+	/*
 	if(!CheckJoinTableTicket((tagTableRule*)pTable->GetCustomRule(), player));
 	{
+		CLog::Log(log_debug, "[%d] 加入房间 failed,  check ticket failed", player->GetUserID());
 		return false;
 	}
+	*/
 
 	//玩家坐下
 	if(pTable->PlayerSitTable(player) != 0)
 	{
+		CLog::Log(log_debug, "[%d] 加入房间 failed,  sit down failed",  player->GetUserID());
 		SendRequestFailure(player,TEXT("加入房间失败, 坐下失败"),REQUEST_FAILURE_PASSWORD);
 		return false;
 	}	
 
 	//发送加入房卡房间成功
 	g_GameCtrl->SendData(player, MDM_USER, CMD_GC_USER_ENTER_SUBGAME_ROOM, NULL, 0);
+	return true;
 }
 
 //加入桌子 -- 不需要密码, 即快速开始
@@ -1274,7 +1288,7 @@ bool CHandleFromGate::On_CMD_GC_USER_JOIN_TABLE_NO_PASS( DWORD dwSocketID, VOID 
 
 
 	//发送加入房卡房间成功
-	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_JOIN_ROOM_SUCCESS, NULL, 0);
+	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_ENTER_SUBGAME_ROOM, NULL, 0);
 
 	return true;
 }
@@ -1392,7 +1406,7 @@ bool CHandleFromGate::On_CMD_GC_USER_JOIN_TABLE_HALL_GOLD( DWORD dwSocketID, VOI
 		}
 
 	//发送加入房间成功
-	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_JOIN_ROOM_SUCCESS, NULL, 0);
+	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_ENTER_SUBGAME_ROOM, NULL, 0);
 	return true;
 }
 
@@ -1446,7 +1460,7 @@ bool CHandleFromGate::On_CMD_GC_User_JoinGroupRoom(DWORD dwSocketID, VOID * pDat
 				bHaveRoom = true;
 
 				//发送加入成功消息
-				g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_JOIN_ROOM_SUCCESS, NULL, 0);
+				g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_ENTER_SUBGAME_ROOM, NULL, 0);
 				break;
 		}
 	}
@@ -2060,6 +2074,7 @@ bool CHandleFromGate::CheckCreateRoom(CPlayer * player, BYTE gameMode)
 bool CHandleFromGate::CheckJoinTableTicket(tagTableRule *pCfg, CPlayer *pIServerUserItem)
 {
 	//内部调用, 不校验指针
+	return true;
 
 	switch( pCfg->GameMode )
 	{
