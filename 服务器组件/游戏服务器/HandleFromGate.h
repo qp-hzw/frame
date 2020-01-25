@@ -80,9 +80,6 @@ protected:
 
 	//加入房间  不需要密码
 	static bool On_CMD_GC_USER_JOIN_TABLE_NO_PASS( DWORD dwContextID, VOID * pData, WORD wDataSize );
-
-	//加入房间  需要密码 -- 数据库校验
-	static bool On_CMD_GC_JOIN_TABLE( DWORD dwContextID, VOID * pData, WORD wDataSize );
 	
 #pragma endregion
 
@@ -154,6 +151,9 @@ protected:
 	//检查 创建桌子的门票
 	static bool CheckCreateTableTicket(tagTableRule * pCfg, CPlayer *pCPlayer);
 
+	//检查加入桌子的门票
+	static bool CheckJoinTableTicket(tagTableRule * pCfg, CPlayer *pCPlayer);
+
 	//牌友圈房间信息需要写入数据库
 	static bool WriteClubRoomToDB(STR_DBR_CLUB_ROOM_INFO* pTableInfo);
 
@@ -167,12 +167,6 @@ protected:
 
     //查找金币房空椅子
 	static CTableFrame* GetGlodRoomEmptyChair(WORD &wChairID, BYTE byType);
-
-	//加入桌子
-protected:
-	 //检查加入桌子的门票
-	static bool CheckJoinTableTicket(tagTableRule * pCfg, CPlayer *pCPlayer);
-
 #pragma endregion 
 
 	#pragma region DB事件通知

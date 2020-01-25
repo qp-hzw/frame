@@ -113,8 +113,6 @@ struct STR_CMD_GC_USER_CREATE_TABLE
 struct STR_SUB_CG_USER_JOIN_FK_ROOM
 {
 	DWORD							dwPassword;		//房间密码
-	double							dLongitude;		//经度
-	double							dLatitude;		//纬度
 };
 
 //加入桌子 -- 不需要密码

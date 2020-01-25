@@ -13,7 +13,7 @@ public:
 
 public:
 	//获取房间配置选项
-	static rule_arry GetRoomRuleSetting(){return m_rule_arry;}
+	static rule_arry GetRoomRuleSetting();
 	//获取房间规则
 	static void GetRoomRule(tagTableRule& roomrule, byte value[20]);
 

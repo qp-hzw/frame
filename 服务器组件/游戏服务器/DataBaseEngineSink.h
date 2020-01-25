@@ -145,9 +145,6 @@ protected:
 	//加入桌子 不需要密码
 	bool On_DBR_CG_USER_JOIN_TABLE_NO_PASS(DWORD dwContextID, void *pData, WORD wDataSize);
 
-	//加入桌子 
-	bool On_DBR_CG_JOIN_TABLE(DWORD dwContextID, void *pData, WORD wDataSize);
-
 	//加入桌子 金币大厅桌子
 	bool On_DBR_CG_USER_JOIN_TABLE_HALL_GOLD(DWORD dwContextID, void *pData, WORD wDataSize);
 };

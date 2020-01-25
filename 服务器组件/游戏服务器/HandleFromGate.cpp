@@ -68,10 +68,6 @@ bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwSocketID, VOID * p
 			g_TCPSocketEngine->SendData(MDM_TRANSFER, CPR_GP_CLUB_PLAYER_INFO, pData, wDataSize);
 			return true;
 		}
-	case DBO_GC_JOIN_TABLE://加入桌子 数据库校验
-		{
-			return On_CMD_GC_JOIN_TABLE(dwSocketID,pData,wDataSize);
-		}
 	case DBO_GC_USER_JOIN_TABLE_HALL_GOLD: //加入桌子 -- 金币大厅桌子
 		{
 			return On_CMD_GC_USER_JOIN_TABLE_HALL_GOLD(dwSocketID,pData,wDataSize);
@@ -1030,7 +1026,6 @@ bool CHandleFromGate::CreateTableHallGold(STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD *
 	return true;
 }
 
-
 //创建桌子 俱乐部桌子
 bool CHandleFromGate::CreateTableAutoClub(STR_DBO_CG_USER_JOIN_TABLE_NO_PASS * pDbo, CPlayer *pIServerUserItem)
 {
@@ -1097,7 +1092,6 @@ bool CHandleFromGate::CreateTableAutoClub(STR_DBO_CG_USER_JOIN_TABLE_NO_PASS * p
 	return true;
 }
 
-
 //Club牌友圈房间信息 写入数据库
 bool CHandleFromGate::WriteClubRoomToDB(STR_DBR_CLUB_ROOM_INFO* pTableInfo)
 {
@@ -1114,129 +1108,41 @@ bool CHandleFromGate::WriteClubRoomToDB(STR_DBR_CLUB_ROOM_INFO* pTableInfo)
 bool CHandleFromGate::On_SUB_User_JoinFkRoom(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
 	//校验用户
-	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerBySocketID(dwSocketID);
-	CLog::Log(log_debug, "On_SUB_User_JoinFkRoom  begin 000 ");
-	if (NULL == pIServerUserItem) return false;
+	CPlayer *player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	if (NULL == player) return false;
 
 	//校验数据包
-	if(wDataSize != sizeof(STR_SUB_CG_USER_JOIN_FK_ROOM))
-	{
-		CLog::Log(log_debug, "On_SUB_User_JoinFkRoom  begin 1111 ");
-		SendRequestFailure(pIServerUserItem,TEXT("加入牌友圈桌子数据错误"),REQUEST_FAILURE_NORMAL);
-		return false;
-	}
-
-	CLog::Log(log_debug, "On_SUB_User_JoinFkRoom  begin 22222 ");
+	if(wDataSize != sizeof(STR_SUB_CG_USER_JOIN_FK_ROOM)) return false;
 
 	//数据定义
 	STR_SUB_CG_USER_JOIN_FK_ROOM *pJoin = (STR_SUB_CG_USER_JOIN_FK_ROOM *)pData;
 
-	//向数据库查询
 	STR_DBR_JOIN_ROOM DBR;
 	DBR.dwTableID = pJoin->dwPassword;
-	DBR.dwUserID = pIServerUserItem->GetUserID();
 
-	//投递请求
-	return g_GameCtrl->PostDataBaseRequest(DBR_CG_JOIN_TABLE, dwSocketID, &DBR,sizeof(DBR));
-}
-
-//加入桌子 返回 -- 需要密码
-bool CHandleFromGate::On_CMD_GC_JOIN_TABLE( DWORD dwSocketID, VOID * pData, WORD wDataSize)
-{
-	CLog::Log(log_debug, "On_CMD_GC_JOIN_TABLE  begin");
-	/* 1. 校验用户 */
-	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerBySocketID(dwSocketID);
-	if (NULL == pIServerUserItem) return false;
-
-	/* 2. 校验数据包 */
-	if(wDataSize != sizeof(STR_DBR_JOIN_ROOM))
+	//房间校验
+	CTableFrame* pTable = CTableManager::FindTableByTableID(DBR.dwTableID);
+	if(!pTable)
 	{
-		SendRequestFailure(pIServerUserItem,TEXT("加入房间数据错误！"),REQUEST_FAILURE_NORMAL);
+		SendRequestFailure(player,TEXT("房间不存在, 请重新输入"),REQUEST_FAILURE_NORMAL);
 		return false;
 	}
 
-	/* 3. 数据库校验 */
-	STR_DBR_JOIN_ROOM *pJoin = (STR_DBR_JOIN_ROOM *)pData;
-	if(pJoin->lResultCode != 0)
-	{
-		SendRequestFailure(pIServerUserItem,TEXT("非工会成员, 不能进入工会桌子"),REQUEST_FAILURE_NORMAL);
-		return false;
-	}
-
-	/* 4. 桌子校验 */
-	DWORD dwPassword = pJoin->dwTableID;	
-	if(dwPassword == 0)
-	{
-		SendRequestFailure(pIServerUserItem, TEXT("房间号错误,请重新尝试"), REQUEST_FAILURE_PASSWORD);
-		return false;
-	}
-
-	/* 5. 校验是否在之前桌子中 */	
-	WORD wOldTableID = pIServerUserItem->GetTableID();	
-	if(wOldTableID != INVALID_TABLE)
-	{
-		if(wOldTableID > CTableManager::TableCount())
-		{
-			wOldTableID = INVALID_TABLE;
-		}
-		else
-		{
-			CTableFrame* pOldTable = CTableManager::FindTableByTableID(wOldTableID);
-			if(pOldTable == NULL || pOldTable->GetGameStatus() != GAME_STATUS_PLAY)
-			{
-				wOldTableID = INVALID_TABLE;
-			}
-		}	
-	}
-
-	//还在之前的房间中(这里应该不会走进来, 因为有断线重连的存在)
-	if(INVALID_TABLE != wOldTableID)
-	{
-		SendRequestFailure(pIServerUserItem,TEXT("您已经在游戏中,不能进入其他房间!"),REQUEST_FAILURE_NORMAL);
-		return false;
-	}
-
-	/* 6. 寻找指定桌子 */
-	CTableFrame *pCurrTableFrame = GetDesignatedTable(dwPassword);
-	//桌子判断
-	if(NULL == pCurrTableFrame)
-	{
-		SendRequestFailure(pIServerUserItem, TEXT("桌子不存在"), REQUEST_FAILURE_NORMAL);
-		return false;
-	}
-
-	/* 7. 房间规则校验 */
-	tagTableRule *pCfg = (tagTableRule*)pCurrTableFrame->GetCustomRule();
-	if (NULL == pCfg)
-	{
-		SendRequestFailure(pIServerUserItem, TEXT("加入失败, 房间规则不存在"), REQUEST_FAILURE_NORMAL);
-		return false;
-	}
-
-	/* 8. 桌子游戏状态 判断 */
-	if(GAME_STATUS_FREE != pCurrTableFrame->GetGameStatus())
-	{
-		SendRequestFailure(pIServerUserItem, TEXT("房间正在游戏中,无法加入"), REQUEST_FAILURE_NORMAL);
-		return false;
-	}
-
-	/* 9. 门票校验 */
-	if(!CheckJoinTableTicket(pCfg, pIServerUserItem))
+	//门票校验 
+	if(!CheckJoinTableTicket((tagTableRule*)pTable->GetCustomRule(), player));
 	{
 		return false;
 	}
 
-	/* 10. 玩家坐下判断 */
-			if(pCurrTableFrame->PlayerSitTable(pIServerUserItem) != 0)
-		{
-			SendRequestFailure(pIServerUserItem,TEXT("加入房间失败, 坐下失败"),REQUEST_FAILURE_PASSWORD);
-			return false;
-		}	
-	
+	//玩家坐下
+	if(pTable->PlayerSitTable(player) != 0)
+	{
+		SendRequestFailure(player,TEXT("加入房间失败, 坐下失败"),REQUEST_FAILURE_PASSWORD);
+		return false;
+	}	
+
 	//发送加入房卡房间成功
-	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_JOIN_ROOM_SUCCESS, NULL, 0);
-
-	return true;
+	g_GameCtrl->SendData(player, MDM_USER, CMD_GC_USER_ENTER_SUBGAME_ROOM, NULL, 0);
 }
 
 //加入桌子 -- 不需要密码, 即快速开始

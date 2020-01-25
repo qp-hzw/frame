@@ -15,7 +15,34 @@ std::string TCHAR2STRING(TCHAR *STR)
 	std::string str(chRtn);
 	return str;
 }
+//char* 2 TCHAR
+TCHAR *chr2wch(const char *buffer)
+{
+        size_t len = strlen(buffer);
+        size_t wlen = MultiByteToWideChar(CP_ACP, 0, (const char*)buffer, int(len), NULL, 0);
+        TCHAR *wBuf = new TCHAR[wlen + 1];
+        MultiByteToWideChar(CP_ACP, 0, (const char*)buffer, int(len), wBuf, int(wlen));
+        return wBuf;
+}
+//获取房间配置选项
+rule_arry RoomRuleManager::GetRoomRuleSetting()
+{
+	rule_arry client_rule_item;
+	memcpy(&client_rule_item, &m_rule_arry, sizeof(rule_arry));
+	for(int i =0; i < 20; i ++)
+	{
+		TCHAR szTemp[15];
+		memcpy(szTemp, m_rule_arry.ItemArry[i].szHeadName, sizeof(TCHAR) *15);
+		string clientHead = GetDescribe(TCHAR2STRING(szTemp));
+		if(clientHead.empty()) continue;
 
+		TCHAR szTchar[15] ; 
+		memcpy(szTchar, chr2wch(clientHead.c_str()), sizeof(TCHAR)*15);
+		memcpy(client_rule_item.ItemArry[i].szHeadName, szTchar, sizeof(TCHAR)*15);
+	}
+
+	return client_rule_item;
+}
 //获取房间规则
 void RoomRuleManager::GetRoomRule(tagTableRule& roomRule, byte value[20])
 {
@@ -34,20 +61,6 @@ void RoomRuleManager::GetRoomRule(tagTableRule& roomRule, byte value[20])
 //读取通用房间配置文件
 void RoomRuleManager::ReadFrameRoomRule()
 {
-	ZeroMemory(&m_rule_arry, sizeof(m_rule_arry));
-
-	memcpy(m_rule_arry.ItemArry[0].szHeadName, TEXT("GameCount"), 15*sizeof(TCHAR));
-	memcpy(m_rule_arry.ItemArry[0].szItemValue[0], TEXT("1"), 10*sizeof(TCHAR));
-	memcpy(m_rule_arry.ItemArry[0].szItemValue[1], TEXT("2"), 10*sizeof(TCHAR));
-	memcpy(m_rule_arry.ItemArry[0].szItemValue[2], TEXT("8"), 10*sizeof(TCHAR));
-	
-	memcpy(m_rule_arry.ItemArry[1].szHeadName, TEXT("PlayerCount"), 15*sizeof(TCHAR));
-	memcpy(m_rule_arry.ItemArry[1].szItemValue[0], TEXT("2"), 10*sizeof(TCHAR));
-	memcpy(m_rule_arry.ItemArry[1].szItemValue[1], TEXT("3"), 10*sizeof(TCHAR));
-	memcpy(m_rule_arry.ItemArry[1].szItemValue[2], TEXT("4"), 10*sizeof(TCHAR));
-	return;
-
-
 	//初始化数据
 	ZeroMemory(&m_rule_arry, sizeof(m_rule_arry));
 	m_frame_rule_count = 0;
@@ -69,19 +82,19 @@ void RoomRuleManager::ReadFrameRoomRule()
 		string strTemp;
 		iRet = CWHCfg::Instance()->GetItemValue(psz, "head", strTemp);
 		if(iRet != 0) continue;
-		std::cout << strTemp << std::endl;
-		std::cout << strTemp.c_str() << std::endl;
-
+	
 		m_frame_rule_count ++;
-		//swprintf(m_rule_arry.ItemArry[i].szHeadName, 15, L"%S", strTemp.c_str());
+		swprintf(m_rule_arry.ItemArry[i].szHeadName, 15, L"%S", strTemp.c_str());
 
+		std::cout << "key: " << strTemp.c_str() << std::endl;
 		for(int j=0; j<4; j++)
 		{
 			char value[20];
 			sprintf(value, "value_%d", j);
 			iRet = CWHCfg::Instance()->GetItemValue(psz, value, strTemp);
 			if(iRet != 0) continue;
-			//swprintf(m_rule_arry.ItemArry[i].szItemValue[j], 10, L"%S", strTemp.c_str());
+			swprintf(m_rule_arry.ItemArry[i].szItemValue[j], 10, L"%S", strTemp.c_str());
+			std::cout << "val: " << j << " : " << strTemp.c_str() << std::endl;
 		}
 	}
 

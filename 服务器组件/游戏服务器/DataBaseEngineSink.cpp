@@ -211,11 +211,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 			bSucceed = On_DBR_CG_USER_JOIN_TABLE_NO_PASS(dwContextID,pData,wDataSize);
 			break;
 		}
-	case DBR_CG_JOIN_TABLE: //加入桌子
-		{
-			bSucceed = On_DBR_CG_JOIN_TABLE(dwContextID,pData,wDataSize);
-			break;
-		}
 	case DBR_CG_USER_JOIN_TABLE_HALL_GOLD: //加入桌子 -- 金币大厅桌子
 		{
 			bSucceed = On_DBR_CG_USER_JOIN_TABLE_HALL_GOLD(dwContextID,pData,wDataSize);
@@ -1824,29 +1819,6 @@ bool CDataBaseEngineSink::On_DBR_CG_USER_JOIN_TABLE_NO_PASS(DWORD dwContextID, v
 	*/
 
 	return g_AttemperEngineSink->OnEventDataBaseResult(DBO_GC_USER_JOIN_TABLE_NO_PASS,dwContextID,&Dbo,sizeof(Dbo));
-}
-
-//加入桌子
-bool CDataBaseEngineSink::On_DBR_CG_JOIN_TABLE(DWORD dwContextID, void *pData, WORD wDataSize)
-{
-	//数据包校验
-	if (sizeof(STR_DBR_JOIN_ROOM) != wDataSize)
-		return false;
-
-	STR_DBR_JOIN_ROOM* pDbReq = (STR_DBR_JOIN_ROOM*)pData;
-
-	//数据库传入参数
-	m_TreasureDB->ResetParameter();
-	m_TreasureDB->AddParameter(TEXT("@dwUserID"), pDbReq->dwUserID);
-	m_TreasureDB->AddParameter(TEXT("@dwTableID"), pDbReq->dwTableID);
-
-	CLog::Log(log_debug, "GSP_CG_USER_JOIN_TABLE  begin 00 ");
-	//执行查询
-	LONG lResultCode = m_TreasureDB->ExecuteProcess(TEXT("GSP_CG_USER_JOIN_TABLE"), false);
-	pDbReq->lResultCode = lResultCode;
-
-	return g_AttemperEngineSink->OnEventDataBaseResult(DBO_GC_JOIN_TABLE,dwContextID, pDbReq, wDataSize);
-
 }
 
 //加入桌子 金币大厅桌子

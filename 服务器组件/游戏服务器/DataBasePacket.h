@@ -117,10 +117,6 @@ struct DBR_GP_UserQuitInfo
 #define	DBO_GC_CLUB_UPDATE_TABLE_INFO			1102					//club牌友圈更新桌子信息
 #define	DBO_GC_CLUB_UPDATE_PLAYER_INFO			2102					//club牌友圈更新玩家信息
 
-
-#define	DBR_CG_JOIN_TABLE						1103					//加入桌子
-#define	DBO_GC_JOIN_TABLE						2103					//加入桌子
-
 #define	DBR_CG_USER_JOIN_TABLE_HALL_GOLD		1104					//加入桌子 -- 加入金币大厅桌子
 #define	DBO_GC_USER_JOIN_TABLE_HALL_GOLD		2104					//加入桌子 -- 加入金币大厅桌子
 
