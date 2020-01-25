@@ -1,5 +1,6 @@
 #include "RoomRuleManager.h"
 #include <iostream>
+#include <stdlib.h>
 
 rule_arry                   RoomRuleManager::m_rule_arry;							//房间规则
 BYTE						RoomRuleManager::m_frame_rule_count = 0;				//frame房间规则 条数
@@ -16,9 +17,8 @@ std::string TCHAR2STRING(TCHAR *STR)
 }
 
 //获取房间规则
-tagTableRule RoomRuleManager::GetRoomRule(byte value[20])
+void RoomRuleManager::GetRoomRule(tagTableRule& roomRule, byte value[20])
 {
-	tagTableRule roomRule;
 	for(int i=0; i<20; i++)
 	{
 		TCHAR temp[15];
@@ -29,8 +29,6 @@ tagTableRule RoomRuleManager::GetRoomRule(byte value[20])
 			SetRoomRule(roomRule, key_name, value[i]);
 		}
 	}
-
-	return roomRule;
 }
 
 //读取通用房间配置文件
@@ -161,31 +159,29 @@ string RoomRuleManager::GetDescribe(string key_name)
 //根据字段名字, 为结构体对应字段赋值
 void RoomRuleManager::SetRoomRule(tagTableRule &roomrule, string key_name, byte value)
 {
-	std::cout << key_name.c_str() << std::endl;
-
 	if(key_name == "GameCount")
 	{
-		roomrule.GameCount = std::stoi(GetRoomValByKey(key_name, value));
+		roomrule.GameCount = (BYTE)atoi(GetRoomValByKey(key_name, value).c_str());
 	}
 	else if(key_name == "PlayerCount")
 	{
-		roomrule.PlayerCount = std::stoi(GetRoomValByKey(key_name, value));
+		roomrule.PlayerCount = atoi(GetRoomValByKey(key_name, value).c_str());
 	}
 	else if(key_name == "cbPayType")
 	{
-		roomrule.cbPayType = std::stoi(GetRoomValByKey(key_name, value));
+		roomrule.cbPayType = atoi(GetRoomValByKey(key_name, value).c_str());
 	}
 	else if(key_name == "bRefuseSameIP")
 	{
-		roomrule.bRefuseSameIP = std::stoi(GetRoomValByKey(key_name, value));
+		roomrule.bRefuseSameIP = atoi(GetRoomValByKey(key_name, value).c_str());
 	}
 	else if(key_name == "bDistanceIn300")
 	{
-		roomrule.bDistanceIn300 = std::stoi(GetRoomValByKey(key_name, value));
+		roomrule.bDistanceIn300 = atoi(GetRoomValByKey(key_name, value).c_str());
 	}
 	else if(key_name == "bAllowStranger")
 	{
-		roomrule.bAllowStranger = std::stoi(GetRoomValByKey(key_name, value));
+		roomrule.bAllowStranger = atoi(GetRoomValByKey(key_name, value).c_str());
 	}
 }
 
@@ -196,10 +192,14 @@ string RoomRuleManager::GetRoomValByKey(string key, byte value)
 
 	for(int i=0; i<20; i++)
 	{
-		string tempkey = TCHAR2STRING(m_rule_arry.ItemArry[i].szHeadName);
+		TCHAR szTemp[15];
+		memcpy(szTemp, m_rule_arry.ItemArry[i].szHeadName, sizeof(TCHAR) * 15);
+		string tempkey = TCHAR2STRING(szTemp);
 		if( tempkey == key)
 		{
-			string val = TCHAR2STRING(m_rule_arry.ItemArry[i].szItemValue[value]);
+			TCHAR szVal[10];
+			memcpy(szVal, m_rule_arry.ItemArry[i].szItemValue[value], sizeof(TCHAR) * 10);
+			string val = TCHAR2STRING(szVal);
 			return val;
 		}
 	}

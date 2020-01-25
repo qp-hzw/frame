@@ -770,7 +770,8 @@ bool CHandleFromGate::On_SUB_CG_USER_SET_ROOM_RULE(VOID * pData, WORD wDataSize,
 	STR_SUB_CG_USER_SET_ROOM_RULE *pCmd = (STR_SUB_CG_USER_SET_ROOM_RULE *)pData;
 
 	//获取完整房间规则 TODONOW
-	tagTableRule cfg = RoomRuleManager::GetRoomRule(pCmd->byChoose);
+	tagTableRule cfg;
+	RoomRuleManager::GetRoomRule(cfg, pCmd->byChoose);
 	cfg.GameMode = pCmd->byGameMode;
 	
 	//门票校验
@@ -836,8 +837,8 @@ bool CHandleFromGate::CreateRoomClub(tagTableRule * pCfg, CPlayer *pIServerUserI
 
 	/* 第六步 房间信息保存到数据库 */
 	STR_DBR_CLUB_ROOM_INFO Dbr;
-	Dbr.dwUserID = pCfg->dwUserID;
-	Dbr.dwClubID = pCfg->dwClubID;
+	//Dbr.dwUserID = pCfg->dwUserID;
+	//Dbr.dwClubID = pCfg->dwClubID;
 	Dbr.dwGameID = (pCfg->dwKindID) << 16;
 	Dbr.byModeID = 0;
 
@@ -855,7 +856,7 @@ bool CHandleFromGate::CreateRoomClub(tagTableRule * pCfg, CPlayer *pIServerUserI
 	Dbr.dwRevenue = pCfg->dwOwnerPercentage;
 	Dbr.byMask = pCfg->byMask;
 	Dbr.dwDizhu = pCfg->dwDizhu;
-	Dbr.dwGold = pCfg->dwLevelGold;
+	//Dbr.dwGold = pCfg->dwLevelGold;
 	Dbr.byAllRound = pCfg->GameCount;
 	Dbr.byChairNum = pCfg->PlayerCount;
 	Dbr.DissolveMinute = pCfg->bDissolve;
@@ -868,7 +869,7 @@ bool CHandleFromGate::CreateRoomClub(tagTableRule * pCfg, CPlayer *pIServerUserI
 
 	//TODONOWW 需要发送给协调服, 然后协调服 发送给登录服.  登录服通知客户端实时刷新俱乐部房间
 	STR_CMD_LC_CLUB_ROOM_RE RECMD;
-	RECMD.dwClubID = pCfg->dwClubID;
+	//RECMD.dwClubID = pCfg->dwClubID;
 	g_GameCtrl->SendData(pIServerUserItem, MDM_CLUB, CMD_LC_CLUB_ROOM_RE, &RECMD, sizeof(STR_CMD_LC_CLUB_ROOM_RE));	
 	
 	return true; 
@@ -957,7 +958,7 @@ bool CHandleFromGate::CreateTableHallGold(STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD *
 	tagTableRule *pCfg =  new tagTableRule(); //(tagTableRule*)pDbo->strCreateRoom.CommonRule;
 
 	//设置场次最低金币
-	pCfg->dwLevelGold = pDbo->dwMinGold;
+	//pCfg->dwLevelGold = pDbo->dwMinGold;
 
 	//检查加入门票
 	if(!CheckJoinTableTicket(pCfg, pIServerUserItem))
@@ -2170,12 +2171,6 @@ bool CHandleFromGate::CheckJoinTableTicket(tagTableRule *pCfg, CPlayer *pIServer
 		}
 	case TABLE_MODE_GOLD://金币模式
 		{
-			//大厅的金币场
-			if(  pIServerUserItem->GetUserGold() < pCfg->dwLevelGold)
-			{
-				SendRequestFailure(pIServerUserItem, TEXT("您正在进入金币房,因金币不足,无法加入"), REQUEST_FAILURE_NORMAL);
-				return false;
-			}
 			break;
 		}
 	case TABLE_MODE_FK_GOLD://房卡金币场
@@ -2191,11 +2186,6 @@ bool CHandleFromGate::CheckJoinTableTicket(tagTableRule *pCfg, CPlayer *pIServer
 			*/
 
 			//俱乐部的房卡金币场 或者 大厅的房卡金币场
-			if( pIServerUserItem->GetUserGold()  < pCfg->dwLevelGold)
-			{
-				SendRequestFailure(pIServerUserItem, TEXT("您正在进入房卡金币房, 因金币不足,无法加入"), REQUEST_FAILURE_NORMAL);
-				return false;
-			}
 			break;
 		}
 	}
@@ -2251,11 +2241,6 @@ bool CHandleFromGate::CheckCreateTableTicket(tagTableRule *pCfg, CPlayer *pIServ
 			}
 			*/
 			//大厅的房卡金币场
-			if( pIServerUserItem->GetUserGold()  < pCfg->dwLevelGold)
-			{
-				SendRequestFailure(pIServerUserItem, TEXT("您正在创建房卡金币房, 因金币不足,无法创建"), REQUEST_FAILURE_NORMAL);
-				return false;
-			}
 			return true;
 		}
 	default:

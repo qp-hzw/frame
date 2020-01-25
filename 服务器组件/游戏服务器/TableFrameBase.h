@@ -31,8 +31,8 @@ struct tagTableRule
 	BYTE	bAllowStranger;			//允许陌生人加入
 
 	/********************************** 牌友圈相关 ************************************/
-	DWORD	dwUserID;				//群主ID
-    DWORD	dwClubID;				//牌友群/俱乐部编号
+	//DWORD	dwUserID;				//群主ID
+    //DWORD	dwClubID;				//牌友群/俱乐部编号
 	DWORD	dwKindID;			    //游戏ID
 	BYTE	byGoldOrFK;				//(2.金币 1.房卡)
 
@@ -48,7 +48,7 @@ struct tagTableRule
 	//TODONOW 如果是在俱乐部的金币场,这里就是房主设置的; 
 	//如果是在大厅的房卡金币场,这里就是系统设置的; 
 	//如果是在大厅的金币场, 这里就是系统设置的
-    DWORD	dwLevelGold;			//进场的最小身价 
+    //DWORD	dwLevelGold;			//进场的最小身价 
 };
 
 /////////////////////////////////////////////////////////////////////

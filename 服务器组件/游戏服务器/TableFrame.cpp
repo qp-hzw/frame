@@ -467,11 +467,12 @@ bool CTableFrame::CheckUserLeave(BYTE byTableMode,CPlayer *pIServerUserItem, tag
 	case TABLE_MODE_GOLD:
 	case TABLE_MODE_FK_GOLD:
 		{
+			/*
 			//这里修改为门票的 10%
 			if(pIServerUserItem->GetUserGold() < (pCfg->dwLevelGold * 0.1))
 			{
 				return true;
-			}
+			}*/
 		}
 	}
 	return false;
