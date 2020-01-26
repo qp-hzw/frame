@@ -3,6 +3,12 @@
 #include "TableManager.h"
 #include <iostream>
 #include "RoomRuleManager.h"
+#include "RobotManager.h"
+
+//时间标识
+#define IDI_LOAD_ANDROID_USER			(IDI_MAIN_MODULE_START+1)			//机器信息
+//时间定义 秒
+#define TIME_LOAD_ANDROID_USER				3000L								//加载机器
 
 bool CHandleFromGate::HandlePacket(TCP_Command Command, VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
@@ -71,6 +77,14 @@ bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwSocketID, VOID * p
 	case DBO_GC_USER_JOIN_TABLE_HALL_GOLD: //加入桌子 -- 金币大厅桌子
 		{
 			return On_CMD_GC_USER_JOIN_TABLE_HALL_GOLD(dwSocketID,pData,wDataSize);
+		}
+	case DBR_GR_GAME_ANDROID_INFO: //加载机器人
+		{
+			return On_LOAD_ANDROID_INFO(dwSocketID,pData,wDataSize);
+		}
+	case DBR_GR_ANDROID_JOIN_GAME: //机器人自动加入房间
+		{
+			return On_ANDROID_JOIN_GAME(dwSocketID,pData,wDataSize);
 		}
 	}
 }
@@ -262,7 +276,6 @@ bool CHandleFromGate::On_CMD_GC_Logon_UserID(DWORD dwSocketID, VOID * pData, WOR
 		tagOfflineUser data;
 		data.dwUserID = pDBOLogon->dwUserID;
 		data.byMask = 2; //表示删除断线用户
-		CLog::Log(log_debug, "2, 4 delete player");
 		g_TCPSocketEngine->SendData(MDM_USER, SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
 	}
 
@@ -1399,11 +1412,11 @@ bool CHandleFromGate::On_CMD_GC_USER_JOIN_TABLE_HALL_GOLD( DWORD dwSocketID, VOI
 	}
 
 	/* 10. 用户坐下 */
-			if(pCurrTableFrame->PlayerSitTable(pIServerUserItem) != 0)
-		{
-			SendRequestFailure(pIServerUserItem,TEXT("加入失败, 坐下失败!"),REQUEST_FAILURE_PASSWORD);
-			return false;
-		}
+	if(pCurrTableFrame->PlayerSitTable(pIServerUserItem) != 0)
+	{
+		SendRequestFailure(pIServerUserItem,TEXT("加入失败, 坐下失败!"),REQUEST_FAILURE_PASSWORD);
+		return false;
+	}
 
 	//发送加入房间成功
 	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_ENTER_SUBGAME_ROOM, NULL, 0);
@@ -1894,6 +1907,87 @@ void CHandleFromGate::ClubLastPlayerSitUp(DWORD dwTableID, DWORD dwUserID, BYTE 
 	}
 }
 
+//加载机器人
+bool CHandleFromGate::On_LOAD_ANDROID_INFO(DWORD dwContextID, VOID * pData, WORD wDataSize)
+{
+	//校验   如何校验
+
+	//获取数据
+	DBO_GR_GameAndroidInfo *RobotInfo = (DBO_GR_GameAndroidInfo *)pData;
+
+	//增加机器玩家
+	for (int i = 0; i < RobotInfo->wAndroidCount; i++)
+	{
+		//构造数据
+		tagUserInfo Info;
+		ZeroMemory(&Info, sizeof(tagUserInfo));
+
+		//数据赋值
+		Info.bAndroidUser = true;
+		Info.cbGender = RobotInfo->AndroidParameter[i].cbGender;
+		Info.dwUserID = RobotInfo->AndroidParameter[i].dwUserID;
+		Info.lDiamond = RobotInfo->AndroidParameter[i].lDiamond;
+		Info.lGold = RobotInfo->AndroidParameter[i].lGold;
+		Info.lOpenRoomCard = RobotInfo->AndroidParameter[i].lOpenRoomCard;
+
+		lstrcpyn(Info.szNickName, RobotInfo->AndroidParameter[i].szNickName, CountArray(Info.szNickName));
+		lstrcpyn(Info.szHeadUrl, RobotInfo->AndroidParameter[i].szHeadUrl, CountArray(Info.szHeadUrl));
+
+		//状态设置
+		Info.cbUserStatus=US_FREE;
+		Info.wTableID=INVALID_TABLE;
+		Info.wChairID=INVALID_CHAIR;
+		Info.dwLogonTime=(DWORD)time(NULL);
+		Info.lRestrictScore=0L;//屏蔽每局封顶
+
+		//插入数据
+		CRobotManager::InsertRobot(Info);
+	}
+
+	//设置机器人自动加入房间定时器
+	g_GameCtrl->SetTimer(IDI_LOAD_ANDROID_USER,TIME_LOAD_ANDROID_USER,TIMES_INFINITY,NULL);
+
+	return true;
+}
+
+//机器人自动加入房间
+bool CHandleFromGate::On_ANDROID_JOIN_GAME(DWORD dwContextID, VOID * pData, WORD wDataSize)
+{
+	// 1、校验
+
+	// 2、查找金币场桌子
+	WORD wChairID;
+	CTableFrame *pTableFrame = GetGlodRoomEmptyChair(wChairID, 0, true);
+	if (pTableFrame == NULL)
+		return true;
+
+	// 3、椅子校验
+	if (wChairID == INVALID_CHAIR)
+		return true;
+
+	// 4、房间规则校验
+	tagTableRule *pTableRule = (tagTableRule *)pTableFrame->GetCustomRule();
+	if (pTableRule == NULL)
+		return true;
+
+	// 5、桌子是否在游戏中校验
+	if (GAME_STATUS_FREE != pTableFrame->GetGameStatus())
+		return true;
+
+	// 6、查找符合条件的机器人
+	CPlayer *pPlayer = GetAndroidUser(pTableFrame);
+	if (pPlayer == NULL)
+		return true;
+
+	// 7、机器人坐下
+	if (pTableFrame->PlayerSitTable(pPlayer, wChairID) != 0)
+		return true;
+
+	// 8、机器人准备
+	if (pTableFrame->PlayerReady(wChairID, pPlayer) != 0)
+		return true;
+}
+
 #pragma region 辅助函数
 //********************************************辅助函数*******************************************//
 
@@ -1996,7 +2090,7 @@ CTableFrame* CHandleFromGate::GetDesignatedTable(const DWORD &dwPassword)
 }
 
 //查找金币房空椅子
-CTableFrame* CHandleFromGate::GetGlodRoomEmptyChair(WORD &wChairID, BYTE byType)
+CTableFrame* CHandleFromGate::GetGlodRoomEmptyChair(WORD &wChairID, BYTE byType, BOOL bTypeFlag)
 {
 	//变量定义
 	CTableFrame *pTableFrame = NULL;
@@ -2009,11 +2103,21 @@ CTableFrame* CHandleFromGate::GetGlodRoomEmptyChair(WORD &wChairID, BYTE byType)
 		CTableFrame *pTableFrame = CTableManager::FindTableByIndex(i);
 
 		//桌子校验
-		if ( (NULL == pTableFrame) || 
-			 (pTableFrame->GetGameStatus() != GAME_STATUS_FREE) || 
-			 (pTableFrame->GetTableMode() != TABLE_MODE_GOLD) ||
-			(pTableFrame->GetGoldType() != byType))
-			continue;
+		if (bTypeFlag == false)
+		{
+			if ( (NULL == pTableFrame) || 
+				(pTableFrame->GetGameStatus() != GAME_STATUS_FREE) || 
+				(pTableFrame->GetTableMode() != TABLE_MODE_GOLD) ||
+				(pTableFrame->GetGoldType() != byType))
+					continue;
+		}
+		else
+		{
+			if ( (NULL == pTableFrame) || 
+				(pTableFrame->GetGameStatus() != GAME_STATUS_FREE) || 
+				(pTableFrame->GetTableMode() != TABLE_MODE_GOLD))
+					continue;
+		}
 
 		//获取空椅子
 		wChairID = pTableFrame->GetNullChairID();
@@ -2188,6 +2292,26 @@ void CHandleFromGate::HallTableCreate(DWORD dwUserID, DWORD dwKindID, BYTE byGam
 
 	//投递请求
 	g_GameCtrl->PostDataBaseRequest(DBR_HALL_GOLD_TABLE_INFO, 0, &Dbr, sizeof(Dbr));
+}
+
+//查找符合条件的机器人用户
+CPlayer* CHandleFromGate::GetAndroidUser(CTableFrame *pTableFrame)
+{
+	//获取房间规则
+	tagTableRule *pCfg = (tagTableRule *)pTableFrame->GetCustomRule();
+
+	for (int i = 0; i < CRobotManager::RobotCount(); i++)
+	{
+		//获取机器人
+		CPlayer *robot = CRobotManager::FindRobotByIndex(i);
+
+		//机器人校验
+		if ((robot == NULL) || (!CheckJoinTableTicket(pCfg, robot)) ||
+			(US_FREE != robot->GetUserStatus()))
+			continue;
+
+		return robot;
+	}
 }
 
 #pragma endregion

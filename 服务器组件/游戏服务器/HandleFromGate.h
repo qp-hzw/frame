@@ -166,7 +166,10 @@ protected:
 	static CTableFrame* GetDesignatedTable(const DWORD &dwPassword);
 
     //查找金币房空椅子
-	static CTableFrame* GetGlodRoomEmptyChair(WORD &wChairID, BYTE byType);
+	static CTableFrame* GetGlodRoomEmptyChair(WORD &wChairID, BYTE byType, BOOL bTypeFlag = false);
+
+	//查找符合条件的机器人用户
+	static CPlayer* GetAndroidUser(CTableFrame *pTableFrame);
 #pragma endregion 
 
 	#pragma region DB事件通知
@@ -214,6 +217,13 @@ public:
 public:
 	//更新用户财富信息
 	static bool OnEventModifyUserTreasure(CPlayer *pCPlayer, DWORD dwTableID, BYTE byTableMode, BYTE byRound, SCORE lUserTreasuse, BYTE byWin);
+
+	//机器人
+public:
+	//加载机器人
+	static bool On_LOAD_ANDROID_INFO(DWORD dwContextID, VOID * pData, WORD wDataSize);
+	//机器人自动加入房间
+	static bool On_ANDROID_JOIN_GAME(DWORD dwContextID, VOID * pData, WORD wDataSize);
 };
 
 #endif

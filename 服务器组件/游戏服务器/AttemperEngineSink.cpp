@@ -34,7 +34,7 @@ CAttemperEngineSink * g_AttemperEngineSink = NULL;
 //////////////////////////////////////////////////////////////////////////////////
 //时间定义 秒
 
-#define TIME_LOAD_ANDROID_USER				600L								//加载机器
+#define TIME_LOAD_ANDROID_USER				3000L								//加载机器
 #define TIME_DISTRIBUTE_ANDROID				15L									//分配用户
 #define TIME_REPORT_SERVER_INFO				30L									//上报时间
 #define TIME_DBCORRESPOND_NOTIFY			3L									//缓存通知时间
@@ -79,7 +79,7 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 		case IDI_LOAD_ANDROID_USER:		//加载机器
 			{
 				//加载机器
-				g_GameCtrl->PostDataBaseRequest(DBR_GR_LOAD_ANDROID_USER,0L,NULL,0L);
+				g_GameCtrl->PostDataBaseRequest(DBR_GR_ANDROID_JOIN_GAME,0L,NULL,0L);
 
 				return true;
 			}

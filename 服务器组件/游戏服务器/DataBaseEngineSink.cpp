@@ -95,6 +95,10 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 			bSucceed = OnRequestLoadAndroidUser(dwContextID,pData,wDataSize,dwUserID);
 			break;
 		}
+	case DBR_GR_ANDROID_JOIN_GAME:		//定时器事件：机器人加入房间
+		{
+			bSucceed = OnRequestAndroidJoinGame(dwContextID,pData,wDataSize,dwUserID);
+		}
 	case DBR_GR_LOAD_OFFLINE:			//加载断线重连
 		{
 			bSucceed = On_DBR_GR_LOAD_OFFLINE(dwContextID,pData,wDataSize,dwUserID);
@@ -746,26 +750,32 @@ bool CDataBaseEngineSink::OnRequestLoadAndroidUser(DWORD dwContextID, VOID * pDa
 		//读取数据
 		GameAndroidInfo.wAndroidCount++;
 		GameAndroidInfo.AndroidParameter[i].dwUserID=m_TreasureDB->GetValue_DWORD(TEXT("UserID"));
-		GameAndroidInfo.AndroidParameter[i].dwServiceTime=m_TreasureDB->GetValue_DWORD(TEXT("ServiceTime"));
-		GameAndroidInfo.AndroidParameter[i].dwMinPlayDraw=m_TreasureDB->GetValue_DWORD(TEXT("MinPlayDraw"));
-		GameAndroidInfo.AndroidParameter[i].dwMaxPlayDraw=m_TreasureDB->GetValue_DWORD(TEXT("MaxPlayDraw"));
-		GameAndroidInfo.AndroidParameter[i].dwMinReposeTime=m_TreasureDB->GetValue_DWORD(TEXT("MinReposeTime"));
-		GameAndroidInfo.AndroidParameter[i].dwMaxReposeTime=m_TreasureDB->GetValue_DWORD(TEXT("MaxReposeTime"));
-		GameAndroidInfo.AndroidParameter[i].dwServiceGender=m_TreasureDB->GetValue_DWORD(TEXT("ServiceGender"));
-		GameAndroidInfo.AndroidParameter[i].lMinTakeScore=m_TreasureDB->GetValue_LONGLONG(TEXT("MinTakeScore"));
-		GameAndroidInfo.AndroidParameter[i].lMaxTakeScore=m_TreasureDB->GetValue_LONGLONG(TEXT("MaxTakeScore"));
+		m_TreasureDB->GetValue_String(TEXT("NickName"), GameAndroidInfo.AndroidParameter[i].szNickName, CountArray(GameAndroidInfo.AndroidParameter[i].szNickName));
+		m_TreasureDB->GetValue_String(TEXT("HeadUrl"), GameAndroidInfo.AndroidParameter[i].szHeadUrl, CountArray(GameAndroidInfo.AndroidParameter[i].szHeadUrl));
+
+		GameAndroidInfo.AndroidParameter[i].cbGender=m_TreasureDB->GetValue_BYTE(TEXT("Gender"));
+		GameAndroidInfo.AndroidParameter[i].lDiamond=m_TreasureDB->GetValue_LONGLONG(TEXT("UserDiamond"));
+		GameAndroidInfo.AndroidParameter[i].lGold=m_TreasureDB->GetValue_LONGLONG(TEXT("UserGold"));
+		GameAndroidInfo.AndroidParameter[i].lOpenRoomCard=m_TreasureDB->GetValue_LONGLONG(TEXT("UserRoomCard"));
 
 		//移动记录
 		m_TreasureDB->MoveToNext();
 	}
+	CLog::Log(log_debug, "wAndroidCount: %d", GameAndroidInfo.wAndroidCount);
 
 	//发送信息
 	WORD wHeadSize=sizeof(GameAndroidInfo)-sizeof(GameAndroidInfo.AndroidParameter);
 	WORD wDataSize_=GameAndroidInfo.wAndroidCount*sizeof(GameAndroidInfo.AndroidParameter[0]);
-	//g_AttemperEngineSink->OnEventDataBaseResult(DBR_GR_GAME_ANDROID_INFO,dwContextID,&GameAndroidInfo,wHeadSize+wDataSize_);
+	g_AttemperEngineSink->OnEventDataBaseResult(DBR_GR_GAME_ANDROID_INFO,dwContextID,&GameAndroidInfo,wHeadSize+wDataSize_);
 
 	return true;
 
+}
+
+//机器人自动加入房间
+bool CDataBaseEngineSink::OnRequestAndroidJoinGame(DWORD dwContextID, VOID * pData, WORD wDataSize, DWORD &dwUserID)
+{
+	return g_AttemperEngineSink->OnEventDataBaseResult(DBR_GR_ANDROID_JOIN_GAME, dwContextID, NULL, 0L);
 }
 
 //加载断线重连

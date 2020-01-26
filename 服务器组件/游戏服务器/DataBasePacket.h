@@ -40,7 +40,8 @@ struct DBR_GP_UserQuitInfo
 
 //配置事件
 #define DBR_GR_LOAD_ANDROID_USER	302									//加载机器
-
+#define DBR_GR_GAME_ANDROID_INFO    305									//加载机器返回
+#define DBR_GR_ANDROID_JOIN_GAME	306									//定时器事件：机器人加入房间
 
 //配置事件
 #define DBR_GR_LOAD_OFFLINE			303									//加载断线重连
@@ -477,15 +478,16 @@ struct DBO_GR_GameAndroidInfo
 	//机器参数
 	struct tagAndroidParameter
 	{
+		//属性资料
 		DWORD							dwUserID;							//用户标识
-		DWORD							dwServiceTime;						//服务时间
-		SCORE							lMinTakeScore;						//携带积分
-		SCORE							lMaxTakeScore;						//携带积分
-		DWORD							dwMinPlayDraw;						//游戏局数
-		DWORD							dwMaxPlayDraw;						//游戏局数
-		DWORD							dwMinReposeTime;					//休息时间
-		DWORD							dwMaxReposeTime;					//休息时间
-		DWORD							dwServiceGender;					//服务类型
+		TCHAR							szNickName[LEN_NICKNAME];			//帐号昵称
+		TCHAR							szHeadUrl[256];						//头像地址
+
+		//用户资料
+		BYTE							cbGender;							//用户性别
+		SCORE							lOpenRoomCard;						//开房卡
+		SCORE							lDiamond;							//钻石
+		SCORE							lGold;								//金币
 	};
 
 	LONG							lResultCode;						//结果代码
