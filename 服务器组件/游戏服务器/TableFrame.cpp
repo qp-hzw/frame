@@ -723,6 +723,9 @@ int CTableFrame::CanPlayerSitTable(CPlayer* pPlayer, WORD &wChairID)
 		return CHAIR_USERD;
 	}
 
+	//4. 门票检测
+
+
 	return 0;
 }
 //玩家能否站起
@@ -1362,6 +1365,18 @@ WORD CTableFrame::GetPlayerChair(CPlayer* pPlayer)
 	}
 
 	return INVALID_CHAIR;
+}
+
+//桌子中是否有真实玩家
+bool CTableFrame::IsTruePlayer()
+{
+	for (auto it = m_player_list.begin(); it != m_player_list.end(); it++)
+	{
+		if (*it != NULL || !(*it)->IsAndroidUser())
+			return true;
+	}
+
+	return false;
 }
 
 //请求失败

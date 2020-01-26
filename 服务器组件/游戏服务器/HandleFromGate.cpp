@@ -5,11 +5,6 @@
 #include "RoomRuleManager.h"
 #include "RobotManager.h"
 
-//时间标识
-#define IDI_LOAD_ANDROID_USER			(IDI_MAIN_MODULE_START+1)			//机器信息
-//时间定义 秒
-#define TIME_LOAD_ANDROID_USER				3000L								//加载机器
-
 bool CHandleFromGate::HandlePacket(TCP_Command Command, VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
 	switch (Command.wMainCmdID)
@@ -81,10 +76,6 @@ bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwSocketID, VOID * p
 	case DBR_GR_GAME_ANDROID_INFO: //加载机器人
 		{
 			return On_LOAD_ANDROID_INFO(dwSocketID,pData,wDataSize);
-		}
-	case DBR_GR_ANDROID_JOIN_GAME: //机器人自动加入房间
-		{
-			return On_ANDROID_JOIN_GAME(dwSocketID,pData,wDataSize);
 		}
 	}
 }
@@ -1376,7 +1367,7 @@ bool CHandleFromGate::On_CMD_GC_USER_JOIN_TABLE_HALL_GOLD( DWORD dwSocketID, VOI
 	
 	/* 6. 查找金币场是否有空椅子 */
 	WORD wChairID;
-	CTableFrame *pCurrTableFrame = GetGlodRoomEmptyChair(wChairID, pJoin->byGameType);
+	CTableFrame *pCurrTableFrame = CTableManager::GetGlodRoomEmptyChair(wChairID, pJoin->byGameType);
 	if (pCurrTableFrame == NULL)
 	{
 		//如果没有找到金币大厅的桌子, 则直接创建一个金币大厅的桌子
@@ -1945,47 +1936,9 @@ bool CHandleFromGate::On_LOAD_ANDROID_INFO(DWORD dwContextID, VOID * pData, WORD
 	}
 
 	//设置机器人自动加入房间定时器
-	g_GameCtrl->SetTimer(IDI_LOAD_ANDROID_USER,TIME_LOAD_ANDROID_USER,TIMES_INFINITY,NULL);
+	CRobotManager::SetRobotTimer();
 
 	return true;
-}
-
-//机器人自动加入房间
-bool CHandleFromGate::On_ANDROID_JOIN_GAME(DWORD dwContextID, VOID * pData, WORD wDataSize)
-{
-	// 1、校验
-
-	// 2、查找金币场桌子
-	WORD wChairID;
-	CTableFrame *pTableFrame = GetGlodRoomEmptyChair(wChairID, 0, true);
-	if (pTableFrame == NULL)
-		return true;
-
-	// 3、椅子校验
-	if (wChairID == INVALID_CHAIR)
-		return true;
-
-	// 4、房间规则校验
-	tagTableRule *pTableRule = (tagTableRule *)pTableFrame->GetCustomRule();
-	if (pTableRule == NULL)
-		return true;
-
-	// 5、桌子是否在游戏中校验
-	if (GAME_STATUS_FREE != pTableFrame->GetGameStatus())
-		return true;
-
-	// 6、查找符合条件的机器人
-	CPlayer *pPlayer = GetAndroidUser(pTableFrame);
-	if (pPlayer == NULL)
-		return true;
-
-	// 7、机器人坐下
-	if (pTableFrame->PlayerSitTable(pPlayer, wChairID) != 0)
-		return true;
-
-	// 8、机器人准备
-	if (pTableFrame->PlayerReady(wChairID, pPlayer) != 0)
-		return true;
 }
 
 #pragma region 辅助函数
@@ -2084,47 +2037,6 @@ CTableFrame* CHandleFromGate::GetDesignatedTable(const DWORD &dwPassword)
 		{
 			return pTableFrame;
 		}
-	}
-
-	return NULL;
-}
-
-//查找金币房空椅子
-CTableFrame* CHandleFromGate::GetGlodRoomEmptyChair(WORD &wChairID, BYTE byType, BOOL bTypeFlag)
-{
-	//变量定义
-	CTableFrame *pTableFrame = NULL;
-	wChairID = INVALID_CHAIR;
-
-	//寻找金币房空椅子
-	for (WORD i=0; i<CTableManager::TableCount(); i++)
-	{
-		//获取对象
-		CTableFrame *pTableFrame = CTableManager::FindTableByIndex(i);
-
-		//桌子校验
-		if (bTypeFlag == false)
-		{
-			if ( (NULL == pTableFrame) || 
-				(pTableFrame->GetGameStatus() != GAME_STATUS_FREE) || 
-				(pTableFrame->GetTableMode() != TABLE_MODE_GOLD) ||
-				(pTableFrame->GetGoldType() != byType))
-					continue;
-		}
-		else
-		{
-			if ( (NULL == pTableFrame) || 
-				(pTableFrame->GetGameStatus() != GAME_STATUS_FREE) || 
-				(pTableFrame->GetTableMode() != TABLE_MODE_GOLD))
-					continue;
-		}
-
-		//获取空椅子
-		wChairID = pTableFrame->GetNullChairID();
-		if(wChairID == INVALID_CHAIR)
-			continue;
-
-		return pTableFrame;
 	}
 
 	return NULL;
@@ -2292,26 +2204,6 @@ void CHandleFromGate::HallTableCreate(DWORD dwUserID, DWORD dwKindID, BYTE byGam
 
 	//投递请求
 	g_GameCtrl->PostDataBaseRequest(DBR_HALL_GOLD_TABLE_INFO, 0, &Dbr, sizeof(Dbr));
-}
-
-//查找符合条件的机器人用户
-CPlayer* CHandleFromGate::GetAndroidUser(CTableFrame *pTableFrame)
-{
-	//获取房间规则
-	tagTableRule *pCfg = (tagTableRule *)pTableFrame->GetCustomRule();
-
-	for (int i = 0; i < CRobotManager::RobotCount(); i++)
-	{
-		//获取机器人
-		CPlayer *robot = CRobotManager::FindRobotByIndex(i);
-
-		//机器人校验
-		if ((robot == NULL) || (!CheckJoinTableTicket(pCfg, robot)) ||
-			(US_FREE != robot->GetUserStatus()))
-			continue;
-
-		return robot;
-	}
 }
 
 #pragma endregion

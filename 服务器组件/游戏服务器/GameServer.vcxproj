@@ -356,6 +356,7 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClCompile Include="PlayerManager.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="GameCtrl.cpp" />
+    <ClCompile Include="RobotManager.cpp" />
     <ClCompile Include="RoomRuleManager.cpp" />
     <ClCompile Include="TableFrame.cpp" />
     <ClCompile Include="TableManager.cpp" />
@@ -364,6 +365,7 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClInclude Include="AttemperEngineSink.h" />
     <ClInclude Include="DataBaseEngineSink.h" />
     <ClInclude Include="DataBasePacket.h" />
+    <ClInclude Include="RobotManager.h" />
     <ClInclude Include="RoomRuleManager.h" />
     <ClInclude Include="TableFrameBase.h" />
     <ClInclude Include="HandleFromCenter.h" />

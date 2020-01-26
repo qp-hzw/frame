@@ -17,6 +17,10 @@
 #define IDI_MAIN_MODULE_START		1									//起始标识
 #define IDI_MAIN_MODULE_FINISH		99									//终止标识
 
+//机器人事件范围
+#define IDI_ROBOT_MODULE_START		100									//起始表示
+#define IDI_ROBOT_MODULE_FINISH		149									//终止标识
+
 //桌子事件范围
 #define IDI_TABLE_MODULE_START		10000								//起始标识
 #define IDI_TABLE_MODULE_FINISH		50010000								//终止标识
@@ -295,6 +299,8 @@ public:
 
 	//获取本桌玩家
 	WORD GetPlayerChair(CPlayer* pPlayer);
+	//桌子中是否有真实玩家
+	bool IsTruePlayer();
 
 #pragma endregion
 

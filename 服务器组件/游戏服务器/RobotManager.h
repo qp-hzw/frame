@@ -1,6 +1,7 @@
 # ifndef _ROBOT_MANAGER_H
 # define _ROBOT_MANAGER_H
 # include <vector>
+# include "TableFrame.h"
 
 class CPlayer;
 
@@ -22,6 +23,12 @@ public:
 	static CPlayer * FindRobotByIndex(WORD index);
 	//查总数
 	static DWORD RobotCount();
+	//设置机器人自动加入房间定时器
+	static void SetRobotTimer();
+	//设置机器人自动加入房间
+	static bool On_ANDROID_JOIN_GAME();
+	//查找符合条件的机器人用户
+	static CPlayer* GetAndroidUser(CTableFrame *pTableFrame);
 };
 
 # endif

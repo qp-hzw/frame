@@ -4,6 +4,7 @@
 #include "TableManager.h"
 #include "HandleFromCenter.h"
 #include "HandleFromGate.h"
+#include "RobotManager.h"
 #include <vector>
 #include <algorithm>
 
@@ -76,13 +77,6 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 		//时间处理
 		switch (dwTimerID)
 		{
-		case IDI_LOAD_ANDROID_USER:		//加载机器
-			{
-				//加载机器
-				g_GameCtrl->PostDataBaseRequest(DBR_GR_ANDROID_JOIN_GAME,0L,NULL,0L);
-
-				return true;
-			}
 		case IDI_CONNECT_CORRESPOND:	//连接协调
 			{
 				g_TCPSocketEngine->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
@@ -100,6 +94,19 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 				return true;
 			}
 
+		}
+	}
+
+	//机器人时间
+	if ((dwTimerID>=IDI_ROBOT_MODULE_START)&&(dwTimerID<=IDI_ROBOT_MODULE_FINISH))
+	{
+		//事件处理
+		switch (dwTimerID)
+		{
+		case IDI_LOAD_ANDROID_USER:		//机器人自动加入房间
+			{
+				CRobotManager::On_ANDROID_JOIN_GAME();
+			}
 		}
 	}
 

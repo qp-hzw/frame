@@ -156,3 +156,42 @@ DWORD CTableManager::GenerateTablePassword()
 		}
 	}
 }
+
+//查找金币房空椅子
+CTableFrame* CTableManager::GetGlodRoomEmptyChair(WORD &wChairID, BYTE byType, BOOL bTypeFlag)
+{
+	//变量定义
+	CTableFrame *pTableFrame = NULL;
+	wChairID = INVALID_CHAIR;
+
+	//寻找金币房空椅子
+	for (WORD i=0; i< TableCount(); i++)
+	{
+		//获取对象
+		CTableFrame *pTableFrame = FindTableByIndex(i);
+
+		//桌子校验
+		if (bTypeFlag == false)
+		{
+			if ( (NULL == pTableFrame) || 
+				(pTableFrame->GetGameStatus() != GAME_STATUS_FREE) || 
+				(pTableFrame->GetTableMode() != TABLE_MODE_GOLD) ||
+				(pTableFrame->GetGoldType() != byType))
+					continue;
+		}
+		else
+		{
+			if ( (NULL == pTableFrame) || 
+				(pTableFrame->GetGameStatus() != GAME_STATUS_FREE) || 
+				(pTableFrame->GetTableMode() != TABLE_MODE_GOLD))
+					continue;
+		}
+
+		//获取空椅子
+		wChairID = pTableFrame->GetNullChairID();
+		if(wChairID == INVALID_CHAIR)
+			continue;
+
+		return pTableFrame;
+	}
+}

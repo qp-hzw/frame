@@ -37,6 +37,9 @@
     <ClCompile Include="RoomRuleManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="RobotManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AttemperEngineSink.h">
@@ -79,6 +82,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="RoomRuleManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RobotManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

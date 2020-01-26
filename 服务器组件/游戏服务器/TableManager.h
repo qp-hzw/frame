@@ -27,11 +27,14 @@ public:
 	static CTableFrame* FindTableByTableID(DWORD dwTableID);
 	//查
 	static CTableFrame* FindTableByIndex(DWORD Index);
+	//查找金币房空椅子
+	static CTableFrame* GetGlodRoomEmptyChair(WORD &wChairID, BYTE byType, BOOL bTypeFlag = false);
 
 	//
 public:
 	//桌子总数
 	static DWORD TableCount();
+
 
 	//辅助函数
 private:

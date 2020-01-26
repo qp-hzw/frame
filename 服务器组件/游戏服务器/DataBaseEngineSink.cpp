@@ -95,10 +95,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 			bSucceed = OnRequestLoadAndroidUser(dwContextID,pData,wDataSize,dwUserID);
 			break;
 		}
-	case DBR_GR_ANDROID_JOIN_GAME:		//定时器事件：机器人加入房间
-		{
-			bSucceed = OnRequestAndroidJoinGame(dwContextID,pData,wDataSize,dwUserID);
-		}
 	case DBR_GR_LOAD_OFFLINE:			//加载断线重连
 		{
 			bSucceed = On_DBR_GR_LOAD_OFFLINE(dwContextID,pData,wDataSize,dwUserID);
@@ -770,12 +766,6 @@ bool CDataBaseEngineSink::OnRequestLoadAndroidUser(DWORD dwContextID, VOID * pDa
 
 	return true;
 
-}
-
-//机器人自动加入房间
-bool CDataBaseEngineSink::OnRequestAndroidJoinGame(DWORD dwContextID, VOID * pData, WORD wDataSize, DWORD &dwUserID)
-{
-	return g_AttemperEngineSink->OnEventDataBaseResult(DBR_GR_ANDROID_JOIN_GAME, dwContextID, NULL, 0L);
 }
 
 //加载断线重连
