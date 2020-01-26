@@ -157,12 +157,11 @@ DWORD CTableManager::GenerateTablePassword()
 	}
 }
 
-//查找金币房空椅子
-CTableFrame* CTableManager::GetGlodRoomEmptyChair(WORD &wChairID, BYTE byType, BOOL bTypeFlag)
+//查找金币场桌子 byType: 初级, 中级, 高级场次
+CTableFrame* CTableManager::GetGlodTable(BYTE byType)
 {
 	//变量定义
-	CTableFrame *pTableFrame = NULL;
-	wChairID = INVALID_CHAIR;
+	CTableFrame *pTableFrameReturn = NULL;
 
 	//寻找金币房空椅子
 	for (WORD i=0; i< TableCount(); i++)
@@ -170,28 +169,48 @@ CTableFrame* CTableManager::GetGlodRoomEmptyChair(WORD &wChairID, BYTE byType, B
 		//获取对象
 		CTableFrame *pTableFrame = FindTableByIndex(i);
 
-		//桌子校验
-		if (bTypeFlag == false)
-		{
-			if ( (NULL == pTableFrame) || 
-				(pTableFrame->GetGameStatus() != GAME_STATUS_FREE) || 
-				(pTableFrame->GetTableMode() != TABLE_MODE_GOLD) ||
-				(pTableFrame->GetGoldType() != byType))
+		if ( (NULL == pTableFrame) || 
+			(pTableFrame->GetGameStatus() != GAME_STATUS_FREE) || 
+			(pTableFrame->GetTableMode() != TABLE_MODE_GOLD) ||
+			(pTableFrame->GetGoldType() != byType))
 					continue;
-		}
-		else
-		{
-			if ( (NULL == pTableFrame) || 
-				(pTableFrame->GetGameStatus() != GAME_STATUS_FREE) || 
-				(pTableFrame->GetTableMode() != TABLE_MODE_GOLD))
-					continue;
-		}
-
-		//获取空椅子
-		wChairID = pTableFrame->GetNullChairID();
-		if(wChairID == INVALID_CHAIR)
-			continue;
-
-		return pTableFrame;
+		
+		pTableFrameReturn = pTableFrame;
+		break;
 	}
+
+	if(pTableFrameReturn == NULL)
+	{
+		pTableFrameReturn = CreateTable();
+		if(pTableFrameReturn == NULL)
+		{
+			CLog::Log(log_error, "GetGlodTable  type:%d  failed", byType);
+		}
+
+		//设置房间规则
+		tagTableRule roomRule;
+		roomRule.GameMode = TABLE_MODE_GOLD;
+		roomRule.GameCount = 1;
+		roomRule.PlayerCount =3;
+		pTableFrameReturn->SetCommonRule(&roomRule);
+	}
+
+	return pTableFrameReturn;
+}
+
+//查找搜哦有金币场桌子
+std::vector<CTableFrame*> CTableManager::GetAllGlodTable()
+{
+	std::vector<CTableFrame*> glod_talbe_array;
+	for(auto item : s_TableArray)
+	{
+		if(item && 
+			(item->GetGameStatus() == GAME_STATUS_FREE) &&
+			(item->GetTableMode() == TABLE_MODE_GOLD))
+		{
+			glod_talbe_array.push_back(item);
+		}
+	}
+
+	return glod_talbe_array;
 }

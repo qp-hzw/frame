@@ -40,9 +40,6 @@ struct DBR_GP_UserQuitInfo
 
 //配置事件
 #define DBR_GR_LOAD_ANDROID_USER	302									//加载机器
-#define DBR_GR_GAME_ANDROID_INFO    305									//加载机器返回
-#define DBR_GR_ANDROID_JOIN_GAME	306									//定时器事件：机器人加入房间
-
 //配置事件
 #define DBR_GR_LOAD_OFFLINE			303									//加载断线重连
 #define DBO_GR_LOAD_OFFLINE			304									//加载断线重连 返回
@@ -117,9 +114,6 @@ struct DBR_GP_UserQuitInfo
 
 #define	DBO_GC_CLUB_UPDATE_TABLE_INFO			1102					//club牌友圈更新桌子信息
 #define	DBO_GC_CLUB_UPDATE_PLAYER_INFO			2102					//club牌友圈更新玩家信息
-
-#define	DBR_CG_USER_JOIN_TABLE_HALL_GOLD		1104					//加入桌子 -- 加入金币大厅桌子
-#define	DBO_GC_USER_JOIN_TABLE_HALL_GOLD		2104					//加入桌子 -- 加入金币大厅桌子
 
 //////////////////////////////////////////////////////////////////////////////////
 

@@ -125,8 +125,6 @@ public:
 	//加入桌子 -- 加入大厅金币场桌子
 	//需要数据库判断并返回可加入的桌子号, 如果没有则会创建一个新的桌子
 	static bool On_SUB_CG_USER_JOIN_GOLD_HALL_ROOM(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//加入房间 -- 加入大厅金币场桌子 返回
-	static bool On_CMD_GC_USER_JOIN_TABLE_HALL_GOLD( DWORD dwContextID, VOID * pData, WORD wDataSize );
 
 	//申请创建房间
 	static bool On_SUB_CG_USER_CREATE_ROOM(VOID * pData, WORD wDataSize, DWORD dwSocketID);
@@ -211,11 +209,6 @@ public:
 public:
 	//更新用户财富信息
 	static bool OnEventModifyUserTreasure(CPlayer *pCPlayer, DWORD dwTableID, BYTE byTableMode, BYTE byRound, SCORE lUserTreasuse, BYTE byWin);
-
-	//机器人
-public:
-	//加载机器人
-	static bool On_LOAD_ANDROID_INFO(DWORD dwContextID, VOID * pData, WORD wDataSize);
 };
 
 #endif

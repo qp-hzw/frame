@@ -38,6 +38,8 @@ enum PLAYER_OP_ERRORCODE
 	CHAIR_USERD=4,         //椅子上已经有人
 	CHAIR_INVALID=5,       //椅子号不正确
 	STATUS_ERR = 6,			//没坐下就要准备
+	
+	TICKET_NOT = 7,        //门票检测没通过
 };
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -631,7 +633,7 @@ int CTableFrame::PlayerLeaveTable(CPlayer* pPlayer)
 	}
 }
 //玩家准备
-int CTableFrame::PlayerReady(WORD wChairID, CPlayer* pPlayer) 
+int CTableFrame::PlayerReady(CPlayer* pPlayer) 
 {
 	//准备校验
 	int ret = CanPlayerReady(pPlayer);
@@ -641,7 +643,7 @@ int CTableFrame::PlayerReady(WORD wChairID, CPlayer* pPlayer)
 	DWORD	dwTableID = pPlayer->GetTableID();
 
 	//设置用户状态为准备
-	pPlayer->SetUserStatus(US_READY, dwTableID, wChairID);
+	pPlayer->SetUserStatus(US_READY, dwTableID, pPlayer->GetChairID());
 
 	//给客户端发送准备行为
 	CMD_GF_GameStatus GameStatus;
@@ -724,7 +726,10 @@ int CTableFrame::CanPlayerSitTable(CPlayer* pPlayer, WORD &wChairID)
 	}
 
 	//4. 门票检测
-
+	if(0 != CheckTicket(pPlayer))
+	{
+		return TICKET_NOT;
+	}
 
 	return 0;
 }
@@ -755,7 +760,7 @@ int CTableFrame::CanPlayerLeaveTable(CPlayer* pPlayer)
 
 	return 0;
 }
-////玩家是否能准备
+//玩家是否能准备
 int CTableFrame::CanPlayerReady(CPlayer* pPlayer) 
 {
 	//校验
@@ -767,6 +772,30 @@ int CTableFrame::CanPlayerReady(CPlayer* pPlayer)
 	return 0;
 }
 
+//检测门票
+int CTableFrame::CheckTicket(CPlayer* player)
+{
+	switch( m_tagTableRule.GameMode)
+	{
+	case TABLE_MODE_FK://房卡模式
+		{
+			//大厅的房卡场：AA支付，且用户房卡不足
+			break;
+		}
+	case TABLE_MODE_GOLD://金币模式
+		{
+			break;
+		}
+	case TABLE_MODE_FK_GOLD://房卡金币场
+		{
+			//大厅的房卡金币场  校验一:  AA支付，且用户房卡不足
+			//俱乐部的房卡金币场 或者 大厅的房卡金币场
+			break;
+		}
+	}
+
+	return 0;
+}
 /*************************************    待整理    *************************************************/
 //写入录像记录 参数 小局数,数据和长度
 bool CTableFrame::WriteRecordInfo(WORD wXJCount,TCHAR strScore[], VOID* pData, DWORD dwDataSize)

@@ -68,7 +68,7 @@ bool CGameCtrl::StartService()
 		m_TCPSocketEngine->Connect(_CPD_SERVER_ADDR, PORT_CENTER);
 	}
 
-	//配置机器人
+	//加载机器人
 	g_GameCtrl->PostDataBaseRequest(DBR_GR_LOAD_ANDROID_USER,0L,NULL,0L);
 
 	return true;

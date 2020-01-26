@@ -69,14 +69,6 @@ bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwSocketID, VOID * p
 			g_TCPSocketEngine->SendData(MDM_TRANSFER, CPR_GP_CLUB_PLAYER_INFO, pData, wDataSize);
 			return true;
 		}
-	case DBO_GC_USER_JOIN_TABLE_HALL_GOLD: //加入桌子 -- 金币大厅桌子
-		{
-			return On_CMD_GC_USER_JOIN_TABLE_HALL_GOLD(dwSocketID,pData,wDataSize);
-		}
-	case DBR_GR_GAME_ANDROID_INFO: //加载机器人
-		{
-			return On_LOAD_ANDROID_INFO(dwSocketID,pData,wDataSize);
-		}
 	}
 }
 
@@ -551,7 +543,7 @@ bool CHandleFromGate::On_SUB_CG_User_Ready(VOID * pData, WORD wDataSize, DWORD d
 		return false;
 
 	//准备处理
-	pTableFrame->PlayerReady(pIServerUserItem->GetChairID(), pIServerUserItem);
+	pTableFrame->PlayerReady(pIServerUserItem);
 
 	return true;
 }
@@ -1141,15 +1133,6 @@ bool CHandleFromGate::On_SUB_User_JoinFkRoom(VOID * pData, WORD wDataSize, DWORD
 		return false;
 	}
 
-	//门票校验 
-	/*
-	if(!CheckJoinTableTicket((tagTableRule*)pTable->GetCustomRule(), player));
-	{
-		CLog::Log(log_debug, "[%d] 加入房间 failed,  check ticket failed", player->GetUserID());
-		return false;
-	}
-	*/
-
 	//玩家坐下
 	if(pTable->PlayerSitTable(player) != 0)
 	{
@@ -1284,11 +1267,11 @@ bool CHandleFromGate::On_CMD_GC_USER_JOIN_TABLE_NO_PASS( DWORD dwSocketID, VOID 
 	}
 
 	/* 10. 用户坐下 */
-			if(pCurrTableFrame->PlayerSitTable(pIServerUserItem) != 0)
-		{
-			SendRequestFailure(pIServerUserItem,TEXT("加入失败, 坐下失败!"),REQUEST_FAILURE_PASSWORD);
-			return false;
-		}
+	if(pCurrTableFrame->PlayerSitTable(pIServerUserItem) != 0)
+	{
+		SendRequestFailure(pIServerUserItem,TEXT("加入失败, 坐下失败!"),REQUEST_FAILURE_PASSWORD);
+		return false;
+	}
 
 
 	//发送加入房卡房间成功
@@ -1301,116 +1284,35 @@ bool CHandleFromGate::On_CMD_GC_USER_JOIN_TABLE_NO_PASS( DWORD dwSocketID, VOID 
 bool CHandleFromGate::On_SUB_CG_USER_JOIN_GOLD_HALL_ROOM(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
 	//校验用户
-	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerBySocketID(dwSocketID);
-	if (NULL == pIServerUserItem) return true;
+	CPlayer *player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	if (NULL == player) return true;
 
 	//校验数据包
 	if(wDataSize != sizeof(STR_SUB_CG_USER_JOIN_GOLD_HALL_ROOM))
 	{
-		SendRequestFailure(pIServerUserItem,TEXT("加入房间 结构体数据错误！"),REQUEST_FAILURE_NORMAL);
+		SendRequestFailure(player,TEXT("加入房间 结构体数据错误！"),REQUEST_FAILURE_NORMAL);
 		return true;
 	}
 
 	//数据定义
 	STR_SUB_CG_USER_JOIN_GOLD_HALL_ROOM *pJoin = (STR_SUB_CG_USER_JOIN_GOLD_HALL_ROOM *)pData;
 
-	//投递请求 数据库只负责查询到此场次的房间规则
-	g_GameCtrl->PostDataBaseRequest(DBR_CG_USER_JOIN_TABLE_HALL_GOLD, dwSocketID, pData,wDataSize);
-
-	return true;
-}
-
-//加入桌子 -- 金币大厅桌子 返回
-bool CHandleFromGate::On_CMD_GC_USER_JOIN_TABLE_HALL_GOLD( DWORD dwSocketID, VOID * pData, WORD wDataSize)
-{
-	/* 1. 校验用户 */
-	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerBySocketID(dwSocketID);
-	if (NULL == pIServerUserItem) return false;
-
-	/* 2. 校验数据包 */
-	if(wDataSize != sizeof(STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD))
+	CTableFrame *pTable = CTableManager::GetGlodTable(pJoin->byType);
+	if(pTable == NULL)
 	{
-		SendRequestFailure(pIServerUserItem,TEXT("加入房间数据错误！"),REQUEST_FAILURE_NORMAL);
-		return false;
+		SendRequestFailure(player,TEXT("加入房间失败, 没有空桌子!"),REQUEST_FAILURE_NORMAL);
+		return true;
 	}
 
-	/* 3. 数据库校验 */
-	STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD *pJoin = (STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD *)pData;
-	if( pJoin->lResultCode != 0)//返回值不为0, 则认为身上金币不足 或者 不是本公司的人
+	//用户坐下
+	if(pTable->PlayerSitTable(player) != 0)
 	{
-		SendRequestFailure(pIServerUserItem,TEXT("身上金币不足, 无法加入"),REQUEST_FAILURE_NORMAL);
-		return false;
-	}
-
-	/* 5. 校验是否在之前的游戏中 */
-	WORD wOldTableID = pIServerUserItem->GetTableID(); //旧桌子号	
-	if (wOldTableID != INVALID_TABLE)
-	{
-		if (wOldTableID > CTableManager::TableCount())
-		{
-			wOldTableID = INVALID_TABLE;
-		}
-		else
-		{
-			CTableFrame* pOldTable = CTableManager::FindTableByTableID(wOldTableID);
-			if (pOldTable == NULL || pOldTable->GetGameStatus() != GAME_STATUS_PLAY)
-			{
-				wOldTableID = INVALID_TABLE;
-			}
-		}
-	}
-	if (INVALID_TABLE != wOldTableID)
-	{
-		SendRequestFailure(pIServerUserItem, TEXT("您已经在游戏中,不能进入其他房间"), REQUEST_FAILURE_NORMAL);
-		return false;
-	}
-	
-	/* 6. 查找金币场是否有空椅子 */
-	WORD wChairID;
-	CTableFrame *pCurrTableFrame = CTableManager::GetGlodRoomEmptyChair(wChairID, pJoin->byGameType);
-	if (pCurrTableFrame == NULL)
-	{
-		//如果没有找到金币大厅的桌子, 则直接创建一个金币大厅的桌子
-		return CreateTableHallGold(pJoin, pIServerUserItem);
-	}
-
-	/* 4. 椅子校验 */
-	if(wChairID == INVALID_CHAIR)
-	{
-		SendRequestFailure(pIServerUserItem, TEXT("椅子号错误,请重新尝试"), REQUEST_FAILURE_PASSWORD);
-		return false;
-	}
-
-	/* 7. 房间规则 */
-	tagTableRule * pCfg = (tagTableRule*)pCurrTableFrame->GetCustomRule();
-	if (NULL == pCfg)
-	{
-		SendRequestFailure(pIServerUserItem, TEXT("加入失败, 房间规则不存在!"), REQUEST_FAILURE_NORMAL);
-		return false;
-	}
-
-	/* 8. 判断桌子是否在游戏中 */
-	if(GAME_STATUS_FREE != pCurrTableFrame->GetGameStatus())
-	{
-		SendRequestFailure(pIServerUserItem, TEXT("房间正在游戏中,无法加入！"), REQUEST_FAILURE_NORMAL);
-		return false;
-	}
-
-	/* 9. 门票校验 */
-	if(!CheckJoinTableTicket(pCfg, pIServerUserItem))
-	{
-		return false;
-	}
-
-	/* 10. 用户坐下 */
-	if(pCurrTableFrame->PlayerSitTable(pIServerUserItem) != 0)
-	{
-		SendRequestFailure(pIServerUserItem,TEXT("加入失败, 坐下失败!"),REQUEST_FAILURE_PASSWORD);
+		SendRequestFailure(player,TEXT("加入失败, 坐下失败!"),REQUEST_FAILURE_PASSWORD);
 		return false;
 	}
 
 	//发送加入房间成功
-	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_ENTER_SUBGAME_ROOM, NULL, 0);
+	g_GameCtrl->SendData(player, MDM_USER, CMD_GC_USER_ENTER_SUBGAME_ROOM, NULL, 0);
 	return true;
 }
 
@@ -1896,49 +1798,6 @@ void CHandleFromGate::ClubLastPlayerSitUp(DWORD dwTableID, DWORD dwUserID, BYTE 
 
 		g_GameCtrl->PostDataBaseRequest(DBR_HALL_GOLD_TABLE_INFO,0,&HallDbr,sizeof(HallDbr));
 	}
-}
-
-//加载机器人
-bool CHandleFromGate::On_LOAD_ANDROID_INFO(DWORD dwContextID, VOID * pData, WORD wDataSize)
-{
-	//校验   如何校验
-
-	//获取数据
-	DBO_GR_GameAndroidInfo *RobotInfo = (DBO_GR_GameAndroidInfo *)pData;
-
-	//增加机器玩家
-	for (int i = 0; i < RobotInfo->wAndroidCount; i++)
-	{
-		//构造数据
-		tagUserInfo Info;
-		ZeroMemory(&Info, sizeof(tagUserInfo));
-
-		//数据赋值
-		Info.bAndroidUser = true;
-		Info.cbGender = RobotInfo->AndroidParameter[i].cbGender;
-		Info.dwUserID = RobotInfo->AndroidParameter[i].dwUserID;
-		Info.lDiamond = RobotInfo->AndroidParameter[i].lDiamond;
-		Info.lGold = RobotInfo->AndroidParameter[i].lGold;
-		Info.lOpenRoomCard = RobotInfo->AndroidParameter[i].lOpenRoomCard;
-
-		lstrcpyn(Info.szNickName, RobotInfo->AndroidParameter[i].szNickName, CountArray(Info.szNickName));
-		lstrcpyn(Info.szHeadUrl, RobotInfo->AndroidParameter[i].szHeadUrl, CountArray(Info.szHeadUrl));
-
-		//状态设置
-		Info.cbUserStatus=US_FREE;
-		Info.wTableID=INVALID_TABLE;
-		Info.wChairID=INVALID_CHAIR;
-		Info.dwLogonTime=(DWORD)time(NULL);
-		Info.lRestrictScore=0L;//屏蔽每局封顶
-
-		//插入数据
-		CRobotManager::InsertRobot(Info);
-	}
-
-	//设置机器人自动加入房间定时器
-	CRobotManager::SetRobotTimer();
-
-	return true;
 }
 
 #pragma region 辅助函数

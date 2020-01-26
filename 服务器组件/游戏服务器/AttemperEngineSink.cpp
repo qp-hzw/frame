@@ -20,18 +20,15 @@ CAttemperEngineSink * g_AttemperEngineSink = NULL;
 
 //////////////////////////////////////////////////////////////////////////////////
 //时间标识
-
-#define IDI_LOAD_ANDROID_USER			(IDI_MAIN_MODULE_START+1)			//机器信息
-//#define IDI_REPORT_SERVER_INFO			(IDI_MAIN_MODULE_START+2)			//房间人数
+#define IDI_LOAD_ANDROID_USER			(IDI_MAIN_MODULE_START+1)			//加载机器人
 #define IDI_CONNECT_CORRESPOND			(IDI_MAIN_MODULE_START+3)			//连接时间
 #define IDI_GAME_SERVICE_PULSE			(IDI_MAIN_MODULE_START+4)			//服务脉冲
 #define IDI_DBCORRESPOND_NOTIFY			(IDI_MAIN_MODULE_START+6)			//缓存通知
-
 #define IDI_LOAD_SENSITIVE_WORD			(IDI_MAIN_MODULE_START+9)			//加载敏感词
-
 #define IDI_WRITE_STOCK_SCORE			(IDI_MAIN_MODULE_START+14)			//写库存记录
 
-#define TIME_CONNECT				30									//重连时间
+
+#define TIME_CONNECT				30									    //重连时间
 //////////////////////////////////////////////////////////////////////////////////
 //时间定义 秒
 
@@ -59,12 +56,6 @@ CAttemperEngineSink::CAttemperEngineSink()
 //启动事件
 bool CAttemperEngineSink::OnAttemperEngineStart(IUnknownEx * pIUnknownEx)
 {
-	/*  TODONOW 该处会导致程序崩溃
-	//设置时间
-	g_GameCtrl->SetTimer(IDI_GAME_SERVICE_PULSE,1000L,TIMES_INFINITY,NULL);
-	g_GameCtrl->SetTimer(IDI_LOAD_ANDROID_USER,TIME_LOAD_ANDROID_USER*1000L,TIMES_INFINITY,NULL);
-	g_GameCtrl->SetTimer(IDI_DBCORRESPOND_NOTIFY,TIME_DBCORRESPOND_NOTIFY*1000L,TIMES_INFINITY,NULL);
-	*/
 	return true;
 }
 
@@ -93,19 +84,10 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 				//g_GameCtrl->PostDataBaseRequest(DBR_GR_LOAD_SENSITIVE_WORDS,0,NULL,0);				
 				return true;
 			}
-
-		}
-	}
-
-	//机器人时间
-	if ((dwTimerID>=IDI_ROBOT_MODULE_START)&&(dwTimerID<=IDI_ROBOT_MODULE_FINISH))
-	{
-		//事件处理
-		switch (dwTimerID)
-		{
 		case IDI_LOAD_ANDROID_USER:		//机器人自动加入房间
 			{
 				CRobotManager::On_ANDROID_JOIN_GAME();
+				return true;
 			}
 		}
 	}

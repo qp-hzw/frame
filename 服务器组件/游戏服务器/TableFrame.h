@@ -275,7 +275,7 @@ public:
 	//玩家离开
 	int PlayerLeaveTable(CPlayer* pPlayer);
 	//玩家准备
-	int PlayerReady(WORD wChairID, CPlayer* pPlayer);
+	int PlayerReady(CPlayer* pPlayer);
 	//玩家断线
 	int PlayerOffline(CPlayer* pPlayer);
 
@@ -287,6 +287,9 @@ private:
 	int CanPlayerUpTable(CPlayer* pPlayer);
 	int CanPlayerLeaveTable(CPlayer* pPlayer);
 	int CanPlayerReady(CPlayer* pPlayer);
+
+	//门票检测
+	int CheckTicket(CPlayer* pPlayer);
 
 #pragma endregion
 

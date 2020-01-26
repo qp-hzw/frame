@@ -70,9 +70,7 @@
 #define SUB_CG_USER_JOIN_TABLE_NO_PASS	19									//#加入桌子,不需要密码, 即快速开始
 //返回的为 2, CMD_GC_USER_JOIN_ROOM_SUCCESS;								//不需要加入桌子返回
 
-#define SUB_CG_USER_JOIN_GOLD_HALL_ROOM	20									//加入大厅金币场桌子
-//如果没有空桌, 返回的是 2, CMD_GC_CLUB_CREATE_TABKE
-//如果有空桌子, 返回的为 2, CMD_GC_USER_JOIN_ROOM_SUCCESS
+#define SUB_CG_USER_JOIN_GOLD_HALL_ROOM	20									//加入大厅金币场桌子 -- 返回317
 
 #define SUB_CG_CLUB_CREATE_TABLE		21									//#创建桌子 牌友圈特有
 #define CMD_GC_CLUB_CREATE_TABKE		121									//#创建桌子 返回

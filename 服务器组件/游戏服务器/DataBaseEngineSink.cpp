@@ -2,6 +2,7 @@
 #include "GameCtrl.h"
 #include "DataBaseEngineSink.h"
 #include "AttemperEngineSink.h"
+#include "RobotManager.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -209,11 +210,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 	case DBR_CG_USER_JOIN_TABLE_NO_PASS://加入桌子 不需要密码,快速加入
 		{
 			bSucceed = On_DBR_CG_USER_JOIN_TABLE_NO_PASS(dwContextID,pData,wDataSize);
-			break;
-		}
-	case DBR_CG_USER_JOIN_TABLE_HALL_GOLD: //加入桌子 -- 金币大厅桌子
-		{
-			bSucceed = On_DBR_CG_USER_JOIN_TABLE_HALL_GOLD(dwContextID,pData,wDataSize);
 			break;
 		}
 	}
@@ -759,13 +755,40 @@ bool CDataBaseEngineSink::OnRequestLoadAndroidUser(DWORD dwContextID, VOID * pDa
 	}
 	CLog::Log(log_debug, "wAndroidCount: %d", GameAndroidInfo.wAndroidCount);
 
-	//发送信息
-	WORD wHeadSize=sizeof(GameAndroidInfo)-sizeof(GameAndroidInfo.AndroidParameter);
-	WORD wDataSize_=GameAndroidInfo.wAndroidCount*sizeof(GameAndroidInfo.AndroidParameter[0]);
-	g_AttemperEngineSink->OnEventDataBaseResult(DBR_GR_GAME_ANDROID_INFO,dwContextID,&GameAndroidInfo,wHeadSize+wDataSize_);
+
+	//增加机器玩家
+	for (int i = 0; i < GameAndroidInfo.wAndroidCount; i++)
+	{
+		//构造数据
+		tagUserInfo Info;
+		ZeroMemory(&Info, sizeof(tagUserInfo));
+
+		//数据赋值
+		Info.bAndroidUser = true;
+		Info.cbGender = GameAndroidInfo.AndroidParameter[i].cbGender;
+		Info.dwUserID = GameAndroidInfo.AndroidParameter[i].dwUserID;
+		Info.lDiamond = GameAndroidInfo.AndroidParameter[i].lDiamond;
+		Info.lGold = GameAndroidInfo.AndroidParameter[i].lGold;
+		Info.lOpenRoomCard = GameAndroidInfo.AndroidParameter[i].lOpenRoomCard;
+
+		lstrcpyn(Info.szNickName, GameAndroidInfo.AndroidParameter[i].szNickName, CountArray(Info.szNickName));
+		lstrcpyn(Info.szHeadUrl, GameAndroidInfo.AndroidParameter[i].szHeadUrl, CountArray(Info.szHeadUrl));
+
+		//状态设置
+		Info.cbUserStatus=US_FREE;
+		Info.wTableID=INVALID_TABLE;
+		Info.wChairID=INVALID_CHAIR;
+		Info.dwLogonTime=(DWORD)time(NULL);
+		Info.lRestrictScore=0L;//屏蔽每局封顶
+
+		//插入数据
+		CRobotManager::InsertRobot(Info);
+	}
+
+	//设置机器人自动加入房间定时器
+	CRobotManager::SetRobotTimer();
 
 	return true;
-
 }
 
 //加载断线重连
@@ -1819,72 +1842,4 @@ bool CDataBaseEngineSink::On_DBR_CG_USER_JOIN_TABLE_NO_PASS(DWORD dwContextID, v
 	*/
 
 	return g_AttemperEngineSink->OnEventDataBaseResult(DBO_GC_USER_JOIN_TABLE_NO_PASS,dwContextID,&Dbo,sizeof(Dbo));
-}
-
-//加入桌子 金币大厅桌子
-bool CDataBaseEngineSink::On_DBR_CG_USER_JOIN_TABLE_HALL_GOLD(DWORD dwContextID, void *pData, WORD wDataSize)
-{
-	//数据包校验
-	if (sizeof(STR_SUB_CG_USER_JOIN_GOLD_HALL_ROOM) != wDataSize)
-		return false;
-
-	//校验用户
-	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerBySocketID(dwContextID);
-	if (NULL == pIServerUserItem) return true;
-
-	STR_SUB_CG_USER_JOIN_GOLD_HALL_ROOM* pDbReq = (STR_SUB_CG_USER_JOIN_GOLD_HALL_ROOM*)pData;
-
-	////初始化一次金币场房间规则
-	//STR_SUB_CG_USER_CREATE_ROOM rule;
-	//ZeroMemory(&rule, sizeof(STR_SUB_CG_USER_CREATE_ROOM));
-
-	//tagTableRule *pTableRule = (tagTableRule *)rule.CommonRule;
-	//pTableRule->GameMode = 2;
-	//pTableRule->GameCount = 2;
-	//pTableRule->PlayerCount = 3;
-	//pTableRule->CellScore = 1;
-	//pTableRule->FangZhu = 0;
-	//pTableRule->dwLevelGold = 2000;   //1000 2000 4000 10000
-
-	//TCHAR tmpRealRoomRule[520] = { 0 };
-	//BinToStr(rule.CommonRule, tmpRealRoomRule, 0, 128);
-	//BinToStr(rule.SubGameRule, &tmpRealRoomRule[256], 128, 256);
-
-	//数据库传入参数
-	m_TreasureDB->ResetParameter();
-	//m_TreasureDB->AddParameter(TEXT("@RoomRule"), tmpRealRoomRule);  //第一次添加用
-	m_TreasureDB->AddParameter(TEXT("@dwUserID"), pIServerUserItem->GetUserID());
-	m_TreasureDB->AddParameter(TEXT("@byGameMod"), pDbReq->byGameMod);
-	m_TreasureDB->AddParameter(TEXT("@byType"), pDbReq->byType);
-	m_TreasureDB->AddParameter(TEXT("@dwKindID"), g_GameCtrl->GetKindID());
-	m_TreasureDB->AddParameter(TEXT("@dwFirmID"), _MYSTERY);
-
-	//执行查询
-	LONG lResultCode = m_TreasureDB->ExecuteProcess(TEXT("GSP_CG_USER_JOIN_GOLD_HALL_ROOM"), true);
-
-	STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD Dbo;
-	ZeroMemory(&Dbo,sizeof(STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD));
-	Dbo.lResultCode = lResultCode;
-	Dbo.dwKindID = g_GameCtrl->GetKindID();
-	Dbo.byGameType =  pDbReq->byType;
-
-	/*
-	if(lResultCode == DB_SUCCESS)
-	{
-		TCHAR szRealRoomRule[520] = {0};
-		m_TreasureDB->GetValue_String(TEXT("RealRoomRule"), szRealRoomRule, sizeof(szRealRoomRule));
-
-		StrToBin(szRealRoomRule, Dbo.strCreateRoom.CommonRule, 0, 255);
-		StrToBin(szRealRoomRule, Dbo.strCreateRoom.SubGameRule, 256, 512);
-
-		Dbo.dwMinGold = m_TreasureDB->GetValue_DWORD(TEXT("Gold"));
-
-		//不使用数据库来控制加入房间流程 //只从数据库获取子游戏规则
-		//Dbo.dwPassword = m_TreasureDB->GetValue_DWORD(TEXT("TableID"));
-	}
-	*/
-
-	g_AttemperEngineSink->OnEventDataBaseResult(DBO_GC_USER_JOIN_TABLE_HALL_GOLD,dwContextID,&Dbo,sizeof(Dbo));
-
-	return true;
 }

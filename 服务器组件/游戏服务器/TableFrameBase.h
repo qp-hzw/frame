@@ -24,7 +24,7 @@ struct tagTableRule
 	BYTE	GameCount;				//游戏局数 0-无限局
 	BYTE	PlayerCount;			//玩家数量 0-任意人数可开
 
-	BYTE	cbPayType;				//支付方式，0房主支付、1AA制
+	BYTE	cbPayType;				//支付方式，0房主支付、1AA制 -- 房卡模式才需要
 
 	BYTE	bRefuseSameIP;			//允许同IP    0-不允许 1-允许
 	BYTE	bDistanceIn300;			//允许300米	  0-不许云 1-允许
@@ -45,10 +45,6 @@ struct tagTableRule
     
 	BYTE	byMask;					//1 AA支付;  2大赢家支付
 	DWORD	dwDizhu;				//底注
-	//TODONOW 如果是在俱乐部的金币场,这里就是房主设置的; 
-	//如果是在大厅的房卡金币场,这里就是系统设置的; 
-	//如果是在大厅的金币场, 这里就是系统设置的
-    //DWORD	dwLevelGold;			//进场的最小身价 
 };
 
 /////////////////////////////////////////////////////////////////////

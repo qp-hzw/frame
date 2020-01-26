@@ -3,14 +3,13 @@
 #include "Player.h"
 #include "GameCtrl.h"
 #include "TableManager.h"
+#include "PlayerManager.h"
 
-//时间标识
-#define IDI_LOAD_ANDROID_USER			(IDI_ROBOT_MODULE_START+1)			//机器信息
-//时间定义 秒
-#define TIME_LOAD_ANDROID_USER				3000L								//加载机器
+#define IDI_LOAD_ANDROID_USER			(IDI_MAIN_MODULE_START+1)			//加载机器人
+#define TIME_LOAD_ANDROID_USER				3000L							//加载机器
+
 
 std::vector<CPlayer *> CRobotManager::s_RobotArray;
-
 
 //增
 bool CRobotManager::InsertRobot(tagUserInfo & UserInfo)
@@ -31,6 +30,7 @@ bool CRobotManager::InsertRobot(tagUserInfo & UserInfo)
 
 	//插入用户
 	s_RobotArray.push_back(pPlayer);
+	CPlayerManager::InsertPlayer(0, *(pPlayer->GetUserInfo()));
 
 	return true;
 }
@@ -55,32 +55,6 @@ bool CRobotManager::DeleteRobot(CPlayer * pPlayer)
 	return true;
 }
 
-//查
-CPlayer * CRobotManager::FindRobotByID(DWORD dwUserID)
-{
-	for(auto player : s_RobotArray)
-	{
-		if(player && player->GetUserID() == dwUserID)
-			return player;
-	}
-
-	return NULL;
-}
-
-//查
-CPlayer * CRobotManager::FindRobotByIndex(WORD index)
-{
-	if (index >= s_RobotArray.size())
-		return NULL;
-	return s_RobotArray[index];
-}
-
-//查总数
-DWORD CRobotManager::RobotCount()
-{
-	return s_RobotArray.size();
-}
-
 //设置机器人自动加入房间定时器
 void CRobotManager::SetRobotTimer()
 {
@@ -88,62 +62,58 @@ void CRobotManager::SetRobotTimer()
 }
 
 //设置机器人自动加入房间
-bool CRobotManager::On_ANDROID_JOIN_GAME()
+void CRobotManager::On_ANDROID_JOIN_GAME()
 {
-	// 1、校验
+	CLog::Log(log_debug, "机器人自动加入房间 begin");
+	std::vector<CTableFrame*> table_array(CTableManager::GetAllGlodTable());
+	CLog::Log(log_debug, "金币场 空闲房间数目: %d", table_array.size());
+	for(auto pTable :table_array )
+	{
+		if (pTable == NULL) continue;
 
-	// 2、查找金币场桌子
-	WORD wChairID;
-	CTableFrame *pTableFrame = CTableManager::GetGlodRoomEmptyChair(wChairID, 0, true);
-	if (pTableFrame == NULL)
-		return true;
+		//桌子中是否有真实玩家
+		if (!pTable->IsTruePlayer()) 
+		{
+			CLog::Log(log_debug, "金币场 桌子【%d】 没有真实玩家", pTable->GetTableID());
+			continue;
+		}
 
-	// 3、椅子校验
-	if (wChairID == INVALID_CHAIR)
-		return true;
+		//查找空闲机器人
+		CPlayer *pPlayer = GetFreeAndroid();
+		if (pPlayer == NULL) 
+		{
+			CLog::Log(log_debug, "金币场 桌子【%d】 没有找到机器人", pTable->GetTableID());
+			break;
+		}
 
-	// 4、房间规则校验
-	tagTableRule *pTableRule = (tagTableRule *)pTableFrame->GetCustomRule();
-	if (pTableRule == NULL)
-		return true;
+		//坐下
+		if( 0 != pTable->PlayerSitTable(pPlayer))
+		{
+			CLog::Log(log_debug, "金币场 桌子【%d】 没有找到机器人", pTable->GetTableID());
+			continue;
+		}
 
-	// 5、桌子是否在游戏中校验
-	if (GAME_STATUS_FREE != pTableFrame->GetGameStatus())
-		return true;
-
-	// 6、桌子中是否有真实玩家
-	if (!pTableFrame->IsTruePlayer())
-		return true;
-
-	// 7、查找符合条件的机器人
-	CPlayer *pPlayer = GetAndroidUser(pTableFrame);
-	if (pPlayer == NULL)
-		return true;
-
-	// 8、机器人坐下
-	if (pTableFrame->PlayerSitTable(pPlayer, wChairID) != 0)
-		return true;
-
-	// 9、机器人准备
-	if (pTableFrame->PlayerReady(wChairID, pPlayer) != 0)
-		return true;
-
-	return true;
+		//准备
+		if (0 != pTable->PlayerReady(pPlayer)) 
+		{
+			CLog::Log(log_debug, "金币场 桌子【%d】 没有找到机器人", pTable->GetTableID());
+			continue;
+		}
+	}
 }
 
 //查找符合条件的机器人用户
-CPlayer* CRobotManager::GetAndroidUser(CTableFrame *pTableFrame)
+CPlayer* CRobotManager::GetFreeAndroid()
 {
-
-	for (int i = 0; i < RobotCount(); i++)
+	for (int i = 0; i < s_RobotArray.size(); i++)
 	{
 		//获取机器人
-		CPlayer *robot = FindRobotByIndex(i);
+		CPlayer *robot = s_RobotArray[i];
 
 		//机器人校验
-		if ((robot == NULL) || (US_FREE != robot->GetUserStatus()))
-			continue;
-
-		return robot;
+		if (robot  && (US_FREE == robot->GetUserStatus()))
+			return robot;
 	}
+
+	return NULL;
 }
