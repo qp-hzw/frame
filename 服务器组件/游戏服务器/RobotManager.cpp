@@ -64,9 +64,7 @@ void CRobotManager::SetRobotTimer()
 //设置机器人自动加入房间
 void CRobotManager::On_ANDROID_JOIN_GAME()
 {
-	CLog::Log(log_debug, "机器人自动加入房间 begin");
 	std::vector<CTableFrame*> table_array(CTableManager::GetAllGlodTable());
-	CLog::Log(log_debug, "金币场 空闲房间数目: %d", table_array.size());
 	for(auto pTable :table_array )
 	{
 		if (pTable == NULL) continue;
@@ -89,14 +87,14 @@ void CRobotManager::On_ANDROID_JOIN_GAME()
 		//坐下
 		if( 0 != pTable->PlayerSitTable(pPlayer))
 		{
-			CLog::Log(log_debug, "金币场 桌子【%d】 没有找到机器人", pTable->GetTableID());
+			CLog::Log(log_debug, "金币场 桌子【%d】 机器人坐下失败", pTable->GetTableID());
 			continue;
 		}
 
 		//准备
 		if (0 != pTable->PlayerReady(pPlayer)) 
 		{
-			CLog::Log(log_debug, "金币场 桌子【%d】 没有找到机器人", pTable->GetTableID());
+			CLog::Log(log_debug, "金币场 桌子【%d】 机器人准备失败", pTable->GetTableID());
 			continue;
 		}
 	}

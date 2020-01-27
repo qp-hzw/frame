@@ -96,6 +96,35 @@ void CTableFrame::SetTableAutoDismiss(DWORD dwMinutes)
 	SetGameTimer(IDI_ROOM_AUTO_DISMISS, dwMinutes*TIME_ROOM_AUTO_DISMISS, 1, NULL); 
 }
 
+//检测房间
+void CTableFrame::CheckRoomTruePlayer()
+{
+	bool flag = true;
+	for (auto it = m_player_list.begin(); it != m_player_list.end(); it++)
+	{
+		if (((*it) != NULL) && (!(*it)->IsAndroidUser()))
+			flag = false;
+	}
+
+	if (flag == true)
+	{
+		HandleDJGameEnd(GAME_CONCLUDE_NORMAL);
+	}
+}
+
+//是否是机器人
+bool CTableFrame::IsRobot(WORD wChairID)
+{
+	if (wChairID > m_wChairCount)
+		return false;
+
+	CPlayer *player = m_player_list[wChairID];
+	if (player == NULL)
+		return false;
+
+	return player->IsAndroidUser();
+}
+
 //设置表决解散房间定时器
 void CTableFrame::SetVoteDismissRoom()
 {
@@ -281,9 +310,6 @@ bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 					g_TCPSocketEngine->SendData(MDM_USER,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
 				}
 			}
-
-			//断开用户 socket
-			CPlayerManager::CloseSocket(pIServerUserItem);
 		}
 
 		CTableManager::DeleteTable(this);
@@ -619,6 +645,10 @@ int CTableFrame::PlayerLeaveTable(CPlayer* pPlayer)
 	//广播发送
 	SendTableData(INVALID_CHAIR, SUB_GR_USER_STATUS, &GameStatus, sizeof(GameStatus), MDM_USER);
 
+	//断开用户 socket (金币场不断)
+	if (m_cbTableMode != TABLE_MODE_GOLD)
+		CPlayerManager::CloseSocket(pPlayer);
+
 	//2. Table
 	auto ite1 = find(m_user_list.begin(), m_user_list.end(), pPlayer);
 	if (ite1 != m_user_list.end())
@@ -631,6 +661,10 @@ int CTableFrame::PlayerLeaveTable(CPlayer* pPlayer)
 	{
 		*ite2 = NULL;
 	}
+
+	//检测房间里是否还有真人 没有真人大局结束
+	if (!pPlayer->IsAndroidUser())
+		CheckRoomTruePlayer();
 }
 //玩家准备
 int CTableFrame::PlayerReady(CPlayer* pPlayer) 
@@ -884,7 +918,7 @@ bool CTableFrame::SendTableData(WORD wChairID, WORD wSubCmdID, VOID * pData, WOR
 	{
 		for (auto it = m_user_list.begin(); it != m_user_list.end(); it++)   //这里旁观用户也会发送
 		{
-			if ((*it) != NULL)
+			if (((*it) != NULL) && (!(*it)->IsAndroidUser()))
 			{
 				g_GameCtrl->SendData((*it), wMainCmdID, wSubCmdID, pData, wDataSize);
 			}
@@ -897,7 +931,8 @@ bool CTableFrame::SendTableData(WORD wChairID, WORD wSubCmdID, VOID * pData, WOR
 		//获取用户
 		CPlayer * pIServerUserItem = GetTableUserItem(wChairID);
 
-		if ((pIServerUserItem == NULL)) return false;
+		if (pIServerUserItem == NULL) return false;
+		if (pIServerUserItem->IsAndroidUser()) return false;
 		//发送数据
 		g_GameCtrl->SendData(pIServerUserItem, wMainCmdID, wSubCmdID, pData, wDataSize);
 
@@ -1401,7 +1436,7 @@ bool CTableFrame::IsTruePlayer()
 {
 	for (auto it = m_player_list.begin(); it != m_player_list.end(); it++)
 	{
-		if (*it != NULL || !(*it)->IsAndroidUser())
+		if ((*it != NULL) && (!(*it)->IsAndroidUser()))
 			return true;
 	}
 

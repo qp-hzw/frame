@@ -187,6 +187,9 @@ public:
 	//设置房间自动解散时间 added by lizhihu
 	virtual void SetTableAutoDismiss(DWORD dwMinutes = 1);
 
+	//检测房间
+	void CheckRoomTruePlayer();
+
 #pragma endregion
 
 	//子游戏与框架接口函数
@@ -194,7 +197,7 @@ public:
 	// 1金币; 2私有; 3比赛
 	virtual int GameType() { return m_tagTableRule.GameMode; }
 	//is roboot
-	virtual bool IsRobot(WORD wChairID) { return true; }
+	virtual bool IsRobot(WORD wChairID);
 	//get player base info
 	virtual BASE_PLAYERINFO GetPlayerBaseInfo(WORD wChairID) { BASE_PLAYERINFO i; return i; }
 

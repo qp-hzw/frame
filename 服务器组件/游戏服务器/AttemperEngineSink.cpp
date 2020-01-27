@@ -147,7 +147,7 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		{
 			memcpy(szInernet_ip, TEXT("127.0.0.1"), CountArray(szInernet_ip));
 		}
-
+		//memcpy(szInernet_ip, TEXT("127.0.0.1"), CountArray(szInernet_ip));
 		lstrcpyn(ServerItem.szServerAddr,szInernet_ip ,CountArray(ServerItem.szServerAddr));
 
 		ServerItem.wServerPort = 0;

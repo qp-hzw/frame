@@ -198,7 +198,7 @@ CTableFrame* CTableManager::GetGlodTable(BYTE byType)
 	return pTableFrameReturn;
 }
 
-//查找搜哦有金币场桌子
+//查找所有金币场桌子
 std::vector<CTableFrame*> CTableManager::GetAllGlodTable()
 {
 	std::vector<CTableFrame*> glod_talbe_array;
@@ -206,7 +206,8 @@ std::vector<CTableFrame*> CTableManager::GetAllGlodTable()
 	{
 		if(item && 
 			(item->GetGameStatus() == GAME_STATUS_FREE) &&
-			(item->GetTableMode() == TABLE_MODE_GOLD))
+			(item->GetTableMode() == TABLE_MODE_GOLD)	&&
+			item->GetSitUserCount() < item->GetChairCount())
 		{
 			glod_talbe_array.push_back(item);
 		}

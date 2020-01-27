@@ -144,6 +144,7 @@ CPlayer * CPlayerManager::FindPlayerBySocketID(DWORD dwScoketID)
  void CPlayerManager::CloseSocket(CPlayer* player)
 {
 	if(player == NULL ) return;
+	if(player->IsAndroidUser()) return;
 
 	CLog::Log(log_debug, "¹Ø±ÕÍæ¼Òsocket %d", player->GetSocketID());
 	g_TCPNetworkEngine->CloseSocket(player->GetSocketID());

@@ -907,7 +907,7 @@ bool CHandleFromGate::CreateTableClub(STR_DBO_GC_CLUB_CREATE_TABLE * pDbo, CPlay
 	DWORD dwPassword = GenerateTablePassword();
 
 	//设置桌子属性
-	//pCurTableFrame->SetTableOwner(pIServerUserItem->GetUserID());
+	pCurrTableFrame->SetTableOwner(pIServerUserItem->GetUserID());
 	pCurrTableFrame->SetTableID(dwPassword);
 
 	//设置房间自动解散，默认一分钟 -- 这里是指不开始游戏 自动一分钟后解散
@@ -974,7 +974,8 @@ bool CHandleFromGate::CreateTableHallGold(STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD *
 	CLog::Log(log_debug, "dwPassword: %d", dwPassword);
 
 	//设置桌子属性
-	//pCurTableFrame->SetTableOwner(pIServerUserItem->GetUserID());
+	std::cout << pIServerUserItem->GetUserID() << std::endl;
+	pCurrTableFrame->SetTableOwner(pIServerUserItem->GetUserID());
 	pCurrTableFrame->SetTableID(dwPassword);
 
 	//设置金币场场次
@@ -999,13 +1000,6 @@ bool CHandleFromGate::CreateTableHallGold(STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD *
 	if(pSubGameCfg != NULL)
 	{
 		pCurrTableFrame->SetSubGameRule(pSubGameCfg);
-	}
-
-	//  new  获取规则后初始化子游戏
-	if (!pCurrTableFrame->InitTableFrameSink())
-	{
-		SendRequestFailure(pIServerUserItem, TEXT("游戏初始化失败！"), REQUEST_FAILURE_NORMAL);
-		return true; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
 	}
 
 	//用户坐下		TODO 后面让客户端主动发送
@@ -1043,7 +1037,7 @@ bool CHandleFromGate::CreateTableAutoClub(STR_DBO_CG_USER_JOIN_TABLE_NO_PASS * p
 	DWORD dwPassword = GenerateTablePassword();
 
 	//设置桌子属性
-	//pCurTableFrame->SetTableOwner(pIServerUserItem->GetUserID());
+	pCurrTableFrame->SetTableOwner(pIServerUserItem->GetUserID());
 	pCurrTableFrame->SetTableID(dwPassword);
 
 	//设置房间自动解散，默认一分钟 -- 这里是指不开始游戏 自动一分钟后解散
@@ -1066,13 +1060,6 @@ bool CHandleFromGate::CreateTableAutoClub(STR_DBO_CG_USER_JOIN_TABLE_NO_PASS * p
 	if(pSubGameCfg != NULL)
 	{
 		pCurrTableFrame->SetSubGameRule(pSubGameCfg);
-	}
-
-	//  new  获取规则后初始化子游戏
-	if (!pCurrTableFrame->InitTableFrameSink())
-	{
-		SendRequestFailure(pIServerUserItem, TEXT("游戏初始化失败！"), REQUEST_FAILURE_NORMAL);
-		return true; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
 	}
 
 	/* 用户坐下 */
