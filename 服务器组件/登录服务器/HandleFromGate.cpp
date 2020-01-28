@@ -873,12 +873,14 @@ bool CHandleFromGate::On_CMD_LC_Logon_RepeatLogon(DWORD UserID, DWORD dwScoketID
 		g_GameCtrl->SendData(player->GetSocketID(), MDM_LOGON, CMD_LC_LOGON_REPEAT_LOGON, &pCMDLogonRepeatLogon, sizeof(STR_CMD_LC_LOGON_REPEAT_LOGON));
 		//关闭连接 --  关闭之前的连接
 		g_TCPNetworkEngine->CloseSocket(player->GetSocketID());
+		//删除之前玩家
+		CPlayerManager::DeletePlayerByID(UserID);
 
-		//提示已登录的用户
+		//提示已登录的用户 TODONOW 使用新的消息, 不能是CMD_LC_LOGON_REPEAT_LOGON
+		/*
 		_snwprintf(pCMDLogonRepeatLogon.szDescribe, sizeof(pCMDLogonRepeatLogon.szDescribe), TEXT("账号在其它地方登录"));
 		g_GameCtrl->SendData(dwScoketID, MDM_LOGON, CMD_LC_LOGON_REPEAT_LOGON, &pCMDLogonRepeatLogon, sizeof(STR_CMD_LC_LOGON_REPEAT_LOGON));
-
-		CPlayerManager::DeletePlayerByID(UserID);
+		*/
 
 		bIsRepeatLogon = true;
 	}
