@@ -68,7 +68,7 @@ int CGameCtrl::InitializeService()
 	if (m_TCPNetworkEngine->SetServiceParameter(wServicePort)==false) return 12;
 
 	/***************************************************  log 配置信息 *************************************************/
-	CLog::Init("logon.log");
+	CLog::Init("logon");
 
 	CLog::Log(log_debug, "service create success");
 	return 0;

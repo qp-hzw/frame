@@ -118,8 +118,7 @@ int CGameCtrl::InitializeService()
 	if (m_TCPSocketEngine->SetServiceID(NETWORK_CORRESPOND)==false) return 11;
 
 	/***************************************************  log 配置信息 *************************************************/
-	std::string log_nam= "GameServer.log";
-	CLog::Init(log_nam.c_str());
+	CLog::Init("GameServer");
 
 	/***************************************************  SubGame 配置信息 *************************************************/
 	//读取子游戏配置文件

@@ -77,7 +77,7 @@ int CGameCtrl::InitializeService()
 
 	/***************************************************  log 配置信息 *************************************************/
 	//设置服务器日志输出等级
-	CLog::Init("correspond.log");
+	CLog::Init("correspond");
 
 	CLog::Log(log_debug, "service create success");
 	return 0;
