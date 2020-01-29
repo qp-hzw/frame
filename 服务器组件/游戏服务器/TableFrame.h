@@ -194,8 +194,8 @@ public:
 
 	//子游戏与框架接口函数
 public:
-	// 1金币; 2私有; 3比赛
-	virtual int GameType() { return m_tagTableRule.GameMode; }
+	// 0房卡 1比赛; 2金币; 3房卡金币 4牌友圈
+	virtual int GameType() { return m_cbTableMode; }
 	//is roboot
 	virtual bool IsRobot(WORD wChairID);
 	//get player base info

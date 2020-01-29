@@ -645,8 +645,8 @@ int CTableFrame::PlayerLeaveTable(CPlayer* pPlayer)
 	//广播发送
 	SendTableData(INVALID_CHAIR, SUB_GR_USER_STATUS, &GameStatus, sizeof(GameStatus), MDM_USER);
 
-	//断开用户 socket (金币场不断)
-	if (m_cbTableMode != TABLE_MODE_GOLD)
+	//断开用户 socket (金币场结束不断)
+	if (m_cbTableMode != TABLE_MODE_GOLD)   //断线重连产生问题
 		CPlayerManager::CloseSocket(pPlayer);
 
 	//2. Table
@@ -1129,8 +1129,7 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 			tagUserInfo *pUserInfo = pIServerUserItem->GetUserInfo();
 			memset(&GameStatus1.UserInfo, 0, sizeof(tagUserInfo));
 			memcpy(&GameStatus1.UserInfo, pUserInfo, sizeof(tagUserInfo));
-
-			std::wcout << GameStatus1.UserInfo.szHeadUrl << std::endl;
+			CLog::Log(log_debug, "wChairID: %d", GameStatus1.UserInfo.wChairID);
 
 			g_GameCtrl->SendData(pIServerUserItem, MDM_USER, SUB_GR_USER_STATUS, &GameStatus1, sizeof(GameStatus1));
 
@@ -1150,9 +1149,6 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 					tagUserInfo *pUserInfo = (*it)->GetUserInfo();
 					memset(&GameStatus.UserInfo, 0, sizeof(tagUserInfo));
 					memcpy(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
-
-					std::wcout << GameStatus.UserInfo.szHeadUrl << std::endl;
-					CLog::Log(log_debug, "wChairID: %d", GameStatus.UserInfo.wChairID);
 
 					g_GameCtrl->SendData(pIServerUserItem, MDM_USER, SUB_GR_USER_STATUS, &GameStatus, sizeof(GameStatus));
 				}
