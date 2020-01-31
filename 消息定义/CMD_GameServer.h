@@ -132,6 +132,11 @@
 #define CMD_GR_FRAME_CHAT					107								//用户聊天
 
 
+//道具消耗
+#define SUB_CG_EFFECT						9								//道具消耗 -- 子游戏中扔鸡蛋, 鲜花, 炸弹
+#define CMD_GC_EFFECT_RESULT				109								//操作失败
+#define CMD_GC_EFFECT_BRODCAST				209								//操作广播
+
 //下面client没有
 #define SUB_GF_LOOKON_CONFIG			803									//旁观配置
 

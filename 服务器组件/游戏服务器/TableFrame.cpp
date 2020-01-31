@@ -1253,6 +1253,33 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 
 			return true;
 		}	
+	case SUB_CG_EFFECT: //道具消耗
+		{
+			//效验参数
+			if (wDataSize != sizeof(STR_SUB_CG_EFFECT)) 
+				return false;
+
+			//变量定义
+			STR_SUB_CG_EFFECT *pSub = (STR_SUB_CG_EFFECT *)pData;
+
+			//道具检测用户 -- 使用物品失败
+			if( !(pIServerUserItem-> UseProp(pSub->dwGoodsID)) )
+			{
+				g_GameCtrl->SendData(pIServerUserItem, MDM_G_FRAME, CMD_GC_EFFECT_RESULT, NULL, 0);
+				return true;
+			}
+
+			//使用成功, 广播给所有人
+			STR_CMD_GC_EFFECT_BRODCAST cmd;
+			ZeroMemory(&cmd, sizeof(cmd));
+
+			//赋值
+			cmd.from_chair =  pIServerUserItem->GetChairID();
+			cmd.target_chair = pSub->target_chair;
+			cmd.dwGoodsID = pSub->dwGoodsID;
+			SendTableData(INVALID_CHAIR, CMD_GC_EFFECT_BRODCAST, &cmd, sizeof(cmd), MDM_G_FRAME);
+			return true;
+		}
 	case SUB_GF_LOOKON_CONFIG:		//旁观配置
 		{
 			//效验参数

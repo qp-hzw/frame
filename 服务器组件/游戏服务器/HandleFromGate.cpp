@@ -899,8 +899,7 @@ bool CHandleFromGate::CreateTableHallGold(STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD *
 	{
 		SendRequestFailure(pIServerUserItem, TEXT("用户坐下失败!"), REQUEST_FAILURE_NORMAL);
 		return true; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
-	}		
-
+	}
 	
 	//发送加入金币房间成功
 	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_ENTER_SUBGAME_ROOM, NULL, 0);

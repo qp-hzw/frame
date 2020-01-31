@@ -47,6 +47,15 @@ CPlayer::CPlayer(tagUserInfo & UserInfo)
 	return;
 }
 
+//用户使用道具
+bool CPlayer::UseProp(DWORD dwGoodsID)
+{
+	//TODONOW 待实现
+	//1. 校验
+	//2. 通知数据库修改
+
+	return true;
+}
 //用户胜率
 WORD CPlayer::GetUserWinRate()
 {

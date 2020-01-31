@@ -115,7 +115,7 @@ public:
 	virtual DWORD GetDBQuestID() { return m_dwDBQuestID++; }
 	
 
-	//积分信息
+	//用户道具
 public:
 	//用户积分
 	virtual SCORE GetUserScore() { return m_UserInfo.lScore; }
@@ -135,6 +135,9 @@ public:
 	virtual SCORE GetUserGold(){ return m_UserInfo.lGold; };
 	//设置用户金币
 	virtual void SetUserGold(SCORE lGold){ m_UserInfo.lGold = lGold; }
+
+	//用户使用道具 
+	bool UseProp(DWORD dwGoodsID);
 
 	//积分信息
 public:

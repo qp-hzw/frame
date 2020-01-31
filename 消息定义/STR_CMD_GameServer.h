@@ -589,9 +589,22 @@ struct STR_CMD_GR_FRAME_GAME_DISSMISS
 	BYTE					cbAgree[MAX_CHAIR];						    //是否同意解散		0-不同意	1-同意   2-未表决
 };
 
-#pragma endregion
 
-#pragma region MDM_GF_GAME 子游戏命令
+//消耗道具
+struct STR_SUB_CG_EFFECT
+{
+	BYTE					target_chair;						    //目标玩家 椅子号
+	DWORD					dwGoodsID;								//物品ID
+};
+
+
+//消耗道具广播
+struct STR_CMD_GC_EFFECT_BRODCAST
+{
+	BYTE					from_chair;								//from 椅子号
+	BYTE					target_chair;						    //to 椅子号
+	DWORD					dwGoodsID;								//物品ID
+};
 
 #pragma endregion
 
