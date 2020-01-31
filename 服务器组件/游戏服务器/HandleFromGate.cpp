@@ -745,7 +745,7 @@ bool CHandleFromGate::On_SUB_CG_USER_CREATE_ROOM(VOID * pData, WORD wDataSize, D
 	}
 
 	//发送房间规则选择 给client
-	g_GameCtrl->SendData(player, MDM_USER, CMD_GC_USER_GET_ROOM_RULE, &RoomRuleManager::GetRoomRuleSetting(), sizeof(rule_arry));
+	g_GameCtrl->SendData(player, MDM_USER, CMD_GC_USER_GET_ROOM_RULE, &RoomRuleManager::Instance()->GetRoomRuleSetting(), sizeof(rule_arry));
 
 	return true;
 }
@@ -763,7 +763,7 @@ bool CHandleFromGate::On_SUB_CG_USER_SET_ROOM_RULE(VOID * pData, WORD wDataSize,
 
 	//获取完整房间规则 TODONOW
 	tagTableRule cfg;
-	RoomRuleManager::GetRoomRule(cfg, pCmd->byChoose);
+	RoomRuleManager::Instance()->GetRoomRule(cfg, pCmd->byChoose);
 	cfg.GameMode = pCmd->byGameMode;
 	
 	//门票校验

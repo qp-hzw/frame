@@ -128,8 +128,7 @@ int CGameCtrl::InitializeService()
 
 
 	//读取房间规则配置文件
-	RoomRuleManager::ReadFrameRoomRule();
-	RoomRuleManager::ReadSubGameRoomRule(dwKindId);
+	RoomRuleManager::Instance()->ReadSubGameRoomRule(dwKindId);
 	return 0;
 }
 //启动内核

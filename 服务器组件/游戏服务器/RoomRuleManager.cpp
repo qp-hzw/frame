@@ -181,7 +181,7 @@ void RoomRuleManager::SetRoomRule(tagTableRule &roomrule, string key_name, byte 
 	}
 	else
 	{
-		//m_SubRoomRuleManager->SetRoomRule(key_name, GetRoomValByKey(key_name, value));
+		m_SubRoomRuleManager->SetRoomRule(key_name, GetRoomValByKey(key_name, value));
 	}
 }
 
