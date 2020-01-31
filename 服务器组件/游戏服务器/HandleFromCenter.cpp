@@ -76,45 +76,33 @@ bool CHandleFromCenter::OnTCPSocketMainTransfer(WORD wSubCmdID, VOID * pData, WO
 				return true;
 			}
 
-			//如果是本服务器的消息, 则通知子游戏解散游戏
-			for(int i = 0; i < CTableManager::TableCount(); i++)
+			CTableFrame *pTableFrame = CTableManager::FindTableByTableID( pCPO->dwTableID);
+			if (NULL == pTableFrame)
+					return true;
+
+			//设置房间处于解散状态
+			pTableFrame->SetDismissState(true);
+
+			//通知客户端弹出大局结算面板
+			STR_CMD_GR_FRAME_DISMISS_RESULT DismissResult;
+			ZeroMemory(&DismissResult, sizeof(DismissResult));
+			DismissResult.cbDismiss = 1;
+			//DismissResult.cbAgree = 1;					
+			if (pTableFrame->GetGameStatus() != GAME_STATUS_FREE)
 			{
-				//校验
-				CTableFrame *pTableFrame = CTableManager::FindTableByIndex(i);
-				if (NULL == pTableFrame)
-					continue;
+				//DismissResult.cbClubQuit = 1;
+			}
 
-				//找到相同桌子号的， 然后解散
-				if(pTableFrame->GetTableID() == pCPO->dwTableID)
-				{
-					//设置房间处于解散状态
-					pTableFrame->SetDismissState(true);
-
-					//通知客户端弹出大局结算面板
-					STR_CMD_GR_FRAME_DISMISS_RESULT DismissResult;
-					ZeroMemory(&DismissResult, sizeof(DismissResult));
-					DismissResult.cbDismiss = 1;
-					//DismissResult.cbAgree = 1;					
-					if (pTableFrame->GetGameStatus() != GAME_STATUS_FREE)
-					{
-						//DismissResult.cbClubQuit = 1;
-					}
-					
-					//pTableFrame->SendTableData(INVALID_CHAIR, CMD_GR_FRAME_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT));
-					
-					//通知子游戏解散房间
-					//空闲状态 直接解散
-					if(GAME_STATUS_FREE == pTableFrame->GetGameStatus())
-					{
-						pTableFrame->HandleDJGameEnd(GAME_CONCLUDE_NORMAL);
-					}
-					//游戏状态则 通知子游戏
-					else
-					{
-						pTableFrame->OnEventClubDismissRoom();
-					}
-					break;
-				}
+			//通知子游戏解散房间
+			//空闲状态 直接解散
+			if(GAME_STATUS_FREE == pTableFrame->GetGameStatus())
+			{
+				pTableFrame->HandleDJGameEnd(GAME_CONCLUDE_NORMAL);
+			}
+			//游戏状态则 通知子游戏
+			else
+			{
+				pTableFrame->OnEventClubDismissRoom();
 			}
 
 			return true;

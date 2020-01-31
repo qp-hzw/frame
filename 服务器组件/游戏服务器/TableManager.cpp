@@ -7,7 +7,7 @@
 
 using namespace std;
 
-std::vector<CTableFrame*>	               CTableManager::s_TableArray;					//桌子数组
+std::list<CTableFrame*>	               CTableManager::s_TableArray;					//桌子数组
 
 //增
 CTableFrame* CTableManager::CreateTable()
@@ -99,14 +99,6 @@ CTableFrame* CTableManager::FindTableByTableID(DWORD dwTableID)
 	return NULL;
 }
 
-//查
-CTableFrame* CTableManager::FindTableByIndex(DWORD dwIndex)
-{
-	if(dwIndex >= s_TableArray.size()) return NULL;
-
-	return s_TableArray.at(dwIndex);
-}
-
 //桌子总数
 DWORD CTableManager::TableCount()
 {
@@ -164,11 +156,8 @@ CTableFrame* CTableManager::GetGlodTable(BYTE byType)
 	CTableFrame *pTableFrameReturn = NULL;
 
 	//寻找金币房空椅子
-	for (WORD i=0; i< TableCount(); i++)
+	for(auto pTableFrame : s_TableArray)
 	{
-		//获取对象
-		CTableFrame *pTableFrame = FindTableByIndex(i);
-
 		if ( (NULL == pTableFrame) || 
 			(pTableFrame->GetGameStatus() != GAME_STATUS_FREE) || 
 			(pTableFrame->GetTableMode() != TABLE_MODE_GOLD) ||

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "Stdafx.h"
+#include <list>
 
 class CTableFrame;
 
@@ -11,7 +12,7 @@ class CTableManager
 {
 	//用户变量
 private:
-	static std::vector<CTableFrame*>                    s_TableArray;               //桌子vector
+	static std::list <CTableFrame*>                    s_TableArray;               //桌子vector
 
 	//
 public:
@@ -25,9 +26,6 @@ public:
 	static bool DeleteAllTable();
 	//查
 	static CTableFrame* FindTableByTableID(DWORD dwTableID);
-	//查
-	static CTableFrame* FindTableByIndex(DWORD Index);
-	
 
 	//获取 空闲金币场桌子 byType: 初级, 中级, 高级场次
 	static CTableFrame* GetGlodTable(BYTE byType);

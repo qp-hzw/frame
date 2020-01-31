@@ -154,14 +154,6 @@ protected:
 
 	//牌友圈房间信息需要写入数据库
 	static bool WriteClubRoomToDB(STR_DBR_CLUB_ROOM_INFO* pTableInfo);
-
-    //寻找下一个空桌子
-	static CTableFrame* GetNextEmptyTable();
-    //生成桌子ID，即加入房间密码
-	static DWORD GenerateTablePassword();
-
-    //根据密码寻找指定桌子
-	static CTableFrame* GetDesignatedTable(const DWORD &dwPassword);
 #pragma endregion 
 
 	#pragma region DB事件通知
