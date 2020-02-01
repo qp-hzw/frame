@@ -56,7 +56,7 @@
 #pragma endregion 
 
 #pragma region MDM_USER 用户汇总
-#define MDM_USER			4									//用户汇总
+#define MDM_USER					2									//用户汇总
 
 //用户状态
 #define SUB_CS_C_USER_OFFLINE		4									//用户断线  game->correspond

@@ -34,20 +34,13 @@
 #define MDM_LOGON					1									//主消息
 
 #define SUB_CL_LOGON_ACCOUNTS		1									//帐号登录
-#define CMD_LC_LOGON_ACCOUNTS		101									//账号登录
-
-#define SUB_CL_LOGON_REGISTER	    2									//帐号注册（返回的是账号登录）
-
+#define SUB_CL_LOGON_REGISTER	    2									//帐号注册（返回的是登录成功）
 #define SUB_CL_LOGON_PLATFORM		3									//平台登陆（第三方登录）
+
+#define CMD_LC_LOGON_ACCOUNTS		101									//登录成功
 #define CMD_LC_LOGON_PLATFORM       103                                 //平台登陆返回
-
 #define CMD_LC_LOGON_REPEAT_LOGON	104									//重复登录
-
 #define CMD_LC_LOGON_LOGON_REWARD   105                                 //登录奖励（老玩家回归 + 节日奖励）
-
-#define CMD_LC_LOGON_UPDATE_NOTIFY	106									//升级提示（登录 + 注册 + 平台登录都会用到）
-
-
 #pragma endregion
 
 #pragma region MDM_LIST 列表命令

@@ -40,10 +40,6 @@ struct DBR_GP_UserQuitInfo
 
 //配置事件
 #define DBR_GR_LOAD_ANDROID_USER	302									//加载机器
-//配置事件
-#define DBR_GR_LOAD_OFFLINE			303									//加载断线重连
-#define DBO_GR_LOAD_OFFLINE			304									//加载断线重连 返回
-
 
 //录像信息保存
 #define DBR_GR_SAVE_RECORDINFO		411									//录像信息保存

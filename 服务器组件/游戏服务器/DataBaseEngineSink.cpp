@@ -96,11 +96,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 			bSucceed = OnRequestLoadAndroidUser(dwContextID,pData,wDataSize,dwUserID);
 			break;
 		}
-	case DBR_GR_LOAD_OFFLINE:			//加载断线重连
-		{
-			bSucceed = On_DBR_GR_LOAD_OFFLINE(dwContextID,pData,wDataSize,dwUserID);
-			break;
-		}
 	case DBR_GR_MODIFY_USER_TREASURE:		//修改用户财富信息
 		{
 			bSucceed = On_DBR_ModifyUserTreasure(dwContextID,pData,wDataSize,dwUserID);
@@ -787,31 +782,6 @@ bool CDataBaseEngineSink::OnRequestLoadAndroidUser(DWORD dwContextID, VOID * pDa
 
 	//设置机器人自动加入房间定时器
 	CRobotManager::SetRobotTimer();
-
-	return true;
-}
-
-//加载断线重连
-bool CDataBaseEngineSink::On_DBR_GR_LOAD_OFFLINE(DWORD dwContextID, VOID * pData, WORD wDataSize, DWORD &dwUserID)
-{
-	//参数校验
-	if(wDataSize != sizeof(STR_DBR_GR_LOAD_OFFLINE)) return false;
-	STR_DBR_GR_LOAD_OFFLINE *pDbr = (STR_DBR_GR_LOAD_OFFLINE*) pData;
-
-	//用户帐户
-	m_TreasureDB->ResetParameter();
-	m_TreasureDB->AddParameter(TEXT("@mystery"),pDbr->byMystery);
-	m_TreasureDB->AddParameter(TEXT("@dwGameID"),pDbr->dwGameID);
-
-	//执行查询
-	long lResultCode=m_TreasureDB->ExecuteProcess(TEXT("GSP_GS_GAMEPROGRESS_INFO"),true);
-
-	if(DB_SUCCESS == lResultCode)
-	{
-		BYTE GameProgress = m_TreasureDB->GetValue_BYTE(TEXT("GameProgress"));
-		g_AttemperEngineSink->OnEventDataBaseResult(DBO_GR_LOAD_OFFLINE,dwContextID,&GameProgress,sizeof(GameProgress));
-	}
-
 
 	return true;
 }

@@ -71,9 +71,7 @@ protected:
 	bool OnRequestLoadAndroidUser(DWORD dwContextID, VOID * pData, WORD wDataSize, DWORD &dwUserID);
 	//机器人自动加入房间
 	bool OnRequestAndroidJoinGame(DWORD dwContextID, VOID * pData, WORD wDataSize, DWORD &dwUserID);
-	//加载断线重连
-	bool On_DBR_GR_LOAD_OFFLINE(DWORD dwContextID, VOID * pData, WORD wDataSize, DWORD &dwUserID);
-	
+
 	//用户权限
 	bool OnRequestManageUserRight(DWORD dwContextID, VOID * pData, WORD wDataSize, DWORD &dwUserID);
 

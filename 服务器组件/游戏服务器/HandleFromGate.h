@@ -92,9 +92,6 @@ protected:
 	#pragma region 待处理
 	//数据事件
 protected:
-	//加载断线重连
-	static bool On_DBO_GR_LOAD_OFFLINE(DWORD dwContextID, VOID * pData, WORD wDataSize);
-	
 	//辅助函数
 protected:
 	//请求失败
