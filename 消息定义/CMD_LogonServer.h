@@ -274,9 +274,8 @@
 #define MDM_SHOP								7							//商城道具
 
 //【子消息号】
-#define SUB_CL_SHOP_QUERY						1							//商城查询 -- 查询商品打折情况
-#define CMD_LC_SHOP_QUERY_RESULT				101							//查询返回
-#define CMD_LC_SHOP_QUERY_FINISH				201							//查询结束
+#define SUB_CL_SHOP_QUERY						1							//商城购买
+#define CMD_LC_SHOP_QUERY_RESULT				101							//商城购买失败返回
 
 #define SUB_CL_BAG_QUERY						2							//背包物品查询
 #define CMD_LC_BAG_RESULT						102							//背包物品返回

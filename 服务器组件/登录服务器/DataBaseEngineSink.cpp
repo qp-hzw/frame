@@ -272,12 +272,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 			return On_DBR_CL_CLUB_QUIT(dwContextID,pData,wDataSize);
 		}
 #pragma endregion
-#pragma region MDM_SHOP 商城道具
-	case DBR_CL_SHOP_QUERY:  //查询商城
-		{
-			return On_DBR_CL_SHOP_QUERY(dwContextID,pData,wDataSize);
-		}
-#pragma endregion
 	}
 
 	return false;
@@ -3757,62 +3751,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_MEMBER_MANAGER(DWORD dwContextID, VOID 
 #pragma endregion
 
 #pragma region MDM_SHOP 商城道具
-//DBR && DBO查询商城
-bool CDataBaseEngineSink::On_DBR_CL_SHOP_QUERY(DWORD dwContextID, VOID * pData, WORD wDataSize)
-{
-	//效验参数
-	if (wDataSize!=sizeof(STR_DBR_CL_SHOP_QUERY)) return false;
-	STR_DBR_CL_SHOP_QUERY *pDBR = (STR_DBR_CL_SHOP_QUERY*) pData;
-
-	//加载类型
-	m_PlatformDB->ResetParameter();
-
-	m_PlatformDB->AddParameter(TEXT("@Mystery"),_MYSTERY);
-	m_PlatformDB->AddParameter(TEXT("@GoodsType"),pDBR->byGoodsType);
-	m_PlatformDB->AddParameter(TEXT("@UserID"),pDBR->dwUserID);
-
-	LONG lResultCode  = m_PlatformDB->ExecuteProcess(TEXT("GSP_CL_SHOP_QUERY"),true);
-
-	//列表发送
-	//变量定义
-	WORD wPacketSize=0;
-	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
-	wPacketSize=0;
-	STR_CMD_LC_SHOP_QUERY_RESULT * pDBO=NULL;
-	while ((lResultCode == DB_SUCCESS) && (m_PlatformDB->IsRecordsetEnd()==false))
-	{
-		//发送信息
-		if ((wPacketSize+sizeof(STR_CMD_LC_SHOP_QUERY_RESULT))>sizeof(cbBuffer))
-		{
-			g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_SHOP_QUERY,dwContextID,cbBuffer,wPacketSize);
-			wPacketSize=0;
-		}
-
-		//读取信息
-		pDBO=(STR_CMD_LC_SHOP_QUERY_RESULT *)(cbBuffer+wPacketSize);
-		pDBO->dwGoodsID=m_PlatformDB->GetValue_DWORD(TEXT("GoodsID"));
-		m_PlatformDB->GetValue_String (TEXT("GoodsName"), pDBO->szGoodsName, CountArray(pDBO->szGoodsName));
-		pDBO->byExtraGiftType=m_PlatformDB->GetValue_BYTE(TEXT("ExtraGiftType"));
-		pDBO->dwExtraGiftCount=m_PlatformDB->GetValue_DWORD(TEXT("ExtraGiftCount"));
-		pDBO->byMoneyType=m_PlatformDB->GetValue_BYTE(TEXT("MoneyType"));
-		pDBO->dwMoneyCount=m_PlatformDB->GetValue_DWORD(TEXT("MoneyCount"));
-		pDBO->byDiscount=m_PlatformDB->GetValue_BYTE(TEXT("Discount"));
-		pDBO->dwLoveLiness=m_PlatformDB->GetValue_DWORD(TEXT("LoveLiness"));
-		m_PlatformDB->GetValue_String (TEXT("Descripe"), pDBO->szDescripe, CountArray(pDBO->szDescripe));
-		m_PlatformDB->GetValue_String (TEXT("Url"), pDBO->szUrl, CountArray(pDBO->szUrl));
-		//设置位移
-		wPacketSize+=sizeof(STR_CMD_LC_SHOP_QUERY_RESULT);
-
-		//移动记录
-		m_PlatformDB->MoveToNext();
-	}
-	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_SHOP_QUERY,dwContextID,cbBuffer,wPacketSize);
-
-	g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_SHOP_QUERY_FINISH,dwContextID,NULL,0);
-
-	return true;
-}
-
 // byte数组转为 string  TODONOW 暂时放在这里处理
 const CString toHexString(const byte * input, const int datasize)
 {

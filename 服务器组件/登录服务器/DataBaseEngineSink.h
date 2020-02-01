@@ -270,11 +270,6 @@ protected:
 
 #pragma endregion
 
-#pragma region MDM_SHOP 商城道具
-protected:
-	//查询商城
-	bool On_DBR_CL_SHOP_QUERY(DWORD dwContextID, VOID * pData, WORD wDataSize);
-#pragma endregion
 };
 
 // byte数组转为 string  TODONOW 暂时放在这里处理

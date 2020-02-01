@@ -1301,29 +1301,8 @@ struct STR_CMD_LC_ROOM_STATE
 //查询商城物品打折情况
 struct STR_SUB_CL_SHOP_QUERY
 {
-	DWORD dwUserID;								//玩家ID
-	BYTE byGoodsType;							//商城物品类型 1房卡 2金币 3金币礼物 4积分礼物
-};
-
-//查询商城返回
-struct STR_CMD_LC_SHOP_QUERY_RESULT
-{
-	DWORD dwGoodsID;							//商品编号
-	TCHAR szGoodsName[LEN_NICKNAME];			//商品名字
-	BYTE  byExtraGiftType;						//额外赠送的财富类型1rmb 2金币 3房卡 4积分
-	DWORD dwExtraGiftCount;						//额外赠送的财富数量
-	BYTE  byMoneyType;							//购买需要的财富类型 1rmb 2金币 3房卡 4积分
-	DWORD dwMoneyCount;							//购买需要的财富数量
-	BYTE  byDiscount;							//折扣
-	DWORD dwLoveLiness;							//增加的魅力值
-	TCHAR szDescripe[128];						//商品描述
-	TCHAR szUrl[256];							//商品url地址
-};
-
-//查询商城结束
-struct STR_CMD_LC_SHOP_QUERY_FINISH
-{
-	BYTE byMask;								//结束标志 1			
+	DWORD dwGoodsID;							//物品ID
+	BYTE byTreasureType;						//财富类型
 };
 
 //背包物品查询 返回

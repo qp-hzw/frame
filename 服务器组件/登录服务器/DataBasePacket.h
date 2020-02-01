@@ -707,19 +707,6 @@ struct STR_DBO_LC_CLUB_STICKY_POST
 #pragma endregion
 #pragma endregion
 
-#pragma region MDM_SHOP 商城道具
-#define DBR_CL_SHOP_QUERY						701							//商城查询 -- 查询商品打折情况
-#define DBO_CL_SHOP_QUERY						702							//商城查询 -- 查询商品打折情况
-#define DBO_CL_SHOP_QUERY_FINISH				703							//商城查询 -- 查询商品打折情况
-
-//查询商城DBR
-struct STR_DBR_CL_SHOP_QUERY
-{
-	DWORD dwUserID;			//玩家ID
-	BYTE byGoodsType;		//物品类型 1rmb购买房卡  2rmb购买金币 3金币购买礼物 4积分购买礼物
-};
-
-#pragma endregion
 
 #pragma region 待整理
 

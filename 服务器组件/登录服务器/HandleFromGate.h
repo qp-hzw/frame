@@ -358,11 +358,6 @@ private:
 #pragma region MDM_SHOP 道具商城
 	//查询商城
 	static bool On_SUB_CL_SHOP_QUERY(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//查询商城返回
-	static bool On_CMD_LC_SHOP_QUERY_RESULT( DWORD dwContextID, VOID * pData, WORD wDataSize);
-	//查询商城结束
-	static bool On_CMD_LC_SHOP_QUERY_FINISH( DWORD dwContextID, VOID * pData, WORD wDataSize);
-
 
 	//背包物品查询
 	static bool On_SUB_CL_BAG_QUERY(VOID * pData, WORD wDataSize, DWORD dwSocketID);

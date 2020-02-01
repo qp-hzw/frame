@@ -350,16 +350,6 @@ bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwScoketID, VOID * p
 			return On_CMD_LC_CLUB_RECORD_FINISH(dwScoketID,pData,wDataSize);
 		}
 #pragma endregion
-#pragma region MDM_SHOP 商城道具
-	case DBO_CL_SHOP_QUERY:		//查询商城
-		{
-			return On_CMD_LC_SHOP_QUERY_RESULT(dwScoketID,pData,wDataSize);
-		}
-	case DBO_CL_SHOP_QUERY_FINISH: //查询商城结束
-		{
-			return On_CMD_LC_SHOP_QUERY_FINISH(dwScoketID,pData,wDataSize);
-		}
-#pragma endregion
 	}
 
 }
@@ -2426,7 +2416,7 @@ bool CHandleFromGate::On_CMD_LC_CLUB_MEMBER_MANAGER_FINISH( DWORD dwScoketID, VO
 	cmd.byMask = 1;
 
 	//处理消息
-	g_GameCtrl->SendData(dwScoketID, MDM_CLUB, CMD_LC_CLUB_MEMBER_MANAGER_FINISH, &cmd, sizeof(STR_CMD_LC_SHOP_QUERY_FINISH));
+	g_GameCtrl->SendData(dwScoketID, MDM_CLUB, CMD_LC_CLUB_MEMBER_MANAGER_FINISH, &cmd, sizeof(cmd));
 	return true;
 }
 //工会基本信息
@@ -2816,6 +2806,14 @@ bool CHandleFromGate::On_SUB_CL_SHOP_QUERY(VOID * pData, WORD wDataSize, DWORD d
 	//校验参数
 	if(wDataSize != sizeof(STR_SUB_CL_SHOP_QUERY)) return false;
 
+	//购买检测
+
+	//购买结果
+
+	//通知client
+
+	//写入数据库 TODONOW
+	/*
 	//处理消息
 	STR_SUB_CL_SHOP_QUERY * pSub = (STR_SUB_CL_SHOP_QUERY *)pData;
 	//定义变量
@@ -2827,27 +2825,7 @@ bool CHandleFromGate::On_SUB_CL_SHOP_QUERY(VOID * pData, WORD wDataSize, DWORD d
 
 	//投递请求
 	g_GameCtrl->PostDataBaseRequest(DBR_CL_SHOP_QUERY, dwSocketID, &Dbr, sizeof(Dbr));
-	return true;
-}
-//查询商城CMD
-bool CHandleFromGate::On_CMD_LC_SHOP_QUERY_RESULT( DWORD dwScoketID, VOID * pData, WORD wDataSize)
-{
-	//校验参数
-	WORD Size = sizeof(STR_CMD_LC_SHOP_QUERY_RESULT);
-	if( (wDataSize%Size) != 0) return false;
-
-	//处理消息
-	g_GameCtrl->SendData(dwScoketID, MDM_SHOP, CMD_LC_SHOP_QUERY_RESULT, pData, wDataSize);
-	return true;
-}
-//查询商城结束CMD
-bool CHandleFromGate::On_CMD_LC_SHOP_QUERY_FINISH( DWORD dwScoketID, VOID * pData, WORD wDataSize)
-{
-	STR_CMD_LC_SHOP_QUERY_FINISH cmd;
-	cmd.byMask = 1;
-
-	//处理消息
-	g_GameCtrl->SendData(dwScoketID, MDM_SHOP, CMD_LC_SHOP_QUERY_FINISH, &cmd, sizeof(STR_CMD_LC_SHOP_QUERY_FINISH));
+	*/
 	return true;
 }
 
