@@ -37,6 +37,8 @@ RoomRuleManager* RoomRuleManager::Instance()
 	{
 		CLog::Log(log_error, "RoomRuleManager:: m_SubRoomRuleManager is null");
 	}
+
+	return _instance;
 }
 //获取房间配置选项
 rule_arry RoomRuleManager::GetRoomRuleSetting()

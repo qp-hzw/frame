@@ -12,7 +12,7 @@ int main(int argc, char **argv)
 	GameCtrl.StartService();
 	while(true)
 	{
-		Sleep(10000000000);
+		Sleep(1000000);
 	}
 
 	return 0;

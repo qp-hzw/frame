@@ -103,7 +103,7 @@ void CRobotManager::On_ANDROID_JOIN_GAME()
 //查找符合条件的机器人用户
 CPlayer* CRobotManager::GetFreeAndroid()
 {
-	for (int i = 0; i < s_RobotArray.size(); i++)
+	for (size_t i = 0; i < s_RobotArray.size(); i++)
 	{
 		//获取机器人
 		CPlayer *robot = s_RobotArray[i];

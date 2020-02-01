@@ -88,7 +88,7 @@ public:
 	//桌子号码
 	 DWORD GetTableID() { return m_UserInfo.wTableID; }
 	//椅子号码
-	 virtual WORD GetChairID() { return m_UserInfo.wChairID; }
+	 virtual BYTE GetChairID() { return static_cast<BYTE>(m_UserInfo.wChairID); }
 
 	//用户状态
 	 BYTE GetUserStatus() { return m_UserInfo.cbUserStatus; }

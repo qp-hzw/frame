@@ -15,6 +15,8 @@ bool CHandleFromCenter::HandlePacket(TCP_Command Command, VOID * pData, WORD wDa
 			return OnTCPSocketMainTransfer(Command.wSubCmdID,pData,wDataSize);	
 		}
 	}
+
+	return true;
 }
 
 //×¢²áÊÂ¼þ

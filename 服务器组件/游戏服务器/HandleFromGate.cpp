@@ -26,6 +26,8 @@ bool CHandleFromGate::HandlePacket(TCP_Command Command, VOID * pData, WORD wData
 			return OnTCPNetworkMainGame(Command.wSubCmdID,pData,wDataSize,dwSocketID);
 		}
 	}
+
+	return true;
 }
 
 bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwSocketID, VOID * pData, WORD wDataSize)
@@ -66,6 +68,8 @@ bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwSocketID, VOID * p
 			return true;
 		}
 	}
+
+	return true;
 }
 
 //登录处理
@@ -362,7 +366,7 @@ bool CHandleFromGate::On_SUB_CG_User_StandUp(VOID * pData, WORD wDataSize, DWORD
 		return false;
 
 	//桌子号和椅子号校验
-	WORD wTableID = pIServerUserItem->GetTableID();
+	DWORD wTableID = pIServerUserItem->GetTableID();
 	WORD wChairID = pIServerUserItem->GetChairID();
 	if ((wTableID !=pUserStandUp->wTableID) || (wChairID != pUserStandUp->wChairID)) 
 		return true;
@@ -517,7 +521,7 @@ bool CHandleFromGate::On_SUB_CG_User_KickUser(VOID * pData, WORD wDataSize, DWOR
 	}
 
 	//请离桌子
-	WORD wTargerTableID = pITargetUserItem->GetTableID();
+	DWORD wTargerTableID = pITargetUserItem->GetTableID();
 	if(wTargerTableID != INVALID_TABLE)
 	{
 		//定义变量
@@ -1075,7 +1079,7 @@ bool CHandleFromGate::On_CMD_GC_USER_JOIN_TABLE_NO_PASS( DWORD dwSocketID, VOID 
 	}
 
 	/* 5. 校验是否在之前的游戏中 */
-	WORD wOldTableID = pIServerUserItem->GetTableID(); //旧桌子号	
+	DWORD wOldTableID = pIServerUserItem->GetTableID(); //旧桌子号	
 	if(wOldTableID != INVALID_TABLE)
 	{
 		if(wOldTableID > CTableManager::TableCount())
@@ -1207,7 +1211,7 @@ bool CHandleFromGate::On_CMD_GC_User_JoinGroupRoom(DWORD dwSocketID, VOID * pDat
 
 	//判断该圈子的房间是否有空椅子的桌子
 	bool bHaveRoom = false;
-	for(int i= 0;i < CTableManager::TableCount();i++)
+	for(size_t i= 0;i < CTableManager::TableCount();i++)
 	{
 		CTableFrame *pTableFrame; // = CTableManager::FindTableByIndex(i);
 		//校验桌子
@@ -1358,7 +1362,7 @@ bool CHandleFromGate::SendDataBatchToMobileUser(WORD wCmdTable, WORD wMainCmdID,
 
 
 		//定义变量
-		WORD wTagerTableID = pIServerUserItem->GetTableID();
+		DWORD wTagerTableID = pIServerUserItem->GetTableID();
 
 		//状态过滤
 		if(pIServerUserItem->GetUserStatus() >= US_SIT)

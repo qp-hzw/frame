@@ -55,7 +55,7 @@ class IServerUserItem
 {
 public:
 //	//椅子号码
-	virtual WORD GetChairID() = NULL;
+	virtual BYTE GetChairID() = NULL;
 };
 
 //玩家基础信息 DB use player base info

@@ -159,14 +159,14 @@ bool CTableFrame::StartGame()
 	KillGameTimer(IDI_ROOM_AUTO_DISMISS);
 
 	//player状态
-	for(int i=0; i< m_player_list.size(); i++)
+	for(size_t i=0; i< m_player_list.size(); i++)
 	{
 		if(!m_player_list.at(i)) continue;
 		m_player_list.at(i)->SetUserStatus(US_PLAYING,m_wTableID,i);
 	}
 
 	//user状态
-	for (int i = 0; i< m_player_list.size(); i++)
+	for (size_t i = 0; i< m_player_list.size(); i++)
 	{
 		if (!m_player_list.at(i)) continue;
 
@@ -207,13 +207,13 @@ bool CTableFrame::HandleXJGameEnd(BYTE byRound, BYTE byTableMode_NO_USER, SCORE 
 	//3 房卡金币模式           非0					   金币
 
 	//设置player、user状态
-	for (int i = 0; i< m_player_list.size(); i++)
+	for (size_t i = 0; i< m_player_list.size(); i++)
 	{
 		if (!m_player_list.at(i)) continue;
 		m_player_list.at(i)->SetUserStatus(US_SIT, m_wTableID, i);
 	}
 
-	for (int i = 0; i< m_user_list.size(); i++)
+	for (size_t i = 0; i< m_user_list.size(); i++)
 	{
 		if (!m_user_list.at(i)) continue;
 
@@ -566,6 +566,8 @@ int CTableFrame::PlayerEnterTable(CPlayer * pPlayer)
 
 	//4. 增加
 	m_user_list.push_back(pPlayer);
+
+	return 0;
 }
 //玩家坐下
 int CTableFrame::PlayerSitTable(CPlayer * pPlayer, WORD wChairID, bool bCheckUserGPS)
@@ -600,7 +602,7 @@ bool CTableFrame::PlayerUpTable(CPlayer *pPlayer)
 {
 	//1, 校验
 	int ret = CanPlayerUpTable(pPlayer);
-	if(ret !=0 ) return ret;
+	if(ret !=0 ) return false;
 
 	//2. Table
 	WORD wChairID = pPlayer->GetChairID();
@@ -665,6 +667,8 @@ int CTableFrame::PlayerLeaveTable(CPlayer* pPlayer)
 	//检测房间里是否还有真人 没有真人大局结束
 	if (!pPlayer->IsAndroidUser())
 		CheckRoomTruePlayer();
+
+	return 0;
 }
 //玩家准备
 int CTableFrame::PlayerReady(CPlayer* pPlayer) 
@@ -1295,7 +1299,7 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 			//旁观处理
 			if (pLookonConfig->dwUserID!=0L)
 			{
-				for (INT_PTR i=0;i<m_user_list.size();i++)
+				for (size_t i=0;i<m_user_list.size();i++)
 				{
 					//获取用户
 					CPlayer * pILookonUserItem=m_user_list[i];
@@ -1319,7 +1323,7 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 				LookonStatus.cbAllowLookon=pLookonConfig->cbAllowLookon;
 
 				//发送消息
-				for (INT_PTR i=0;i<m_user_list.size();i++)
+				for (size_t i=0;i<m_user_list.size();i++)
 				{
 					//获取用户
 					CPlayer * pILookonUserItem=m_user_list[i];
@@ -1443,7 +1447,7 @@ WORD CTableFrame::GetSitUserCount()
 
 WORD CTableFrame::GetPlayerChair(CPlayer* pPlayer)
 {
-	for(int i =0; i<m_player_list.size(); i++)
+	for(size_t i =0; i<m_player_list.size(); i++)
 	{
 		if(m_player_list.at(i) == pPlayer)
 		{
@@ -1907,9 +1911,9 @@ bool CTableFrame::OnEventApplyDismissRoom(WORD wChairID, bool bAgree)
 		ZeroMemory(&VoteRet, sizeof(STR_CMD_GR_FRMAE_VOTE_DISMISS));
 
 		//赋值
-		VoteRet.cbApplyChair = wChairID;
+		VoteRet.cbApplyChair = static_cast<BYTE>(wChairID);
 		VoteRet.cbAgree = 1;
-		VoteRet.cbChairID = wChairID;
+		VoteRet.cbChairID = static_cast<BYTE>(wChairID);
 
 		//广播投票结果消息让客户端弹出解散框
 		SendTableData(INVALID_CHAIR, CMD_GR_USER_VOTE_DISMISS, &VoteRet, sizeof(STR_CMD_GR_FRMAE_VOTE_DISMISS), MDM_USER);
@@ -1977,8 +1981,8 @@ bool CTableFrame::OnEventVoteDismissRoom(WORD wChairID, bool bAgree)
 
 	//赋值
 	VoteDismissRet.cbAgree = (bAgree == true) ? 1 : 0;
-	VoteDismissRet.cbChairID = wChairID;
-	VoteDismissRet.cbApplyChair = m_dissmisserChaiID;
+	VoteDismissRet.cbChairID = static_cast<BYTE>(wChairID);
+	VoteDismissRet.cbApplyChair = static_cast<BYTE>(m_dissmisserChaiID);
 
 	//广播发送
 	SendTableData(INVALID_CHAIR, CMD_GR_USER_VOTE_DISMISS, &VoteDismissRet, sizeof(STR_CMD_GR_FRMAE_VOTE_DISMISS), MDM_USER);

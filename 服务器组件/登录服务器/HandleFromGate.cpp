@@ -351,7 +351,7 @@ bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwScoketID, VOID * p
 		}
 #pragma endregion
 	}
-
+	return true;
 }
 
 //登录模块
@@ -2856,7 +2856,7 @@ bool CHandleFromGate::On_SUB_CL_BAG_QUERY(VOID * pData, WORD wDataSize, DWORD dw
 	WORD wPacketSize=0;
 	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
 	STR_CMD_LC_BAG_RESULT * pCMD=NULL;
-	for(int i=0; i < vec_cmd.size(); i++)
+	for(size_t i=0; i < vec_cmd.size(); i++)
 	{
 		//发送信息
 		if ((wPacketSize+sizeof(STR_CMD_LC_BAG_RESULT))>sizeof(cbBuffer))
