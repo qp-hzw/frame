@@ -41,7 +41,7 @@ bool CAttemperEngineSink::OnEventTCPNetworkShut(DWORD dwClientAddr, DWORD dwActi
 bool CAttemperEngineSink::DoServerRegister(TCP_Command Command, VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
 	//消息号校验
-	if( (Command.wMainCmdID != MDM_REGISTER)  ||
+	if( (Command.wMainCmdID != MDM_REGISTER_CPD)  ||
 		(Command.wSubCmdID != CPR_REGISTER_SERVER))
 		return false;
 
@@ -55,7 +55,7 @@ bool CAttemperEngineSink::DoServerRegister(TCP_Command Command, VOID * pData, WO
 	if (pItem->szServerAddr[0]==0)
 	{
 		//notify server
-		g_GameCtrl->SendData(dwSocketID,MDM_REGISTER,CPO_REGISTER_FAILURE);
+		g_GameCtrl->SendData(dwSocketID,MDM_REGISTER_CPD,CPO_REGISTER_FAILURE);
 
 		//中断网络
 		g_TCPNetworkEngine->CloseSocket(dwSocketID);
@@ -85,7 +85,7 @@ bool CAttemperEngineSink::DoServerRegister(TCP_Command Command, VOID * pData, WO
 	CLog::Log(log_debug, "port:%d", ServerItem.wServerPort);
 
 	//发送 注册完成
-	g_GameCtrl->SendData(dwSocketID,MDM_REGISTER,CPO_REGISTER_SUCESS, &ServerItem.wServerPort, sizeof(ServerItem.wServerPort));
+	g_GameCtrl->SendData(dwSocketID,MDM_REGISTER_CPD,CPO_REGISTER_SUCESS, &ServerItem.wServerPort, sizeof(ServerItem.wServerPort));
 
 	return true;
 }

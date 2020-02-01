@@ -634,7 +634,7 @@ bool CHandleFromGate::On_MDM_GAME(WORD wSubCmdID, VOID * pData, WORD wDataSize, 
 
 			CLog::Log(log_debug, "Game KindID: %d", CPR.dwKindID);
 
-			g_TCPSocketEngine->SendData(MDM_TRANSFER, CPR_LP_CREATE_TABLE, &CPR, sizeof(CPR));
+			g_TCPSocketEngine->SendData(CPD_MDM_TRANSFER, CPR_LP_CREATE_TABLE, &CPR, sizeof(CPR));
 
 			return true;
 		}
@@ -2098,7 +2098,7 @@ bool CHandleFromGate::On_CMD_LC_CLUB_TABLE_DISSOLVE( DWORD dwScoketID, VOID * pD
 		CPR.dwGameID = pCmd->dwGameID;
 		CPR.dwTableID = pCmd->dwTableID;
 
-		g_TCPSocketEngine->SendData(MDM_TRANSFER, CPR_LP_CLUB_TABLE_DISSOLVE, &CPR, sizeof(STR_CPR_LP_CLUB_TABLE_DISSOLVE));
+		g_TCPSocketEngine->SendData(CPD_MDM_TRANSFER, CPR_LP_CLUB_TABLE_DISSOLVE, &CPR, sizeof(STR_CPR_LP_CLUB_TABLE_DISSOLVE));
 	}
 	return true;
 }

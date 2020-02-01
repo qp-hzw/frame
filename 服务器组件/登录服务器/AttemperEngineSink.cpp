@@ -95,7 +95,7 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		lstrcpyn(ServerItem.szServerAddr,szInernet_ip ,CountArray(ServerItem.szServerAddr));
 
 		//·¢ËÍÊý¾Ý
-		g_TCPSocketEngine->SendData(MDM_REGISTER,CPR_REGISTER_SERVER,&ServerItem,sizeof(ServerItem));
+		g_TCPSocketEngine->SendData(MDM_REGISTER_CPD,CPR_REGISTER_SERVER,&ServerItem,sizeof(ServerItem));
 
 		return true;
 	}

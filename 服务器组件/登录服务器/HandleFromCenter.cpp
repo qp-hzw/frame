@@ -7,15 +7,15 @@ bool CHandleFromCenter::HandlePacket(TCP_Command Command, VOID * pData, WORD wDa
 {
 	switch (Command.wMainCmdID)
 	{
-	case MDM_REGISTER:		//注册模块
+	case MDM_REGISTER_CPD:		//注册模块
 		{
 			return OnTCPSocketMainRegister(Command.wSubCmdID,pData,wDataSize);
 		}
-	case MDM_USER:	//列表命令
+	case CPD_MDM_USER:	//列表命令
 		{
 			return OnTCPSocketMainServiceInfo(Command.wSubCmdID,pData,wDataSize);
 		}
-	case MDM_TRANSFER:	//中转服务
+	case CPD_MDM_TRANSFER:	//中转服务
 		{
 			return OnTCPSocketMainTransfer(Command.wSubCmdID,pData,wDataSize);	
 		}

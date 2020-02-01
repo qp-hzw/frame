@@ -26,7 +26,7 @@
 
 #pragma region MDM_REGISTER 注册模块
 //注册命令
-#define MDM_REGISTER				1									//注册模块
+#define MDM_REGISTER_CPD			1									//注册模块
 
 //服务注册
 #define CPR_REGISTER_SERVER  	    1									//服务注册
@@ -39,7 +39,7 @@
 
 
 #pragma region MDM_TRANSFER 中转服务
-#define MDM_TRANSFER				3									//中转服务
+#define CPD_MDM_TRANSFER			3									//中转服务
 
 #define CPR_GP_CLUB_TABLE_INFO		1									//广播桌子信息
 #define CPO_PL_CLUB_TABLE_INFO		101									//广播桌子信息
@@ -56,7 +56,7 @@
 #pragma endregion 
 
 #pragma region MDM_USER 用户汇总
-#define MDM_USER					2									//用户汇总
+#define CPD_MDM_USER				2									//用户汇总
 
 //用户状态
 #define SUB_CS_C_USER_OFFLINE		4									//用户断线  game->correspond

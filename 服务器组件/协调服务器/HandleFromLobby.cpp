@@ -7,7 +7,7 @@ bool CHandleFromLobby::HandlePacket(TCP_Command Command, VOID * pData, WORD wDat
 {
 	switch (Command.wMainCmdID)
 	{
-	case MDM_TRANSFER:	//中转服务
+	case CPD_MDM_TRANSFER:	//中转服务
 		{
 			return OnTCPNetworkMainTransfer(Command.wSubCmdID,pData,wDataSize,dwSocketID);
 		}
@@ -38,7 +38,7 @@ bool CHandleFromLobby::OnTCPNetworkMainTransfer(WORD wSubCmdID, VOID * pData, WO
 			CPO.dwTableID = pCPR->dwTableID;
 
 			//发送通知 -- 全部游戏服
-			g_GameCtrl->SendDataBatch(MDM_TRANSFER,CPO_PG_CLUB_TABLE_DISSOLVE,&CPO,sizeof(CPO));
+			g_GameCtrl->SendDataBatch(CPD_MDM_TRANSFER,CPO_PG_CLUB_TABLE_DISSOLVE,&CPO,sizeof(CPO));
 
 			return true;
 		}
@@ -77,7 +77,7 @@ bool CHandleFromLobby::OnTCPNetworkMainTransfer(WORD wSubCmdID, VOID * pData, WO
 			}
 
 			//发送消息
-			g_GameCtrl->SendData(dwSocketID,MDM_TRANSFER,CPO_PL_CREATE_TABLE, &CPO, sizeof(CPO));
+			g_GameCtrl->SendData(dwSocketID,CPD_MDM_TRANSFER,CPO_PL_CREATE_TABLE, &CPO, sizeof(CPO));
 			return true;
 		}
 

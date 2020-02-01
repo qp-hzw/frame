@@ -155,7 +155,7 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		CLog::Log(log_debug, "ServerID:%d", ServerItem.dwServerID);
 
 		//发送数据
-		g_TCPSocketEngine->SendData(MDM_REGISTER,CPR_REGISTER_SERVER,&ServerItem,sizeof(ServerItem));
+		g_TCPSocketEngine->SendData(MDM_REGISTER_CPD,CPR_REGISTER_SERVER,&ServerItem,sizeof(ServerItem));
 
 		return true;
 	}
@@ -219,7 +219,7 @@ bool CAttemperEngineSink::OnEventTCPNetworkShut(DWORD dwClientAddr, DWORD dwActi
 		data.dwUserID = pPlayer->GetUserID();
 		data.dwServerID = g_GameCtrl->GetKindID(); //以后需要改成GameID
 		data.byMask = 1; //表示增加断线用户
-		g_TCPSocketEngine->SendData(MDM_USER,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
+		g_TCPSocketEngine->SendData(CPD_MDM_USER,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
 	}
 	else //没有在桌子里, 则直接删除用户
 	{

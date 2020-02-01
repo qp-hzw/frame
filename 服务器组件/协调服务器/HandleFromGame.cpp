@@ -6,11 +6,11 @@ bool CHandleFromGame::HandlePacket(TCP_Command Command, VOID * pData, WORD wData
 {
 	switch (Command.wMainCmdID)
 	{
-	case MDM_TRANSFER:	//中转服务
+	case CPD_MDM_TRANSFER:	//中转服务
 		{
 			return OnTCPNetworkMainTransfer(Command.wSubCmdID,pData,wDataSize,dwSocketID);
 		}
-	case MDM_USER://用户命令
+	case CPD_MDM_USER://用户命令
 		{
 			return OnTCPNetworkMainUserCollect(Command.wSubCmdID,pData,wDataSize,dwSocketID);
 		}
@@ -30,7 +30,7 @@ bool CHandleFromGame::OnTCPNetworkMainTransfer(WORD wSubCmdID, VOID * pData, WOR
 			if (wDataSize!=sizeof(STR_CMD_LC_CLUB_TABLE_LIST)) return true;
 			
 			//发送通知 -- 全部登录服
-			g_GameCtrl->SendDataBatch(MDM_TRANSFER,CPO_PL_CLUB_TABLE_INFO,pData,wDataSize);
+			g_GameCtrl->SendDataBatch(CPD_MDM_TRANSFER,CPO_PL_CLUB_TABLE_INFO,pData,wDataSize);
 			return true;
 		}
 	case CPR_GP_CLUB_PLAYER_INFO: //club俱乐部玩家信息更新
@@ -39,7 +39,7 @@ bool CHandleFromGame::OnTCPNetworkMainTransfer(WORD wSubCmdID, VOID * pData, WOR
 			if (wDataSize!=sizeof(STR_CMD_LC_CLUB_TABLE_USER_LIST)) return false;
 			
 			//发送通知 -- 全部登录服
-			g_GameCtrl->SendDataBatch(MDM_TRANSFER,CPO_PL_CLUB_PLAYER_INFO,pData,wDataSize);
+			g_GameCtrl->SendDataBatch(CPD_MDM_TRANSFER,CPO_PL_CLUB_PLAYER_INFO,pData,wDataSize);
 			return true;
 		}
 	}
@@ -58,7 +58,7 @@ bool CHandleFromGame::OnTCPNetworkMainUserCollect(WORD wSubCmdID, VOID * pData, 
 			if (wDataSize!=sizeof(tagOfflineUser)) return true;
 
 			//发送通知 -- 全部登录服
-			g_GameCtrl->SendDataBatch(MDM_USER,SUB_CS_C_USER_OFFLINE_B, pData, wDataSize);
+			g_GameCtrl->SendDataBatch(CPD_MDM_USER,SUB_CS_C_USER_OFFLINE_B, pData, wDataSize);
 			return true;
 		}
 	}

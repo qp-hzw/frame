@@ -56,13 +56,13 @@ bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwSocketID, VOID * p
 	case DBO_GC_CLUB_UPDATE_TABLE_INFO:// 更新桌子信息
 		{
 			if(sizeof(STR_CMD_LC_CLUB_TABLE_LIST) != wDataSize) return false;
-			g_TCPSocketEngine->SendData(MDM_TRANSFER, CPR_GP_CLUB_TABLE_INFO, pData, wDataSize);
+			g_TCPSocketEngine->SendData(CPD_MDM_TRANSFER, CPR_GP_CLUB_TABLE_INFO, pData, wDataSize);
 			return true;;
 		}
 	case DBO_GC_CLUB_UPDATE_PLAYER_INFO://更新玩家信息
 		{
 			if(sizeof(STR_CMD_LC_CLUB_TABLE_USER_LIST) != wDataSize) return false;
-			g_TCPSocketEngine->SendData(MDM_TRANSFER, CPR_GP_CLUB_PLAYER_INFO, pData, wDataSize);
+			g_TCPSocketEngine->SendData(CPD_MDM_TRANSFER, CPR_GP_CLUB_PLAYER_INFO, pData, wDataSize);
 			return true;
 		}
 	}
@@ -253,7 +253,7 @@ bool CHandleFromGate::On_CMD_GC_Logon_UserID(DWORD dwSocketID, VOID * pData, WOR
 		tagOfflineUser data;
 		data.dwUserID = pDBOLogon->dwUserID;
 		data.byMask = 2; //表示删除断线用户
-		g_TCPSocketEngine->SendData(MDM_USER, SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
+		g_TCPSocketEngine->SendData(CPD_MDM_USER, SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
 	}
 
 	return true;

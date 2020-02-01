@@ -6,11 +6,11 @@ bool CHandleFromCenter::HandlePacket(TCP_Command Command, VOID * pData, WORD wDa
 {
 	switch (Command.wMainCmdID)
 	{
-	case MDM_REGISTER:		//注册服务
+	case MDM_REGISTER_CPD:		//注册服务
 		{
 			return OnTCPSocketMainRegister(Command.wSubCmdID,pData,wDataSize);
 		}
-	case MDM_TRANSFER:		//中转服务
+	case CPD_MDM_TRANSFER:		//中转服务
 		{
 			return OnTCPSocketMainTransfer(Command.wSubCmdID,pData,wDataSize);	
 		}
