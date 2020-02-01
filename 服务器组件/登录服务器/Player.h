@@ -34,6 +34,13 @@ public:
 	//用户标识
 	DWORD GetUserID() { return m_UserInfo.dwUserID; }
 
+
+	/**********************************  游戏动态数据 ****************************************/
+public:
+	//用户物品
+	//vector<STR_DBO_CL_BAG_QUERY> GetProp() { return ;}
+
+
 //	/**********************************  socket信息 ****************************************/
 //public:
 //	//绑带索引
@@ -68,6 +75,7 @@ public:
 //	virtual SCORE GetUserGold(){ return m_UserInfo.lGold; };
 //	//设置用户金币
 //	virtual void SetUserGold(SCORE lGold){ m_UserInfo.lGold = lGold; }
+
 };
 
 #endif

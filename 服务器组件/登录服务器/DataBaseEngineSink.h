@@ -274,16 +274,6 @@ protected:
 protected:
 	//查询商城
 	bool On_DBR_CL_SHOP_QUERY(DWORD dwContextID, VOID * pData, WORD wDataSize);
-
-	//金钱购买道具
-	bool On_DBR_CL_SHOP_MONEY(DWORD dwContextID, VOID * pData, WORD wDataSize);
-
-	//钻石购买道具
-	bool On_DBR_CL_SHOP_DIAMOND(DWORD dwContextID, VOID * pData, WORD wDataSize);
-
-	//背包物品查询
-	bool On_DBR_CL_BAG_QUERY(DWORD dwContextID, VOID * pData, WORD wDataSize);
-
 #pragma endregion
 };
 

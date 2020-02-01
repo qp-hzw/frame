@@ -359,18 +359,6 @@ bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwScoketID, VOID * p
 		{
 			return On_CMD_LC_SHOP_QUERY_FINISH(dwScoketID,pData,wDataSize);
 		}
-	case DBO_CL_SHOP_DIAMOND : //钻石购买道具
-		{
-			return On_CMD_LC_SHOP_DIAMOND_RESULT(dwScoketID,pData,wDataSize);
-		}
-	case DBO_CL_BAG_QUERY: //背包物品查询
-		{
-			return On_CMD_LC_BAG_RESULT(dwScoketID,pData,wDataSize);
-		}
-	case DBO_CL_BAG_FINISH://背包物品查询完成
-		{
-			return On_CMD_LC_BAG_FINISH(dwScoketID,pData,wDataSize);
-		}
 #pragma endregion
 	}
 
@@ -629,14 +617,6 @@ bool CHandleFromGate::On_MDM_SHOP(WORD wSubCmdID, VOID * pData, WORD wDataSize, 
 	case SUB_CL_SHOP_QUERY:	 //查询商城
 		{
 			return On_SUB_CL_SHOP_QUERY(pData, wDataSize, dwSocketID);
-		}
-	case SUB_CL_SHOP_MONEY:  //金钱购买道具
-		{
-			//return On_SUB_CL_SHOP_MONEY(pData, wDataSize, dwSocketID);	
-		}
-	case SUB_CL_SHOP_DIAMOND: //钻石购买道具
-		{
-			return On_SUB_CL_SHOP_DIAMOND(pData, wDataSize, dwSocketID);
 		}
 	case SUB_CL_BAG_QUERY: //背包物品查询
 		{
@@ -2871,79 +2851,40 @@ bool CHandleFromGate::On_CMD_LC_SHOP_QUERY_FINISH( DWORD dwScoketID, VOID * pDat
 	return true;
 }
 
-//钻石购买道具
-bool CHandleFromGate::On_SUB_CL_SHOP_DIAMOND(VOID * pData, WORD wDataSize, DWORD dwSocketID)
-{
-	//校验参数
-	if(wDataSize != sizeof(STR_SUB_CL_SHOP_DIAMOND)) return false;
-
-	//处理消息
-	STR_SUB_CL_SHOP_DIAMOND * pSub = (STR_SUB_CL_SHOP_DIAMOND *)pData;
-
-	//投递请求
-	g_GameCtrl->PostDataBaseRequest(DBR_CL_SHOP_DIAMOND, dwSocketID, pData, wDataSize);
-	return true;
-}
-
-//钻石购买道具CMD
-bool CHandleFromGate::On_CMD_LC_SHOP_DIAMOND_RESULT( DWORD dwScoketID, VOID * pData, WORD wDataSize)
-{
-	//校验参数
-	ASSERT( wDataSize == sizeof(STR_DBO_CL_SHOP_DIAMOND));
-	if(wDataSize != sizeof(STR_DBO_CL_SHOP_DIAMOND)) return false;
-
-	STR_DBO_CL_SHOP_DIAMOND * pDBO = (STR_DBO_CL_SHOP_DIAMOND*)pData;
-	STR_CMD_LC_SHOP_DIAMOND_RESULT CMD;
-	CMD.lResultCode = pDBO->lResultCode;
-	lstrcpyn(CMD.szDescribe,pDBO->szDescribeString,CountArray(CMD.szDescribe));
-	
-	//处理消息
-	g_GameCtrl->SendData(dwScoketID, MDM_SHOP, CMD_LC_SHOP_DIAMOND_RESULT, &CMD, sizeof(CMD));
-	return true;
-}
-
 //背包物品查询
 bool CHandleFromGate::On_SUB_CL_BAG_QUERY(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//校验参数
-	ASSERT( wDataSize == sizeof(STR_SUB_CL_BAG_QUERY));
-	if(wDataSize != sizeof(STR_SUB_CL_BAG_QUERY)) return false;
+	CPlayer* player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	if(!player) return true;
 
-	//处理消息
-	STR_SUB_CL_BAG_QUERY * pSub = (STR_SUB_CL_BAG_QUERY *)pData;
-	//定义变量
-	STR_DBR_CL_BAG_QUERY Dbr;
-	ZeroMemory(&Dbr,sizeof(Dbr));
+	std::vector<STR_CMD_LC_BAG_RESULT> vec_cmd;// = player->GetUserProp() TODONOW 带增加
 
-	Dbr.dwUserID = pSub->dwUserID;	
+	//列表发送
+	WORD wPacketSize=0;
+	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
+	STR_CMD_LC_BAG_RESULT * pCMD=NULL;
+	for(int i=0; i < vec_cmd.size(); i++)
+	{
+		//发送信息
+		if ((wPacketSize+sizeof(STR_CMD_LC_BAG_RESULT))>sizeof(cbBuffer))
+		{
+			g_GameCtrl->SendData(dwSocketID, MDM_SHOP, CMD_LC_BAG_RESULT, cbBuffer, wPacketSize);
+			wPacketSize=0;
+		}
 
-	//投递请求
-	g_GameCtrl->PostDataBaseRequest(DBR_CL_BAG_QUERY, dwSocketID, &Dbr, sizeof(Dbr));
+		//读取信息
+		pCMD=(STR_CMD_LC_BAG_RESULT *)(cbBuffer+wPacketSize);
+		pCMD->dwGoodsID = vec_cmd.at(i).dwGoodsID; 
+		pCMD->dwGoodsNum = vec_cmd.at(i).dwGoodsNum;
+
+		//设置位移
+		wPacketSize+=sizeof(STR_CMD_LC_BAG_RESULT);
+
+	}
+	if (wPacketSize>0) g_GameCtrl->SendData(dwSocketID, MDM_SHOP, CMD_LC_BAG_RESULT, cbBuffer, wPacketSize);
+	
+	g_GameCtrl->SendData(dwSocketID, MDM_SHOP, CMD_LC_BAG_FINISH, pData, wDataSize);
 	return true;
 }
 
-//背包物品查询CMD
-bool CHandleFromGate::On_CMD_LC_BAG_RESULT( DWORD dwScoketID, VOID * pData, WORD wDataSize)
-{
-	//校验参数
-	WORD Size = sizeof(STR_DBO_CL_BAG_QUERY);
-	if( (wDataSize%Size) != 0) return false;
-
-	//处理消息
-	g_GameCtrl->SendData(dwScoketID, MDM_SHOP, CMD_LC_BAG_RESULT, pData, wDataSize);
-	return true;
-}
-
-//背包物品查询结束CMD
-bool CHandleFromGate::On_CMD_LC_BAG_FINISH( DWORD dwScoketID, VOID * pData, WORD wDataSize)
-{
-	//校验参数
-	WORD Size = sizeof(STR_CMD_LC_BAG_FINISH);
-
-	if( wDataSize != Size) return false;
-
-	//处理消息
-	g_GameCtrl->SendData(dwScoketID, MDM_SHOP, CMD_LC_BAG_FINISH, pData, wDataSize);
-	return true;
-}
 #pragma endregion

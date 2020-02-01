@@ -363,22 +363,9 @@ private:
 	//查询商城结束
 	static bool On_CMD_LC_SHOP_QUERY_FINISH( DWORD dwContextID, VOID * pData, WORD wDataSize);
 
-	//金钱购买道具
-	static bool On_SUB_CL_SHOP_MONEY(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//金钱购买道具返回
-	static bool On_CMD_LC_SHOP_MONEY_RESULT( DWORD dwContextID, VOID * pData, WORD wDataSize );
-
-	//钻石购买道具
-	static bool On_SUB_CL_SHOP_DIAMOND(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//钻石购买道具返回
-	static bool On_CMD_LC_SHOP_DIAMOND_RESULT( DWORD dwContextID, VOID * pData, WORD wDataSize );
 
 	//背包物品查询
 	static bool On_SUB_CL_BAG_QUERY(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//背包物品查询结果CMD
-	static bool On_CMD_LC_BAG_RESULT( DWORD dwContextID, VOID * pData, WORD wDataSize );
-	//背包物品查询完成
-	static bool On_CMD_LC_BAG_FINISH( DWORD dwContextID, VOID * pData, WORD wDataSize );
 #pragma endregion
 
 };

@@ -278,15 +278,9 @@
 #define CMD_LC_SHOP_QUERY_RESULT				101							//查询返回
 #define CMD_LC_SHOP_QUERY_FINISH				201							//查询结束
 
-#define SUB_CL_SHOP_MONEY						2							//(暂未用到)金钱购买道具
-#define CMD_LC_SHOP_MONEY_RESULT				102							//(暂未用到)金钱购买道具 返回
-
-#define SUB_CL_SHOP_DIAMOND						3							//钻石购买道具
-#define CMD_LC_SHOP_DIAMOND_RESULT				103							//钻石购买道具 返回
-
-#define SUB_CL_BAG_QUERY						4							//背包物品查询
-#define CMD_LC_BAG_RESULT						104							//背包物品返回
-#define CMD_LC_BAG_FINISH						204							//背包物品查询结束
+#define SUB_CL_BAG_QUERY						2							//背包物品查询
+#define CMD_LC_BAG_RESULT						102							//背包物品返回
+#define CMD_LC_BAG_FINISH						202							//背包物品查询结束
 
 #pragma endregion 
 

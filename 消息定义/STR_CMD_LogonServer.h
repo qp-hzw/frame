@@ -1326,43 +1326,11 @@ struct STR_CMD_LC_SHOP_QUERY_FINISH
 	BYTE byMask;								//结束标志 1			
 };
 
-//钻石购买道具
-struct STR_SUB_CL_SHOP_DIAMOND
-{
-	DWORD dwShopper;							//购买人
-	DWORD byGoodsType;							//商品类型
-	DWORD dwGoodsID;							//商品编号
-	DWORD dwGoodsNum;							//购买商品的数量
-
-	BYTE  byMask;								//0为自己购买;  1为他人代付
-	DWORD dwTargetID;							//赠送对象
-};
-
-//钻石购买道具 返回
-struct STR_CMD_LC_SHOP_DIAMOND_RESULT
-{
-	LONG	lResultCode;						//0-购买成功  其他失败
-	TCHAR	szDescribe[128];					//失败原因
-};
-
-//背包物品查询
-struct STR_SUB_CL_BAG_QUERY
-{
-	DWORD dwUserID;				//玩家ID
-};
-
 //背包物品查询 返回
 struct STR_CMD_LC_BAG_RESULT
 {
 	DWORD dwGoodsID;		//物品ID
 	DWORD dwGoodsNum;		//物品数量
-	BYTE  byGoodsType;		//物品类型
-};
-
-//背包物品查询 结束
-struct STR_CMD_LC_BAG_FINISH
-{
-	DWORD dwLoveness;		//玩家魅力值
 };
 
 #pragma endregion

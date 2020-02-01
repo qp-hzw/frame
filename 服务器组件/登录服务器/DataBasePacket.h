@@ -712,18 +712,6 @@ struct STR_DBO_LC_CLUB_STICKY_POST
 #define DBO_CL_SHOP_QUERY						702							//商城查询 -- 查询商品打折情况
 #define DBO_CL_SHOP_QUERY_FINISH				703							//商城查询 -- 查询商品打折情况
 
-
-#define DBR_CL_SHOP_MONEY						704							//(暂未用到)金钱购买道具
-#define DBO_CL_SHOP_MONEY						705							//(暂未用到)金钱购买道具
-
-#define DBR_CL_SHOP_DIAMOND						706							//钻石购买道具
-#define DBO_CL_SHOP_DIAMOND						707							//钻石购买道具
-
-#define DBR_CL_BAG_QUERY						708							//背包物品查询
-#define DBO_CL_BAG_QUERY						709							//背包物品查询
-#define DBO_CL_BAG_FINISH						710							//背包物品查询结束
-
-
 //查询商城DBR
 struct STR_DBR_CL_SHOP_QUERY
 {
@@ -731,26 +719,6 @@ struct STR_DBR_CL_SHOP_QUERY
 	BYTE byGoodsType;		//物品类型 1rmb购买房卡  2rmb购买金币 3金币购买礼物 4积分购买礼物
 };
 
-//钻石购买道具DBO
-struct STR_DBO_CL_SHOP_DIAMOND
-{
-	LONG							lResultCode;						//操作代码
-	TCHAR							szDescribeString[128];				//成功消息
-};
-
-//背包物品查询
-struct STR_DBR_CL_BAG_QUERY
-{
-	DWORD dwUserID;			//玩家ID
-};
-
-//背包物品查询 DBO
-struct STR_DBO_CL_BAG_QUERY
-{
-	DWORD dwGoodsID;		//物品ID
-	DWORD dwGoodsNum;		//物品数量
-	BYTE  byGoodsType;		//物品类型
-};
 #pragma endregion
 
 #pragma region 待整理
