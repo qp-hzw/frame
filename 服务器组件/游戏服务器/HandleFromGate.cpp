@@ -242,7 +242,6 @@ bool CHandleFromGate::On_CMD_GC_Logon_UserID(DWORD dwSocketID, VOID * pData, WOR
 	if(pDBOLogon->lResultCode != 0)
 		return true;
 
-
 	//用户掉线判断
 	CPlayer *player = CPlayerManager::FindPlayerByID(pDBOLogon->dwUserID);
 	if(player == NULL)
@@ -255,7 +254,9 @@ bool CHandleFromGate::On_CMD_GC_Logon_UserID(DWORD dwSocketID, VOID * pData, WOR
 
 		//重复登录, 需要给客户端发送重复消息
 
-		//断线情形
+		//断线情形   //备用方案 
+		//g_GameCtrl->SetTimer(IDI_RECONNEC_MODULE_START+dwSocketID, 2000, 1, 0);
+
 		tagOfflineUser data;
 		data.dwUserID = pDBOLogon->dwUserID;
 		data.byMask = 2; //表示删除断线用户
@@ -342,10 +343,15 @@ void CHandleFromGate::ActiveUserItem( DWORD dwSocketID, STR_DBO_CG_LOGON_USERID 
 //加载断线重连返回
 bool CHandleFromGate::On_DBO_GR_LOAD_OFFLINE(DWORD dwSocketID, VOID * pData, WORD wDataSize)
 {
-	//参数校验
-	if(sizeof(BYTE ) != wDataSize) return false;
+	////玩家校验
+	//CPlayer *player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	//if (player == NULL)
+	//	return false;
 
-	//m_GameProgress =  *((BYTE*)pData);
+	//tagOfflineUser data;
+	//data.dwUserID = player->GetUserID();
+	//data.byMask = 2; //表示删除断线用户
+	//g_TCPSocketEngine->SendData(MDM_USER, SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
 
 	return true;
 }

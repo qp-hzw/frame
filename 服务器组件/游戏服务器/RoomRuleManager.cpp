@@ -79,6 +79,19 @@ void RoomRuleManager::GetRoomRule(tagTableRule& roomRule, byte value[20])
 	}
 }
 
+//设置金币场规则
+void RoomRuleManager::SetGoldRule(tagTableRule& roomRule, BYTE byType)
+{
+	//数据初始化
+	m_SubRoomRuleManager->Init();
+	m_SubRoomRuleManager->SetGoldRule(byType);
+
+	roomRule.GameMode = TABLE_MODE_GOLD;
+	roomRule.GameCount = 1;
+	roomRule.PlayerCount =3;
+	roomRule.dwAmount = (byType == 1) ? 1000 : ((byType == 2) ? 2000 : ((byType == 3) ? 4000 : 10000));
+}
+
 //读取子游戏房间配置文件
 void RoomRuleManager::ReadSubGameRoomRule(int kindid)
 {

@@ -4,6 +4,7 @@
 #include <thread>
 #include <chrono>
 #include "GameCtrl.h"
+#include "RoomRuleManager.h"
 
 using namespace std;
 
@@ -178,9 +179,13 @@ CTableFrame* CTableManager::GetGlodTable(BYTE byType)
 
 		//设置房间规则
 		tagTableRule roomRule;
-		roomRule.GameMode = TABLE_MODE_GOLD;
-		roomRule.GameCount = 1;
-		roomRule.PlayerCount =3;
+		ZeroMemory(&roomRule, sizeof(tagTableRule));
+		RoomRuleManager::Instance()->SetGoldRule(roomRule, byType);
+
+		//设置场次
+		pTableFrameReturn->SetGoldType(byType);
+
+		//设置通用规则
 		pTableFrameReturn->SetCommonRule(&roomRule);
 	}
 
@@ -188,9 +193,9 @@ CTableFrame* CTableManager::GetGlodTable(BYTE byType)
 }
 
 //查找所有金币场桌子
-std::vector<CTableFrame*> CTableManager::GetAllGlodTable()
+std::list<CTableFrame*> CTableManager::GetAllGlodTable()
 {
-	std::vector<CTableFrame*> glod_talbe_array;
+	std::list<CTableFrame*> glod_talbe_array;
 	for(auto item : s_TableArray)
 	{
 		if(item && 

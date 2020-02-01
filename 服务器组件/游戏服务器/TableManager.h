@@ -30,7 +30,7 @@ public:
 	//获取 空闲金币场桌子 byType: 初级, 中级, 高级场次
 	static CTableFrame* GetGlodTable(BYTE byType);
 	//获取所有空闲金币场桌子
-	static std::vector<CTableFrame*> GetAllGlodTable();
+	static std::list<CTableFrame*> GetAllGlodTable();
 
 	//
 public:

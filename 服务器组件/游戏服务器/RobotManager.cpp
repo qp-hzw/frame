@@ -64,7 +64,7 @@ void CRobotManager::SetRobotTimer()
 //设置机器人自动加入房间
 void CRobotManager::On_ANDROID_JOIN_GAME()
 {
-	std::vector<CTableFrame*> table_array(CTableManager::GetAllGlodTable());
+	std::list<CTableFrame*> table_array(CTableManager::GetAllGlodTable());
 	for(auto pTable :table_array )
 	{
 		if (pTable == NULL) continue;

@@ -23,6 +23,8 @@ public:
 	virtual void SetRoomRule(string key, string value)= NULL;
 	//
 	virtual void Init() = NULL;
+	//设置Gold场规则
+	virtual void SetGoldRule(BYTE byType) = NULL;
 };
 
 
@@ -43,6 +45,8 @@ public:
 	rule_arry GetRoomRuleSetting();
 	//获取房间规则
 	void GetRoomRule(tagTableRule& roomrule, byte value[20]);
+	//设置金币房规则
+	void SetGoldRule(tagTableRule& roomRule, BYTE byType);
 
 public:
 	//读取子游戏房间配置文件
