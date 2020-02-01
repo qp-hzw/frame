@@ -2857,7 +2857,22 @@ bool CHandleFromGate::On_SUB_CL_BAG_QUERY(VOID * pData, WORD wDataSize, DWORD dw
 	CPlayer* player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
 	if(!player) return true;
 
-	std::vector<STR_CMD_LC_BAG_RESULT> vec_cmd;// = player->GetUserProp() TODONOW 带增加
+	//std::vector<STR_CMD_LC_BAG_RESULT> vec_cmd;// = player->GetUserProp() TODONOW 带增加
+
+	std::vector<STR_CMD_LC_BAG_RESULT> vec_cmd;
+	STR_CMD_LC_BAG_RESULT item;
+
+	item.dwGoodsID = 1;
+	item.dwGoodsNum =1;
+	vec_cmd.push_back(item);
+
+	item.dwGoodsID = 2;
+	item.dwGoodsNum =20;
+	vec_cmd.push_back(item);
+
+	item.dwGoodsID = 3;
+	item.dwGoodsNum =99;
+	vec_cmd.push_back(item);
 
 	//列表发送
 	WORD wPacketSize=0;
