@@ -44,8 +44,8 @@
 
 //
 #define CMD_GC_USER_MODIFY_TREASURE		1									//修改用户财富信息返回
-#define CMD_ROOM_RULE					2									//房间信息
-#define SUB_GR_USER_STATUS				3									//用户动作
+//#define CMD_ROOM_RULE					2									//房间信息
+//#define SUB_GR_USER_STATUS			3									//用户动作
 #define SUB_GR_REQUEST_FAILURE			4									//请求失败		大部分失败消息都返回这个消息
 
 
@@ -114,10 +114,16 @@
 #define MDM_G_FRAME					100									//框架命令
 
 //房间信息
-#define SUB_RG_FRAME_OPTION					1								//游戏配置
-#define CMD_GR_FRAME_GAME_OPTION			101								//游戏场景
+#define SUB_RG_ROOM_RULE					1								//请求房间规则
+#define CMD_GR_ROOM_RULE					101								//房间规则
+#define SUB_RG_PLAYER_INFO					201								//请求用户信息
+#define CMD_GR_USER_STATUS					301								//用户动作结果
+#define CMD_GR_USER_STATUS_FINISH			401								//请求用户信息完毕
+#define SUB_RG_FRAME_GAME_OPTION			501								//请求游戏场景
+#define CMD_GR_FRAME_GAME_OPTION			601								//请求用户场景返回
+
 #define CMD_GR_FRAME_GAME_STATUS			102								//游戏状态
-#define CMD_GR_FRAME_GAME_DISSMISS			301							    //解散面板状态
+#define CMD_GR_FRAME_GAME_DISSMISS			701							    //解散面板状态
 
 //GPS测距
 #define SUB_CG_COM_CHECK_USER_GPS			5								//请求校验用户GPS位置信息

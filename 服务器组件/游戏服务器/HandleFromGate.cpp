@@ -241,7 +241,7 @@ bool CHandleFromGate::On_CMD_GC_Logon_UserID(DWORD dwSocketID, VOID * pData, WOR
 	//µÇÂ¼Ê§°Ü, ÍË³ö
 	if(pDBOLogon->lResultCode != 0)
 		return true;
-
+	
 	//ÓÃ»§µôÏßÅÐ¶Ï
 	CPlayer *player = CPlayerManager::FindPlayerByID(pDBOLogon->dwUserID);
 	if(player == NULL)

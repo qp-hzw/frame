@@ -177,6 +177,14 @@ bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwScoketID, VOID * p
 		{
 			return On_CMD_LC_SERVICE_GOLD_INFO_FINISH(dwScoketID,pData,wDataSize);
 		}
+	case DBO_LC_SERVICE_MATCH_INFO:     //请求比赛场信息 返回
+		{
+			return On_CMD_LC_SERVICE_MATCH_INFO(dwScoketID,pData,wDataSize);
+		}
+	case DBO_LC_SERVICE_MATCH_INFO_FINISH:   //请求比赛场信息 结束
+		{
+			return On_CMD_LC_SERVICE_MATCH_INFO_FINISH(dwScoketID,pData,wDataSize);
+		}
 			 
 #pragma region MDM_CLUB 牌友圈
 	case DBO_LC_CLUB_ALL_CLUB_INFO_LIST:		//查询牌友圈列表 返回
@@ -451,6 +459,10 @@ bool CHandleFromGate::OnTCPNetworkMainService(WORD wSubCmdID, VOID * pData, WORD
 		{
 			return On_SUB_CL_SERVICE_CUSTOMER_MESSEGE(pData, wDataSize, dwSocketID);
 		}
+	case SUB_CL_SERVICE_MATCH_INFO: //比赛场信息
+		{
+			return On_SUB_CL_SERVICE_MATCH_INFO(pData, wDataSize, dwSocketID);
+		}
 	}
 
 	return false;
@@ -712,7 +724,7 @@ bool CHandleFromGate::On_CMD_LC_Logon_Account(DWORD dwScoketID, VOID * pData, WO
 
 	//发送登录成功
 	g_GameCtrl->SendData(dwScoketID, MDM_LOGON, CMD_LC_LOGON_ACCOUNTS, pCMD, sizeof(STR_CMD_LC_LOGON_PLATFORM));
-
+	
 	//登录奖励
 	On_CMD_LC_Logon_Logon_Reward(dwScoketID, pCMD->LasLogonDate);
 
@@ -1683,6 +1695,22 @@ bool CHandleFromGate::On_CMD_LC_SERVICE_GOLD_INFO_FINISH( DWORD dwScoketID, VOID
 	//发送数据
 	g_GameCtrl->SendData(dwScoketID,MDM_SERVICE, CMD_LC_SERVICE_GOLD_INFO_FINISH, pLotteryResult, sizeof(STR_CMD_LC_SERVICE_GOLD_INFO_FINISH));
 
+	return true;
+}
+
+//请求比赛场信息
+bool CHandleFromGate::On_SUB_CL_SERVICE_MATCH_INFO(VOID * pData, WORD wDataSize, DWORD dwSocketID)
+{
+	return true;
+}
+//请求比赛场信息 返回
+bool CHandleFromGate::On_CMD_LC_SERVICE_MATCH_INFO(DWORD dwContextID, VOID * pData, WORD wDataSize)
+{
+	return true;
+}
+//请求比赛场信息 结束
+bool CHandleFromGate::On_CMD_LC_SERVICE_MATCH_INFO_FINISH(DWORD dwContextID, VOID * pData, WORD wDataSize)
+{
 	return true;
 }
 

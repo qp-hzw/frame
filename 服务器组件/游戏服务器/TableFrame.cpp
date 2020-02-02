@@ -562,7 +562,7 @@ int CTableFrame::PlayerEnterTable(CPlayer * pPlayer)
 	CopyMemory(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
 
 	//广播发送
-	SendTableData(INVALID_CHAIR, SUB_GR_USER_STATUS, &GameStatus, sizeof(GameStatus), MDM_USER);
+	SendTableData(INVALID_CHAIR, CMD_GR_USER_STATUS, &GameStatus, sizeof(GameStatus));
 
 	//4. 增加
 	m_user_list.push_back(pPlayer);
@@ -593,7 +593,7 @@ int CTableFrame::PlayerSitTable(CPlayer * pPlayer, WORD wChairID, bool bCheckUse
 	CopyMemory(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
 
 	//广播发送
-	SendTableData(INVALID_CHAIR, SUB_GR_USER_STATUS, &GameStatus, sizeof(GameStatus), MDM_USER);
+	SendTableData(INVALID_CHAIR, CMD_GR_USER_STATUS, &GameStatus, sizeof(GameStatus));
 
 	return 0;
 }
@@ -621,7 +621,7 @@ bool CTableFrame::PlayerUpTable(CPlayer *pPlayer)
 	CopyMemory(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
 
 	//广播发送
-	SendTableData(INVALID_CHAIR, SUB_GR_USER_STATUS, &GameStatus, sizeof(GameStatus), MDM_USER);
+	SendTableData(INVALID_CHAIR, CMD_GR_USER_STATUS, &GameStatus, sizeof(GameStatus));
 
 	return true;
 }
@@ -645,7 +645,7 @@ int CTableFrame::PlayerLeaveTable(CPlayer* pPlayer)
 	CopyMemory(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
 
 	//广播发送
-	SendTableData(INVALID_CHAIR, SUB_GR_USER_STATUS, &GameStatus, sizeof(GameStatus), MDM_USER);
+	SendTableData(INVALID_CHAIR, CMD_GR_USER_STATUS, &GameStatus, sizeof(GameStatus));
 
 	//断开用户 socket (金币场结束不断)
 	if (m_cbTableMode != TABLE_MODE_GOLD)   //断线重连产生问题
@@ -693,7 +693,7 @@ int CTableFrame::PlayerReady(CPlayer* pPlayer)
 	CopyMemory(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
 
 	//广播发送
-	SendTableData(INVALID_CHAIR, SUB_GR_USER_STATUS, &GameStatus, sizeof(GameStatus), MDM_USER);
+	SendTableData(INVALID_CHAIR, CMD_GR_USER_STATUS, &GameStatus, sizeof(GameStatus));
 
 	//判断三个玩家是否都准备
 	WORD ReadyNum = 0;
@@ -729,7 +729,7 @@ int CTableFrame::PlayerOffline(CPlayer* pPlayer)
 	CopyMemory(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
 
 	//广播发送
-	SendTableData(INVALID_CHAIR, SUB_GR_USER_STATUS, &GameStatus, sizeof(GameStatus), MDM_USER);
+	SendTableData(INVALID_CHAIR, CMD_GR_USER_STATUS, &GameStatus, sizeof(GameStatus));
 
 	return 0;
 }
@@ -1111,17 +1111,18 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 	//默认处理
 	switch (wSubCmdID)
 	{
-	case SUB_RG_FRAME_OPTION:	//游戏配置
+	case SUB_RG_ROOM_RULE:		//游戏规则
 		{
-			//变量定义
-			CMD_GF_GameOption * pGameOption=(CMD_GF_GameOption *)pData;
-
 			//发送房间规则
 			STR_CMD_ROOM_RULE room_rule;
 			memcpy(&room_rule.common, &m_tagTableRule, sizeof(room_rule.common));
 			room_rule.TableID = m_wTableID;
-			g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_ROOM_RULE, &room_rule, sizeof(room_rule));
+			g_GameCtrl->SendData(pIServerUserItem, MDM_G_FRAME, CMD_GR_ROOM_RULE, &room_rule, sizeof(room_rule));
 
+			return true;
+		}
+	case SUB_RG_PLAYER_INFO:		//请求用户信息
+		{
 			// 1、给加入玩家发送自己的数据
 			WORD wChairID = pIServerUserItem->GetChairID();
 			BYTE cbUserStatus = pIServerUserItem->GetUserStatus();
@@ -1135,7 +1136,7 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 			memcpy(&GameStatus1.UserInfo, pUserInfo, sizeof(tagUserInfo));
 			CLog::Log(log_debug, "wChairID: %d", GameStatus1.UserInfo.wChairID);
 
-			g_GameCtrl->SendData(pIServerUserItem, MDM_USER, SUB_GR_USER_STATUS, &GameStatus1, sizeof(GameStatus1));
+			g_GameCtrl->SendData(pIServerUserItem, MDM_G_FRAME, CMD_GR_USER_STATUS, &GameStatus1, sizeof(GameStatus1));
 
 			// 2、玩家加入房间  将在房间里的所有玩家信息发送给新玩家
 			for (auto it = m_user_list.begin(); it != m_user_list.end(); it++)
@@ -1154,9 +1155,19 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 					memset(&GameStatus.UserInfo, 0, sizeof(tagUserInfo));
 					memcpy(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
 
-					g_GameCtrl->SendData(pIServerUserItem, MDM_USER, SUB_GR_USER_STATUS, &GameStatus, sizeof(GameStatus));
+					g_GameCtrl->SendData(pIServerUserItem, MDM_G_FRAME, CMD_GR_USER_STATUS, &GameStatus, sizeof(GameStatus));
 				}
 			}
+
+			// 3、给Client发送 用户信息发送完成的消息
+			g_GameCtrl->SendData(pIServerUserItem, MDM_G_FRAME, CMD_GR_USER_STATUS_FINISH, NULL, 0);
+
+			return true;
+		}
+	case SUB_RG_FRAME_GAME_OPTION:		//请求游戏场景
+		{
+			//变量定义
+			WORD wChairID = pIServerUserItem->GetChairID();
 
 			//发送场景
 			m_pITableFrameSink->OnEventSendGameScene(wChairID, pIServerUserItem, m_cbGameStatus, true);
@@ -1222,6 +1233,7 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 
 				g_GameCtrl->SendData(pIServerUserItem,MDM_G_FRAME,CMD_GR_FRAME_GAME_DISSMISS,&cmd_dismiss,sizeof(cmd_dismiss));
 			}
+
 			return true;
 		}
 	case SUB_RG_FRAME_CHAT:		//用户聊天

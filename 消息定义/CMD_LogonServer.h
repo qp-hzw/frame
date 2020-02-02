@@ -135,6 +135,10 @@
 #define CMD_LC_SERVICE_GOLD_INFO				119							//请求金币大厅信息 返回
 #define CMD_LC_SERVICE_GOLD_INFO_FINISH			219							//请求金币大厅信息 结束
 
+#define SUB_CL_SERVICE_MATCH_INFO				22							//请求比赛场信息
+#define CMD_LC_SERVICE_MATCH_INFO				122							//请求比赛场信息  返回
+#define CMD_LC_SERVICE_MATCH_INFO_FINISH		222							//请求比赛场信息  结束
+
 #define SUB_CL_SERVICE_XJ_RECORD_PLAYBACK		20							//小局录像回放
 #define CMD_LC_SERVICE_XJ_RECORD_PLAYBACK		120							//小局录像回放 返回
 

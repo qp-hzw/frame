@@ -152,6 +152,13 @@ private:
 	//请求金币大厅信息 结束
 	static bool On_CMD_LC_SERVICE_GOLD_INFO_FINISH( DWORD dwContextID, VOID * pData, WORD wDataSize );
 
+	//请求比赛场信息
+	static bool On_SUB_CL_SERVICE_MATCH_INFO(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+	//请求比赛场信息 返回
+	static bool On_CMD_LC_SERVICE_MATCH_INFO(DWORD dwContextID, VOID * pData, WORD wDataSize);
+	//请求比赛场信息 结束
+	static bool On_CMD_LC_SERVICE_MATCH_INFO_FINISH(DWORD dwContextID, VOID * pData, WORD wDataSize);
+
 	//修改个人资料
 	static bool On_SUB_CL_Service_ModifyPersonalInfo(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//修改个人资料返回

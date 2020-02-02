@@ -86,6 +86,9 @@ protected:
 	//退出比赛
 	bool OnRequestMatchQuit(DWORD dwContextID, VOID * pData, WORD wDataSize, DWORD &dwUserID);
 
+	//配置比赛场
+	bool On_DBR_GR_MATCH_CONFIG(DWORD dwContextID,VOID * pData, WORD wDataSize);
+
 	//写当前库存
 	bool OnWriteCurrentStock(DWORD dwContextID, VOID * pData, WORD wDataSize, DWORD &dwUserID);
 

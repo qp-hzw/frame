@@ -69,7 +69,10 @@ bool CGameCtrl::StartService()
 	}
 
 	//加载机器人
-	g_GameCtrl->PostDataBaseRequest(DBR_GR_LOAD_ANDROID_USER,0L,NULL,0L);
+	PostDataBaseRequest(DBR_GR_LOAD_ANDROID_USER,0L,NULL,0L);
+
+	//加载比赛场配置
+	PostDataBaseRequest(DBR_GR_MATCH_CONFIG, 0L, NULL, 0L);
 
 	return true;
 }
@@ -201,6 +204,7 @@ bool CGameCtrl::SendData(CPlayer * pIServerUserItem, WORD wMainCmdID, WORD wSubC
 	
 	return true;
 }
+
 
 //房间消息
 bool CGameCtrl::SendRoomMessage(LPCTSTR lpszMessage, WORD wType)

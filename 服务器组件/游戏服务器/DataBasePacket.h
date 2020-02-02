@@ -63,14 +63,15 @@ struct DBR_GP_UserQuitInfo
 //游戏事件
 #define DBR_GR_GAME_FRAME_REQUEST	502									//游戏请求
 
-
-
 //比赛事件
 #define DBR_GR_MATCH_FEE			600									//比赛费用
 #define DBR_GR_MATCH_START			601									//比赛开始
 #define DBR_GR_MATCH_OVER			602									//比赛结束
 #define DBR_GR_MATCH_REWARD			603									//比赛奖励
 #define DBR_GR_MATCH_QUIT			604									//退出比赛
+
+//比赛配置
+#define DBR_GR_MATCH_CONFIG			605									//配置比赛场
 
 //游戏控制
 #define DBR_GR_WRITE_CURRENT_STOCK		1006							//写当前库存值
@@ -624,6 +625,12 @@ struct DBR_GR_MatchReward
 	DWORD								dwGold;								//游戏币
 	DWORD								dwMedal;							//用户奖牌
 	DWORD								dwClientAddr;						//连接地址
+};
+
+//比赛配置
+struct STR_DBR_GR_MATCH_CONFIG
+{
+
 };
 
 //系统消息

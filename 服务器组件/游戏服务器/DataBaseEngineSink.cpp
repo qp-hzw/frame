@@ -3,6 +3,7 @@
 #include "DataBaseEngineSink.h"
 #include "AttemperEngineSink.h"
 #include "RobotManager.h"
+#include "MatchManager.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -205,6 +206,11 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 	case DBR_CG_USER_JOIN_TABLE_NO_PASS://加入桌子 不需要密码,快速加入
 		{
 			bSucceed = On_DBR_CG_USER_JOIN_TABLE_NO_PASS(dwContextID,pData,wDataSize);
+			break;
+		}
+	case DBR_GR_MATCH_CONFIG:  //启动游戏服时配置比赛场
+		{
+			bSucceed = On_DBR_GR_MATCH_CONFIG(dwContextID,pData,wDataSize);
 			break;
 		}
 	}
@@ -1812,4 +1818,17 @@ bool CDataBaseEngineSink::On_DBR_CG_USER_JOIN_TABLE_NO_PASS(DWORD dwContextID, v
 	*/
 
 	return g_AttemperEngineSink->OnEventDataBaseResult(DBO_GC_USER_JOIN_TABLE_NO_PASS,dwContextID,&Dbo,sizeof(Dbo));
+}
+
+//配置比赛场
+bool CDataBaseEngineSink::On_DBR_GR_MATCH_CONFIG(DWORD dwContextID,VOID * pData, WORD wDataSize)
+{
+	//从数据库读取配置
+	STR_DBR_GR_MATCH_CONFIG cfg;
+	ZeroMemory(&cfg, sizeof(STR_DBR_GR_MATCH_CONFIG));
+
+	//配置比赛场
+	CMatchManager::ReadMatchConfig(cfg);
+
+	return true;
 }
