@@ -379,14 +379,14 @@ bool CDataBaseEngineSink::On_DBO_Service_RefreshUserInfo(DWORD dwContextID, DWOR
 		//用户元宝
 		UserInfo.dwUserDiamond=m_AccountsDB->GetValue_LONGLONG(TEXT("UserDiamond"));
 		//用户奖牌
-		UserInfo.dwUserMedal=m_AccountsDB->GetValue_DWORD(TEXT("UserMedal"));
+		//UserInfo.dwUserMedal=m_AccountsDB->GetValue_DWORD(TEXT("UserMedal"));
 		//经验数值
 		UserInfo.dwExperience=m_AccountsDB->GetValue_DWORD(TEXT("Experience"));
 		//用户魅力
 		UserInfo.dwLoveLiness=m_AccountsDB->GetValue_DWORD(TEXT("LoveLiness"));
 
 		//管理员等级
-		UserInfo.cbMasterOrder=m_AccountsDB->GetValue_BYTE(TEXT("MasterOrder"));
+		//UserInfo.cbMasterOrder=m_AccountsDB->GetValue_BYTE(TEXT("MasterOrder"));
 		//会员等级
 		UserInfo.cbMemberOrder=m_AccountsDB->GetValue_BYTE(TEXT("MemberOrder"));
 		//会员到期时
@@ -1035,7 +1035,6 @@ bool CDataBaseEngineSink::On_DBO_Service_RequestLottery(DWORD dwUserID, DWORD dw
 	UserScoreInfo.lOpenRoomCard = m_AccountsDB->GetValue_LONG(TEXT("OpenRoomCard"));
 	UserScoreInfo.lDiamond = m_AccountsDB->GetValue_LONG(TEXT("Diamond"));
 	UserScoreInfo.lRewardCard = m_AccountsDB->GetValue_LONG(TEXT("RewardCard"));
-	UserScoreInfo.lScore = m_AccountsDB->GetValue_LONG(TEXT("Score"));
 
 	//发送财富变更消息
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_USER_QUERY_SCORE_INFO, dwContextID, &UserScoreInfo, sizeof(STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO));
@@ -1207,7 +1206,7 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_RECORD_LIST(DWORD dwContextID, 
 		pDBO2->dwUserID = m_TreasureDB->GetValue_DWORD(TEXT("UserID"));
 		m_TreasureDB->GetValue_String(TEXT("NickName"),pDBO2->szNickName,CountArray(pDBO2->szNickName));
 		m_TreasureDB->GetValue_String(TEXT("HeadUrl"),pDBO2->szHeadUrl,CountArray(pDBO2->szHeadUrl));
-		pDBO2->lScore=m_TreasureDB->GetValue_LONGLONG(TEXT("Score"));
+		//pDBO2->lScore=m_TreasureDB->GetValue_LONGLONG(TEXT("Score"));
 
 		//设置位移
 		wPacketSize2+=sizeof(STR_CMD_LC_SERVICE_PURE_RECORD_LIST_PLAYERINFO);
@@ -1305,7 +1304,7 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_XJ_RECORD_LIST(DWORD dwContextI
 			pDBO2->bRoundCount = m_TreasureDB->GetValue_BYTE(TEXT("RoundCount"));
 			pDBO2->dwUserID = m_TreasureDB->GetValue_DWORD(TEXT("UserID"));
 			m_TreasureDB->GetValue_String(TEXT("NickName"),pDBO2->szNickName,CountArray(pDBO2->szNickName));
-			pDBO2->lScore=m_TreasureDB->GetValue_LONGLONG(TEXT("Score"));
+			//pDBO2->lScore=m_TreasureDB->GetValue_LONGLONG(TEXT("Score"));
 
 			//设置位移
 			wPacketSize2+=sizeof(STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_PLAYERINFO);
@@ -1810,7 +1809,7 @@ bool CDataBaseEngineSink::OnModifyUserInsure(DWORD dwContextID, void * pData, WO
 	m_TreasureDB->AddParameter(TEXT("@lOpenRoomCard"), pDbReq->lOpenRoomCard);
 	m_TreasureDB->AddParameter(TEXT("@lDiamond"), pDbReq->lDiamond);
 	m_TreasureDB->AddParameter(TEXT("@lRewardCard"), pDbReq->lRewardCard);
-	m_TreasureDB->AddParameter(TEXT("@lScore"), pDbReq->lScore);
+	//m_TreasureDB->AddParameter(TEXT("@lScore"), pDbReq->lScore);
 
 	//输出变量
 	WCHAR szDescribe[128]=L"";
@@ -1833,7 +1832,7 @@ bool CDataBaseEngineSink::OnModifyUserInsure(DWORD dwContextID, void * pData, WO
 		UserScoreInfo.lOpenRoomCard = m_AccountsDB->GetValue_LONG(TEXT("@OpenRoomCard"));
 		UserScoreInfo.lDiamond = m_AccountsDB->GetValue_LONG(TEXT("@Diamond"));
 		UserScoreInfo.lRewardCard = m_AccountsDB->GetValue_LONG(TEXT("@RewardCard"));
-		UserScoreInfo.lScore = m_AccountsDB->GetValue_LONG(TEXT("@Score"));
+		//UserScoreInfo.lScore = m_AccountsDB->GetValue_LONG(TEXT("@Score"));
 
 		//发送财富变更消息
 		g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_USER_QUERY_SCORE_INFO,dwContextID,&UserScoreInfo,sizeof(STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO));
@@ -1926,75 +1925,6 @@ bool CDataBaseEngineSink::On_DBR_Logon_Accounts(DWORD dwContextID, VOID * pData,
 	return true;
 }
 
-//账号登录返回
-bool CDataBaseEngineSink::On_DBO_Logon_Accounts(DWORD dwContextID, DWORD dwResultCode, LPCTSTR pszErrorString)
-{
-	//变量定义
-	STR_CMD_LC_LOGON_PLATFORM DBOLogonAccount;
-	ZeroMemory(&DBOLogonAccount,sizeof(DBOLogonAccount));
-
-	//登录成功获取信息
-	if(DB_SUCCESS == dwResultCode)
-	{
-		/* *****************************    用户信息     ****************************/
-		//用户标志
-		DBOLogonAccount.dwUserID=m_AccountsDB->GetValue_DWORD(TEXT("UserID"));
-		//用户昵称
-		m_AccountsDB->GetValue_String(TEXT("NickName"),DBOLogonAccount.szNickName,CountArray(DBOLogonAccount.szNickName));
-		//用户性别
-		DBOLogonAccount.cbGender=m_AccountsDB->GetValue_BYTE(TEXT("Gender"));
-		//头像索引
-		m_AccountsDB->GetValue_String(TEXT("HeadUrl"),DBOLogonAccount.szHeadUrl,CountArray(DBOLogonAccount.szHeadUrl));
-		//个性签名
-		m_AccountsDB->GetValue_String(TEXT("MySignature"),DBOLogonAccount.szMySignature,CountArray(DBOLogonAccount.szMySignature));
-
-		//用户元宝
-		DBOLogonAccount.dwUserDiamond=m_AccountsDB->GetValue_LONGLONG(TEXT("UserDiamond"));
-		//用户奖牌
-		DBOLogonAccount.dwUserMedal=m_AccountsDB->GetValue_DWORD(TEXT("UserMedal"));
-		//经验数值
-		DBOLogonAccount.byLevel=m_AccountsDB->GetValue_BYTE(TEXT("UserLevel"));
-		//用户魅力
-		DBOLogonAccount.dwLoveLiness=m_AccountsDB->GetValue_DWORD(TEXT("LoveLiness"));
-
-		//管理员等级
-		DBOLogonAccount.cbMasterOrder=m_AccountsDB->GetValue_BYTE(TEXT("MasterOrder"));
-		//会员等级
-		DBOLogonAccount.cbMemberOrder=m_AccountsDB->GetValue_BYTE(TEXT("MemberOrder"));
-		//会员到期时间
-		m_AccountsDB->GetValue_SystemTime(TEXT("MemberOverDate"),DBOLogonAccount.MemberOverDate);
-
-		//真实姓名
-		m_AccountsDB->GetValue_String(TEXT("IdentityName"),DBOLogonAccount.szIdentityName,CountArray(DBOLogonAccount.szIdentityName));
-		//身份证号
-		m_AccountsDB->GetValue_String(TEXT("IdentityNum"),DBOLogonAccount.szIdentityNum,CountArray(DBOLogonAccount.szIdentityNum));
-		//手机号码
-		m_AccountsDB->GetValue_String(TEXT("MobilePhone"),DBOLogonAccount.szMobilePhone,CountArray(DBOLogonAccount.szMobilePhone));
-		/* *****************************    账号信息     ****************************/
-		//最后登录地址
-		m_AccountsDB->GetValue_String(TEXT("LastLogonIP"),DBOLogonAccount.szLasLogonIp,CountArray(DBOLogonAccount.szLasLogonIp));
-		//最后上线时间 
-		m_AccountsDB->GetValue_SystemTime(TEXT("LastLogonDate"),DBOLogonAccount.LasLogonDate);
-
-		/* *****************************    附加数据     ****************************/
-		//用户积分
-		DBOLogonAccount.lUserScore = m_AccountsDB->GetValue_LONGLONG(TEXT("UserScore"));
-		//用户游戏币
-		DBOLogonAccount.lUserGold = m_AccountsDB->GetValue_LONGLONG(TEXT("UserGold"));
-		//用户房卡
-		DBOLogonAccount.lOpenRoomCard = m_AccountsDB->GetValue_LONGLONG(TEXT("UserRoomCard"));
-	}
-
-	//构造数据
-	DBOLogonAccount.dwResultCode=dwResultCode;
-	lstrcpyn(DBOLogonAccount.szDescribeString,pszErrorString,CountArray(DBOLogonAccount.szDescribeString));
-
-	//发送结果
-	g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_LOGON_ACCOUNTS,dwContextID,&DBOLogonAccount, sizeof(DBOLogonAccount));
-
-	return true;
-}
-
 //注册处理
 bool CDataBaseEngineSink::On_DBR_Logon_Register(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
@@ -2064,75 +1994,58 @@ bool CDataBaseEngineSink::On_DBR_Logon_Platform(DWORD dwContextID, VOID * pData,
 	CDBVarValue DBVarValue;
 	m_AccountsDB->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
-	On_DBO_Logon_Platform(dwContextID,lResultCode,CW2CT(DBVarValue.bstrVal));
-
+	On_DBO_Logon_Accounts(dwContextID,lResultCode,CW2CT(DBVarValue.bstrVal));
 	return true;
 }
 
-//平台登录返回
-bool CDataBaseEngineSink::On_DBO_Logon_Platform(DWORD dwContextID, DWORD dwResultCode, LPCTSTR pszErrorString)
+//账号登录返回
+bool CDataBaseEngineSink::On_DBO_Logon_Accounts(DWORD dwContextID, DWORD dwResultCode, LPCTSTR pszErrorString)
 {
 	//变量定义
-	STR_CMD_LC_LOGON_PLATFORM DBOLogonPlatform;
-	ZeroMemory(&DBOLogonPlatform,sizeof(DBOLogonPlatform));
+	STR_CMD_LC_LOGON_PLATFORM DBOLogonAccount;
+	ZeroMemory(&DBOLogonAccount,sizeof(DBOLogonAccount));
 
 	//登录成功获取信息
 	if(DB_SUCCESS == dwResultCode)
 	{
-		/* *****************************    用户信息     ****************************/
 		//用户标志
-		DBOLogonPlatform.dwUserID=m_AccountsDB->GetValue_DWORD(TEXT("UserID"));
+		DBOLogonAccount.useInfo.dwUserID=m_AccountsDB->GetValue_DWORD(TEXT("UserID"));
 		//用户昵称
-		m_AccountsDB->GetValue_String(TEXT("NickName"),DBOLogonPlatform.szNickName,CountArray(DBOLogonPlatform.szNickName));
+		m_AccountsDB->GetValue_String(TEXT("NickName"),DBOLogonAccount.useInfo.szNickName,CountArray(DBOLogonAccount.useInfo.szNickName));
 		//用户性别
-		DBOLogonPlatform.cbGender=m_AccountsDB->GetValue_BYTE(TEXT("Gender"));
+		DBOLogonAccount.useInfo.cbGender=m_AccountsDB->GetValue_BYTE(TEXT("Gender"));
 		//头像索引
-		m_AccountsDB->GetValue_String(TEXT("HeadUrl"),DBOLogonPlatform.szHeadUrl,CountArray(DBOLogonPlatform.szHeadUrl));
+		m_AccountsDB->GetValue_String(TEXT("HeadUrl"),DBOLogonAccount.useInfo.szHeadUrl,CountArray(DBOLogonAccount.useInfo.szHeadUrl));
 		//个性签名
-		m_AccountsDB->GetValue_String(TEXT("MySignature"),DBOLogonPlatform.szMySignature,CountArray(DBOLogonPlatform.szMySignature));
+		m_AccountsDB->GetValue_String(TEXT("MySignature"),DBOLogonAccount.useInfo.szUnderWrite,CountArray(DBOLogonAccount.useInfo.szUnderWrite));
 
-		//用户元宝
-		DBOLogonPlatform.dwUserDiamond=m_AccountsDB->GetValue_LONGLONG(TEXT("UserDiamond"));
-		//用户奖牌
-		DBOLogonPlatform.dwUserMedal=m_AccountsDB->GetValue_DWORD(TEXT("UserMedal"));
-		//经验数值
-		DBOLogonPlatform.byLevel=m_AccountsDB->GetValue_BYTE(TEXT("UserLevel"));
-		//用户魅力
-		DBOLogonPlatform.dwLoveLiness=m_AccountsDB->GetValue_DWORD(TEXT("LoveLiness"));
+		//社团ID
+		//社团名字
 
-		//管理员等级
-		DBOLogonPlatform.cbMasterOrder=m_AccountsDB->GetValue_BYTE(TEXT("MasterOrder"));
 		//会员等级
-		DBOLogonPlatform.cbMemberOrder=m_AccountsDB->GetValue_BYTE(TEXT("MemberOrder"));
-		//会员到期时间
-		m_AccountsDB->GetValue_SystemTime(TEXT("MemberOverDate"),DBOLogonPlatform.MemberOverDate);
+		DBOLogonAccount.useInfo.cbMemberOrder=m_AccountsDB->GetValue_BYTE(TEXT("MemberOrder"));
+		//经验等级
+		DBOLogonAccount.useInfo.dwLevel=m_AccountsDB->GetValue_BYTE(TEXT("UserLevel"));
+		//经验数值
 
-		//真实姓名
-		m_AccountsDB->GetValue_String(TEXT("IdentityName"),DBOLogonPlatform.szIdentityName,CountArray(DBOLogonPlatform.szIdentityName));
-		//身份证号
-		m_AccountsDB->GetValue_String(TEXT("IdentityNum"),DBOLogonPlatform.szIdentityNum,CountArray(DBOLogonPlatform.szIdentityNum));
-		//手机号码
-		m_AccountsDB->GetValue_String(TEXT("MobilePhone"),DBOLogonPlatform.szMobilePhone,CountArray(DBOLogonPlatform.szMobilePhone));
-		/* *****************************    账号信息     ****************************/
-		//最后登录地址
-		m_AccountsDB->GetValue_String(TEXT("LastLogonIP"),DBOLogonPlatform.szLasLogonIp,CountArray(DBOLogonPlatform.szLasLogonIp));
-		//最后上线时间
-		m_AccountsDB->GetValue_SystemTime(TEXT("LastLogonDate"),DBOLogonPlatform.LasLogonDate);
-
-		/* *****************************    附加数据     ****************************/
-		//用户积分 TODONOW 数据库缺少该字段
-		//DBOLogonPlatform.lUserScore = m_AccountsDB->GetValue_LONGLONG(TEXT("UserScore"));
-		//用户游戏币
-		DBOLogonPlatform.lUserGold = m_AccountsDB->GetValue_LONGLONG(TEXT("UserGold"));
 		//用户房卡
-		DBOLogonPlatform.lOpenRoomCard = m_AccountsDB->GetValue_LONGLONG(TEXT("OpenRoomCard"));
+		DBOLogonAccount.useInfo.lOpenRoomCard = m_AccountsDB->GetValue_LONGLONG(TEXT("UserRoomCard"));
+		//钻石
+		//用户游戏币
+		DBOLogonAccount.useInfo.lGold = m_AccountsDB->GetValue_LONGLONG(TEXT("UserGold"));
+
+		//胜利盘数
+		//失败盘数
+		//和盘盘数
+		//逃跑盘数
 	}
 
 	//构造数据
-	DBOLogonPlatform.dwResultCode=dwResultCode;
-	lstrcpyn(DBOLogonPlatform.szDescribeString,pszErrorString,CountArray(DBOLogonPlatform.szDescribeString));
+	DBOLogonAccount.dwResultCode=dwResultCode;
+	lstrcpyn(DBOLogonAccount.szDescribeString,pszErrorString,CountArray(DBOLogonAccount.szDescribeString));
 
-	g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_LOGON_PLATFORM,dwContextID,&DBOLogonPlatform,sizeof(DBOLogonPlatform));
+	//发送结果
+	g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_LOGON_ACCOUNTS,dwContextID,&DBOLogonAccount, sizeof(DBOLogonAccount));
 	return true;
 }
 

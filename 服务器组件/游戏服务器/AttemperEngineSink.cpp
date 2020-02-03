@@ -213,13 +213,6 @@ bool CAttemperEngineSink::OnEventTCPNetworkShut(DWORD dwClientAddr, DWORD dwActi
 	{
 		//table 广播
 		pTableFrame->PlayerOffline(pPlayer);
-
-		//发送给协调服, 由协调服通知登录服
-		tagOfflineUser data;
-		data.dwUserID = pPlayer->GetUserID();
-		data.dwServerID = g_GameCtrl->GetKindID(); //以后需要改成GameID
-		data.byMask = 1; //表示增加断线用户
-		g_TCPSocketEngine->SendData(CPD_MDM_USER,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
 	}
 	else //没有在桌子里, 则直接删除用户
 	{

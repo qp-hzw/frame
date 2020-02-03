@@ -109,6 +109,36 @@ bool CHandleFromCenter::OnTCPSocketMainTransfer(WORD wSubCmdID, VOID * pData, WO
 
 			return true;
 		}
+
+	case CPR_PG_OFFLINE_PLAYERQUERY: //查询断线玩家
+		{			
+			//校验数据
+			if (wDataSize != sizeof(STR_CPR_PG_OFFLINE_PLAYERQUERY)) return false;
+			STR_CPR_PG_OFFLINE_PLAYERQUERY* pCPO = (STR_CPR_PG_OFFLINE_PLAYERQUERY *)pData;
+
+			STR_CPO_GP_OFFLINE_FINISH cmd;
+			cmd.dwSocketID = pCPO->dwSocketID;
+			cmd.dwUserID = pCPO->dwUserID;
+
+			CPlayer *player =  CPlayerManager::FindPlayerByID(pCPO->dwUserID);
+			if(!player)
+			{
+				cmd.bOffline = 0;
+				g_TCPSocketEngine->SendData(CPD_MDM_TRANSFER,CPO_GP_OFFLINE_FINISH, &cmd, sizeof(cmd));
+				return true;
+			}
+		
+			if(player->GetTableID() != INVALID_TABLE)
+			{
+				cmd.bOffline = 1;
+			}
+			else
+			{
+				cmd.bOffline = 0;
+			}
+			g_TCPSocketEngine->SendData(CPD_MDM_TRANSFER,CPO_GP_OFFLINE_FINISH, &cmd, sizeof(cmd));
+			return true;
+		}
 	}
 
 	return true;

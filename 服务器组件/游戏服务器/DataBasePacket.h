@@ -124,8 +124,6 @@ struct STR_DBR_CG_LOGON_USERID
 	//附加信息
 	DWORD							dwClientAddr;						//连接地址
 	TCHAR							szMachineID[LEN_MACHINE_ID];		//机器标识
-	double							dLongitude;							//登录游戏服时GPS经度
-	double							dLatitude;							//登录游戏服时GPS纬度
 };
 //ID 登录返回
 struct STR_DBO_CG_LOGON_USERID
@@ -133,58 +131,7 @@ struct STR_DBO_CG_LOGON_USERID
 	LONG							lResultCode;								//错误代码
 	TCHAR							szDescribeString[LEN_MESSAGE_DESCRIBE];		//消息描述
 
-	//属性资料
-	WORD							wFaceID;							//头像标识
-	DWORD							dwUserID;							//用户 I D
-	DWORD							dwGameID;							//游戏 I D
-	DWORD							dwGroupID;							//社团 I D
-	DWORD							dwCustomID;							//自定头像
-	TCHAR							szNickName[LEN_NICKNAME];			//帐号昵称
-	TCHAR							szGroupName[LEN_GROUP_NAME];		//社团名字
-	TCHAR							szHeadUrl[256];						//头像地址
-
-	//用户资料
-	BYTE							cbGender;							//用户性别
-	BYTE							cbMemberOrder;						//会员等级
-	BYTE							cbMasterOrder;						//管理等级
-	TCHAR							szUnderWrite[LEN_MY_SIGNATURE];		//个性签名
-
-	//积分信息
-	SCORE							lScore;								//用户分数
-	SCORE							lGrade;								//用户成绩
-	SCORE							lControlScore;						//用户控制值
-	SCORE							lOpenRoomCard;						//开房卡
-	SCORE							lDiamond;							//钻石
-	SCORE							lGold;								//金币
-
-	//游戏信息
-	DWORD							dwWinCount;							//胜利盘数
-	DWORD							dwLostCount;						//失败盘数
-	DWORD							dwDrawCount;						//和局盘数
-	DWORD							dwFleeCount;						//逃跑盘数
-	DWORD							dwUserMedal;						//用户奖牌
-	DWORD							dwExperience;						//用户经验
-	LONG							lLoveLiness;						//用户魅力
-
-	//用户权限
-	DWORD							dwUserRight;						//用户权限
-	DWORD							dwMasterRight;						//管理权限
-
-	//索引变量
-	DWORD							dwInoutIndex;						//记录索引
-	TCHAR							szMachineID[LEN_MACHINE_ID];		//机器标识
-
-	//手机定义
-	BYTE                            cbDeviceType;                       //设备类型
-	WORD                            wBehaviorFlags;                     //行为标识
-	WORD                            wPageTableCount;                    //分页桌数
-
-	//辅助信息
-	TCHAR							szPassword[LEN_MD5];				//登录密码
-
-	//GPS位置信息
-	double							dLongitude;							//登录游戏服时GPS经度
-	double							dLatitude;							//登录游戏服时GPS纬度
+	tagUserInfo                     useInfo;                                    //玩家信息
 };
 
 //创建牌友圈房间
@@ -400,55 +347,6 @@ struct DBR_GR_GameScoreRecord
 	tagGameScoreRecord				GameScoreRecord[MAX_CHAIR];			//游戏记录
 };
 
-//道具请求
-struct DBR_GR_PropertyRequest
-{
-	//购买信息
-	WORD							wItemCount;							//购买数目
-	WORD							wPropertyIndex;						//道具索引
-	DWORD							dwSourceUserID;						//购买对象
-	DWORD							dwTargetUserID;						//使用对象
-
-	//消费模式
-	BYTE                            cbRequestArea;			            //使用范围 
-	BYTE							cbConsumeScore;						//积分消费
-	SCORE							lFrozenedScore;						//冻结积分
-
-	//用户权限
-	DWORD                           dwUserRight;						//会员权限
-
-	//系统信息
-	WORD							wTableID;							//桌子号码
-	DWORD							dwInoutIndex;						//进入标识
-	DWORD							dwClientAddr;						//连接地址
-	TCHAR							szMachineID[LEN_MACHINE_ID];		//机器序列
-};
-
-//写入彩金积分
-struct DBR_GR_PrizePool_Write_Score
-{
-	WORD           wGameID;                                            //游戏ID
-	WORD           wRoomID;                                            //房间ID
-	SCORE          lPrizePoolScore;                                       //彩金抽取积分
-};
-//彩金读取
-struct DBR_GR_PrizePool_Get_Data
-{
-	WORD           wGameID;                                            //游戏ID
-	WORD           wRoomID;                                            //房间ID
-	WORD          wTableID;                                            //桌子ID
-};
-//彩金中奖
-struct DBR_GR_PrizePool_Reward
-{
-	WORD           wGameID;                                            //游戏ID
-	WORD           wRoomID;                                            //房间ID
-	WORD           wTableID;                                            //房间ID
-	WORD           wChairID;                                           //中奖椅子ID
-	LONG           lTopPercent;                                        //奖励分子
-	LONG           lBottomPercent;                                     //奖励分母
-
-};
 //////////////////////////////////////////////////////////////////////////////////
 
 //配置信息
@@ -484,83 +382,6 @@ struct DBO_GR_GameAndroidInfo
 	LONG							lResultCode;						//结果代码
 	WORD							wAndroidCount;						//用户数目
 	tagAndroidParameter				AndroidParameter[MAX_ANDROID];		//机器信息
-};
-
-//道具成功
-struct DBO_GR_S_PropertySuccess
-{
-	//道具信息
-	WORD							wItemCount;							//购买数目
-	WORD							wPropertyIndex;						//道具索引
-	DWORD							dwSourceUserID;						//购买对象
-	DWORD							dwTargetUserID;						//使用对象
-
-	//消费模式
-	BYTE                            cbRequestArea;						//请求范围
-	BYTE							cbConsumeScore;						//积分消费
-	SCORE							lFrozenedScore;						//冻结积分
-
-	//会员权限
-	DWORD                           dwUserRight;						//会员权限
-
-	//结果信息
-	SCORE							lConsumeGold;						//消费游戏币
-	LONG							lSendLoveLiness;					//赠送魅力
-	LONG							lRecvLoveLiness;					//接受魅力
-
-	//会员信息
-	BYTE							cbMemberOrder;						//会员等级
-};
-
-//道具失败
-struct DBO_GR_PropertyFailure
-{
-	BYTE                            cbRequestArea;						//请求范围
-	LONG							lResultCode;						//操作代码
-	SCORE							lFrozenedScore;						//冻结积分
-	TCHAR							szDescribeString[128];				//描述消息
-};
-//彩金数据配置
-struct DBO_GR_PrizePoolData
-{
-	WORD                            wGameID;                             //游戏ID
-	//WORD                            wKindID;                             //游戏ID
-	WORD                            wRoomID;                             //房间ID
-	WORD                            wTableID;                            //桌子ID
-	LONGLONG                        lPrizePool;                          //彩金池
-	LONGLONG                        lAllPrizePool;                       //总彩金池
-	BYTE                            bIsGamePrize;                        //是否开总彩金
-	BYTE                            bIsRoomPrize;                        //是否开房间彩金
-	BYTE                            bIsSendMessage;                      //是否发送跑马灯
-};
-//总彩金
-struct DBO_GR_GamePrizePool
-{
-	WORD                            wGameID;                             //游戏ID
-	WORD                            wRoomID;                             //房间ID
-	LONGLONG                        lAllPrizePool;                       //总彩金池
-};
-//房间彩金
-struct DBO_GR_RoomPrizePool
-{
-	WORD                            wGameID;                             //游戏ID
-	WORD                            wRoomID;                             //房间ID
-	WORD                            wTableID;                            //桌子ID
-	LONGLONG                        lPrizePool;                          //彩金池
-	BYTE                            bIsGamePrize;                        //是否开总彩金
-	BYTE                            bIsRoomPrize;                        //是否开房间彩金
-	BYTE                            bIsSendMessage;                      //是否发送跑马灯
-};
-
-//彩金中奖
-struct DBO_GR_PrizePoolReward
-{
-	WORD                            wGameID;                             //游戏ID
-	WORD                            wRoomID;                             //房间ID
-	WORD                            wTableID;                            //中奖玩家桌子ID
-	WORD                            wChairID;                            //中奖玩家ID
-	LONGLONG                        lRewardGold;                         //中奖金币
-	BYTE                            bIsSendMessage;                      //是否发送跑马灯
 };
 
 

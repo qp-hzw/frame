@@ -8,3 +8,4 @@ CPlayer::CPlayer(DWORD dwSocketID, tagUserInfo& UserInfo)
 
 	m_dwSocketID = dwSocketID;
 }
+

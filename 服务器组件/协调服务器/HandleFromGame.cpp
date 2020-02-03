@@ -1,5 +1,6 @@
 #include "HandleFromGame.h"
 #include "GameCtrl.h"
+#include "ServerItemManager.h"
 
 //消息分发处理函数
 bool CHandleFromGame::HandlePacket(TCP_Command Command, VOID * pData, WORD wDataSize, DWORD dwSocketID)
@@ -9,10 +10,6 @@ bool CHandleFromGame::HandlePacket(TCP_Command Command, VOID * pData, WORD wData
 	case CPD_MDM_TRANSFER:	//中转服务
 		{
 			return OnTCPNetworkMainTransfer(Command.wSubCmdID,pData,wDataSize,dwSocketID);
-		}
-	case CPD_MDM_USER://用户命令
-		{
-			return OnTCPNetworkMainUserCollect(Command.wSubCmdID,pData,wDataSize,dwSocketID);
 		}
 	}
 	return false;
@@ -42,27 +39,51 @@ bool CHandleFromGame::OnTCPNetworkMainTransfer(WORD wSubCmdID, VOID * pData, WOR
 			g_GameCtrl->SendDataBatch(CPD_MDM_TRANSFER,CPO_PL_CLUB_PLAYER_INFO,pData,wDataSize);
 			return true;
 		}
-	}
-
-	return false;
-}
-
-//用户处理
-bool CHandleFromGame::OnTCPNetworkMainUserCollect(WORD wSubCmdID, VOID * pData, WORD wDataSize, DWORD dwSocketID)
-{
-	switch (wSubCmdID)
-	{
-	case SUB_CS_C_USER_OFFLINE:	//用户断线
+	case CPO_GP_OFFLINE_FINISH:
 		{
-			//效验数据
-			if (wDataSize!=sizeof(tagOfflineUser)) return true;
+			//校验数据
+			if (wDataSize != sizeof(STR_CPO_GP_OFFLINE_FINISH)) return false;
+			STR_CPO_GP_OFFLINE_FINISH* pCPO = (STR_CPO_GP_OFFLINE_FINISH *)pData;
 
-			//发送通知 -- 全部登录服
-			g_GameCtrl->SendDataBatch(CPD_MDM_USER,SUB_CS_C_USER_OFFLINE_B, pData, wDataSize);
+			static int recv_num = 0;
+			recv_num++;
+
+			if(pCPO->bOffline == 1)
+			{
+				tagServerItem* item =  CServerItemManager::FindItemBySocketID(dwSocketID);
+				if(!item)
+				{
+					//发送给logon
+					STR_CPO_PL_OFFLINE_FiNISH cmd;
+					cmd.dwUserID = pCPO->dwUserID;
+					cmd.dwGameID = item->dwServerID;
+					cmd.dwSocketID = pCPO->dwSocketID;
+					
+					g_GameCtrl->SendData(pCPO->dwSocketID, CPD_MDM_TRANSFER, CPO_PL_OFFLINE_FiNISH,&cmd,sizeof(cmd));
+					return true;
+				}
+			}
+
+			//所有数据接收完毕
+			if(recv_num == CServerItemManager::FindAllGameServer().size())
+			{
+				recv_num = 0;
+
+				//发送给logon
+				STR_CPO_PL_OFFLINE_FiNISH cmd;
+				cmd.dwUserID = pCPO->dwUserID;
+				cmd.dwGameID = 0;
+				cmd.dwSocketID = pCPO->dwSocketID;
+
+				g_GameCtrl->SendData(pCPO->dwSocketID, CPD_MDM_TRANSFER, CPO_PL_OFFLINE_FiNISH,&cmd,sizeof(cmd));
+				return true;
+			}
+
 			return true;
 		}
 	}
 
 	return false;
 }
+
 #pragma endregion 

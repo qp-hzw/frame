@@ -34,14 +34,6 @@ private:
 	//ID登录返回
 	static bool On_CMD_GC_Logon_UserID(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
-    //登录模块 辅助函数
-private:
-	//ID登录成功，激活用户（为了给pCPlayer赋值，传进去双指针，pCPlayer传进去的就是NULL）
-	static void ActiveUserItem(DWORD dwContextID, STR_DBO_CG_LOGON_USERID *pDBOLogon);
-
-	//用户登出
-	static VOID OnEventUserLogout(CPlayer * pCPlayer, DWORD dwLeaveReason);
-
 #pragma endregion
 
 	#pragma region  用户命令 MDM_USER

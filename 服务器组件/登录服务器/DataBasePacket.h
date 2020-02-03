@@ -68,9 +68,6 @@ struct STR_DBR_CL_LOGON_ACCOUNTS
 //帐号注册
 struct STR_DBR_CL_LOGON_REGISTER
 {
-	//Socket校验
-	//LPVOID							pBindParameter;						//绑定参数
-	
 	//账号信息
 	TCHAR							szAccounts[LEN_ACCOUNTS];			//登录帐号
 	TCHAR							szPassword[LEN_MD5];				//登录密码
@@ -82,43 +79,6 @@ struct STR_DBR_CL_LOGON_REGISTER
 	TCHAR							szMachineID[LEN_MACHINE_ID];		//机器序列
 	DWORD							dwProxyID;							//代理ID
 };
-//账号注册返回
-struct STR_DBO_CL_LOGON_REGISTER
-{
-	//操作结果
-	DWORD                           dwResultCode;                       //结果标识
-	//描述信息
-	TCHAR							szDescribeString[128];				//描述消息
-
-	//用户标识
-	DWORD							dwUserID;							//用户标识
-	//基本属性
-	TCHAR							szNickName[LEN_NICKNAME];			//用户昵称
-	BYTE							cbGender;							//用户性别
-	WORD							wFaceID;							//头像索引
-	TCHAR							szMySignature[LEN_MY_SIGNATURE];	//个性签名
-	//荣誉属性
-	SCORE                           dwUserDiamond;                      //用户钻石|元宝
-	DWORD							dwUserMedal;						//用户奖牌
-	DWORD							dwExperience;						//经验数值
-	DWORD							dwLoveLiness;						//用户魅力
-	//用户权限
-	BYTE                            cbMasterOrder;                      //管理员等级 0表示非管理员
-	BYTE							cbMemberOrder;						//会员等级   0表示非管理员
-	SYSTEMTIME						MemberOverDate;						//会员到期时间
-	//联系方式
-	TCHAR                           szIdentityName[LEN_IDENTITY_NAME];  //真实姓名
-	TCHAR                           szIdentityNum[LEN_IDENTITY_NUM];    //身份证号
-	TCHAR                           szMobilePhone[LEN_MOBILE_PHONE];    //手机号码
-	//账号信息
-	TCHAR							szLasLogonIp[LEN_IP_ADDR];			//最后登录地址
-	SYSTEMTIME						LasLogonDate;						//最后上线时间
-	//道具信息
-	SCORE							lUserScore;							//用户积分
-	SCORE							lUserGold;							//用户金币
-	SCORE							lOpenRoomCard;						//用户房卡
-};
-
 //平台登录
 struct STR_DBR_CL_LOGON_PLATFORM
 {
@@ -682,7 +642,7 @@ struct STR_DBO_LC_CLUB_JOIN_CLUB_MESSAGE
 	DWORD	dwUserID;									//申请玩家ID
 	TCHAR	szUserName[LEN_NICKNAME];					//申请玩家昵称
 
-	DWORD	dwCustomID;									//自定义标识
+	//DWORD	dwCustomID;									//自定义标识
 	TCHAR	szHeadUrl[LEN_HEAD_URL];							//头像地址
 };
 

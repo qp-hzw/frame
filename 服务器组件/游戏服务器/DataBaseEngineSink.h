@@ -49,7 +49,7 @@ protected:
 	//ID 登录
 	bool On_DBR_Logon_UserID(DWORD dwContextID, VOID * pData, WORD wDataSize, DWORD &dwUserID);
 	//ID登录返回
-	bool On_DBO_Logon_UserID(DWORD dwContextID, const double &dLongitude, const double &dLatitude, DWORD dwErrorCode, LPCTSTR pszErrorString);
+	bool On_DBO_Logon_UserID(DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString);
 
 	//主消息号3
 protected:
@@ -62,8 +62,6 @@ protected:
 protected:
 	//游戏写分
 	bool OnRequestWriteGameScore(DWORD dwContextID, VOID * pData, WORD wDataSize, DWORD &dwUserID);
-	//离开房间
-	bool OnRequestLeaveGameServer(DWORD dwContextID, VOID * pData, WORD wDataSize, DWORD &dwUserID);
 	//游戏记录
 	bool OnRequestGameScoreRecord(DWORD dwContextID, VOID * pData, WORD wDataSize, DWORD &dwUserID);
 

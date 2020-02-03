@@ -80,6 +80,23 @@ bool CHandleFromLobby::OnTCPNetworkMainTransfer(WORD wSubCmdID, VOID * pData, WO
 			g_GameCtrl->SendData(dwSocketID,CPD_MDM_TRANSFER,CPO_PL_CREATE_TABLE, &CPO, sizeof(CPO));
 			return true;
 		}
+		case CPR_LP_OFFLINE_PLAYERQUERY: //查询断线玩家
+		{
+			//校验数据
+			if (wDataSize!=sizeof(STR_CPR_LP_OFFLINE_PLAYERQUERY)) return true;
+			STR_CPR_LP_OFFLINE_PLAYERQUERY *pCPR = (STR_CPR_LP_OFFLINE_PLAYERQUERY*) pData;
+
+			//向所有GameServer查询
+			for(auto item : CServerItemManager::FindAllGameServer())
+			{
+				STR_CPR_PG_OFFLINE_PLAYERQUERY cmd;
+				cmd.dwSocketID = dwSocketID;
+				cmd.dwUserID = pCPR->dwUserID;
+				if(!item) continue;
+				g_GameCtrl->SendData(item->dwSocketID,CPD_MDM_TRANSFER,CPR_PG_OFFLINE_PLAYERQUERY, &cmd, sizeof(cmd));
+			}
+			return true;
+		}
 
 	}
 

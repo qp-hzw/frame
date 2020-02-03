@@ -212,8 +212,6 @@ bool CHandleFromGate::On_SUB_CG_Logon_UserID(VOID * pData, WORD wDataSize, DWORD
 	//构造数据
 	LogonUserID.dwUserID = pLogonUserID->dwUserID;
 	//LogonUserID.dwClientAddr = pBindParameter->dwClientAddr;
-	LogonUserID.dLatitude = pLogonUserID->dLatitude;
-	LogonUserID.dLongitude = pLogonUserID->dLongitude;
 	lstrcpyn(LogonUserID.szPassword,pLogonUserID->szPassword,CountArray(LogonUserID.szPassword));
 	lstrcpyn(LogonUserID.szMachineID,pLogonUserID->szMachineID,CountArray(LogonUserID.szMachineID));
 
@@ -243,95 +241,21 @@ bool CHandleFromGate::On_CMD_GC_Logon_UserID(DWORD dwSocketID, VOID * pData, WOR
 		return true;
 	
 	//用户掉线判断
-	CPlayer *player = CPlayerManager::FindPlayerByID(pDBOLogon->dwUserID);
+	CPlayer *player = CPlayerManager::FindPlayerByID(pDBOLogon->useInfo.dwUserID);
 	if(player == NULL)
 	{
-		ActiveUserItem(dwSocketID, pDBOLogon); //新增
+		tagUserInfo useInfo;
+		ZeroMemory(&useInfo, sizeof(useInfo));
+		memcpy(&useInfo, &(pDBOLogon->useInfo), sizeof(useInfo));
+
+		CPlayerManager::InsertPlayer(dwSocketID, useInfo);
 	}
 	else //断线情形 && 重复登录
 	{
 		player->SetSocketID(dwSocketID);
-
-		//重复登录, 需要给客户端发送重复消息
-
-		tagOfflineUser data;
-		data.dwUserID = pDBOLogon->dwUserID;
-		data.byMask = 2; //表示删除断线用户
-		g_TCPSocketEngine->SendData(CPD_MDM_USER, SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
 	}
 
 	return true;
-}
-
-//ID登录成功，激活用户
-void CHandleFromGate::ActiveUserItem( DWORD dwSocketID, STR_DBO_CG_LOGON_USERID *pDBOLogon)
-{
-	if ( NULL == pDBOLogon )
-	{
-		return;
-	}
-
-	//用户变量
-	tagUserInfo UserInfo;
-	ZeroMemory(&UserInfo,sizeof(UserInfo));
-
-	//属性资料
-	UserInfo.dwUserID = pDBOLogon->dwUserID;
-	UserInfo.dwGroupID = pDBOLogon->dwGroupID;
-	UserInfo.dwCustomID = pDBOLogon->dwCustomID;
-	lstrcpyn(UserInfo.szNickName,pDBOLogon->szNickName,CountArray(UserInfo.szNickName));
-	lstrcpyn(UserInfo.szHeadUrl,pDBOLogon->szHeadUrl,CountArray(UserInfo.szHeadUrl));
-
-	//用户资料
-	UserInfo.cbGender=pDBOLogon->cbGender;
-	UserInfo.cbMemberOrder=pDBOLogon->cbMemberOrder;
-	UserInfo.cbMasterOrder=pDBOLogon->cbMasterOrder;
-	lstrcpyn(UserInfo.szGroupName,pDBOLogon->szGroupName,CountArray(UserInfo.szGroupName));
-	lstrcpyn(UserInfo.szUnderWrite,pDBOLogon->szUnderWrite,CountArray(UserInfo.szUnderWrite));
-
-	//状态设置
-	UserInfo.cbUserStatus=US_FREE;
-	UserInfo.wTableID=INVALID_TABLE;
-	UserInfo.wChairID=INVALID_CHAIR;
-
-	//积分信息
-	UserInfo.lScore=pDBOLogon->lScore;
-	UserInfo.lGrade=pDBOLogon->lGrade;
-	UserInfo.lOpenRoomCard=pDBOLogon->lOpenRoomCard;
-	UserInfo.lDiamond=pDBOLogon->lDiamond;
-	UserInfo.lGold=pDBOLogon->lGold;
-	UserInfo.lControlScore=pDBOLogon->lControlScore;
-	UserInfo.dwWinCount=pDBOLogon->dwWinCount;
-	UserInfo.dwLostCount=pDBOLogon->dwLostCount;
-	UserInfo.dwDrawCount=pDBOLogon->dwDrawCount;
-	UserInfo.dwFleeCount=pDBOLogon->dwFleeCount;
-	UserInfo.dwUserMedal=pDBOLogon->dwUserMedal;
-	UserInfo.dwExperience=pDBOLogon->dwExperience;
-	UserInfo.lLoveLiness=pDBOLogon->lLoveLiness;
-
-	//位置信息
-	UserInfo.dLatitude = pDBOLogon->dLatitude;
-	UserInfo.dLongitude = pDBOLogon->dLongitude;
-
-	//登录信息
-	UserInfo.dwLogonTime=(DWORD)time(NULL);
-	UserInfo.dwInoutIndex=pDBOLogon->dwInoutIndex;
-
-	//用户权限
-	UserInfo.dwUserRight=pDBOLogon->dwUserRight;
-	UserInfo.dwMasterRight=pDBOLogon->dwMasterRight;
-
-	//辅助变量
-	bool bAndroidUser = false;						//用户类型，真人/机器人
-	UserInfo.bAndroidUser = bAndroidUser;
-	UserInfo.lRestrictScore=0L;//屏蔽每局封顶
-	lstrcpyn(UserInfo.szPassword,pDBOLogon->szPassword,CountArray(UserInfo.szPassword));
-
-	//连接信息
-	lstrcpyn(UserInfo.szMachineID,pDBOLogon->szMachineID,CountArray(UserInfo.szMachineID));
-
-	//激活用户 -- 设置用户信息
-	CPlayerManager::InsertPlayer(dwSocketID, UserInfo);
 }
 
 #pragma endregion
@@ -481,9 +405,6 @@ bool CHandleFromGate::On_SUB_CG_User_KickUser(VOID * pData, WORD wDataSize, DWOR
 	CPlayer * pITargetUserItem = CPlayerManager::FindPlayerByID(pKickUser->dwTargetUserID);
 	if(pITargetUserItem==NULL) return true;
 
-	//用户效验
-	if ((pIServerUserItem==NULL)||(pIServerUserItem->GetMemberOrder()<=pITargetUserItem->GetMemberOrder())) return false;
-
 	//用户状态
 	if(pITargetUserItem->GetUserStatus()==US_PLAYING)
 	{
@@ -494,30 +415,6 @@ bool CHandleFromGate::On_SUB_CG_User_KickUser(VOID * pData, WORD wDataSize, DWOR
 		//发送消息
 		g_GameCtrl->SendRoomMessage(pIServerUserItem,szMessage,0);
 		return true;
-	}
-
-	//防踢判断
-	if((pITargetUserItem->GetUserProperty()->wPropertyUseMark&PT_USE_MARK_GUARDKICK_CARD)!=0)
-	{
-		//变量定义
-		DWORD dwCurrentTime=(DWORD)time(NULL);
-		tagUserProperty * pUserProperty = pITargetUserItem->GetUserProperty();
-
-		//时效判断
-		DWORD dwValidTime=pUserProperty->PropertyInfo[2].wPropertyCount*pUserProperty->PropertyInfo[2].dwValidNum;
-		if(pUserProperty->PropertyInfo[2].dwEffectTime+dwValidTime>dwCurrentTime)
-		{
-			//变量定义
-			TCHAR szMessage[256]=TEXT("");
-			_sntprintf_s(szMessage,CountArray(szMessage),TEXT("由于玩家 [ %s ] 正在使用防踢卡,您无法将它踢出游戏！"),pITargetUserItem->GetNickName());
-
-			//发送消息
-			g_GameCtrl->SendRoomMessage(pIServerUserItem,szMessage,0);
-
-			return true; 
-		}
-		else
-			pUserProperty->wPropertyUseMark &= ~PT_USE_MARK_GUARDKICK_CARD;
 	}
 
 	//请离桌子
@@ -1290,30 +1187,6 @@ bool CHandleFromGate::On_CMD_GC_User_ModifyUserTreasure(DWORD dwSocketID, VOID *
 	pIServerUserItem->SetUserDiamond(CMDModify.lUserDiamond);
 
 	return true;
-}
-
-//用户离开
-VOID CHandleFromGate::OnEventUserLogout(CPlayer * pIServerUserItem, DWORD dwLeaveReason)
-{
-	//变量定义
-	DBR_GR_LeaveGameServer LeaveGameServer;
-	ZeroMemory(&LeaveGameServer,sizeof(LeaveGameServer));
-
-	//LeaveGameServer.lControlScore = pIServerUserItem->GetUserControlScore();
-
-	//用户信息
-	LeaveGameServer.dwLeaveReason=dwLeaveReason;
-	LeaveGameServer.dwUserID=pIServerUserItem->GetUserID();
-	LeaveGameServer.dwOnLineTimeCount=(DWORD)(time(NULL))-pIServerUserItem->GetLogonTime();
-
-	//连接信息
-	LeaveGameServer.dwClientAddr=pIServerUserItem->GetClientAddr();
-	lstrcpyn(LeaveGameServer.szMachineID,pIServerUserItem->GetMachineID(),CountArray(LeaveGameServer.szMachineID));
-
-	//投递请求
-	g_GameCtrl->PostDataBaseRequest(DBR_GR_LEAVE_GAME_SERVER,0L,&LeaveGameServer,sizeof(LeaveGameServer));
-
-	return;
 }
 
 //请求失败

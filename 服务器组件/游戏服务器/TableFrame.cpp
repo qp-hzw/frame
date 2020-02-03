@@ -297,18 +297,6 @@ bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 			{
 				//先让玩家站起
 				PlayerLeaveTable(pIServerUserItem);
-
-				//1. 若桌子用户属于断线状态，未重连
-				if ( US_OFFLINE == pIServerUserItem->GetUserStatus() )
-				{
-					//发送给协调服务器, 再转发给登录服
-					tagOfflineUser data;
-					data.dwUserID = pIServerUserItem->GetUserID();
-					data.byMask = 2; //表示删除断线用户
-
-					//发送给协调服务器
-					g_TCPSocketEngine->SendData(CPD_MDM_USER,SUB_CS_C_USER_OFFLINE,&data,sizeof(tagOfflineUser));
-				}
 			}
 		}
 
@@ -1559,9 +1547,6 @@ bool CTableFrame::EfficacyStartGame(WORD wReadyChairID)
 //地址效验
 bool CTableFrame::EfficacyIPAddress(CPlayer * pIServerUserItem)
 {
-	//管理员不受限制
-	if(pIServerUserItem->GetMasterOrder()!=0) return true;
-
 	//规则判断
 	//	if (CServerRule::IsForfendGameRule(m_pGameServiceOption->dwServerRule)==true) return true;
 
@@ -1646,8 +1631,8 @@ bool CTableFrame::CheckUserDistance()
 		//获得该用户的位置信息
 		CPlayer *pCheckUserItem = GetTableUserItem(i);
 		if(NULL == pCheckUserItem) continue;
-		double dCheckUserLong = pCheckUserItem->GetUserInfo()->dLongitude;
-		double dCheckUserLat  = pCheckUserItem->GetUserInfo()->dLatitude;
+		double dCheckUserLong = 0.1;//pCheckUserItem->GetUserInfo()->dLongitude;
+		double dCheckUserLat  = 0.1;//pCheckUserItem->GetUserInfo()->dLatitude;
 
 		//校验位置信息
 		if( (dCheckUserLong<0.01 && dCheckUserLong>-0.01) || 
@@ -1664,8 +1649,8 @@ bool CTableFrame::CheckUserDistance()
 			if(NULL == pTableUserItem) continue;
 
 			//获得桌子用户位置
-			double dTableUserLong = pTableUserItem->GetUserInfo()->dLongitude;
-			double dTableUserLat = pTableUserItem->GetUserInfo()->dLatitude;
+			double dTableUserLong = 0.1;// pTableUserItem->GetUserInfo()->dLongitude;
+			double dTableUserLat = 0.1;//pTableUserItem->GetUserInfo()->dLatitude;
 
 			//校验用户位置信息
 			if( (dTableUserLong<0.01 && dTableUserLong>-0.01) || 
@@ -1789,12 +1774,6 @@ bool CTableFrame::CheckUserIpAddress()
 //积分效验
 bool CTableFrame::EfficacyScoreRule(CPlayer * pIServerUserItem)
 {
-	//管理员不受限制
-	if(pIServerUserItem->GetMasterOrder()!=0) return true;
-
-	//规则判断
-	//	if (CServerRule::IsForfendGameRule(m_pGameServiceOption->dwServerRule)==true) return true;
-
 	//变量定义
 	WORD wWinRate=pIServerUserItem->GetUserWinRate();
 	WORD wFleeRate=pIServerUserItem->GetUserFleeRate();

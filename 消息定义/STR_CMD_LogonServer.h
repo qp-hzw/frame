@@ -64,41 +64,11 @@ struct STR_SUB_CL_LOGON_PLATFORM
 //账号|平台登陆 返回
 struct STR_CMD_LC_LOGON_PLATFORM
 {
-	//操作结果
 	DWORD                           dwResultCode;							//结果标识
-	//描述信息
 	TCHAR							szDescribeString[LEN_MESSAGE_DESCRIBE];	//描述消息
-	//用户标识
-	DWORD							dwUserID;							//用户标识
-	//基本属性
-	TCHAR							szNickName[LEN_NICKNAME];			//用户昵称
-	BYTE							cbGender;							//用户性别
-	TCHAR							szHeadUrl[LEN_HEAD_URL];			//头像地址
-	TCHAR							szMySignature[LEN_MY_SIGNATURE];	//个性签名
-	//荣誉属性
-	SCORE                           dwUserDiamond;						//用户元宝
-	DWORD							dwUserMedal;						//用户奖牌
-	BYTE							byLevel;						//经验数值
-	DWORD							dwLoveLiness;						//用户魅力
-	//用户权限
-	BYTE                            cbMasterOrder;                      //管理员等级 0表示非管理员
-	BYTE							cbMemberOrder;						//会员等级   0表示非管理员
-	SYSTEMTIME						MemberOverDate;						//会员到期时间
-	TCHAR                           szIdentityName[LEN_IDENTITY_NAME];  //真实姓名
-	TCHAR                           szIdentityNum[LEN_IDENTITY_NUM];    //身份证号
-	TCHAR                           szMobilePhone[LEN_MOBILE_PHONE];    //手机号码	
-	//账号信息
-	TCHAR							szLasLogonIp[LEN_IP_ADDR];			//最后登录地址
-	SYSTEMTIME						LasLogonDate;						//最后上线时间
-	//财富信息
-	SCORE							lUserScore;							//用户游戏币
-	SCORE							lUserGold;							//用户金币
-	SCORE							lOpenRoomCard;						//用户房卡
 
-	//额外信息. 
-	DWORD							dwOffLineGameID;					//断线重连的GameID, 非空表示是断线重连
-
-	//TODO 增加代理ID
+	tagUserInfo                     useInfo;                                //玩家信息 
+	DWORD							dwOffLineGameID;					    //断线重连的GameID, 非空表示是断线重连
 };
 
 //重复登录

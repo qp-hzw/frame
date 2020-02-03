@@ -81,11 +81,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 			bSucceed = OnRequestWriteGameScore(dwContextID,pData,wDataSize,dwUserID);
 		}
 		break;
-	case DBR_GR_LEAVE_GAME_SERVER:		//离开游戏服
-		{
-			bSucceed = OnRequestLeaveGameServer(dwContextID,pData,wDataSize,dwUserID);
-		}
-		break;
 	case DBR_GR_GAME_SCORE_RECORD:		//游戏记录
 		{
 			bSucceed = OnRequestGameScoreRecord(dwContextID,pData,wDataSize,dwUserID);
@@ -254,7 +249,7 @@ bool CDataBaseEngineSink::On_DBR_Logon_UserID(DWORD dwContextID, VOID * pData, W
 	CDBVarValue DBVarValue;
 	m_TreasureDB->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
-	On_DBO_Logon_UserID(dwContextID, pLogonUserID->dLongitude, pLogonUserID->dLatitude, lResultCode, CW2CT(DBVarValue.bstrVal));
+	On_DBO_Logon_UserID(dwContextID, lResultCode, CW2CT(DBVarValue.bstrVal));
 
 	return true;
 }
@@ -280,7 +275,7 @@ bool CDataBaseEngineSink::On_DBR_GP_QUIT(DWORD dwContextID, VOID * pData, WORD w
 
 
 //ID登录返回
-bool CDataBaseEngineSink::On_DBO_Logon_UserID(DWORD dwContextID, const double &dLongitude, const double &dLatitude, DWORD dwErrorCode, LPCTSTR pszErrorString)
+bool CDataBaseEngineSink::On_DBO_Logon_UserID(DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString)
 {
 	//发送数据
 	STR_DBO_CG_LOGON_USERID LogonUserID;
@@ -290,57 +285,39 @@ bool CDataBaseEngineSink::On_DBO_Logon_UserID(DWORD dwContextID, const double &d
 	LogonUserID.lResultCode = dwErrorCode;
 	lstrcpyn(LogonUserID.szDescribeString, pszErrorString, CountArray(LogonUserID.szDescribeString));
 
-	//执行成功，获取用户信息
-	if ( DB_SUCCESS == dwErrorCode )
-	{	
-		//属性资料
-		LogonUserID.wFaceID = m_TreasureDB->GetValue_WORD(TEXT("FaceID"));
-		LogonUserID.dwUserID=m_TreasureDB->GetValue_DWORD(TEXT("UserID"));
-		LogonUserID.dwGameID=m_TreasureDB->GetValue_DWORD(TEXT("GameID"));
-		LogonUserID.dwGroupID=m_TreasureDB->GetValue_DWORD(TEXT("GroupID"));
-		LogonUserID.dwCustomID=m_TreasureDB->GetValue_DWORD(TEXT("CustomID"));
-		m_TreasureDB->GetValue_String(TEXT("NickName"),LogonUserID.szNickName,CountArray(LogonUserID.szNickName));
-		m_TreasureDB->GetValue_String(TEXT("GroupName"),LogonUserID.szGroupName,CountArray(LogonUserID.szGroupName));
-		m_TreasureDB->GetValue_String(TEXT("HeadUrl"),LogonUserID.szHeadUrl,CountArray(LogonUserID.szHeadUrl));
+		//登录成功获取信息
+	if(DB_SUCCESS == dwErrorCode)
+	{
+		//用户标志
+		LogonUserID.useInfo.dwUserID=m_TreasureDB->GetValue_DWORD(TEXT("UserID"));
+		//用户昵称
+		m_TreasureDB->GetValue_String(TEXT("NickName"),LogonUserID.useInfo.szNickName,CountArray(LogonUserID.useInfo.szNickName));
+		//用户性别
+		LogonUserID.useInfo.cbGender=m_TreasureDB->GetValue_BYTE(TEXT("Gender"));
+		//头像索引
+		m_TreasureDB->GetValue_String(TEXT("HeadUrl"),LogonUserID.useInfo.szHeadUrl,CountArray(LogonUserID.useInfo.szHeadUrl));
+		//个性签名
+		m_TreasureDB->GetValue_String(TEXT("MySignature"),LogonUserID.useInfo.szUnderWrite,CountArray(LogonUserID.useInfo.szUnderWrite));
 
-		//用户资料
-		LogonUserID.cbGender=m_TreasureDB->GetValue_BYTE(TEXT("Gender"));
-		LogonUserID.cbMemberOrder=m_TreasureDB->GetValue_BYTE(TEXT("MemberOrder"));
-		LogonUserID.cbMasterOrder=m_TreasureDB->GetValue_BYTE(TEXT("MasterOrder"));
-		m_TreasureDB->GetValue_String(TEXT("UnderWrite"),LogonUserID.szUnderWrite,CountArray(LogonUserID.szUnderWrite));
+		//社团ID
+		//社团名字
 
-		//积分信息
-		LogonUserID.lScore=m_TreasureDB->GetValue_LONGLONG(TEXT("Score"));
-		LogonUserID.lGrade=m_TreasureDB->GetValue_LONGLONG(TEXT("Grade"));
-		LogonUserID.lControlScore=m_TreasureDB->GetValue_LONGLONG(TEXT("ControlScore"));
+		//会员等级
+		LogonUserID.useInfo.cbMemberOrder=m_TreasureDB->GetValue_BYTE(TEXT("MemberOrder"));
+		//经验等级
+		LogonUserID.useInfo.dwLevel=m_TreasureDB->GetValue_BYTE(TEXT("UserLevel"));
+		//经验数值
 
-		//房卡信息 add by guo
-		LogonUserID.lOpenRoomCard = m_TreasureDB->GetValue_LONGLONG(TEXT("OpenRoomCard"));
-		LogonUserID.lDiamond = m_TreasureDB->GetValue_LONGLONG(TEXT("Diamond"));
-		LogonUserID.lGold = m_TreasureDB->GetValue_LONGLONG(TEXT("Gold"));
+		//用户房卡
+		LogonUserID.useInfo.lOpenRoomCard = m_TreasureDB->GetValue_LONGLONG(TEXT("UserRoomCard"));
+		//钻石
+		//用户游戏币
+		LogonUserID.useInfo.lGold = m_TreasureDB->GetValue_LONGLONG(TEXT("UserGold"));
 
-		//局数信息
-		LogonUserID.dwWinCount=m_TreasureDB->GetValue_LONG(TEXT("WinCount"));
-		LogonUserID.dwLostCount=m_TreasureDB->GetValue_LONG(TEXT("LostCount"));
-		LogonUserID.dwDrawCount=m_TreasureDB->GetValue_LONG(TEXT("DrawCount"));
-		LogonUserID.dwFleeCount=m_TreasureDB->GetValue_LONG(TEXT("FleeCount"));
-		LogonUserID.dwUserMedal=m_TreasureDB->GetValue_LONG(TEXT("UserMedal"));
-		LogonUserID.dwExperience=m_TreasureDB->GetValue_LONG(TEXT("Experience"));
-		LogonUserID.lLoveLiness=m_TreasureDB->GetValue_LONG(TEXT("LoveLiness"));
-
-		//附加信息
-		LogonUserID.dwUserRight=m_TreasureDB->GetValue_DWORD(TEXT("UserRight"));
-		LogonUserID.dwMasterRight=m_TreasureDB->GetValue_DWORD(TEXT("MasterRight"));
-		LogonUserID.cbDeviceType = DEVICE_TYPE_PC;
-		LogonUserID.wBehaviorFlags = 0;
-		LogonUserID.wPageTableCount = 0;
-
-		//位置信息
-		LogonUserID.dLatitude = dLatitude;
-		LogonUserID.dLongitude = dLongitude;
-
-		//索引变量
-		LogonUserID.dwInoutIndex = m_TreasureDB->GetValue_DWORD(TEXT("InoutIndex"));
+		//胜利盘数
+		//失败盘数
+		//和盘盘数
+		//逃跑盘数
 	}
 
 	//发送数据
@@ -426,21 +403,19 @@ bool CDataBaseEngineSink::OnRequestWriteGameScore(DWORD dwContextID, VOID * pDat
 	m_TreasureDB->AddParameter(TEXT("@dwUserID"),pWriteGameScore->dwUserID);
 
 	//变更成绩
-	m_TreasureDB->AddParameter(TEXT("@lVariationScore"),pWriteGameScore->VariationInfo.lScore);
-	m_TreasureDB->AddParameter(TEXT("@lVariationGrade"),pWriteGameScore->VariationInfo.lGrade);
 	m_TreasureDB->AddParameter(TEXT("@lVariationInsure"),pWriteGameScore->VariationInfo.lInsure);
 	m_TreasureDB->AddParameter(TEXT("@lVariationRevenue"),pWriteGameScore->VariationInfo.lRevenue);
 	m_TreasureDB->AddParameter(TEXT("@lVariationWinCount"),pWriteGameScore->VariationInfo.dwWinCount);
 	m_TreasureDB->AddParameter(TEXT("@lVariationLostCount"),pWriteGameScore->VariationInfo.dwLostCount);
 	m_TreasureDB->AddParameter(TEXT("@lVariationDrawCount"),pWriteGameScore->VariationInfo.dwDrawCount);
 	m_TreasureDB->AddParameter(TEXT("@lVariationFleeCount"),pWriteGameScore->VariationInfo.dwFleeCount);
-	m_TreasureDB->AddParameter(TEXT("@lVariationUserMedal"),pWriteGameScore->VariationInfo.dwUserMedal);
+	//m_TreasureDB->AddParameter(TEXT("@lVariationUserMedal"),pWriteGameScore->VariationInfo.dwUserMedal);
 	m_TreasureDB->AddParameter(TEXT("@lVariationExperience"),pWriteGameScore->VariationInfo.dwExperience);
-	m_TreasureDB->AddParameter(TEXT("@lVariationLoveLiness"),pWriteGameScore->VariationInfo.lLoveLiness);
+	//m_TreasureDB->AddParameter(TEXT("@lVariationLoveLiness"),pWriteGameScore->VariationInfo.lLoveLiness);
 	m_TreasureDB->AddParameter(TEXT("@dwVariationPlayTimeCount"),pWriteGameScore->VariationInfo.dwPlayTimeCount);
 
 	//控制值
-	m_TreasureDB->AddParameter(TEXT("@lControlScore"),pWriteGameScore->lControlScore);
+	//m_TreasureDB->AddParameter(TEXT("@lControlScore"),pWriteGameScore->lControlScore);
 
 	//抽水信息
 	m_TreasureDB->AddParameter(TEXT("@lChoushui"),pWriteGameScore->VariationInfo.lChoushui);;
@@ -554,84 +529,6 @@ bool CDataBaseEngineSink::On_DBR_SaveGameRecord(DWORD dwContextID, void * pData,
 	return true;
 }
 
-//离开房间
-bool CDataBaseEngineSink::OnRequestLeaveGameServer(DWORD dwContextID, VOID * pData, WORD wDataSize, DWORD &dwUserID)
-{
-	//请求处理
-	DBR_GR_LeaveGameServer * pLeaveGameServer=(DBR_GR_LeaveGameServer *)pData;
-	dwUserID=pLeaveGameServer->dwUserID;
-
-
-	//效验参数
-	ASSERT(wDataSize==sizeof(DBR_GR_LeaveGameServer));
-	if (wDataSize!=sizeof(DBR_GR_LeaveGameServer)) return false;
-
-	//转化地址
-	TCHAR szClientAddr[16]=TEXT("");
-	BYTE * pClientAddr=(BYTE *)&pLeaveGameServer->dwClientAddr;
-	_sntprintf_s(szClientAddr,CountArray(szClientAddr),TEXT("%d.%d.%d.%d"),pClientAddr[0],pClientAddr[1],pClientAddr[2],pClientAddr[3]);
-
-	//构造参数
-	m_TreasureDB->ResetParameter();
-
-	//用户信息
-	m_TreasureDB->AddParameter(TEXT("@dwUserID"),pLeaveGameServer->dwUserID);
-	m_TreasureDB->AddParameter(TEXT("@dwOnLineTimeCount"),pLeaveGameServer->dwOnLineTimeCount);
-
-	//系统信息
-	m_TreasureDB->AddParameter(TEXT("@dwInoutIndex"),pLeaveGameServer->dwInoutIndex);
-	m_TreasureDB->AddParameter(TEXT("@dwLeaveReason"),pLeaveGameServer->dwLeaveReason);
-
-	/*
-	//记录成绩
-	m_TreasureDB->AddParameter(TEXT("@lRecordScore"),pLeaveGameServer->RecordInfo.lScore);
-	m_TreasureDB->AddParameter(TEXT("@lRecordGrade"),pLeaveGameServer->RecordInfo.lGrade);
-	m_TreasureDB->AddParameter(TEXT("@lRecordInsure"),pLeaveGameServer->RecordInfo.lInsure);
-	m_TreasureDB->AddParameter(TEXT("@lRecordRevenue"),pLeaveGameServer->RecordInfo.lRevenue);
-	m_TreasureDB->AddParameter(TEXT("@lRecordWinCount"),pLeaveGameServer->RecordInfo.dwWinCount);
-	m_TreasureDB->AddParameter(TEXT("@lRecordLostCount"),pLeaveGameServer->RecordInfo.dwLostCount);
-	m_TreasureDB->AddParameter(TEXT("@lRecordDrawCount"),pLeaveGameServer->RecordInfo.dwDrawCount);
-	m_TreasureDB->AddParameter(TEXT("@lRecordFleeCount"),pLeaveGameServer->RecordInfo.dwFleeCount);
-	m_TreasureDB->AddParameter(TEXT("@lRecordUserMedal"),pLeaveGameServer->RecordInfo.dwUserMedal);
-	m_TreasureDB->AddParameter(TEXT("@lRecordExperience"),pLeaveGameServer->RecordInfo.dwExperience);
-	m_TreasureDB->AddParameter(TEXT("@lRecordLoveLiness"),pLeaveGameServer->RecordInfo.lLoveLiness);
-	m_TreasureDB->AddParameter(TEXT("@dwRecordPlayTimeCount"),pLeaveGameServer->RecordInfo.dwPlayTimeCount);
-
-	//变更成绩
-	m_TreasureDB->AddParameter(TEXT("@lVariationScore"),pLeaveGameServer->VariationInfo.lScore);
-	m_TreasureDB->AddParameter(TEXT("@lVariationGrade"),pLeaveGameServer->VariationInfo.lGrade);
-	m_TreasureDB->AddParameter(TEXT("@lVariationInsure"),pLeaveGameServer->VariationInfo.lInsure);
-	m_TreasureDB->AddParameter(TEXT("@lVariationRevenue"),pLeaveGameServer->VariationInfo.lRevenue);
-	m_TreasureDB->AddParameter(TEXT("@lVariationWinCount"),pLeaveGameServer->VariationInfo.dwWinCount);
-	m_TreasureDB->AddParameter(TEXT("@lVariationLostCount"),pLeaveGameServer->VariationInfo.dwLostCount);
-	m_TreasureDB->AddParameter(TEXT("@lVariationDrawCount"),pLeaveGameServer->VariationInfo.dwDrawCount);
-	m_TreasureDB->AddParameter(TEXT("@lVariationFleeCount"),pLeaveGameServer->VariationInfo.dwFleeCount);
-	m_TreasureDB->AddParameter(TEXT("@lVariationUserMedal"),pLeaveGameServer->VariationInfo.dwUserMedal);
-	m_TreasureDB->AddParameter(TEXT("@lVariationExperience"),pLeaveGameServer->VariationInfo.dwExperience);
-	m_TreasureDB->AddParameter(TEXT("@lVariationLoveLiness"),pLeaveGameServer->VariationInfo.lLoveLiness);
-	m_TreasureDB->AddParameter(TEXT("@dwVariationPlayTimeCount"),pLeaveGameServer->VariationInfo.dwPlayTimeCount);
-	*/
-
-	//////控制信息(不需要写)
-	//m_TreasureDB->AddParameter(TEXT("@lControlScore"),pLeaveGameServer->lControlScore);
-
-	////抽水信息
-	//m_TreasureDB->AddParameter(TEXT("@lChoushui"),pLeaveGameServer->VariationInfo.lChoushui);
-	//m_TreasureDB->AddParameter(TEXT("@dwChoushuiType"),pLeaveGameServer->VariationInfo.dwChoushuiType);
-
-	//其他参数
-	//TODONOW 
-	m_TreasureDB->AddParameter(TEXT("@wKindID"),g_GameCtrl->GetServerID());
-	m_TreasureDB->AddParameter(TEXT("@wServerID"),g_GameCtrl->GetServerID());
-	m_TreasureDB->AddParameter(TEXT("@strClientIP"),szClientAddr);
-	m_TreasureDB->AddParameter(TEXT("@strMachineID"),pLeaveGameServer->szMachineID);
-
-	//执行查询
-	LONG lResultCode=m_TreasureDB->ExecuteProcess(TEXT("GSP_GR_LeaveGameServer"),true);
-
-	return true;
-}
-
 //游戏记录
 bool CDataBaseEngineSink::OnRequestGameScoreRecord(DWORD dwContextID, VOID * pData, WORD wDataSize, DWORD &dwUserID)
 {
@@ -696,13 +593,13 @@ bool CDataBaseEngineSink::OnRequestGameScoreRecord(DWORD dwContextID, VOID * pDa
 			m_TreasureDB->AddParameter(TEXT("@wChairID"),pGameScoreRecord->GameScoreRecord[i].wChairID);
 
 			//成绩信息
-			m_TreasureDB->AddParameter(TEXT("@lScore"),pGameScoreRecord->GameScoreRecord[i].lScore);
-			m_TreasureDB->AddParameter(TEXT("@lGrade"),pGameScoreRecord->GameScoreRecord[i].lGrade);
+			//m_TreasureDB->AddParameter(TEXT("@lScore"),pGameScoreRecord->GameScoreRecord[i].lScore);
+			//m_TreasureDB->AddParameter(TEXT("@lGrade"),pGameScoreRecord->GameScoreRecord[i].lGrade);
 			m_TreasureDB->AddParameter(TEXT("@lRevenue"),pGameScoreRecord->GameScoreRecord[i].lRevenue);
-			m_TreasureDB->AddParameter(TEXT("@lControlScore"),pGameScoreRecord->GameScoreRecord[i].lControlScore);
+			//m_TreasureDB->AddParameter(TEXT("@lControlScore"),pGameScoreRecord->GameScoreRecord[i].lControlScore);
 			m_TreasureDB->AddParameter(TEXT("@lChoushui"),pGameScoreRecord->GameScoreRecord[i].lChoushui);
 			m_TreasureDB->AddParameter(TEXT("@dwChoushuiType"),pGameScoreRecord->GameScoreRecord[i].dwChoushuiType);
-			m_TreasureDB->AddParameter(TEXT("@dwUserMedal"),pGameScoreRecord->GameScoreRecord[i].dwUserMemal);
+			//m_TreasureDB->AddParameter(TEXT("@dwUserMedal"),pGameScoreRecord->GameScoreRecord[i].dwUserMemal);
 			m_TreasureDB->AddParameter(TEXT("@dwPlayTimeCount"),pGameScoreRecord->GameScoreRecord[i].dwPlayTimeCount);
 
 			//执行查询
@@ -765,7 +662,6 @@ bool CDataBaseEngineSink::OnRequestLoadAndroidUser(DWORD dwContextID, VOID * pDa
 		ZeroMemory(&Info, sizeof(tagUserInfo));
 
 		//数据赋值
-		Info.bAndroidUser = true;
 		Info.cbGender = GameAndroidInfo.AndroidParameter[i].cbGender;
 		Info.dwUserID = GameAndroidInfo.AndroidParameter[i].dwUserID;
 		Info.lDiamond = GameAndroidInfo.AndroidParameter[i].lDiamond;
@@ -779,8 +675,6 @@ bool CDataBaseEngineSink::OnRequestLoadAndroidUser(DWORD dwContextID, VOID * pDa
 		Info.cbUserStatus=US_FREE;
 		Info.wTableID=INVALID_TABLE;
 		Info.wChairID=INVALID_CHAIR;
-		Info.dwLogonTime=(DWORD)time(NULL);
-		Info.lRestrictScore=0L;//屏蔽每局封顶
 
 		//插入数据
 		CRobotManager::InsertRobot(Info);

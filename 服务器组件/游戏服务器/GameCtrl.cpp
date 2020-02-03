@@ -257,7 +257,7 @@ bool CGameCtrl::SendRoomMessage(CPlayer * pIServerUserItem, LPCTSTR lpszMessage,
 	if (pIServerUserItem==NULL) return false;
 
 	//发送数据
-	if (pIServerUserItem->GetBindIndex()!=INVALID_WORD)
+	//if (pIServerUserItem->GetBindIndex()!=INVALID_WORD)
 	{
 		//变量定义
 		CMD_CM_SystemMessage SystemMessage;
@@ -297,7 +297,7 @@ bool CGameCtrl::SendGameMessage(CPlayer * pIServerUserItem, LPCTSTR lpszMessage,
 	if (pIServerUserItem==NULL) return false;
 
 	//发送数据
-	if ((pIServerUserItem->GetBindIndex()!=INVALID_WORD))
+	//if ((pIServerUserItem->GetBindIndex()!=INVALID_WORD))
 	{
 		//变量定义
 		CMD_CM_SystemMessage SystemMessage;

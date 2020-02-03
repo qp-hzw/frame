@@ -62,9 +62,6 @@ struct STR_SUB_CG_LOGON_USERID
 	TCHAR							szPassword[LEN_MD5];						//登录密码
 	TCHAR							szMachineID[LEN_MACHINE_ID];				//机器序列
 	DWORD							dwSubGameVersion;							//子游戏版本
-
-	double							dLongitude;									//登录游戏服时GPS经度
-	double							dLatitude;									//登录游戏服时GPS纬度
 };
 //ID 登录返回
 struct STR_CMD_GC_LOGON_USERID
@@ -72,7 +69,6 @@ struct STR_CMD_GC_LOGON_USERID
 	LONG							lResultCode;								//错误代码
 	TCHAR							szDescribeString[LEN_MESSAGE_DESCRIBE];		//消息描述
 	DWORD							dwKindID;									//游戏KindID
-	DWORD							dwOffLineGameID;							//断线重连的游戏ID, 非0表示是断线重连
 };
 #pragma endregion
 

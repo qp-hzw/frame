@@ -1,4 +1,4 @@
-#ifndef DATABASE_ENGINE_SINK_HEAD_FILE
+﻿#ifndef DATABASE_ENGINE_SINK_HEAD_FILE
 #define DATABASE_ENGINE_SINK_HEAD_FILE
 
 #include "Stdafx.h"
@@ -44,12 +44,13 @@ public:
 protected:
 	//帐号登录
 	bool On_DBR_Logon_Accounts(DWORD dwContextID, VOID * pData, WORD wDataSize);
-	bool On_DBO_Logon_Accounts(DWORD dwContextID, DWORD dwResuleCode, LPCTSTR pszErrorString);
 	//帐号注册
 	bool On_DBR_Logon_Register(DWORD dwContextID, VOID * pData, WORD wDataSize);
 	//平台登录
 	bool On_DBR_Logon_Platform(DWORD dwContextID, VOID * pData, WORD wDataSize);
-	bool On_DBO_Logon_Platform(DWORD dwContextID, DWORD dwResuleCode, LPCTSTR pszErrorString);
+
+	//登录返回
+	bool On_DBO_Logon_Accounts(DWORD dwContextID, DWORD dwResuleCode, LPCTSTR pszErrorString);
 
 	//变更用户财富	TODO 登陆奖励 + 老玩家奖励
 	bool OnModifyUserInsure(DWORD dwContextID, void * pData, WORD wDataSize);

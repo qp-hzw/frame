@@ -25,12 +25,6 @@ private:
 	tagUserInfo						m_UserInfo;							//用户信息
 	tagUserProperty                 m_UserProperty;                     //玩家道具
 
-	//登录信息
-private:
-	DWORD							m_dwDBQuestID;						//请求标识
-	DWORD							m_dwLogonTime;						//登录时间
-	DWORD							m_dwInoutIndex;						//进出索引
-
 private:
 	bool							m_bAndroidUser;						//机器用户
 
@@ -42,11 +36,8 @@ private:
 
 	//系统属性
 private:
-	WORD							m_wBindIndex;						//绑定索引
 	DWORD							m_dwClientAddr;						//连接地址
 	TCHAR							m_szMachineID[LEN_MACHINE_ID];		//机器标识
-
-	BYTE							m_OldGameStatus;					//用户断线之前的状态
 
 	//函数定义
 public:
@@ -73,14 +64,6 @@ public:
 	//用户性别
 	BYTE GetGender() { return m_UserInfo.cbGender; }
 
-	//用户权限
-	 BYTE GetMemberOrder() { return m_UserInfo.cbMemberOrder; } 
-	//管理权限
-	 BYTE GetMasterOrder() { return m_UserInfo.cbMasterOrder; } 
-
-	//登录时间
-	 DWORD GetLogonTime() { return m_dwLogonTime; }
-
 	 //是否机器人
 	  bool IsAndroidUser() { return m_bAndroidUser; }
 	/**********************************  游戏动态数据 ****************************************/
@@ -94,33 +77,16 @@ public:
 	 BYTE GetUserStatus() { return m_UserInfo.cbUserStatus; }
 	 bool SetUserStatus(BYTE cbUserStatus, DWORD wTableID, WORD wChairID);
 
-	 //用户断线之前的状态
-	 BYTE GetOldGameStatus() { return m_OldGameStatus;}
-	 void SetOldGameStatus(BYTE gamestatus) { m_OldGameStatus = gamestatus;}
-
-
 	/**********************************  socket信息 ****************************************/
 public:
-	//绑带索引
-	 WORD GetBindIndex() { return m_wBindIndex; }
 	//用户地址
 	 DWORD GetClientAddr() { return m_dwClientAddr; }
 	//机器标识
 	 LPCTSTR GetMachineID() { return m_szMachineID; }
 
 
-	//登录信息
-public:
-	//请求标识
-	virtual DWORD GetDBQuestID() { return m_dwDBQuestID++; }
-	
-
 	//用户道具
 public:
-	//用户积分
-	virtual SCORE GetUserScore() { return m_UserInfo.lScore; }
-	//用户成绩
-	virtual SCORE GetUserGrade() { return m_UserInfo.lGrade; }
 	//获得用户房卡
 	virtual SCORE GetUserRoomCard() { return m_UserInfo.lOpenRoomCard; }
 	//设置用户房卡
@@ -156,12 +122,6 @@ public:
 public:
 	//更新用户财富信息
 	virtual bool ModifyUserTreasure(DWORD dwTableID, BYTE byTableMode, BYTE byRound, SCORE lUserTreasuse, BYTE byWin);
-
-	//参数接口
-public:
-	//设置参数
-	virtual bool SetUserParameter(DWORD dwClientAddr, TCHAR szMachineID[LEN_MACHINE_ID], bool bAndroidUser, 
-		bool bClientReady, const double &dLongitude, const double &dLatitude);
 
 	//辅助函数
 private:

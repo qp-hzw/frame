@@ -12,8 +12,6 @@ public:
 public:
 	//中转服务
 	static bool OnTCPNetworkMainTransfer(WORD wSubCmdID, VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//用户汇总
-	static bool OnTCPNetworkMainUserCollect(WORD wSubCmdID, VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//具体处理
 public:
 

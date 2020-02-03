@@ -1,6 +1,7 @@
 #include "HandleFromCenter.h"
 #include "GameCtrl.h"
 #include "PlayerManager.h"
+#include "Player.h"
 
 //消息分发处理函数
 bool CHandleFromCenter::HandlePacket(TCP_Command Command, VOID * pData, WORD wDataSize, WORD wServiceID)
@@ -10,10 +11,6 @@ bool CHandleFromCenter::HandlePacket(TCP_Command Command, VOID * pData, WORD wDa
 	case MDM_REGISTER_CPD:		//注册模块
 		{
 			return OnTCPSocketMainRegister(Command.wSubCmdID,pData,wDataSize);
-		}
-	case CPD_MDM_USER:	//列表命令
-		{
-			return OnTCPSocketMainServiceInfo(Command.wSubCmdID,pData,wDataSize);
 		}
 	case CPD_MDM_TRANSFER:	//中转服务
 		{
@@ -52,34 +49,7 @@ bool CHandleFromCenter::OnTCPSocketMainRegister(WORD wSubCmdID, VOID * pData, WO
 
 	return true;
 }
-//列表命令
-bool CHandleFromCenter::OnTCPSocketMainServiceInfo(WORD wSubCmdID, VOID * pData, WORD wDataSize)
-{
-	switch (wSubCmdID)
-	{
-	case SUB_CS_C_USER_OFFLINE_B: //用户断线
-		{
-			//效验数据
-			if (wDataSize!=sizeof(tagOfflineUser)) return true;
-			tagOfflineUser * pOffline = (tagOfflineUser*) pData;
 
-			CLog::Log(log_debug, "2, 15 %d", pOffline->byMask);
-
-			if(pOffline->byMask == 1)//增加断线用户
-			{
-				CPlayerManager::AddOfflinePlayer(pOffline->dwUserID, pOffline->dwServerID);
-			}
-			else if(pOffline->byMask == 2) //删除断线用户
-			{
-				CPlayerManager::DeleteOfflinePlayer(pOffline->dwUserID);
-			}
-
-			return true;
-		}
-	}
-
-	return true;
-}
 //中转服务
 bool CHandleFromCenter::OnTCPSocketMainTransfer(WORD wSubCmdID, VOID * pData, WORD wDataSize)
 {
@@ -121,6 +91,24 @@ bool CHandleFromCenter::OnTCPSocketMainTransfer(WORD wSubCmdID, VOID * pData, WO
 			CMD.dwPort = pCPO->dwPort;
 
 			g_GameCtrl->SendData(pCPO->dwSocketID, MDM_GAME, CMD_LC_GAME_QUERY_GAMEID, &CMD, sizeof(CMD));
+			return true;
+		}
+	case CPO_PL_OFFLINE_FiNISH: //查询返回
+		{
+			//效验数据
+			if (wDataSize!=sizeof(STR_CPO_PL_OFFLINE_FiNISH)) return true;
+			STR_CPO_PL_OFFLINE_FiNISH *pCPO = (STR_CPO_PL_OFFLINE_FiNISH*)pData;
+
+			CPlayer* player = CPlayerManager::FindPlayerByID(pCPO->dwUserID);
+			if(!player) return true;
+
+			//发送登录成功 
+			STR_CMD_LC_LOGON_PLATFORM  cmd;
+			cmd.dwResultCode = 0;
+			memcpy(&cmd.useInfo, player->GetUserInfo(), sizeof(cmd.useInfo));
+			cmd.dwOffLineGameID  = pCPO->dwGameID;
+			g_GameCtrl->SendData(pCPO->dwSocketID, MDM_LOGON, CMD_LC_LOGON_ACCOUNTS, &cmd, sizeof(cmd));
+
 			return true;
 		}
 	}

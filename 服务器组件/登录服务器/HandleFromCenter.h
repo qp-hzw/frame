@@ -13,8 +13,6 @@ public:
 public:
 	//注册模块
 	static bool OnTCPSocketMainRegister(WORD wSubCmdID, VOID * pData, WORD wDataSize);
-	//列表命令
-	static bool OnTCPSocketMainServiceInfo(WORD wSubCmdID, VOID * pData, WORD wDataSize);
 	//中转服务
 	static bool OnTCPSocketMainTransfer(WORD wSubCmdID, VOID * pData, WORD wDataSize);
 

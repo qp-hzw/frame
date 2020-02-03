@@ -670,12 +670,6 @@ bool CHandleFromGate::On_SUB_CL_Logon_Accounts(VOID * pData, WORD wDataSize, DWO
 	//处理消息
 	STR_SUB_CL_LOGON_ACCOUNTS * pSUBLogonAccounts=(STR_SUB_CL_LOGON_ACCOUNTS *)pData;
 
-	//版本判断（版本不对，直接退出）
-	if ( !On_CMD_LC_Logon_UpdateNotify(pSUBLogonAccounts->dwVersionCheck, dwSocketID) )
-	{
-		return true;
-	}
-
 	//变量构造
 	STR_DBR_CL_LOGON_ACCOUNTS DBRLogonAccounts;
 	ZeroMemory(&DBRLogonAccounts,sizeof(DBRLogonAccounts));
@@ -709,24 +703,23 @@ bool CHandleFromGate::On_CMD_LC_Logon_Account(DWORD dwScoketID, VOID * pData, WO
 	}
 
 	//重复登录处理
-	On_CMD_LC_Logon_RepeatLogon( pCMD->dwUserID, dwScoketID );
+	On_CMD_LC_Logon_RepeatLogon( pCMD->useInfo.dwUserID, dwScoketID );
 
-	//断线重连的处理
-	pCMD->dwOffLineGameID  = CPlayerManager::FindOfflineGameID(pCMD->dwUserID);
-
-	//玩家记录
+	//插入玩家记录
 	tagUserInfo UserInfo;
 	ZeroMemory(&UserInfo, sizeof(UserInfo));
-	UserInfo.dwUserID = pCMD->dwUserID;
-
+	memcpy(&UserInfo, &(pCMD->useInfo), sizeof(UserInfo));
 	CPlayerManager::InsertPlayer (dwScoketID, UserInfo);
-	CPlayer* player = CPlayerManager::FindPlayerBySocketID(dwScoketID);
 
-	//发送登录成功
-	g_GameCtrl->SendData(dwScoketID, MDM_LOGON, CMD_LC_LOGON_ACCOUNTS, pCMD, sizeof(STR_CMD_LC_LOGON_PLATFORM));
-	
+	//查询断线重连
+	STR_CPR_LP_OFFLINE_PLAYERQUERY CPR;
+	CPR.dwUserID = pCMD->useInfo.dwUserID;
+	g_TCPSocketEngine->SendData(CPD_MDM_TRANSFER, CPR_LP_OFFLINE_PLAYERQUERY, &CPR, sizeof(CPR));
+
+	/* TODONOW
 	//登录奖励
 	On_CMD_LC_Logon_Logon_Reward(dwScoketID, pCMD->LasLogonDate);
+	*/
 
 	return true;
 }
@@ -742,14 +735,6 @@ bool CHandleFromGate::On_SUB_CL_Logon_Register(VOID * pData, WORD wDataSize, DWO
 	
 	//处理消息
 	STR_SUB_CL_LOGON_REGISTER * pSUBLogonRegister=(STR_SUB_CL_LOGON_REGISTER *)pData;
-
-	/*
-	//效验版本
-	if ( !On_CMD_LC_Logon_UpdateNotify(pSUBLogonRegister->dwVersionCheck, dwSocketID) )
-	{
-		return true;
-	}
-	*/
 
 	//变量定义
 	STR_DBR_CL_LOGON_REGISTER DBRLogonRegister;
@@ -822,7 +807,7 @@ bool CHandleFromGate::On_CMD_LC_Logon_Platform(DWORD dwScoketID, VOID * pData, W
 	}
 
 	//重复登录踢出
-	On_CMD_LC_Logon_RepeatLogon( pCMD->dwUserID ,dwScoketID);
+	On_CMD_LC_Logon_RepeatLogon( pCMD->useInfo.dwUserID ,dwScoketID);
 
 	//断线重连的处理
 
@@ -832,8 +817,10 @@ bool CHandleFromGate::On_CMD_LC_Logon_Platform(DWORD dwScoketID, VOID * pData, W
 	//发送登录成功
 	g_GameCtrl->SendData(dwScoketID,MDM_LOGON,CMD_LC_LOGON_PLATFORM, pCMD, sizeof(STR_CMD_LC_LOGON_PLATFORM));
 
+	/*
 	//登录奖励
-	On_CMD_LC_Logon_Logon_Reward(dwScoketID, pCMD->LasLogonDate);
+	On_CMD_LC_Logon_Logon_Reward(dwScoketID, pCMD->);
+	*/
 
 	return true;
 }
