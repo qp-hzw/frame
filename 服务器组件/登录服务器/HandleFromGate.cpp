@@ -764,29 +764,8 @@ bool CHandleFromGate::On_SUB_CL_Logon_Platform(VOID * pData, WORD wDataSize, DWO
 		return false;
 	}
 
-	//处理消息
-	STR_SUB_CL_LOGON_PLATFORM * pSUBLogonPlatform=(STR_SUB_CL_LOGON_PLATFORM *)pData;
-
-	//效验版本
-	if ( !On_CMD_LC_Logon_UpdateNotify(pSUBLogonPlatform->dwVersionCheck, dwSocketID) )
-	{
-		return true;
-	}
-
-	//变量构造
-	STR_DBR_CL_LOGON_PLATFORM DBRLogonPlatform;
-	ZeroMemory(&DBRLogonPlatform,sizeof(DBRLogonPlatform));
-
-	DBRLogonPlatform.cbGender = pSUBLogonPlatform->cbGender;
-	lstrcpyn(DBRLogonPlatform.szNickName, pSUBLogonPlatform->szNickName, CountArray(DBRLogonPlatform.szNickName));
-	lstrcpyn(DBRLogonPlatform.strHeadUrl, pSUBLogonPlatform->strHeadUrl, CountArray(DBRLogonPlatform.strHeadUrl));
-	lstrcpyn(DBRLogonPlatform.szOpenID, pSUBLogonPlatform->szOpenID, CountArray(DBRLogonPlatform.szOpenID));
-	lstrcpyn(DBRLogonPlatform.szUnionID, pSUBLogonPlatform->szUnionID, CountArray(DBRLogonPlatform.szUnionID));
-	lstrcpyn(DBRLogonPlatform.szMachineID,pSUBLogonPlatform->szMachineID,CountArray(DBRLogonPlatform.szMachineID));
-	DBRLogonPlatform.dwProxyID = pSUBLogonPlatform->dwProxyID;
-
 	//投递请求
-	g_GameCtrl->PostDataBaseRequest(DBR_CL_LOGON_PLATFORM, dwSocketID, &DBRLogonPlatform, sizeof(DBRLogonPlatform));
+	g_GameCtrl->PostDataBaseRequest(DBR_CL_LOGON_PLATFORM, dwSocketID, pData, wDataSize);
 
 	return true;}
 

@@ -95,7 +95,6 @@ struct STR_CPO_GP_OFFLINE_FINISH
 //查询断线玩家返回
 struct STR_CPO_PL_OFFLINE_FiNISH
 {
-	DWORD  dwSocketID;                             //查询的logon socket
 	DWORD  dwUserID;                               //查询断线玩家
 	DWORD  dwGameID;                               //GameID
 };

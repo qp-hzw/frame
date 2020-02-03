@@ -285,7 +285,7 @@ bool CDataBaseEngineSink::On_DBO_Logon_UserID(DWORD dwContextID, DWORD dwErrorCo
 	LogonUserID.lResultCode = dwErrorCode;
 	lstrcpyn(LogonUserID.szDescribeString, pszErrorString, CountArray(LogonUserID.szDescribeString));
 
-		//登录成功获取信息
+	//登录成功获取信息
 	if(DB_SUCCESS == dwErrorCode)
 	{
 		//用户标志

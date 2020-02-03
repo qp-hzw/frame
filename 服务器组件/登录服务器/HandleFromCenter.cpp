@@ -107,7 +107,7 @@ bool CHandleFromCenter::OnTCPSocketMainTransfer(WORD wSubCmdID, VOID * pData, WO
 			cmd.dwResultCode = 0;
 			memcpy(&cmd.useInfo, player->GetUserInfo(), sizeof(cmd.useInfo));
 			cmd.dwOffLineGameID  = pCPO->dwGameID;
-			g_GameCtrl->SendData(pCPO->dwSocketID, MDM_LOGON, CMD_LC_LOGON_ACCOUNTS, &cmd, sizeof(cmd));
+			g_GameCtrl->SendData(player->GetSocketID(), MDM_LOGON, CMD_LC_LOGON_ACCOUNTS, &cmd, sizeof(cmd));
 
 			return true;
 		}

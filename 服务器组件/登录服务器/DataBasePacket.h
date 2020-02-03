@@ -8,45 +8,6 @@
 #define MAX_SEND_CLIENT_TASK_NUM			5
 
 #pragma region MDM_LIST 列表命令
-/* *********************************************************************************
-**   启动命令（启动登陆服时，服务单元发送的消息）				(201-300)
-
-#define DBR_GP_ONLINE_COUNT_INFO	2									//统计在线 -- 发给数据库
-
-#define DBR_UPDATA_MARQUEE			3									//加载跑马灯消息 查询
-#define DBO_UPDATA_MARQUEE			1003									//加载跑马灯消息 返回
-#define DBO_UPDATA_MARQUEE_FINISH	2003									//加载跑马灯消息 结束
-
-//在线信息
-struct DBR_GP_OnLineCountInfo
-{
-	DWORD							dwGameCount;						//类型数目
-	DWORD							dwOnLineCountSum;					//总在线数
-	tagOnLineInfoGame				OnLineCountGame[MAX_KIND];			//类型在线
-};
-
-//加载结果
-struct DBO_GP_GameListResult
-{
-	BYTE							cbSuccess;							//成功标志
-};
-
-//加载跑马灯消息 返回
-struct STR_DBO_UPDATA_MARQUEE
-{
-	BYTE							byMask;								//1代表新增;  2代表删除  3忽略此消息  4发送此消息
-	DWORD							dwMarqueeID;						//跑马灯索引
-	DWORD							dwMaruqeeTime;						//跑马灯 滚动间隔
-	SYSTEMTIME						timeStartTime;						//跑马灯 开始时间
-	SYSTEMTIME						timeEndTime;						//跑马灯 结束时间
-	TCHAR							szMarqueeMsg[1024];					//跑马灯消息
-};
-#pragma endregion
-
-#pragma region MDM_LOGON 登录命令
-/* *********************************************************************************
-**      MAIN:1   MDM_LOGON    登录命令
-** *********************************************************************************/
 //登录命令
 #define	DBR_CL_LOGON_ACCOUNTS		101									//帐号登录
 #define DBO_CL_LOGON_ACCOUNTS       1101                                 //账号登录
@@ -76,18 +37,6 @@ struct STR_DBR_CL_LOGON_REGISTER
 	TCHAR                           strMobilePhone[LEN_MOBILE_PHONE];   //手机号码 可以为null
 
 	//机器标识
-	TCHAR							szMachineID[LEN_MACHINE_ID];		//机器序列
-	DWORD							dwProxyID;							//代理ID
-};
-//平台登录
-struct STR_DBR_CL_LOGON_PLATFORM
-{
-	LPVOID							pBindParameter;						//绑定参数
-	TCHAR							szOpenID[33];						//OpenID | tokenID
-	TCHAR							szUnionID[33];						//UnionID
-	TCHAR							szNickName[LEN_NICKNAME];			//用户昵称
-	BYTE							cbGender;							//用户性别
-	TCHAR							strHeadUrl[LEN_HEAD_URL];			//头像地址
 	TCHAR							szMachineID[LEN_MACHINE_ID];		//机器序列
 	DWORD							dwProxyID;							//代理ID
 };

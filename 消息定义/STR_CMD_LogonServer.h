@@ -93,18 +93,6 @@ struct STR_CMD_LC_LOGON_LOGON_REWARD
 };
 #pragma endregion
 
-#pragma region MDM_LIST 列表命令
-struct STR_SUB_CL_LIST_QUERY_GAMEID
-{
-	DWORD		kindID; //TODONOW 具体类型 再定
-};
-
-struct STR_CMD_LC_LIST_QUERY_GAMEID
-{
-	DWORD		dwGameID;	//可用的gameID
-};
-#pragma endregion
-
 #pragma region MDM_SERVICE 用户命令
 
 //玩家反馈

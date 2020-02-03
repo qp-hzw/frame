@@ -10,6 +10,7 @@ CPlayer::CPlayer(tagUserInfo & UserInfo)
 	//辅助变量
 	m_bClientReady=false;
 	m_bModifyScore=false;
+	m_bAndroidUser=false;
 
 	//状态设置
 	m_UserInfo.cbUserStatus=US_FREE;
@@ -100,7 +101,6 @@ VOID CPlayer::ResetUserItem()
 	ZeroMemory(m_szMachineID,sizeof(m_szMachineID));
 
 	//客户类型
-
 	m_bAndroidUser=false;
 
 	//辅助变量

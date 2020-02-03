@@ -43,22 +43,6 @@
 #define CMD_LC_LOGON_LOGON_REWARD   105                                 //登录奖励（老玩家回归 + 节日奖励）
 #pragma endregion
 
-#pragma region MDM_LIST 列表命令
-/* *********************************************************************************
-**         MAIN:2    MDM_LIST    列表命令（登录成功后主动发送给客户端，客户端无需请求)
-** *********************************************************************************/
-#define MDM_LIST					2									//列表信息
-
-//列表信息返回
-#define CMD_LC_LIST_TYPE			101									//类型列表TypeItem
-#define CMD_LC_LIST_KIND			102									//种类列表KindItem
-#define CMD_LC_LIST_NODE			103									//节点列表NodeItem
-#define CMD_LC_LIST_ROOM			104									//房间列表RoomItem
-
-#define CMD_LC_LIST_ROOM_ONLINE		105									//房间人数 TODONOW client需要增加
-
-#pragma endregion
-
 #pragma region MDM_SERVICE 用户服务
 /* *********************************************************************************
 **      MAIN:3    MDM_SERVICE    服务		//基本包括所有客户端大厅点击按钮消息

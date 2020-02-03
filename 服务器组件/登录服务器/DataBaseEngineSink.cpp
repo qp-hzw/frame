@@ -1965,11 +1965,10 @@ bool CDataBaseEngineSink::On_DBR_Logon_Register(DWORD dwContextID, VOID * pData,
 bool CDataBaseEngineSink::On_DBR_Logon_Platform(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
 	//效验参数
-	ASSERT(wDataSize==sizeof(STR_DBR_CL_LOGON_PLATFORM));
-	if (wDataSize!=sizeof(STR_DBR_CL_LOGON_PLATFORM)) return false;
+	if (wDataSize!=sizeof(STR_SUB_CL_LOGON_PLATFORM)) return false;
 
 	//请求处理
-	STR_DBR_CL_LOGON_PLATFORM * pDBRLogonPlatform=(STR_DBR_CL_LOGON_PLATFORM *)pData;
+	STR_SUB_CL_LOGON_PLATFORM * pDBRLogonPlatform=(STR_SUB_CL_LOGON_PLATFORM *)pData;
 
 	//构造参数
 	m_AccountsDB->ResetParameter();

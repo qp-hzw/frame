@@ -21,6 +21,8 @@ bool CRobotManager::InsertRobot(tagUserInfo & UserInfo)
 		if (pPlayer == NULL)
 			throw;
 
+		pPlayer->m_bAndroidUser = true;
+
 	}
 	catch (...)
 	{

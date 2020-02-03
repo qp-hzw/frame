@@ -25,7 +25,7 @@ private:
 	tagUserInfo						m_UserInfo;							//用户信息
 	tagUserProperty                 m_UserProperty;                     //玩家道具
 
-private:
+public:
 	bool							m_bAndroidUser;						//机器用户
 
 	//辅助变量

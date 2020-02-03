@@ -57,7 +57,6 @@ bool CHandleFromGame::OnTCPNetworkMainTransfer(WORD wSubCmdID, VOID * pData, WOR
 					STR_CPO_PL_OFFLINE_FiNISH cmd;
 					cmd.dwUserID = pCPO->dwUserID;
 					cmd.dwGameID = item->dwServerID;
-					cmd.dwSocketID = pCPO->dwSocketID;
 					
 					g_GameCtrl->SendData(pCPO->dwSocketID, CPD_MDM_TRANSFER, CPO_PL_OFFLINE_FiNISH,&cmd,sizeof(cmd));
 					return true;
@@ -73,7 +72,6 @@ bool CHandleFromGame::OnTCPNetworkMainTransfer(WORD wSubCmdID, VOID * pData, WOR
 				STR_CPO_PL_OFFLINE_FiNISH cmd;
 				cmd.dwUserID = pCPO->dwUserID;
 				cmd.dwGameID = 0;
-				cmd.dwSocketID = pCPO->dwSocketID;
 
 				g_GameCtrl->SendData(pCPO->dwSocketID, CPD_MDM_TRANSFER, CPO_PL_OFFLINE_FiNISH,&cmd,sizeof(cmd));
 				return true;
