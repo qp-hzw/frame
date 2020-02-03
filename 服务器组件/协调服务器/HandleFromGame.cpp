@@ -51,8 +51,10 @@ bool CHandleFromGame::OnTCPNetworkMainTransfer(WORD wSubCmdID, VOID * pData, WOR
 			if(pCPO->bOffline == 1)
 			{
 				tagServerItem* item =  CServerItemManager::FindItemBySocketID(dwSocketID);
-				if(!item)
+				if(item != NULL)
 				{
+					recv_num = 0;
+
 					//·¢ËÍ¸ølogon
 					STR_CPO_PL_OFFLINE_FiNISH cmd;
 					cmd.dwUserID = pCPO->dwUserID;

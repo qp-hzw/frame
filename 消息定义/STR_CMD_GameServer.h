@@ -469,7 +469,7 @@ struct CMD_GF_LookonStatus
 struct CMD_GF_GameStatus
 {
 	BYTE							cbUserAction;							//游戏状态
-	tagUserInfo				UserInfo;								//玩家信息
+	tagUserInfo						UserInfo;								//玩家信息
 };
 
 //用户聊天

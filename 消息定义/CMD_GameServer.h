@@ -44,8 +44,6 @@
 
 //
 #define CMD_GC_USER_MODIFY_TREASURE		1									//修改用户财富信息返回
-//#define CMD_ROOM_RULE					2									//房间信息
-//#define SUB_GR_USER_STATUS			3									//用户动作
 #define SUB_GR_REQUEST_FAILURE			4									//请求失败		大部分失败消息都返回这个消息
 
 
