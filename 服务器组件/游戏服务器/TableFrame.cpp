@@ -562,7 +562,7 @@ int CTableFrame::PlayerEnterTable(CPlayer * pPlayer)
 	CopyMemory(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
 
 	//广播发送
-	SendTableData(INVALID_CHAIR, CMD_GR_USER_STATUS, &GameStatus, sizeof(GameStatus));
+	SendTableData(INVALID_CHAIR, CMD_GR_USER_STATUS, &GameStatus, sizeof(GameStatus), MDM_G_FRAME);
 
 	//4. 增加
 	m_user_list.push_back(pPlayer);
@@ -593,7 +593,7 @@ int CTableFrame::PlayerSitTable(CPlayer * pPlayer, WORD wChairID, bool bCheckUse
 	CopyMemory(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
 
 	//广播发送
-	SendTableData(INVALID_CHAIR, CMD_GR_USER_STATUS, &GameStatus, sizeof(GameStatus));
+	SendTableData(INVALID_CHAIR, CMD_GR_USER_STATUS, &GameStatus, sizeof(GameStatus), MDM_G_FRAME);
 
 	return 0;
 }
@@ -621,7 +621,7 @@ bool CTableFrame::PlayerUpTable(CPlayer *pPlayer)
 	CopyMemory(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
 
 	//广播发送
-	SendTableData(INVALID_CHAIR, CMD_GR_USER_STATUS, &GameStatus, sizeof(GameStatus));
+	SendTableData(INVALID_CHAIR, CMD_GR_USER_STATUS, &GameStatus, sizeof(GameStatus), MDM_G_FRAME);
 
 	return true;
 }
@@ -645,7 +645,7 @@ int CTableFrame::PlayerLeaveTable(CPlayer* pPlayer)
 	CopyMemory(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
 
 	//广播发送
-	SendTableData(INVALID_CHAIR, CMD_GR_USER_STATUS, &GameStatus, sizeof(GameStatus));
+	SendTableData(INVALID_CHAIR, CMD_GR_USER_STATUS, &GameStatus, sizeof(GameStatus), MDM_G_FRAME);
 
 	//断开用户 socket (金币场结束不断)
 	if (m_cbTableMode != TABLE_MODE_GOLD)   //断线重连产生问题
@@ -693,7 +693,7 @@ int CTableFrame::PlayerReady(CPlayer* pPlayer)
 	CopyMemory(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
 
 	//广播发送
-	SendTableData(INVALID_CHAIR, CMD_GR_USER_STATUS, &GameStatus, sizeof(GameStatus));
+	SendTableData(INVALID_CHAIR, CMD_GR_USER_STATUS, &GameStatus, sizeof(GameStatus), MDM_G_FRAME);
 
 	//判断三个玩家是否都准备
 	WORD ReadyNum = 0;
@@ -729,7 +729,7 @@ int CTableFrame::PlayerOffline(CPlayer* pPlayer)
 	CopyMemory(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
 
 	//广播发送
-	SendTableData(INVALID_CHAIR, CMD_GR_USER_STATUS, &GameStatus, sizeof(GameStatus));
+	SendTableData(INVALID_CHAIR, CMD_GR_USER_STATUS, &GameStatus, sizeof(GameStatus), MDM_G_FRAME);
 
 	return 0;
 }
