@@ -54,9 +54,6 @@
 #define MDM_SERVICE								3							//服务
 
 //【子消息号】
-#define SUB_CL_SERVICE_USER_FEEDBACK			1							//玩家反馈
-#define CMD_LC_SERVICE_USER_FEEDBACK			101							//玩家反馈返回
-
 #define SUB_CL_SERVICE_REFRESH_USER_INFO		2							//刷新用户信息
 #define CMD_CL_SERVICE_REFRESH_USER_INFO		102							//刷新用户信息返回
 
@@ -126,7 +123,6 @@
 #define SUB_CL_SERVICE_XJ_RECORD_PLAYBACK		20							//小局录像回放
 #define CMD_LC_SERVICE_XJ_RECORD_PLAYBACK		120							//小局录像回放 返回
 
-#define SUB_CL_SERVICE_CUSTOMER_MESSEGE			21							//客服提示消息
 #define CMD_LC_SERVICE_CUSTOMER_MESSEGE			121							//客服提示消息 返回
 
 #pragma endregion
@@ -255,33 +251,23 @@
 #define MDM_SHOP								7							//商城道具
 
 //【子消息号】
-#define SUB_CL_SHOP_QUERY						1							//商城购买
-#define CMD_LC_SHOP_QUERY_RESULT				101							//商城购买失败返回
+#define SUB_CL_SHOP_BUY							1							//商城购买
+#define CMD_LC_SHOP_BUY_RESULT					101							//商城购买返回
 
 #define SUB_CL_BAG_QUERY						2							//背包物品查询
 #define CMD_LC_BAG_RESULT						102							//背包物品返回
 #define CMD_LC_BAG_FINISH						202							//背包物品查询结束
 
-#pragma endregion 
 
-#pragma region MDM_GIFT 礼物道具
+#define SUB_CL_GIFT_GIVE_PROPS					3							//赠送道具
+#define CMD_LC_GIFT_GIVE_PROPS					103							//赠送道具返回
+#define CMD_LC_GIFT_GIVE_PROPS_SHOW				203							//被赠送人的提醒
 
-/* *******************************************************************************
-**          MAIN:5      MDM_GIFT   礼物道具
-** ******************************************************************************/
-//【主消息号】
-#define MDM_GIFT								5							//礼物道具
+#define SUB_CL_OTHERS_RECHARGE_INFO				4							//充值信息
+#define CMD_LC_OTHERS_RECHARGE_INFO				104							//充值信息 返回
 
-//【子消息号】
-#define SUB_CL_GIFT_GIVE_PROPS					1							//赠送道具
-#define CMD_LC_GIFT_GIVE_PROPS					101							//赠送道具返回
-#define CMD_LC_GIFT_GIVE_PROPS_SHOW				201							//被赠送人的提醒
-
-#define SUB_CL_OTHERS_RECHARGE_INFO				2							//充值信息
-#define CMD_LC_OTHERS_RECHARGE_INFO				102							//赠送道具返回
-
-#define SUB_CL_OTHERS_EXCHANGE_INFO				3							//兑换信息（钱->道具）
-#define CMD_LC_OTHERS_EXCHANGE_INFO				3							//兑换信息返回
+#define SUB_CL_OTHERS_EXCHANGE_INFO				5							//兑换信息（钱->道具）
+#define CMD_LC_OTHERS_EXCHANGE_INFO				105							//兑换信息返回
 
 
 //充值信息

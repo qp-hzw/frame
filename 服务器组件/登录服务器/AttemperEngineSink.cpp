@@ -90,8 +90,8 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 		ServerItem.wServerPort = PORT_LOGON;
 
 		//设置变量
-		TCHAR szInernet_ip[32] = TEXT("0.0.0.0");
-		CWHIP::GetInternetIP(szInernet_ip);
+		TCHAR szInernet_ip[32] = TEXT("127.0.0.1");
+		//CWHIP::GetInternetIP(szInernet_ip);
 		lstrcpyn(ServerItem.szServerAddr,szInernet_ip ,CountArray(ServerItem.szServerAddr));
 
 		//发送数据

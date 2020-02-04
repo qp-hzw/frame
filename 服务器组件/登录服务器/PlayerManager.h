@@ -3,6 +3,7 @@
 #include <vector>
 #include "Stdafx.h"
 #include <map>
+#include <list>
 
 class CPlayer;
 
@@ -10,7 +11,7 @@ class  CPlayerManager
 {
 	//用户变量
 private:
-	static std::vector<CPlayer*>	            s_PlayerArray;					//用户数组
+	static std::list<CPlayer*>	                s_PlayerArray;					//用户数组
 	static std::map<DWORD, DWORD>               s_OfflinePlayer;				//断线玩家列表
 
 	//查找函数
@@ -25,8 +26,6 @@ public:
 	static bool DeletePlayerBySocketID(DWORD dwSocketID);
 	//删 所有
 	static bool DeleteAllPlayer();
-	//查
-	static CPlayer * FindPlayerByEnum(WORD wEnumIndex);
 	//查
 	static CPlayer * FindPlayerByID(DWORD dwUserID);
 	//查

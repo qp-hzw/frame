@@ -11,16 +11,8 @@
 //用户道具
 struct tagUserProperty
 {
-	//道具使用
-	struct tagUsePropertyInfo
-	{
-		WORD                            wPropertyCount;                     //道具数目
-		WORD                            dwValidNum;						    //有效数字
-		DWORD                           dwEffectTime;                       //生效时间
-	};
-
-	WORD                            wPropertyUseMark;                   //道具标示
-	tagUsePropertyInfo              PropertyInfo[MAX_PT_MARK];			//使用信息   
+	DWORD       dwPropID;		  //item id
+	DWORD       dwPropCount;      //item count;
 };
 
 
@@ -48,7 +40,6 @@ struct tagUserInfo
 	SCORE							lGold;								//金币
 	SCORE							lDiamond;							//钻石
 	
-
 	//游戏信息
 	DWORD							dwWinCount;							//胜利盘数
 	DWORD							dwLostCount;						//失败盘数

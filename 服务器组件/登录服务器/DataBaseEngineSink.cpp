@@ -6,21 +6,25 @@
 #include "DataBaseEngineSink.h"
 #include "RankManager.h"
 
+IDataBase		   *g_AccountsDB = NULL;				    //
+IDataBase		   *g_TreasureDB = NULL;					//
+
+
 //启动事件
 bool CDataBaseEngineSink::OnDataBaseEngineStart(IUnknownEx * pIUnknownEx)
 {
 	m_AccountsDB = static_cast<IDataBase*>(CWHModule::Database());
 	m_TreasureDB = static_cast<IDataBase*>(CWHModule::Database());
-	m_PlatformDB = static_cast<IDataBase*>(CWHModule::Database());
 
 	if(m_AccountsDB == NULL) return false;
 	if(m_TreasureDB == NULL) return false;
-	if(m_PlatformDB == NULL) return false;
 
 	//发起连接
-	m_PlatformDB->Connect(1);
 	m_AccountsDB->Connect(2);
 	m_TreasureDB->Connect(3);
+
+	g_AccountsDB = m_AccountsDB;
+	g_TreasureDB = m_TreasureDB;
 
 	return true;
 }
@@ -47,14 +51,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 	case DBR_CL_LOGON_PLATFORM:			//平台登录
 		{
 			return On_DBR_Logon_Platform(dwContextID,pData,wDataSize);
-		}
-	case DBR_CL_USER_QUERY_SCORE_INFO:		//查询金币钻石信息
-		{
-			return On_DBR_QueryScoreInfo(dwContextID,pData,wDataSize);
-		}
-	case DBR_CL_SERVICE_USER_FEEDBACK:			//玩家反馈
-		{
-			return On_DBR_Service_UserFeedback(dwContextID,pData,wDataSize);
 		}
 	case DBR_CL_SERVICE_REFRESH_USER_INFO:		//刷新用户信息
 		{
@@ -107,14 +103,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 	case DBR_CL_SERVICE_XJ_RECORD_PLAYBACK:		//小局录像回放
 		{
 			return On_DBR_CL_Service_XJRecordPlayback(dwContextID,pData,wDataSize);
-		}
-	case DBR_CL_SERVICE_CUSTOMER_MESSEGE:		//客服消息
-		{
-			return On_DBR_CL_SERVICE_CUSTOMER_MESSEGE(dwContextID,pData,wDataSize);
-		}
-	case DBR_CL_SERVICE_GOLD_INFO:				//请求金币大厅信息
-		{
-			return On_DBR_CL_SERVICE_GOLD_INFO(dwContextID,pData,wDataSize);
 		}
 	case DBR_CL_SERVICE_MODIFY_PERSONAL_INFO:	//修改个人资料
 		{
@@ -272,57 +260,17 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 			return On_DBR_CL_CLUB_QUIT(dwContextID,pData,wDataSize);
 		}
 #pragma endregion
+	case DBR_CL_BAG_QUERY: //背包查询
+		{
+			return On_DBR_Bag_Query(dwContextID,pData,wDataSize);
+		}
+
 	}
 
 	return false;
 }
 
 /* **************************【MAIN:3    MDM_SERVICE    服务】*************************************/
-//玩家反馈
-bool CDataBaseEngineSink::On_DBR_Service_UserFeedback( DWORD dwContextID, VOID * pData, WORD wDataSize )
-{
-	//效验参数
-	ASSERT(wDataSize==sizeof(STR_DBR_CL_SERVICE_FEEDBACK));
-	if (wDataSize!=sizeof(STR_DBR_CL_SERVICE_FEEDBACK)) return false;
-
-	//请求处理
-	STR_DBR_CL_SERVICE_FEEDBACK * pUserSuggestion = (STR_DBR_CL_SERVICE_FEEDBACK *)pData;
-
-	//构造参数
-	m_AccountsDB->ResetParameter();
-	m_AccountsDB->AddParameter(TEXT("@iUserID"),pUserSuggestion->dwUserID);
-	m_AccountsDB->AddParameter(TEXT("@chFB_Title"),pUserSuggestion->szFB_Title);
-	m_AccountsDB->AddParameter(TEXT("@chFB_Content"),pUserSuggestion->szFB_Content);
-	m_AccountsDB->AddParameter(TEXT("@chContact"),pUserSuggestion->szContact);
-
-	//结果处理
-	LONG lResultCode=m_AccountsDB->ExecuteProcess(TEXT("GSP_CL_Service_Feedback"),true);		//在QPAccountsDB数据库的AccountsInfo表中插入用户反馈
-
-	//返回结果处理
-	On_DBO_Service_UserFeedback(dwContextID, lResultCode, TEXT("玩家反馈处理完成!"));
-
-	return true;
-}
-
-//玩家反馈返回
-bool CDataBaseEngineSink::On_DBO_Service_UserFeedback(DWORD dwContextID, DWORD dwResultCode, LPCTSTR pszErrorString)
-{
-	//变量定义
-	STR_DBO_CL_SERVICE_FEEDBACK OperateResult;
-	ZeroMemory(&OperateResult,sizeof(OperateResult));
-
-	//构造数据
-	OperateResult.lResultCode = dwResultCode;
-	lstrcpyn(OperateResult.szDescribeString,pszErrorString,CountArray(OperateResult.szDescribeString));
-
-	//发送结果
-	WORD wDataSize=CountStringBuffer(OperateResult.szDescribeString);
-	WORD wHeadSize=sizeof(OperateResult)-sizeof(OperateResult.szDescribeString);
-	g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_SERVICE_USER_FEEDBACK,dwContextID,&OperateResult,wHeadSize+wDataSize);
-
-	return true;
-}
-
 //刷新用户信息
 bool CDataBaseEngineSink::On_DBR_Service_RefreshUserInfo( DWORD dwContextID, VOID * pData, WORD wDataSize )
 {
@@ -509,11 +457,6 @@ bool CDataBaseEngineSink::On_DBO_Service_QueryRoomList(DWORD dwContextID, DWORD 
 //获取富豪榜
 bool CDataBaseEngineSink::On_DBR_Service_GetRichList(DWORD dwContextID, void * pData, WORD wDataSize)
 {
-
-	STR_DBR_CL_SERCIVR_GET_RICHLIST* pRichList = (STR_DBR_CL_SERCIVR_GET_RICHLIST* )pData;
-	if(pData == NULL || wDataSize != sizeof(STR_DBR_CL_SERCIVR_GET_RICHLIST))
-		return false;
-
 	m_AccountsDB->ResetParameter();
 
 	//执行查询
@@ -1373,105 +1316,6 @@ bool CDataBaseEngineSink::On_DBR_CL_Service_XJRecordPlayback(DWORD dwContextID, 
 	return true;
 }
 
-//客服消息
-bool CDataBaseEngineSink::On_DBR_CL_SERVICE_CUSTOMER_MESSEGE(DWORD dwContextID, void * pData, WORD wDataSize)
-{
-
-	if (sizeof(STR_DBR_CL_SERVICE_CUSTOMER_MESSEGE) != wDataSize)
-	{
-		return false;
-	}
-
-	STR_DBR_CL_SERVICE_CUSTOMER_MESSEGE* pDbReq = (STR_DBR_CL_SERVICE_CUSTOMER_MESSEGE*)pData;
-
-	//输入参数
-	m_PlatformDB->ResetParameter();
-	m_PlatformDB->AddParameter(TEXT("@FirmID"), _MYSTERY);
-	m_PlatformDB->AddParameter(TEXT("@MessageType"), pDbReq->cbMessegeFlag);
-
-	//执行查询
-	LONG lResultCode = m_PlatformDB->ExecuteProcess(TEXT("GSP_GP_GET_SERVICE_MESSAGE"), true);
-	if (lResultCode == DB_SUCCESS)
-	{
-		//构造DBO数据
-		STR_DBO_LC_SERVICE_CUSTOMER_MESSEGE DBO;
-		ZeroMemory(&DBO, sizeof(STR_DBO_LC_SERVICE_CUSTOMER_MESSEGE));
-
-		//获取录像数据
-		m_PlatformDB->GetValue_String(TEXT("MessageText"), DBO.szMessege, CountArray(DBO.szMessege));
-		DBO.cbMessegeFlag = m_PlatformDB->GetValue_BYTE(TEXT("MessageType"));
-
-		g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_CUSTOMER_MESSEGE, dwContextID, &DBO, sizeof(STR_DBO_LC_SERVICE_CUSTOMER_MESSEGE));
-	}
-
-
-	return true;
-}
-
-//请求金币大厅信息 
-bool CDataBaseEngineSink::On_DBR_CL_SERVICE_GOLD_INFO(DWORD dwContextID, void * pData, WORD wDataSize)
-{
-	if (sizeof(STR_SUB_CL_SERVICE_GOLD_INFO) != wDataSize)
-	{
-		return false;
-	}
-
-	STR_SUB_CL_SERVICE_GOLD_INFO* pDbReq = (STR_SUB_CL_SERVICE_GOLD_INFO*)pData;
-
-#pragma region 请求金币大厅信息
-
-	m_TreasureDB->ResetParameter();
-	m_TreasureDB->AddParameter(TEXT("@dwUserID"), pDbReq->dwUserID);
-	m_TreasureDB->AddParameter(TEXT("@dwModID"), pDbReq->dwModID);
-	m_TreasureDB->AddParameter(TEXT("@dwKindID"), pDbReq->dwKindID);
-	m_TreasureDB->AddParameter(TEXT("@dwFirmID"), _MYSTERY);
-
-	////执行查询
-	LONG lResultCode = m_TreasureDB->ExecuteProcess(TEXT("GSP_CL_SERVICE_GOLD_INFO"), true);
-
-	//列表发送
-	WORD wPacketSize=0;
-	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
-	wPacketSize=0;
-	STR_CMD_LC_SERVICE_GOLD_INFO * pDBO=NULL;
-
-	while ((lResultCode == DB_SUCCESS) && m_TreasureDB->IsRecordsetEnd()==false)
-	{
-		//发送信息
-		if ((wPacketSize+sizeof(STR_CMD_LC_SERVICE_GOLD_INFO))>sizeof(cbBuffer))
-		{
-			g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_GOLD_INFO,dwContextID,cbBuffer,wPacketSize);
-			wPacketSize=0;
-		}
-		//读取信息
-		pDBO=(STR_CMD_LC_SERVICE_GOLD_INFO *)(cbBuffer+wPacketSize);
-		pDBO->byGoldMod = m_TreasureDB->GetValue_BYTE(TEXT("GoldMod"));
-		pDBO->dwScore = m_TreasureDB->GetValue_DWORD(TEXT("GoldScore"));
-		pDBO->dwGold = m_TreasureDB->GetValue_DWORD(TEXT("Gold"));
-		pDBO->dwServiceGold = m_TreasureDB->GetValue_DWORD(TEXT("ServiceGold"));
-
-		//设置位移
-		wPacketSize+=sizeof(STR_CMD_LC_SERVICE_GOLD_INFO);
-
-		//移动记录
-		m_TreasureDB->MoveToNext();
-	}
-	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_GOLD_INFO,dwContextID,cbBuffer,wPacketSize);
-
-#pragma endregion
-
-#pragma region 请求金币大厅信息 结束
-	STR_CMD_LC_SERVICE_GOLD_INFO_FINISH DBOFinish;
-	DBOFinish.byMask = 1;
-
-	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_GOLD_INFO_FINISH,dwContextID,&DBOFinish,sizeof(DBOFinish));
-#pragma endregion
-
-
-	return true;
-}
-
-
 //修改个人资料
 bool CDataBaseEngineSink::On_DBR_Service_ModifyPersonalInfo(DWORD dwContextID, void * pData, WORD wDataSize)
 {
@@ -1553,7 +1397,6 @@ bool CDataBaseEngineSink::On_DBR_Other_RechargeInfo( DWORD dwContextID, VOID * p
 
 	return true;
 }
-
 //充值信息返回
 bool CDataBaseEngineSink::On_DBO_Other_RechargeInfo(DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString)
 {
@@ -1574,7 +1417,7 @@ bool CDataBaseEngineSink::On_DBO_Other_RechargeInfo(DWORD dwContextID, DWORD dwE
 	{
 		DBR_CommandSource wRequestID ;
 		ZeroMemory(&wRequestID,sizeof(wRequestID));
-		wRequestID.MainCommand = MDM_GIFT;
+		wRequestID.MainCommand = MDM_SHOP;
 		wRequestID.SubCommand  = SUB_CL_OTHERS_RECHARGE_INFO;
 
 		//错误信息
@@ -1628,68 +1471,13 @@ bool CDataBaseEngineSink::On_DBO_Other_ExchangeInfo(DWORD dwContextID, DWORD dwE
 		//错误处理
 		DBR_CommandSource wRequestID ;
 		ZeroMemory(&wRequestID,sizeof(wRequestID));
-		wRequestID.MainCommand = MDM_GIFT;
+		wRequestID.MainCommand = MDM_SHOP;
 		wRequestID.SubCommand  = SUB_CL_OTHERS_EXCHANGE_INFO;
 
 		On_DBO_CommonOperateResult(dwContextID, dwErrorCode, TEXT("数据库出错!"), wRequestID);
 	}
 
 	return true;
-}
-
-//查询用户金币房卡
-bool CDataBaseEngineSink::On_DBR_QueryScoreInfo(DWORD dwContextID, VOID * pData, WORD wDataSize)
-{
-	//效验参数
-	ASSERT(wDataSize==sizeof(STR_DBR_CL_SERCIVR_QUERY_SCORE_INFO));
-	if (wDataSize!=sizeof(STR_DBR_CL_SERCIVR_QUERY_SCORE_INFO)) return false;
-
-	//请求处理
-	STR_DBR_CL_SERCIVR_QUERY_SCORE_INFO * pQueryScoreInfo =(STR_DBR_CL_SERCIVR_QUERY_SCORE_INFO *)pData;
-
-	//构造参数
-	m_TreasureDB->ResetParameter();
-	m_TreasureDB->AddParameter(TEXT("@dwUserID"),pQueryScoreInfo->dwUserID);
-
-	//执行查询
-	LONG lResultCode=m_TreasureDB->ExecuteProcess(TEXT("GSP_CL_Service_GetUserScoreInfo"),true);
-
-	//结果处理
-	On_DBO_QueryScoreInfo(dwContextID,lResultCode,NULL,false);
-
-	return true;
-
-}
-
-//查询金币房卡返回
-VOID CDataBaseEngineSink::On_DBO_QueryScoreInfo(DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString, bool bMobileClient)
-{
-	//构造数据
-	STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO UserScoreInfo;
-	ZeroMemory(&UserScoreInfo,sizeof(UserScoreInfo));
-
-	//描述信息
-	UserScoreInfo.lResultCode = dwErrorCode;
-	lstrcpyn(UserScoreInfo.szDescribeString, pszErrorString, CountArray(UserScoreInfo.szDescribeString));
-
-	if (dwErrorCode==DB_SUCCESS)
-	{
-		//构造变量
-		UserScoreInfo.dwUserID = m_TreasureDB->GetValue_DWORD(TEXT("UserID"));
-		UserScoreInfo.lGold = m_TreasureDB->GetValue_LONGLONG(TEXT("Gold"));
-		UserScoreInfo.lOpenRoomCard = m_TreasureDB->GetValue_LONGLONG(TEXT("OpenRoomCard"));
-		UserScoreInfo.lDiamond = m_TreasureDB->GetValue_LONGLONG(TEXT("Diamond"));
-
-		//发送结果
-		g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_USER_QUERY_SCORE_INFO,dwContextID,&UserScoreInfo,sizeof(STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO));
-	}
-	else
-	{
-		//发送结果
-		g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_USER_QUERY_SCORE_INFO,dwContextID,&UserScoreInfo,sizeof(STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO));
-	}
-
-	return;
 }
 
 //更新排行榜用户信息
@@ -1896,19 +1684,17 @@ bool CDataBaseEngineSink::On_DBR_CL_GIFT_GIVE_PROPS(DWORD dwContextID, void * pD
 bool CDataBaseEngineSink::On_DBR_Logon_Accounts(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
 	//效验参数
-	if (wDataSize!=sizeof(STR_DBR_CL_LOGON_ACCOUNTS)) return false;
+	if (wDataSize!=sizeof(STR_SUB_CL_LOGON_ACCOUNTS)) return false;
 
 	//请求处理
-	STR_DBR_CL_LOGON_ACCOUNTS * pDBRLogonAccounts=(STR_DBR_CL_LOGON_ACCOUNTS *)pData;
+	STR_SUB_CL_LOGON_ACCOUNTS * pDBRLogonAccounts=(STR_SUB_CL_LOGON_ACCOUNTS *)pData;
 
 	//构造参数
 	m_AccountsDB->ResetParameter();
-	m_AccountsDB->AddParameter(TEXT("@mystery"),_MYSTERY);
 	m_AccountsDB->AddParameter(TEXT("@strAccounts"),pDBRLogonAccounts->szAccounts);
 	m_AccountsDB->AddParameter(TEXT("@strPassword"),pDBRLogonAccounts->szPassword);
 	m_AccountsDB->AddParameter(TEXT("@strClientIP"),TEXT("")); //TODONOW 删除这个地址
 	m_AccountsDB->AddParameter(TEXT("@strMachineID"),pDBRLogonAccounts->szMachineID);
-	m_AccountsDB->AddParameter(TEXT("@ProxyID"),pDBRLogonAccounts->dwProxyID);
 
 	//输出参数
 	TCHAR szDescribeString[127]=TEXT("");
@@ -1936,7 +1722,6 @@ bool CDataBaseEngineSink::On_DBR_Logon_Register(DWORD dwContextID, VOID * pData,
 
 	//构造参数
 	m_AccountsDB->ResetParameter();
-	m_AccountsDB->AddParameter(TEXT("@byMYSTERY"), _MYSTERY);
 	m_AccountsDB->AddParameter(TEXT("@strAccounts"),pDBRLogonRegister->szAccounts);
 	m_AccountsDB->AddParameter(TEXT("@strPassword"),pDBRLogonRegister->szPassword);
 	m_AccountsDB->AddParameter(TEXT("@strNickName"),pDBRLogonRegister->szNickName);
@@ -1944,7 +1729,6 @@ bool CDataBaseEngineSink::On_DBR_Logon_Register(DWORD dwContextID, VOID * pData,
 	m_AccountsDB->AddParameter(TEXT("@strClientIP"),TEXT(""));
 	m_AccountsDB->AddParameter(TEXT("@strMobilePhone"),pDBRLogonRegister->strMobilePhone);
 	m_AccountsDB->AddParameter(TEXT("@strMachineID"),pDBRLogonRegister->szMachineID);
-	m_AccountsDB->AddParameter(TEXT("@dwProxyID"),pDBRLogonRegister->dwProxyID);
 
 	//输出参数
 	TCHAR szDescribeString[128]=TEXT("");
@@ -1972,7 +1756,6 @@ bool CDataBaseEngineSink::On_DBR_Logon_Platform(DWORD dwContextID, VOID * pData,
 
 	//构造参数
 	m_AccountsDB->ResetParameter();
-	m_AccountsDB->AddParameter(TEXT("@byMystery"), _MYSTERY);
 	m_AccountsDB->AddParameter(TEXT("@strOpenID"), pDBRLogonPlatform->szOpenID);
 	m_AccountsDB->AddParameter(TEXT("@szUnionID"), pDBRLogonPlatform->szUnionID);
 	m_AccountsDB->AddParameter(TEXT("@strNickName"), pDBRLogonPlatform->szNickName);
@@ -2019,24 +1802,23 @@ bool CDataBaseEngineSink::On_DBO_Logon_Accounts(DWORD dwContextID, DWORD dwResul
 		m_AccountsDB->GetValue_String(TEXT("MySignature"),DBOLogonAccount.useInfo.szUnderWrite,CountArray(DBOLogonAccount.useInfo.szUnderWrite));
 
 		//社团ID
+		DBOLogonAccount.useInfo.dwGroupID=m_AccountsDB->GetValue_BYTE(TEXT("GroupID"));
 		//社团名字
+		m_AccountsDB->GetValue_String(TEXT("GroupName"),DBOLogonAccount.useInfo.szGroupName,CountArray(DBOLogonAccount.useInfo.szGroupName));
 
 		//会员等级
 		DBOLogonAccount.useInfo.cbMemberOrder=m_AccountsDB->GetValue_BYTE(TEXT("MemberOrder"));
-		//经验等级
-		DBOLogonAccount.useInfo.dwLevel=m_AccountsDB->GetValue_BYTE(TEXT("UserLevel"));
+		//人物等级
+		DBOLogonAccount.useInfo.dwLevel=m_AccountsDB->GetValue_BYTE(TEXT("cbLevel"));
 		//经验数值
+		DBOLogonAccount.useInfo.dwExperience=m_AccountsDB->GetValue_DWORD(TEXT("Experience"));
 
 		//用户房卡
 		DBOLogonAccount.useInfo.lOpenRoomCard = m_AccountsDB->GetValue_LONGLONG(TEXT("UserRoomCard"));
 		//钻石
+		DBOLogonAccount.useInfo.lDiamond = m_AccountsDB->GetValue_LONGLONG(TEXT("UserDiamond"));
 		//用户游戏币
 		DBOLogonAccount.useInfo.lGold = m_AccountsDB->GetValue_LONGLONG(TEXT("UserGold"));
-
-		//胜利盘数
-		//失败盘数
-		//和盘盘数
-		//逃跑盘数
 	}
 
 	//构造数据
@@ -3188,7 +2970,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_QUERY_SETTING(DWORD dwContextID, V
 	return true;
 }
 
-
 //解散房间请求
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_DISSOLVE(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
@@ -3772,3 +3553,49 @@ int StrToBin(TCHAR* inWord, BYTE* OutBin, int source_len_begin, int source_len_e
 }
 
 #pragma endregion
+
+//背包查询
+bool CDataBaseEngineSink::On_DBR_Bag_Query( DWORD dwContextID, VOID * pData, WORD wDataSize )
+{
+	//效验参数
+	if (wDataSize!=sizeof(DWORD)) return false;
+	DWORD * dbr=(DWORD *)pData;
+
+	//执行存储过程
+	m_AccountsDB->ResetParameter();
+	m_AccountsDB->AddParameter(TEXT("UserID"),*dbr);
+	LONG lResultCode=m_AccountsDB->ExecuteProcess(TEXT("GSP_CL_BAG_QUERY"),true);
+
+	//获取数据
+	if (lResultCode == DB_SUCCESS)
+	{
+		//列表发送
+		WORD wPacketSize=0;
+		BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
+		wPacketSize=0;
+		STR_DBO_CL_BAG_RESULT * pDBO=NULL;
+		while (m_AccountsDB->IsRecordsetEnd()==false)
+		{
+			//发送信息
+			if ((wPacketSize+sizeof(STR_DBO_CL_BAG_RESULT))>sizeof(cbBuffer))
+			{
+				g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_BAG_RESULT,dwContextID,cbBuffer,wPacketSize);
+				wPacketSize=0;
+			}
+			//读取信息
+			pDBO=(STR_DBO_CL_BAG_RESULT *)(cbBuffer+wPacketSize);
+			pDBO->dwUserID = *dbr;
+			pDBO->Prop.dwPropID = m_AccountsDB->GetValue_BYTE(TEXT("GoodsID"));
+			pDBO->Prop.dwPropCount = m_AccountsDB->GetValue_DWORD(TEXT("GoodsNum"));
+
+			//设置位移
+			wPacketSize+=sizeof(STR_DBO_CL_BAG_RESULT);
+
+			//移动记录
+			m_AccountsDB->MoveToNext();
+		}
+		if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_BAG_RESULT,dwContextID,cbBuffer,wPacketSize);
+	}
+
+	return true;
+}

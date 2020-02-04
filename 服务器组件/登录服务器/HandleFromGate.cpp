@@ -21,10 +21,6 @@ bool CHandleFromGate::HandlePacket(TCP_Command Command, VOID * pData, WORD wData
 		{
 			return On_MDM_CLUB(Command.wSubCmdID,pData,wDataSize,dwSocketID);
 		}
-	case MDM_GIFT:				//礼物道具	
-		{
-			return OnTCPNetworkMainOther(Command.wSubCmdID,pData,wDataSize,dwSocketID);
-		}
 	case MDM_SHOP:				//商城道具
 		{
 			return On_MDM_SHOP(Command.wSubCmdID,pData,wDataSize,dwSocketID);
@@ -54,10 +50,6 @@ bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwScoketID, VOID * p
 		}
 #pragma endregion
 
-	case DBO_CL_SERVICE_USER_FEEDBACK:			//玩家反馈返回
-		{
-			return On_CMD_LC_Service_UserFeedBack(dwScoketID, pData);
-		}
 	case DBO_CL_SERVICE_REFRESH_USER_INFO:		//刷新用户信息返回
 		{
 			return On_CMD_LC_Service_RefreshUserInfo(dwScoketID, pData);
@@ -98,11 +90,6 @@ bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwScoketID, VOID * p
 		{
 			return On_CMD_LC_Service_ModifyPersonalInfo(dwScoketID,pData,wDataSize);
 		}
-	case DBO_CL_USER_QUERY_SCORE_INFO:			//查询(变更)金币房卡
-		{
-			return On_CMD_LC_Service_QueryScoreInfo(dwScoketID,pData,wDataSize);
-		}
-	
 	case DBO_CL_USER_COMMAND_RESULT:		//公共操作结果
 		{
 			return On_CMD_LC_CommonOperateResult(dwScoketID,pData,wDataSize);
@@ -160,10 +147,6 @@ bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwScoketID, VOID * p
 	case DBO_LC_SERVICE_XJ_RECORD_PLAYBACK:			//小局录像回放
 		{
 			return On_CMD_LC_Service_XJRecordPlayback(dwScoketID,pData,wDataSize);
-		}
-	case DBO_LC_SERVICE_CUSTOMER_MESSEGE:		//客服消息
-		{
-			return On_CMD_LC_SERVICE_CUSTOMER_MESSEGE(dwScoketID,pData,wDataSize);
 		}
 	case DBO_LC_SERVICE_PURE_XJ_RECORD_FINISH://小局战绩结束
 		{
@@ -358,6 +341,10 @@ bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwScoketID, VOID * p
 			return On_CMD_LC_CLUB_RECORD_FINISH(dwScoketID,pData,wDataSize);
 		}
 #pragma endregion
+	case DBO_CL_BAG_RESULT: //查询背包返回
+		{
+			return On_DBO_CL_BAG_RESULT(dwScoketID,pData,wDataSize);
+		}
 	}
 	return true;
 }
@@ -387,10 +374,6 @@ bool CHandleFromGate::OnTCPNetworkMainService(WORD wSubCmdID, VOID * pData, WORD
 {
 	switch (wSubCmdID)
 	{
-	case SUB_CL_SERVICE_USER_FEEDBACK:			//玩家反馈
-		{
-			return On_SUB_CL_Service_UserFeedBack(pData, wDataSize, dwSocketID);
-		}
 	case SUB_CL_SERVICE_REFRESH_USER_INFO:		//刷新用户信息
 		{
 			return On_SUB_CL_Service_RefreshUserInfo(pData, wDataSize, dwSocketID);
@@ -454,10 +437,6 @@ bool CHandleFromGate::OnTCPNetworkMainService(WORD wSubCmdID, VOID * pData, WORD
 	case SUB_CL_SERVICE_XJ_RECORD_PLAYBACK:	//小局录像回放
 		{
 			return On_SUB_CL_Service_XJRecordPlayback(pData, wDataSize, dwSocketID);
-		}
-	case SUB_CL_SERVICE_CUSTOMER_MESSEGE:	//客服消息
-		{
-			return On_SUB_CL_SERVICE_CUSTOMER_MESSEGE(pData, wDataSize, dwSocketID);
 		}
 	case SUB_CL_SERVICE_MATCH_INFO: //比赛场信息
 		{
@@ -590,11 +569,20 @@ bool CHandleFromGate::On_MDM_CLUB(WORD wSubCmdID, VOID * pData, WORD wDataSize, 
 
 	return false;
 }
-//礼物道具
-bool CHandleFromGate::OnTCPNetworkMainOther(WORD wSubCmdID, VOID * pData, WORD wDataSize, DWORD dwSocketID)
+
+//商城道具
+bool CHandleFromGate::On_MDM_SHOP(WORD wSubCmdID, VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	switch (wSubCmdID)
+	switch(wSubCmdID)
 	{
+	case SUB_CL_SHOP_BUY:	 //商城购买
+		{
+			return On_SUB_CL_SHOP_BUY(pData, wDataSize, dwSocketID);
+		}
+	case SUB_CL_BAG_QUERY: //背包物品查询
+		{
+			return On_SUB_CL_BAG_QUERY(pData, wDataSize, dwSocketID);
+		}	
 	case SUB_CL_GIFT_GIVE_PROPS:				//赠送道具
 		{
 			return On_SUB_CL_GIFT_GIVE_PROPS(pData, wDataSize, dwSocketID);
@@ -607,23 +595,6 @@ bool CHandleFromGate::OnTCPNetworkMainOther(WORD wSubCmdID, VOID * pData, WORD w
 		{
 			return On_SUB_CL_Other_ExchangeInfo(pData, wDataSize, dwSocketID);
 		}
-	}
-
-	return false;
-}
-//商城道具
-bool CHandleFromGate::On_MDM_SHOP(WORD wSubCmdID, VOID * pData, WORD wDataSize, DWORD dwSocketID)
-{
-	switch(wSubCmdID)
-	{
-	case SUB_CL_SHOP_QUERY:	 //查询商城
-		{
-			return On_SUB_CL_SHOP_QUERY(pData, wDataSize, dwSocketID);
-		}
-	case SUB_CL_BAG_QUERY: //背包物品查询
-		{
-			return On_SUB_CL_BAG_QUERY(pData, wDataSize, dwSocketID);
-		}	
 	}
 
 	return false;
@@ -667,21 +638,8 @@ bool CHandleFromGate::On_SUB_CL_Logon_Accounts(VOID * pData, WORD wDataSize, DWO
 		return false;
 	}
 
-	//处理消息
-	STR_SUB_CL_LOGON_ACCOUNTS * pSUBLogonAccounts=(STR_SUB_CL_LOGON_ACCOUNTS *)pData;
-
-	//变量构造
-	STR_DBR_CL_LOGON_ACCOUNTS DBRLogonAccounts;
-	ZeroMemory(&DBRLogonAccounts,sizeof(DBRLogonAccounts));
-
-	//数据赋值
-	lstrcpyn(DBRLogonAccounts.szAccounts,pSUBLogonAccounts->szAccounts,CountArray(DBRLogonAccounts.szAccounts));
-	lstrcpyn(DBRLogonAccounts.szPassword,pSUBLogonAccounts->szPassword,CountArray(DBRLogonAccounts.szPassword));
-	lstrcpyn(DBRLogonAccounts.szMachineID,pSUBLogonAccounts->szMachineID,CountArray(DBRLogonAccounts.szMachineID));
-	DBRLogonAccounts.dwProxyID = pSUBLogonAccounts->dwProxyID;
-
 	//投递请求
-	g_GameCtrl->PostDataBaseRequest(DBR_CL_LOGON_ACCOUNTS,dwSocketID,&DBRLogonAccounts,sizeof(DBRLogonAccounts));
+	g_GameCtrl->PostDataBaseRequest(DBR_CL_LOGON_ACCOUNTS,dwSocketID, pData, wDataSize);
 	return true;
 }
 
@@ -910,51 +868,6 @@ bool CHandleFromGate::On_CMD_LC_Logon_Logon_Reward(DWORD dwScoketID, SYSTEMTIME 
 
 #pragma region MDM_SERVICE 用户服务
 /***************************************** 【服务处理函数-主消息3】 *******************************************/
-//玩家反馈
-bool CHandleFromGate::On_SUB_CL_Service_UserFeedBack(VOID * pData, WORD wDataSize, DWORD dwSocketID)
-{
-	//校验参数
-	ASSERT( wDataSize == sizeof(STR_SUB_CL_SERVICE_FEEDBACK));
-	if(wDataSize != sizeof(STR_SUB_CL_SERVICE_FEEDBACK)) return false;
-
-	//处理消息
-	STR_SUB_CL_SERVICE_FEEDBACK * pUserSuggestion = (STR_SUB_CL_SERVICE_FEEDBACK *)pData;
-
-	//构造玩家反馈数据
-	STR_DBR_CL_SERVICE_FEEDBACK UserSuggestion;
-	ZeroMemory(&UserSuggestion,sizeof(UserSuggestion));
-	UserSuggestion.dwUserID = pUserSuggestion->dwUserID;
-	lstrcpyn(UserSuggestion.szFB_Title,pUserSuggestion->szFB_Title,CountArray(UserSuggestion.szFB_Title));
-	lstrcpyn(UserSuggestion.szContact,pUserSuggestion->szContact,CountArray(UserSuggestion.szContact));
-	lstrcpyn(UserSuggestion.szFB_Content,pUserSuggestion->szFB_Content,CountArray(UserSuggestion.szFB_Content));
-
-	//投递请求
-	g_GameCtrl->PostDataBaseRequest(DBR_CL_SERVICE_USER_FEEDBACK, dwSocketID, &UserSuggestion, sizeof(UserSuggestion));
-
-	return true;
-}
-
-//玩家反馈返回
-bool CHandleFromGate::On_CMD_LC_Service_UserFeedBack( DWORD dwScoketID, VOID * pData)
-{
-	//变量定义
-	STR_CMD_LC_SERVICE_FEEDBACK FeedBack;
-	ZeroMemory(&FeedBack, sizeof(FeedBack));
-
-	//变量定义
-	STR_DBO_CL_SERVICE_FEEDBACK *pOperate = (STR_DBO_CL_SERVICE_FEEDBACK *)pData;
-
-	//构造数据
-	FeedBack.lResultCode=pOperate->lResultCode;
-	lstrcpyn(FeedBack.szDescribeString, pOperate->szDescribeString, CountArray(FeedBack.szDescribeString));
-
-	//发送数据
-	WORD wDataSize = sizeof(FeedBack);
-	g_GameCtrl->SendData(dwScoketID, MDM_SERVICE, CMD_LC_SERVICE_USER_FEEDBACK, &FeedBack, wDataSize);
-
-	return true;
-}
-
 //刷新用户信息
 bool CHandleFromGate::On_SUB_CL_Service_RefreshUserInfo(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
@@ -1587,45 +1500,6 @@ bool CHandleFromGate::On_CMD_LC_Service_XJRecordPlayback( DWORD dwScoketID, VOID
 	return true;
 }
 
-//客服消息
-bool CHandleFromGate::On_SUB_CL_SERVICE_CUSTOMER_MESSEGE(VOID * pData, WORD wDataSize, DWORD dwSocketID)
-{
-	//数据大小校验
-	if ( wDataSize != sizeof(STR_SUB_CL_SERVICE_CUSTOMER_MESSEGE) )
-		return false;
-
-	//SUB数据
-	STR_SUB_CL_SERVICE_CUSTOMER_MESSEGE *SUB = (STR_SUB_CL_SERVICE_CUSTOMER_MESSEGE *)pData;
-	
-	//构造DBR数据
-	STR_DBR_CL_SERVICE_CUSTOMER_MESSEGE DBR;
-	ZeroMemory(&DBR, sizeof(STR_DBR_CL_SERVICE_CUSTOMER_MESSEGE));
-	DBR.cbMessegeFlag = SUB->cbMessegeFlag;
-
-	return g_GameCtrl->PostDataBaseRequest(DBR_CL_SERVICE_CUSTOMER_MESSEGE, dwSocketID, &DBR, sizeof(DBR));
-}
-//客服消息 返回
-bool CHandleFromGate::On_CMD_LC_SERVICE_CUSTOMER_MESSEGE( DWORD dwScoketID, VOID * pData, WORD wDataSize )
-{
-	//参数校验
-	if(wDataSize != sizeof(STR_DBO_LC_SERVICE_CUSTOMER_MESSEGE))
-		return false;
-
-	//DBO数据
-	STR_DBO_LC_SERVICE_CUSTOMER_MESSEGE *pDBO = (STR_DBO_LC_SERVICE_CUSTOMER_MESSEGE*)pData;
-
-	//构造CMD数据
-	STR_CMD_LC_SERVICE_CUSTOMER_MESSEGE CMD;
-	ZeroMemory(&CMD, sizeof(STR_CMD_LC_SERVICE_CUSTOMER_MESSEGE));
-	CMD.cbMessegeFlag = pDBO->cbMessegeFlag;
-	lstrcpyn(CMD.szMessege, pDBO->szMessege, CountArray(CMD.szMessege));
-
-	//发送数据
-	g_GameCtrl->SendData(dwScoketID, MDM_SERVICE, CMD_LC_SERVICE_CUSTOMER_MESSEGE, &CMD, sizeof(STR_CMD_LC_SERVICE_CUSTOMER_MESSEGE));
-
-	return true;
-}
-
 //请求金币大厅信息
 bool CHandleFromGate::On_SUB_CL_SERVICE_GOLD_INFO(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
@@ -1633,7 +1507,8 @@ bool CHandleFromGate::On_SUB_CL_SERVICE_GOLD_INFO(VOID * pData, WORD wDataSize, 
 	if(wDataSize!=sizeof(STR_SUB_CL_SERVICE_GOLD_INFO))
 		return false;
 
-	return g_GameCtrl->PostDataBaseRequest(DBR_CL_SERVICE_GOLD_INFO,dwSocketID,pData, wDataSize);
+	return true;
+	//return g_GameCtrl->PostDataBaseRequest(DBR_CL_SERVICE_GOLD_INFO,dwSocketID,pData, wDataSize);
 }
 //请求金币大厅信息 返回
 bool CHandleFromGate::On_CMD_LC_SERVICE_GOLD_INFO( DWORD dwScoketID, VOID * pData, WORD wDataSize )
@@ -1708,32 +1583,6 @@ bool CHandleFromGate::On_CMD_LC_Service_ModifyPersonalInfo( DWORD dwScoketID, VO
 
 	//发送数据
 	g_GameCtrl->SendData(dwScoketID, MDM_SERVICE, CMD_LC_SERVICE_MODIFY_PERSONAL_INFO, &PersonalInfo, sizeof(STR_CMD_LC_SERVICE_MODIFY_PERSONL_INFO));
-
-	return true;
-}
-
-//查询金币房卡返回
-bool CHandleFromGate::On_CMD_LC_Service_QueryScoreInfo(DWORD dwScoketID, VOID * pData, WORD wDataSize)
-{
-	//变量定义
-	STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO * pScoreInfo =(STR_DBO_CL_SERCIVR_QUERY_SCORE_INFO *)pData;
-
-	//变量定义
-	STR_CMD_LC_QUERY_SCORE_INFO ScoreInfo;
-	ZeroMemory(&ScoreInfo,sizeof(ScoreInfo));
-
-	//描述信息
-	ScoreInfo.lResultCode = pScoreInfo->lResultCode;
-	lstrcpyn(ScoreInfo.szDescribeString, pScoreInfo->szDescribeString, CountArray(ScoreInfo.szDescribeString));
-
-	//财富信息
-	ScoreInfo.dwUserID = pScoreInfo->dwUserID;
-	ScoreInfo.lGold = pScoreInfo->lGold;
-	ScoreInfo.lOpenRoomCard = pScoreInfo->lOpenRoomCard;
-	ScoreInfo.lDiamond = pScoreInfo->lDiamond;
-
-	//发送数据
-	g_GameCtrl->SendData(dwScoketID, MDM_SERVICE, CMD_LC_USER_QUERY_SCORE_INFO, &ScoreInfo, sizeof(STR_CMD_LC_QUERY_SCORE_INFO));
 
 	return true;
 }
@@ -2682,7 +2531,7 @@ bool CHandleFromGate::On_CMD_LC_GIFT_GIVE_PROPS( DWORD dwScoketID, VOID * pData,
 	if(wDataSize!=sizeof(STR_CMD_LC_GIFT_GIVE_PROPS))
 		return false;
 
-	g_GameCtrl->SendData(dwScoketID, MDM_GIFT, CMD_LC_GIFT_GIVE_PROPS, pData, wDataSize);
+	g_GameCtrl->SendData(dwScoketID, MDM_SHOP, CMD_LC_GIFT_GIVE_PROPS, pData, wDataSize);
 
 	return true;
 }
@@ -2700,7 +2549,7 @@ bool CHandleFromGate::On_CMD_LC_GIFT_GIVE_PROPS_SHOW( DWORD dwScoketID, VOID * p
 	if(!player) return false;
 
 	//通知用户
-	g_GameCtrl->SendData(player->GetSocketID(), MDM_GIFT, CMD_LC_GIFT_GIVE_PROPS_SHOW, 
+	g_GameCtrl->SendData(player->GetSocketID(), MDM_SHOP, CMD_LC_GIFT_GIVE_PROPS_SHOW, 
 		pData, wDataSize);	
 
 	return true;
@@ -2747,9 +2596,6 @@ bool CHandleFromGate::On_CMD_LC_Other_RechargeInfo( DWORD dwScoketID, VOID * pDa
 	return true;
 }
 
-
-
-
 //兑换道具
 bool CHandleFromGate::On_SUB_CL_Other_ExchangeInfo(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
@@ -2794,84 +2640,103 @@ bool CHandleFromGate::On_CMD_LC_Other_ExchangeInfo( DWORD dwScoketID, VOID * pDa
 #pragma endregion
 
 #pragma region MDM_SHOP 商城道具
-//查询商城
-bool CHandleFromGate::On_SUB_CL_SHOP_QUERY(VOID * pData, WORD wDataSize, DWORD dwSocketID)
+//商城购买
+bool CHandleFromGate::On_SUB_CL_SHOP_BUY(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
 	//校验参数
-	if(wDataSize != sizeof(STR_SUB_CL_SHOP_QUERY)) return false;
+	if(wDataSize != sizeof(STR_SUB_CL_SHOP_BUY)) return false;
+	STR_SUB_CL_SHOP_BUY * pSub = (STR_SUB_CL_SHOP_BUY *)pData;
+
+	CPlayer *player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	if(player == NULL) return false;
 
 	//购买检测
+	//if(0 != Chck())
+	
+	tagUserProperty prop;
+	prop.dwPropID = pSub->dwGoodsID;
+	prop.dwPropCount = pSub->dwGoodsNum;
+	player->AddProp(prop);
 
-	//购买结果
-
-	//通知client
-
-	//写入数据库 TODONOW
-	/*
-	//处理消息
-	STR_SUB_CL_SHOP_QUERY * pSub = (STR_SUB_CL_SHOP_QUERY *)pData;
-	//定义变量
-	STR_DBR_CL_SHOP_QUERY Dbr;
-	ZeroMemory(&Dbr,sizeof(Dbr));
-
-	Dbr.byGoodsType = pSub->byGoodsType;
-	Dbr.dwUserID = pSub->dwUserID;
-
-	//投递请求
-	g_GameCtrl->PostDataBaseRequest(DBR_CL_SHOP_QUERY, dwSocketID, &Dbr, sizeof(Dbr));
-	*/
+	//返回给client
+	STR_CMD_LC_SHOP_BUY_RESULT cmd;
+	cmd.byResult = 0;
+	g_GameCtrl->SendData(dwSocketID, MDM_SHOP, CMD_LC_SHOP_BUY_RESULT, &cmd, sizeof(cmd));
 	return true;
 }
 
-//背包物品查询
+//道具查询
 bool CHandleFromGate::On_SUB_CL_BAG_QUERY(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	CPlayer* player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
-	if(!player) return true;
+	CPlayer *player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	if(player == NULL) return true;
 
-	//std::vector<STR_CMD_LC_BAG_RESULT> vec_cmd;// = player->GetUserProp() TODONOW 带增加
+	for(auto item : *(player->m_ArrPrp))
+	{
+		CLog::Log(log_debug, "item id :"); // ,  item.dwPropID);
+	}
 
-	std::vector<STR_CMD_LC_BAG_RESULT> vec_cmd;
-	STR_CMD_LC_BAG_RESULT item;
+	if(player->m_ArrPrp->empty())
+	{
+		g_GameCtrl->SendData(dwSocketID, MDM_SHOP, CMD_LC_BAG_FINISH, NULL, 0);
+		return true;
+	}
 
-	item.dwGoodsID = 1;
-	item.dwGoodsNum =1;
-	vec_cmd.push_back(item);
+	/*
+	CLog::Log(log_debug, "player->m_ArrPrp size : "  + player->m_ArrPrp.size());
+	std::list<tagUserProperty> list_prop;
 
-	item.dwGoodsID = 2;
-	item.dwGoodsNum =20;
-	vec_cmd.push_back(item);
+	CLog::Log(log_debug, "list_prop size : "  + list_prop.size());
 
-	item.dwGoodsID = 3;
-	item.dwGoodsNum =99;
-	vec_cmd.push_back(item);
 
-	//列表发送
 	WORD wPacketSize=0;
 	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
 	STR_CMD_LC_BAG_RESULT * pCMD=NULL;
-	for(size_t i=0; i < vec_cmd.size(); i++)
+	for(auto item : list_prop)
 	{
-		//发送信息
+		CLog::Log(log_debug, "item: "  + item.dwPropID);
+
 		if ((wPacketSize+sizeof(STR_CMD_LC_BAG_RESULT))>sizeof(cbBuffer))
 		{
 			g_GameCtrl->SendData(dwSocketID, MDM_SHOP, CMD_LC_BAG_RESULT, cbBuffer, wPacketSize);
 			wPacketSize=0;
 		}
-
-		//读取信息
-		pCMD=(STR_CMD_LC_BAG_RESULT *)(cbBuffer+wPacketSize);
-		pCMD->dwGoodsID = vec_cmd.at(i).dwGoodsID; 
-		pCMD->dwGoodsNum = vec_cmd.at(i).dwGoodsNum;
-
-		//设置位移
-		wPacketSize+=sizeof(STR_CMD_LC_BAG_RESULT);
-
-	}
-	if (wPacketSize>0) g_GameCtrl->SendData(dwSocketID, MDM_SHOP, CMD_LC_BAG_RESULT, cbBuffer, wPacketSize);
 	
-	g_GameCtrl->SendData(dwSocketID, MDM_SHOP, CMD_LC_BAG_FINISH, pData, wDataSize);
+		pCMD=(STR_CMD_LC_BAG_RESULT *)(cbBuffer+wPacketSize);
+		pCMD->dwGoodsID = item.dwPropID;
+		pCMD->dwGoodsNum = item.dwPropCount;
+
+		wPacketSize+=sizeof(STR_CMD_LC_BAG_RESULT);
+	}
+
+	if (wPacketSize>0) g_GameCtrl->SendData(dwSocketID, MDM_SHOP, CMD_LC_BAG_RESULT, cbBuffer, wPacketSize);
+
+	g_GameCtrl->SendData(dwSocketID, MDM_SHOP, CMD_LC_BAG_FINISH, NULL, 0);
+	*/
 	return true;
 }
 
+//背包物品查询 返回
+bool CHandleFromGate::On_DBO_CL_BAG_RESULT( DWORD dwScoketID, VOID * pData, WORD wDataSize)
+{
+	//校验参数
+	WORD Size = sizeof(STR_DBO_CL_BAG_RESULT);
+	if( (wDataSize < Size) || 
+		( (wDataSize % Size) != 0))
+		return false;
+
+	//获得个数
+	int count = wDataSize / sizeof(STR_DBO_CL_BAG_RESULT);
+
+	//返回的列表
+	STR_DBO_CL_BAG_RESULT *TaskList = (STR_DBO_CL_BAG_RESULT *)pData;
+	for (int i=0; i<count; i++)
+	{
+		CPlayer *player = CPlayerManager::FindPlayerByID((TaskList+i)->dwUserID);
+		player ->InitProp((TaskList+i)->Prop);
+		CLog::Log(log_debug, "InitProp propid: %ld", (TaskList+i)->Prop.dwPropID);
+	}
+
+	return true;
+}
 #pragma endregion

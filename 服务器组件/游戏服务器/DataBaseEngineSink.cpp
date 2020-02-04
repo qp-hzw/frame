@@ -22,20 +22,12 @@ CDataBaseEngineSink::~CDataBaseEngineSink()
 //启动事件
 bool CDataBaseEngineSink::OnDataBaseEngineStart(IUnknownEx * pIUnknownEx)
 {
-	m_PlatformDB = static_cast<IDataBase*>(CWHModule::Database());
 	m_TreasureDB = static_cast<IDataBase*>(CWHModule::Database());
 	
-	if(m_PlatformDB == NULL) return false;
 	if(m_TreasureDB == NULL) return false;
 
 	//发起连接
-	bool bRet1 = m_PlatformDB->Connect(1);
 	bool bRet2 = m_TreasureDB->Connect(3);
-
-	if(!bRet1)
-	{
-		return false;
-	}
 
 	if(!bRet2)
 	{

@@ -24,8 +24,6 @@ public:
 	//删 所有
 	static bool DeleteAllPlayer();
 	//查
-	static CPlayer * FindPlayerByEnum(WORD wEnumIndex);
-	//查
 	static CPlayer * FindPlayerByID(DWORD dwUserID);
 	//查
 	static CPlayer * FindPlayerBySocketID(DWORD dwSocketID);

@@ -109,13 +109,6 @@ bool CPlayerManager::DeleteAllPlayer()
 }
 
 //²é
-CPlayer * CPlayerManager::FindPlayerByEnum(WORD wEnumIndex)
-{
-	if (wEnumIndex >= s_PlayerArray.size()) return NULL;
-	return s_PlayerArray[wEnumIndex];
-}
-
-//²é
 CPlayer * CPlayerManager::FindPlayerByID(DWORD dwUserID)
 {
 	for(auto player : s_PlayerArray)

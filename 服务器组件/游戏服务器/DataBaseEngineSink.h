@@ -10,7 +10,6 @@ class CDataBaseEngineSink : public IDataBaseEngineSink
 	//游戏数据库
 protected:
 	IDataBase					   *m_TreasureDB;					    //财富数据库
-	IDataBase					   *m_PlatformDB;					    //平台数据库
 
 	//函数定义
 public:

@@ -10,21 +10,12 @@
 #pragma region MDM_LIST 列表命令
 //登录命令
 #define	DBR_CL_LOGON_ACCOUNTS		101									//帐号登录
-#define DBO_CL_LOGON_ACCOUNTS       1101                                 //账号登录
+#define DBO_CL_LOGON_ACCOUNTS       1101                                //账号登录
 
 #define DBR_CL_LOGON_REGISTER		102									//帐号注册
 
 #define DBR_CL_LOGON_PLATFORM       103                                 //平台登录
-#define DBO_CL_LOGON_PLATFORM       1103                                 //平台登录
-
-//帐号登录
-struct STR_DBR_CL_LOGON_ACCOUNTS
-{
-	TCHAR							szAccounts[LEN_ACCOUNTS];			//登录帐号
-	TCHAR							szPassword[LEN_MD5];				//登录密码
-	TCHAR							szMachineID[LEN_MACHINE_ID];		//机器序列
-	DWORD							dwProxyID;							//代理ID
-};
+#define DBO_CL_LOGON_PLATFORM       1103                                //平台登录
 
 //帐号注册
 struct STR_DBR_CL_LOGON_REGISTER
@@ -47,9 +38,6 @@ struct STR_DBR_CL_LOGON_REGISTER
 /* *********************************************************************************
 **      MAIN:3   MDM_SERVICE    服务命令 
 ** *********************************************************************************/
-#define DBR_CL_SERVICE_USER_FEEDBACK		301									//玩家反馈
-#define	DBO_CL_SERVICE_USER_FEEDBACK		1301								//玩家反馈返回
-
 #define DBR_CL_SERVICE_REFRESH_USER_INFO	302									//刷新用户信息
 #define DBO_CL_SERVICE_REFRESH_USER_INFO	1302								//刷新用户信息返回
 
@@ -80,7 +68,6 @@ struct STR_DBR_CL_LOGON_REGISTER
 #define DBR_CL_SERVICE_MODIFY_PERSONAL_INFO		311								//修改个人资料
 #define DBO_CL_SERVICE_MODIFY_PERSONAL_INFO		1311							//修改个人资料返回
 
-#define DBR_CL_USER_QUERY_SCORE_INFO			312								//查询(变更)金币房卡信息
 #define DBO_CL_USER_QUERY_SCORE_INFO			1312							//查询（变更）金币房卡信息返回
 
 //下面这些排行榜的消息号，是自身的排行榜类调用的消息 TODO 暂时放在这里
@@ -91,8 +78,6 @@ struct STR_DBR_CL_LOGON_REGISTER
 
 
 #define DBR_GP_MODIFY_USER_INSURE				314								//变更用户财富		TODO 在登录奖励中用到，暂时注释了
-
-#define DBR_GP_READ_VERSION_AND_URL				315								//读取版本号		//暂时注释，后面可能会用到
 
 #define DBR_CL_SERVICE_PURE_STANDING_LIST		316								//pure大厅排行版
 #define DBO_LC_SERVICE_PURE_STANDING_LIST		1316							//pure大厅排行版 返回
@@ -118,10 +103,6 @@ struct STR_DBR_CL_LOGON_REGISTER
 
 #define DBR_CL_SERVICE_XJ_RECORD_PLAYBACK		320								//小局录像回放
 #define DBO_LC_SERVICE_XJ_RECORD_PLAYBACK		1320							//小局录像回放返回
-
-#define DBR_CL_SERVICE_CUSTOMER_MESSEGE			321								//客服消息
-#define DBO_LC_SERVICE_CUSTOMER_MESSEGE			1321							//客服消息返回
-
 //////////////////////////////////////////////////////////////////////////////////
 //【结构体定义】
 
@@ -212,10 +193,6 @@ struct STR_DBO_CL_SERCIVR_QUERY_ROOMLIST
 	DWORD dwScore[5];					//用户积分
 };
 
-//获取富豪榜
-struct STR_DBR_CL_SERCIVR_GET_RICHLIST
-{
-};
 //获取富豪榜返回
 struct STR_DBO_CL_SERCIVR_GET_RICHLIST
 {
@@ -640,6 +617,9 @@ struct STR_DBO_LC_CLUB_STICKY_POST
 #define	DBO_CL_USER_COMMAND_RESULT			804							//公用操作结果
 
 
+#define DBR_CL_BAG_QUERY					805							//查询背包
+#define DBO_CL_BAG_RESULT					1805						//查询背包 返回
+
 //公共操作
 struct DBR_CommandSource
 {
@@ -680,6 +660,13 @@ struct DBO_GP_OperateCommand
 	DBR_CommandSource				mCommand;							//协议消息
 	LONG							lResultCode;						//操作代码
 	TCHAR							szDescribeString[128];				//成功消息
+};
+
+//物品查询背包返回
+struct STR_DBO_CL_BAG_RESULT
+{
+	DWORD                          dwUserID; //玩家ID
+	tagUserProperty                Prop;     //物品信息
 };
 
 /* *******************************************************************************

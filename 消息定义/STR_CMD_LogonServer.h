@@ -1256,11 +1256,18 @@ struct STR_CMD_LC_ROOM_STATE
 #pragma endregion
 
 #pragma region MDM_SHOP 商城道具
-//查询商城物品打折情况
-struct STR_SUB_CL_SHOP_QUERY
+//商城购买
+struct STR_SUB_CL_SHOP_BUY
 {
 	DWORD dwGoodsID;							//物品ID
+	DWORD dwGoodsNum;                           //物品数量
 	BYTE byTreasureType;						//财富类型
+};
+
+//商城购买返回
+struct STR_CMD_LC_SHOP_BUY_RESULT
+{
+	BYTE  byResult;        //返回结果 0成功， 其他失败
 };
 
 //背包物品查询 返回

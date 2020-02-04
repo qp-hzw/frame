@@ -363,8 +363,7 @@ bool CHandleFromGate::On_SUB_CG_User_InviteUser(VOID * pData, WORD wDataSize, DW
 	CMD_GR_UserInviteReq * pUserInviteReq=(CMD_GR_UserInviteReq *)pData;
 
 	//获取用户
-	WORD wBindIndex = LOWORD(dwSocketID);
-	CPlayer * pIServerUserItem=GetBindUserItem(wBindIndex);
+	CPlayer * pIServerUserItem= CPlayerManager::FindPlayerBySocketID (dwSocketID);
 	if (pIServerUserItem==NULL) return false;
 
 	//效验状态
@@ -398,8 +397,7 @@ bool CHandleFromGate::On_SUB_CG_User_KickUser(VOID * pData, WORD wDataSize, DWOR
 	CMD_GR_KickUser * pKickUser=(CMD_GR_KickUser *)pData;
 
 	//获取用户
-	WORD wBindIndex=LOWORD(dwSocketID);
-	CPlayer * pIServerUserItem=GetBindUserItem(wBindIndex);
+	CPlayer * pIServerUserItem=CPlayerManager::FindPlayerBySocketID (dwSocketID);
 
 	//目标用户
 	CPlayer * pITargetUserItem = CPlayerManager::FindPlayerByID(pKickUser->dwTargetUserID);
@@ -912,8 +910,7 @@ bool CHandleFromGate::On_SUB_User_JoinFkRoom(VOID * pData, WORD wDataSize, DWORD
 bool CHandleFromGate::On_SUB_CG_USER_JOIN_TABLE_NO_PASS(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
 	//校验用户
-	WORD wBindIndex = LOWORD(dwSocketID);
-	CPlayer *pIServerUserItem = GetBindUserItem(wBindIndex);
+	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerBySocketID (dwSocketID);
 	if (NULL == pIServerUserItem) return false;
 
 	//校验数据包
@@ -934,8 +931,7 @@ bool CHandleFromGate::On_SUB_CG_USER_JOIN_TABLE_NO_PASS(VOID * pData, WORD wData
 bool CHandleFromGate::On_CMD_GC_USER_JOIN_TABLE_NO_PASS( DWORD dwSocketID, VOID * pData, WORD wDataSize)
 {
 	/* 1. 校验用户 */
-	WORD wBindIndex = LOWORD(dwSocketID);
-	CPlayer *pIServerUserItem = GetBindUserItem(wBindIndex);
+	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerBySocketID (dwSocketID);
 	if (NULL == pIServerUserItem) return false;
 
 	/* 2. 校验数据包 */
@@ -1089,8 +1085,7 @@ bool CHandleFromGate::On_CMD_GC_User_JoinGroupRoom(DWORD dwSocketID, VOID * pDat
 		return false;
 
 	//获取用户
-	WORD wBindIndex = LOWORD(dwSocketID);
-	CPlayer *pIServerUserItem = GetBindUserItem(wBindIndex);
+	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerBySocketID (dwSocketID);
 	if ( NULL == pIServerUserItem )
 	{
 		return false;
@@ -1207,49 +1202,6 @@ bool CHandleFromGate::SendRequestFailure(CPlayer * pIServerUserItem, LPCTSTR psz
 	return true;
 }
 
-//绑定用户
-CPlayer * CHandleFromGate::GetBindUserItem(WORD wBindIndex)
-{
-	CPlayer *pPlayer = NULL;
-
-	//获取用户
-	pPlayer = CPlayerManager::FindPlayerByEnum(wBindIndex);
-	if (pPlayer == NULL)
-	{
-		return NULL;
-	}
-
-	return pPlayer;
-}
-
-//群发数据
-bool CHandleFromGate::SendDataBatchToMobileUser(WORD wCmdTable, WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize)
-{
-	//枚举用户
-	WORD wEnumIndex=0;
-	while(wEnumIndex<CPlayerManager::GetPlayerCount())
-	{
-		//过滤用户
-		CPlayer *pIServerUserItem=CPlayerManager::FindPlayerByEnum(wEnumIndex++);
-		if(pIServerUserItem==NULL) continue;
-
-
-		//定义变量
-		DWORD wTagerTableID = pIServerUserItem->GetTableID();
-
-		//状态过滤
-		if(pIServerUserItem->GetUserStatus() >= US_SIT)
-		{
-			if(wTagerTableID != wCmdTable)continue;
-		}
-
-
-		//发送消息
-		g_GameCtrl->SendData(pIServerUserItem,wMainCmdID,wSubCmdID,pData,wDataSize);
-	}
-
-	return true;
-}
 
 //////////////////////////////////////////////////////////////////////////////////
 //添加替他人开房
@@ -1438,8 +1390,7 @@ void CHandleFromGate::LeaveTable(DWORD dwTableID, DWORD dwUserID)
 bool CHandleFromGate::On_CMD_CG_CLUB_CREATE_TABLE( DWORD dwSocketID, VOID * pData, WORD wDataSize )
 {
 	//获取用户
-	WORD wBindIndex = LOWORD(dwSocketID);
-	CPlayer *pIServerUserItem = GetBindUserItem(wBindIndex);
+	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerBySocketID (dwSocketID);
 	//用户校验
 	if (pIServerUserItem==NULL) return false;
 

@@ -17,8 +17,6 @@ private:
 	static bool OnTCPNetworkMainLogon(WORD wSubCmdID, VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//用户服务
 	static bool OnTCPNetworkMainService(WORD wSubCmdID, VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//礼物道具
-	static bool OnTCPNetworkMainOther(WORD wSubCmdID, VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//商城道具
 	static bool On_MDM_SHOP(WORD wSubCmdID, VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//牌友圈
@@ -54,11 +52,6 @@ private:
 #pragma endregion
 
 #pragma region MAIN_SERVICE
-	//玩家反馈
-	static bool On_SUB_CL_Service_UserFeedBack(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//玩家反馈返回
-	static bool On_CMD_LC_Service_UserFeedBack(DWORD dwContextID, VOID * pData);
-
 	//刷新用户信息
 	static bool On_SUB_CL_Service_RefreshUserInfo(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//刷新用户信息返回
@@ -140,11 +133,6 @@ private:
 	//小局录像回放 返回
 	static bool On_CMD_LC_Service_XJRecordPlayback( DWORD dwContextID, VOID * pData, WORD wDataSize );
 
-	//客服消息
-	static bool On_SUB_CL_SERVICE_CUSTOMER_MESSEGE(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//客服消息 返回
-	static bool On_CMD_LC_SERVICE_CUSTOMER_MESSEGE( DWORD dwContextID, VOID * pData, WORD wDataSize );
-
 	//请求金币大厅信息
 	static bool On_SUB_CL_SERVICE_GOLD_INFO(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//请求金币大厅信息 返回
@@ -163,9 +151,6 @@ private:
 	static bool On_SUB_CL_Service_ModifyPersonalInfo(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//修改个人资料返回
 	static bool On_CMD_LC_Service_ModifyPersonalInfo( DWORD dwContextID, VOID * pData, WORD wDataSize );
-
-	//查询（变更）金币房卡钻石返回（涉及到用户金币等改变的，都会返回这个消息，让客户端刷新用户金币信息）
-	static bool On_CMD_LC_Service_QueryScoreInfo(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
 	//公共操作结果返回	
 	static bool On_CMD_LC_CommonOperateResult( DWORD dwContextID, VOID * pData, WORD wDataSize );
@@ -363,11 +348,14 @@ private:
 #pragma endregion
 
 #pragma region MDM_SHOP 道具商城
-	//查询商城
-	static bool On_SUB_CL_SHOP_QUERY(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+	//商城购买
+	static bool On_SUB_CL_SHOP_BUY(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 
 	//背包物品查询
 	static bool On_SUB_CL_BAG_QUERY(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+	//背包物品查询
+	static bool On_DBO_CL_BAG_RESULT( DWORD dwContextID, VOID * pData, WORD wDataSize );
+	
 #pragma endregion
 
 };

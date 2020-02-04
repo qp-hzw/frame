@@ -88,16 +88,6 @@ protected:
 protected:
 	//请求失败
 	static bool SendRequestFailure(CPlayer * pCPlayer, LPCTSTR pszDescribe, LONG lErrorCode);
-
-	//辅助函数
-public:
-	//绑定用户
-	static CPlayer * GetBindUserItem(WORD wBindIndex);
-
-	//辅助函数
-protected:
-	//群发数据
-	static bool SendDataBatchToMobileUser(WORD wCmdTable, WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize);
 #pragma endregion
 
 	#pragma region  创建房间 && 创建桌子 && 加入桌子

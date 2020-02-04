@@ -109,6 +109,10 @@ bool CHandleFromCenter::OnTCPSocketMainTransfer(WORD wSubCmdID, VOID * pData, WO
 			cmd.dwOffLineGameID  = pCPO->dwGameID;
 			g_GameCtrl->SendData(player->GetSocketID(), MDM_LOGON, CMD_LC_LOGON_ACCOUNTS, &cmd, sizeof(cmd));
 
+
+			//查询该玩家背包, 关注等信息
+			g_GameCtrl->PostDataBaseRequest(DBR_CL_BAG_QUERY, 0, &(pCPO->dwUserID),sizeof(DWORD));
+
 			return true;
 		}
 	}

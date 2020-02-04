@@ -1,7 +1,7 @@
 #include "PlayerManager.h"
 #include "Player.h"
 
-std::vector<CPlayer*> CPlayerManager::s_PlayerArray;
+std::list<CPlayer*> CPlayerManager::s_PlayerArray;
 std::map<DWORD, DWORD> CPlayerManager::s_OfflinePlayer;
 
 //Ôö
@@ -80,12 +80,6 @@ bool CPlayerManager::DeleteAllPlayer()
 	return true;
 }
 
-//²é
-CPlayer * CPlayerManager::FindPlayerByEnum(WORD wEnumIndex)
-{
-	if (wEnumIndex >= s_PlayerArray.size()) return NULL;
-	return s_PlayerArray[wEnumIndex];
-}
 
 //²é
 CPlayer * CPlayerManager::FindPlayerByID(DWORD dwUserID)

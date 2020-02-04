@@ -11,7 +11,6 @@ class CDataBaseEngineSink : public IDataBaseEngineSink
 protected:
 	IDataBase					*m_AccountsDB;					//用户数据库
 	IDataBase					*m_TreasureDB;					//游戏币数据库
-	IDataBase					*m_PlatformDB;					//平台数据库
 
 	//函数定义
 public:
@@ -60,11 +59,6 @@ protected:
 #pragma region MDM_SERVICE 用户服务
 	/* **************************【MAIN:3    MDM_SERVICE    服务】*************************************/
 protected:
-	//玩家反馈
-	bool On_DBR_Service_UserFeedback(DWORD dwContextID, VOID * pData, WORD wDataSize);
-	//玩家反馈返回
-	bool On_DBO_Service_UserFeedback(DWORD dwContextID, DWORD dwResultCode, LPCTSTR pszErrorString);
-
 	//刷新用户信息
 	bool On_DBR_Service_RefreshUserInfo(DWORD dwContextID, VOID * pData, WORD wDataSize);
 	//刷新用户信息返回
@@ -122,22 +116,11 @@ protected:
 	//小局录像回放
 	bool On_DBR_CL_Service_XJRecordPlayback(DWORD dwContextID, void * pData, WORD wDataSize);
 
-	//客服消息
-	bool On_DBR_CL_SERVICE_CUSTOMER_MESSEGE(DWORD dwContextID, void * pData, WORD wDataSize);
-	
-	//请求金币大厅信息
-	bool On_DBR_CL_SERVICE_GOLD_INFO(DWORD dwContextID, void * pData, WORD wDataSize);
-	
 	//修改个人资料
 	bool On_DBR_Service_ModifyPersonalInfo(DWORD dwContextID, void * pData, WORD wDataSize);
 	//修改个人资料返回
 	bool On_DBO_Service_ModifyPersonalInfo(DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString);
 
-	//查询并更新用户金币房卡（只要涉及金币房卡等改变的消息都要用到这个函数，暂时放在这里面）
-	bool On_DBR_QueryScoreInfo(DWORD dwContextID, VOID * pData, WORD wDataSize);
-	//查询金币房卡返回（牌友圈 + 赠送道具时调用）
-	VOID On_DBO_QueryScoreInfo(DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString, bool bMobileClient);
-	
 #pragma endregion
 
 #pragma region MDM_GIFT 礼物道具
@@ -271,6 +254,8 @@ protected:
 
 #pragma endregion
 
+	//背包查询
+	bool On_DBR_Bag_Query(DWORD dwContextID, VOID * pData, WORD wDataSize);
 };
 
 // byte数组转为 string  TODONOW 暂时放在这里处理
@@ -279,6 +264,9 @@ const CString toHexString(const byte * input, const int datasize);
 // string 转为byte数组  TODONOW 暂时放在这里处理
 int StrToBin(TCHAR* inWord, BYTE* OutBin, int source_len_begin, int source_len_end);
 
+
+extern IDataBase         *g_AccountsDB;                     
+extern IDataBase		 *g_TreasureDB;
 //////////////////////////////////////////////////////////////////////////////////
 
 #endif
