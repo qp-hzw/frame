@@ -4,6 +4,9 @@
 #include "Stdafx.h"
 #include "DataBasePacket.h"
 
+extern IDataBase         *g_AccountsDB;                     
+extern IDataBase		 *g_TreasureDB;
+
 //数据库类
 class CDataBaseEngineSink : public IDataBaseEngineSink
 {
@@ -264,9 +267,6 @@ const CString toHexString(const byte * input, const int datasize);
 // string 转为byte数组  TODONOW 暂时放在这里处理
 int StrToBin(TCHAR* inWord, BYTE* OutBin, int source_len_begin, int source_len_end);
 
-
-extern IDataBase         *g_AccountsDB;                     
-extern IDataBase		 *g_TreasureDB;
 //////////////////////////////////////////////////////////////////////////////////
 
 #endif

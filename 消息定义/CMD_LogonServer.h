@@ -33,6 +33,8 @@
 ** *********************************************************************************/
 #define MDM_LOGON					1									//主消息
 
+#define SUB_CL_COMMON_ERROR		    0									//通用错误 
+
 #define SUB_CL_LOGON_ACCOUNTS		1									//帐号登录
 #define SUB_CL_LOGON_REGISTER	    2									//帐号注册（返回的是登录成功）
 #define SUB_CL_LOGON_PLATFORM		3									//平台登陆（第三方登录）
@@ -41,6 +43,8 @@
 #define CMD_LC_LOGON_PLATFORM       103                                 //平台登陆返回
 #define CMD_LC_LOGON_REPEAT_LOGON	104									//重复登录
 #define CMD_LC_LOGON_LOGON_REWARD   105                                 //登录奖励（老玩家回归 + 节日奖励）
+
+
 #pragma endregion
 
 #pragma region MDM_SERVICE 用户服务
@@ -54,19 +58,23 @@
 #define MDM_SERVICE								3							//服务
 
 //【子消息号】
-#define SUB_CL_SERVICE_REFRESH_USER_INFO		2							//刷新用户信息
-#define CMD_CL_SERVICE_REFRESH_USER_INFO		102							//刷新用户信息返回
+#define SUB_CL_SERVICE_FLOWER					1							//粉丝, 关注
+#define CMD_LC_SERVICE_FLOWER					101							//粉丝, 关注 返回
 
-#define SUB_CL_SERVICE_QUERY_ROOM_LIST			3							//查询开房信息列表
-#define CMD_LC_SERVICE_QUERY_ROOM_LIST			103							//开房信息返回
+#define SUB_CL_SERVICE_FLOWER_QUERY				2							//查看关注
+#define CMD_LC_SERVICE_FLOWER_QUERY				102							//查看关注 返回
+#define CMD_LC_SERVICE_FLOWER_QUERY_FINISH		202							//查看关注 返回
+
+#define SUB_CL_SERVICE_FLOWING_QUERY			3							//查看粉丝
+#define CMD_LC_SERVICE_FLOWING_QUERY			103							//查看粉丝 返回
+#define CMD_LC_SERVICE_FLOWING_QUERY_FINISH		203							//查看关注 返回
+
+#define SUB_CL_SERVICE_REFRESH_USER_INFO		5							//刷新用户信息
+#define CMD_CL_SERVICE_REFRESH_USER_INFO		105							//刷新用户信息返回
 
 #define SUB_CL_SERVICE_MODIFY_PERSONAL_INFO		4							//修改个人资料（所有用户能修改的资料都在这里处理）
 #define CMD_LC_SERVICE_MODIFY_PERSONAL_INFO		104							//修改个人资料返回
 
-/* START 老大厅的排行榜, 之后可以删除 */
-#define SUB_CL_SERVICE_GET_RICH_LIST			5							//获取富豪榜
-#define CMD_LC_SERVICE_GET_RICH_LIST			105							//富豪榜返回
-/* END */
 
 /* START 老大厅的战绩, 之后可以删除掉 */
 #define SUB_CL_SERVICE_GET_DJ_RECORD_LIST		6							//获取大局录像列表
@@ -118,9 +126,6 @@
 
 #define SUB_CL_SERVICE_XJ_RECORD_PLAYBACK		20							//小局录像回放
 #define CMD_LC_SERVICE_XJ_RECORD_PLAYBACK		120							//小局录像回放 返回
-
-#define CMD_LC_SERVICE_CUSTOMER_MESSEGE			121							//客服提示消息 返回
-
 #pragma endregion
 
 #pragma region MDM_CLUB  牌友圈

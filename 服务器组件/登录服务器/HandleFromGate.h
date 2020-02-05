@@ -44,31 +44,22 @@ private:
 	//重复登录踢出
 	static bool On_CMD_LC_Logon_RepeatLogon(DWORD UserID, DWORD dwContextID);
 
-	//升级提示（版本检测）
-	static bool On_CMD_LC_Logon_UpdateNotify(DWORD dwVersionCheck, DWORD dwSocketID);
-
 	//登录奖励
 	static bool On_CMD_LC_Logon_Logon_Reward(DWORD dwContextID, SYSTEMTIME LasLogonDate);
 #pragma endregion
 
 #pragma region MAIN_SERVICE
+	//粉丝关注
+	static bool On_SUB_CL_SERVICE_FLOWER(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+	//查看关注
+	static bool On_SUB_CL_SERVICE_FLOWER_QUERY(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+	//查看粉丝
+	static bool On_SUB_CL_SERVICE_FLOWING_QUERY(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+
 	//刷新用户信息
 	static bool On_SUB_CL_Service_RefreshUserInfo(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//刷新用户信息返回
 	static bool On_CMD_LC_Service_RefreshUserInfo( DWORD dwContextID, VOID * pData);
-
-	//查询开房信息列表
-	static bool On_SUB_CL_Service_QueryRoomList(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//查询开房信息列表返回
-	static bool On_CMD_LC_Service_QueryRoomList(DWORD dwContextID, VOID * pData, WORD wDataSize);
-
-	//查询已开房（结束）信息列表返回
-	static bool On_CMD_LC_Service_QueryOpenedRoomList(DWORD dwContextID, VOID * pData, WORD wDataSize);
-
-	//获取富豪榜
-	static bool On_SUB_CL_Service_GetRichList(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//获取富豪榜返回
-	static bool On_CMD_LC_Service_GetRichList( DWORD dwContextID, VOID * pData, WORD wDataSize );
 
 	//获取用户录像列表
 	static bool On_SUB_CL_Service_GetUserRecordList(VOID * pData, WORD wDataSize, DWORD dwSocketID);

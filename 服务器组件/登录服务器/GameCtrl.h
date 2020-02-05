@@ -64,7 +64,8 @@ public:
 	bool SendData(DWORD dwSocketID, WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize);
 	//批量发送
 	bool SendDataBatch(WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize);
-
+	//发送通用错误提示
+	bool SendDataMsg(DWORD dwSocketID, string msg);
 
 	/***********************           消息发送  -> DB                ***********************/
 public:

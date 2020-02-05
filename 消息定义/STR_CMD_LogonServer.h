@@ -24,6 +24,11 @@ struct STR_CMD_LC_LIST_ROOM_ONLINE
 	DWORD	dwOnlineCount;					//在线
 };
 
+//通用错误提示
+struct STR_SUB_CL_COMMON_ERROR
+{
+	TCHAR szMsg[20];            //通用错误提示
+};
 #pragma endregion
 
 #pragma region MDM_LOGON 登录模块
@@ -94,6 +99,31 @@ struct STR_CMD_LC_LOGON_LOGON_REWARD
 #pragma endregion
 
 #pragma region MDM_SERVICE 用户命令
+//关注, 粉丝 
+struct STR_SUB_CL_SERVICE_FLOWER
+{
+	DWORD   dwTargetID;  //查看对象的useID
+};
+
+//关注, 粉丝 
+struct STR_CMD_LC_SERVICE_FLOWER_P
+{
+	DWORD							dwUserID;							//用户ID
+	TCHAR							szNickName[LEN_NICKNAME];			//用户昵称
+	BYTE							cbGender;							//用户性别
+	TCHAR							szHeadUrl[LEN_HEAD_URL];			//头像地址
+	DWORD                           dwLoveValue;                        //爱心值
+};
+//关注, 粉丝 
+struct STR_CMD_LC_SERVICE_FLOWER
+{
+	DWORD   dwFolwerNum;  //我的关注
+	DWORD   dwFolwingNum; //我的粉丝
+	BYTE    cbIsGuanzhu;  //1显示关注按钮; 其他不显示关注按钮
+
+	STR_CMD_LC_SERVICE_FLOWER_P folwingInfo[5];
+};
+
 
 //玩家反馈
 struct STR_SUB_CL_SERVICE_FEEDBACK

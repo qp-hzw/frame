@@ -54,14 +54,6 @@ bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwScoketID, VOID * p
 		{
 			return On_CMD_LC_Service_RefreshUserInfo(dwScoketID, pData);
 		}
-	case DBO_CL_SERVICE_QUERY_ROOM_LIST:		//查询开房列表返回
-		{
-			return On_CMD_LC_Service_QueryRoomList(dwScoketID,pData,wDataSize);
-		}
-	case DBO_CL_SERVICE_GET_RICH_LIST:			//获取富豪榜返回
-		{
-			return On_CMD_LC_Service_GetRichList(dwScoketID,pData,wDataSize);
-		}
 	case DBO_CL_SERVICE_GET_USER_RECORD_LIST:	//获取用户录像列表返回（大局）
 		{
 			return On_CMD_LC_Service_GetUserRecordList(dwScoketID,pData,wDataSize);
@@ -366,21 +358,25 @@ bool CHandleFromGate::OnTCPNetworkMainService(WORD wSubCmdID, VOID * pData, WORD
 {
 	switch (wSubCmdID)
 	{
+	case SUB_CL_SERVICE_FLOWER: //关注， 粉丝
+		{
+			return On_SUB_CL_SERVICE_FLOWER(pData, wDataSize, dwSocketID);
+		}
+	case SUB_CL_SERVICE_FLOWER_QUERY:  //查看关注
+		{
+			return On_SUB_CL_SERVICE_FLOWER_QUERY(pData, wDataSize, dwSocketID);
+		}
+	case SUB_CL_SERVICE_FLOWING_QUERY: //查看粉丝
+		{
+			return On_SUB_CL_SERVICE_FLOWING_QUERY(pData, wDataSize, dwSocketID);
+		}
 	case SUB_CL_SERVICE_REFRESH_USER_INFO:		//刷新用户信息
 		{
 			return On_SUB_CL_Service_RefreshUserInfo(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CL_SERVICE_QUERY_ROOM_LIST:		//查询开房信息列表
-		{
-			return On_SUB_CL_Service_QueryRoomList(pData, wDataSize, dwSocketID);
-		}
 	case SUB_CL_SERVICE_MODIFY_PERSONAL_INFO:	//修改个人资料
 		{
 			return On_SUB_CL_Service_ModifyPersonalInfo(pData, wDataSize, dwSocketID);
-		}
-	case SUB_CL_SERVICE_GET_RICH_LIST:			//获取富豪榜
-		{
-			return On_SUB_CL_Service_GetRichList(pData, wDataSize, dwSocketID);
 		}
 	case SUB_CL_SERVICE_GET_DJ_RECORD_LIST:	//获取用户录像列表
 		{
@@ -782,34 +778,6 @@ bool CHandleFromGate::On_CMD_LC_Logon_RepeatLogon(DWORD UserID, DWORD dwScoketID
 	return bIsRepeatLogon;
 }
 
-//升级提示（版本校验）
-bool CHandleFromGate::On_CMD_LC_Logon_UpdateNotify(DWORD dwVersionCheck, DWORD dwSocketID)
-{
-	/*
-	DWORD serverFrameVersion = Get_Framework_Version(PLATFORM_VERSION);  //服务端 frame 版本
-	DWORD clientFrameVersion = dwVersionCheck; //client  Hall 版本
-
-	byte ret = Compate_Hall_LogonServer(clientFrameVersion, serverFrameVersion);
-	CLog::Log(log_debug, "版本校验结果:%d  服务器版本:%ld  客户端版本:%ld", ret, serverFrameVersion, clientFrameVersion);
-
-	//版本匹配, 则直接退出, 不需要发送消息
-	if(0 == ret )
-	{
-		return false;
-	}
-
-	//构造数据
-	STR_CMD_LC_LOGON_UPDATE_NOTIFY UpdateNotify;
-	ZeroMemory(&UpdateNotify,sizeof(UpdateNotify));
-	UpdateNotify.cbUpdateNotify = ret;
-	UpdateNotify.dwCurrentServerVersion = serverFrameVersion;
-	//发送消息
-	g_GameCtrl->SendData(dwSocketID, MDM_LOGON, CMD_LC_LOGON_UPDATE_NOTIFY, &UpdateNotify, sizeof(UpdateNotify));
-	*/
-
-	return true;
-}
-
 //登录奖励
 bool CHandleFromGate::On_CMD_LC_Logon_Logon_Reward(DWORD dwScoketID, SYSTEMTIME LasLogonDate)
 { 
@@ -856,6 +824,153 @@ bool CHandleFromGate::On_CMD_LC_Logon_Logon_Reward(DWORD dwScoketID, SYSTEMTIME 
 
 #pragma region MDM_SERVICE 用户服务
 /***************************************** 【服务处理函数-主消息3】 *******************************************/
+//粉丝关注
+ bool CHandleFromGate::On_SUB_CL_SERVICE_FLOWER(VOID * pData, WORD wDataSize, DWORD dwSocketID)
+ {
+	 if ( sizeof(STR_SUB_CL_SERVICE_FLOWER) != wDataSize) return true;
+	 CPlayer * player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	 if(player == NULL) return false;
+	 
+	 STR_SUB_CL_SERVICE_FLOWER* sub = (STR_SUB_CL_SERVICE_FLOWER*) pData;
+
+	 g_AccountsDB->ResetParameter();
+	 g_AccountsDB->AddParameter(TEXT("@dwTargetID"), sub->dwTargetID); 
+	 g_AccountsDB->AddParameter(TEXT("@dwMyID"), player->GetUserID()); 
+
+	 //执行查询
+	 LONG lResultCode = g_AccountsDB->ExecuteProcess(TEXT("GSP_CL_FLOWER_ALL"),true);
+	 if(lResultCode == DB_SUCCESS)
+	 {
+		 STR_CMD_LC_SERVICE_FLOWER cmd;
+		 //我的关注
+		 cmd.dwFolwerNum = g_AccountsDB->GetValue_DWORD(TEXT("FlowerNum"));
+		 //我的粉丝
+		 cmd.dwFolwingNum = g_AccountsDB->GetValue_DWORD(TEXT("FlowingNum"));
+		  //我的粉丝
+		 BYTE bGuanzhu	= g_AccountsDB->GetValue_BYTE(TEXT("cbIsGuanzhu")); //0表示没有关注
+		 if ( (bGuanzhu == 0 ) && (sub->dwTargetID != player->GetUserID())) //没有关注, 并且不是自身
+		 {
+			 cmd.cbIsGuanzhu = 1;
+		 }
+		 else
+		 {
+			 cmd.cbIsGuanzhu = 0;
+		 }
+
+		 int i = 0;
+		 while(g_AccountsDB->IsRecordsetEnd() == false)
+		 {
+			 STR_CMD_LC_SERVICE_FLOWER_P cmd_p;
+			 cmd_p.dwUserID = g_AccountsDB->GetValue_DWORD(TEXT("UserID"));
+			 g_AccountsDB->GetValue_String(TEXT("NickName"),cmd_p.szNickName,CountArray(cmd_p.szNickName));
+			 cmd_p.cbGender = g_AccountsDB->GetValue_BYTE(TEXT("Gender"));
+			 g_AccountsDB->GetValue_String(TEXT("HeadUrl"),cmd_p.szHeadUrl,CountArray(cmd_p.szHeadUrl));
+			 cmd_p.dwLoveValue = g_AccountsDB->GetValue_DWORD(TEXT("LoveValue"));
+
+			 memcpy(&cmd.folwingInfo[i], &cmd_p, sizeof(cmd_p));
+			 i++;
+		 }
+
+		 g_GameCtrl->SendData(dwSocketID, MDM_SERVICE, CMD_LC_SERVICE_FLOWER, &cmd, sizeof(cmd));
+	 }
+	 else
+	 {
+		 g_GameCtrl->SendDataMsg(dwSocketID, "查询失败");
+	 }
+
+	 return true;
+ }
+//查看我的关注
+bool CHandleFromGate::On_SUB_CL_SERVICE_FLOWER_QUERY(VOID * pData, WORD wDataSize, DWORD dwSocketID)
+{
+	 CPlayer * player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	 if(player == NULL) return false;
+
+	 g_AccountsDB->ResetParameter();
+	 g_AccountsDB->AddParameter(TEXT("@dwUserID"), player->GetUserID()); 
+
+	 //执行查询
+	 LONG lResultCode = g_AccountsDB->ExecuteProcess(TEXT("GSP_CL_FLOWER_QUERY"),true);
+	 if(lResultCode == DB_SUCCESS)
+	 {
+		 WORD wPacketSize=0;
+		 BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
+		 STR_CMD_LC_SERVICE_FLOWER_P * pCMD=NULL;
+		 while(g_AccountsDB->IsRecordsetEnd() == false)
+		 {
+			 if ((wPacketSize+sizeof(STR_CMD_LC_SERVICE_FLOWER_P))>sizeof(cbBuffer))
+			 {
+				 g_GameCtrl->SendData(dwSocketID, MDM_SERVICE, CMD_LC_SERVICE_FLOWER_QUERY, cbBuffer, wPacketSize);
+				 wPacketSize=0;
+			 }
+
+			 STR_CMD_LC_SERVICE_FLOWER_P cmd_p;
+			 cmd_p.dwUserID = g_AccountsDB->GetValue_DWORD(TEXT("UserID"));
+			 g_AccountsDB->GetValue_String(TEXT("NickName"),cmd_p.szNickName,CountArray(cmd_p.szNickName));
+			 cmd_p.cbGender = g_AccountsDB->GetValue_BYTE(TEXT("Gender"));
+			 g_AccountsDB->GetValue_String(TEXT("HeadUrl"),cmd_p.szHeadUrl,CountArray(cmd_p.szHeadUrl));
+			 cmd_p.dwLoveValue = g_AccountsDB->GetValue_DWORD(TEXT("LoveValue"));
+
+			 pCMD=(STR_CMD_LC_SERVICE_FLOWER_P *)(cbBuffer+wPacketSize);
+			 memcpy(pCMD, &cmd_p, sizeof(cmd_p));
+
+			 wPacketSize+=sizeof(STR_CMD_LC_SERVICE_FLOWER_P);
+		 }
+
+		 if (wPacketSize>0) g_GameCtrl->SendData(dwSocketID, MDM_SERVICE, CMD_LC_SERVICE_FLOWER_QUERY, cbBuffer, wPacketSize);
+		 g_GameCtrl->SendData(dwSocketID, MDM_SERVICE, CMD_LC_SERVICE_FLOWER_QUERY_FINISH, NULL, 0);
+	 }
+	 else
+	 {
+		 g_GameCtrl->SendDataMsg(dwSocketID, "查询失败");
+	 }
+}
+//查看我的粉丝
+bool CHandleFromGate::On_SUB_CL_SERVICE_FLOWING_QUERY(VOID * pData, WORD wDataSize, DWORD dwSocketID)
+{
+		 CPlayer * player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	 if(player == NULL) return false;
+
+	 g_AccountsDB->ResetParameter();
+	 g_AccountsDB->AddParameter(TEXT("@dwUserID"), player->GetUserID()); 
+
+	 //执行查询
+	 LONG lResultCode = g_AccountsDB->ExecuteProcess(TEXT("GSP_CL_FLOWING_QUERY"),true);
+	 if(lResultCode == DB_SUCCESS)
+	 {
+		 WORD wPacketSize=0;
+		 BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
+		 STR_CMD_LC_SERVICE_FLOWER_P * pCMD=NULL;
+		 while(g_AccountsDB->IsRecordsetEnd() == false)
+		 {
+			 if ((wPacketSize+sizeof(STR_CMD_LC_SERVICE_FLOWER_P))>sizeof(cbBuffer))
+			 {
+				 g_GameCtrl->SendData(dwSocketID, MDM_SERVICE, CMD_LC_SERVICE_FLOWING_QUERY, cbBuffer, wPacketSize);
+				 wPacketSize=0;
+			 }
+
+			 STR_CMD_LC_SERVICE_FLOWER_P cmd_p;
+			 cmd_p.dwUserID = g_AccountsDB->GetValue_DWORD(TEXT("UserID"));
+			 g_AccountsDB->GetValue_String(TEXT("NickName"),cmd_p.szNickName,CountArray(cmd_p.szNickName));
+			 cmd_p.cbGender = g_AccountsDB->GetValue_BYTE(TEXT("Gender"));
+			 g_AccountsDB->GetValue_String(TEXT("HeadUrl"),cmd_p.szHeadUrl,CountArray(cmd_p.szHeadUrl));
+			 cmd_p.dwLoveValue = g_AccountsDB->GetValue_DWORD(TEXT("LoveValue"));
+
+			 pCMD=(STR_CMD_LC_SERVICE_FLOWER_P *)(cbBuffer+wPacketSize);
+			 memcpy(pCMD, &cmd_p, sizeof(cmd_p));
+
+			 wPacketSize+=sizeof(STR_CMD_LC_SERVICE_FLOWER_P);
+		 }
+
+		 if (wPacketSize>0) g_GameCtrl->SendData(dwSocketID, MDM_SERVICE, CMD_LC_SERVICE_FLOWING_QUERY, cbBuffer, wPacketSize);
+		 g_GameCtrl->SendData(dwSocketID, MDM_SERVICE, CMD_LC_SERVICE_FLOWING_QUERY_FINISH, NULL, 0);
+	 }
+	 else
+	 {
+		 g_GameCtrl->SendDataMsg(dwSocketID, "查询失败");
+	 }
+}
+
 //刷新用户信息
 bool CHandleFromGate::On_SUB_CL_Service_RefreshUserInfo(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
@@ -888,74 +1003,6 @@ bool CHandleFromGate::On_CMD_LC_Service_RefreshUserInfo( DWORD dwScoketID, VOID 
 	//发送数据
 	WORD wDataSize = sizeof(STR_CMD_LC_SERVICE_REFRESH_INFO);
 	g_GameCtrl->SendData(dwScoketID, MDM_SERVICE, CMD_CL_SERVICE_REFRESH_USER_INFO, &UserInfo, wDataSize);
-
-	return true;
-}
-
-//查询开房信息列表
-bool CHandleFromGate::On_SUB_CL_Service_QueryRoomList(VOID * pData, WORD wDataSize, DWORD dwSocketID)
-{
-	ASSERT( wDataSize == sizeof(STR_SUB_CL_SERVICE_QUERY_ROOMLIST));
-	if(wDataSize != sizeof(STR_SUB_CL_SERVICE_QUERY_ROOMLIST)) return false;
-
-	STR_SUB_CL_SERVICE_QUERY_ROOMLIST* pTableInfoList = (STR_SUB_CL_SERVICE_QUERY_ROOMLIST*)pData;
-
-	
-	STR_DBR_CL_SERCIVR_QUERY_ROOMLIST GetTableInfoList;
-	GetTableInfoList.dwUserID = pTableInfoList->dwUserID;
-
-	//查询开房列表
-	g_GameCtrl->PostDataBaseRequest(DBR_CL_SERVICE_QUERY_ROOM_LIST,dwSocketID,&GetTableInfoList,sizeof(STR_DBR_CL_SERCIVR_QUERY_ROOMLIST));
-
-	return true;
-}
-
-//查询开房列表返回
-bool CHandleFromGate::On_CMD_LC_Service_QueryRoomList(DWORD dwScoketID, VOID * pData, WORD wDataSize)
-{
-	//参数校验
-	ASSERT(wDataSize==sizeof(STR_DBO_CL_SERCIVR_QUERY_ROOMLIST));
-	STR_DBO_CL_SERCIVR_QUERY_ROOMLIST *pRecord = (STR_DBO_CL_SERCIVR_QUERY_ROOMLIST*)pData;
-
-	STR_CMD_LC_SERVICE_QUERY_ROOMLIST TableInfo;
-	ZeroMemory(&TableInfo,sizeof(STR_CMD_LC_SERVICE_QUERY_ROOMLIST));
-
-	memcpy(&TableInfo, pRecord, sizeof(STR_CMD_LC_SERVICE_QUERY_ROOMLIST));
-
-	g_GameCtrl->SendData(dwScoketID, MDM_SERVICE, CMD_LC_SERVICE_QUERY_ROOM_LIST, &TableInfo, sizeof(STR_CMD_LC_SERVICE_QUERY_ROOMLIST));
-
-	return true;
-}
-
-//获取富豪榜
-bool CHandleFromGate::On_SUB_CL_Service_GetRichList(VOID * pData, WORD wDataSize, DWORD dwSocketID)
-{
-	//校验
-	ASSERT( wDataSize == sizeof(STR_SUB_CL_SERVICE_GET_RICHLIST));
-	if( wDataSize != sizeof(STR_SUB_CL_SERVICE_GET_RICHLIST) ) 		
-	{
-		return false;
-	}
-	
-	return g_GameCtrl->PostDataBaseRequest(DBR_CL_SERVICE_GET_RICH_LIST, dwSocketID, pData, 0);
-}
-
-//获取富豪榜返回
-bool CHandleFromGate::On_CMD_LC_Service_GetRichList( DWORD dwScoketID, VOID * pData, WORD wDataSize )
-{
-	//参数校验
-	ASSERT(wDataSize==sizeof(STR_DBO_CL_SERCIVR_GET_RICHLIST));
-	if(wDataSize!=sizeof(STR_DBO_CL_SERCIVR_GET_RICHLIST))
-		return false;
-
-	STR_DBO_CL_SERCIVR_GET_RICHLIST *pLotteryResult = (STR_DBO_CL_SERCIVR_GET_RICHLIST*)pData;
-
-	STR_CMD_LC_SERVICE_GET_RICHLIST LotteryResult;
-	ZeroMemory(&LotteryResult,sizeof(STR_CMD_LC_SERVICE_GET_RICHLIST));
-
-	memcpy(&LotteryResult,pLotteryResult,sizeof(STR_DBO_CL_SERCIVR_GET_RICHLIST));		//修改bug，原来的sizeof里面不是这个结构体
-
-	g_GameCtrl->SendData(dwScoketID,MDM_SERVICE, CMD_LC_SERVICE_GET_RICH_LIST, &LotteryResult, sizeof(STR_CMD_LC_SERVICE_GET_RICHLIST));
 
 	return true;
 }

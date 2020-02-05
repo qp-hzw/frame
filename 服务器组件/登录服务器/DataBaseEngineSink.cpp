@@ -56,14 +56,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 		{
 			return On_DBR_Service_RefreshUserInfo(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_SERVICE_QUERY_ROOM_LIST:		//查询开房信息列表
-		{
-			return On_DBR_Service_QueryRoomList(dwContextID,pData,wDataSize);
-		}
-	case DBR_CL_SERVICE_GET_RICH_LIST:			//获取富豪榜
-		{
-			return On_DBR_Service_GetRichList(dwContextID,pData,wDataSize);
-		}
 	case DBR_CL_SERVICE_GET_USER_RECORD_LIST:	//获取用户戏录像列表
 		{
 			return On_DBR_Service_GetUserRecordList(dwContextID,pData,wDataSize);
