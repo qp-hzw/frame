@@ -2671,31 +2671,11 @@ bool CHandleFromGate::On_SUB_CL_BAG_QUERY(VOID * pData, WORD wDataSize, DWORD dw
 	CPlayer *player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
 	if(player == NULL) return true;
 
-	for(auto item : *(player->m_ArrPrp))
-	{
-		CLog::Log(log_debug, "item id :"); // ,  item.dwPropID);
-	}
-
-	if(player->m_ArrPrp->empty())
-	{
-		g_GameCtrl->SendData(dwSocketID, MDM_SHOP, CMD_LC_BAG_FINISH, NULL, 0);
-		return true;
-	}
-
-	/*
-	CLog::Log(log_debug, "player->m_ArrPrp size : "  + player->m_ArrPrp.size());
-	std::list<tagUserProperty> list_prop;
-
-	CLog::Log(log_debug, "list_prop size : "  + list_prop.size());
-
-
 	WORD wPacketSize=0;
 	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
 	STR_CMD_LC_BAG_RESULT * pCMD=NULL;
-	for(auto item : list_prop)
+	for(auto item : player->GetProps())
 	{
-		CLog::Log(log_debug, "item: "  + item.dwPropID);
-
 		if ((wPacketSize+sizeof(STR_CMD_LC_BAG_RESULT))>sizeof(cbBuffer))
 		{
 			g_GameCtrl->SendData(dwSocketID, MDM_SHOP, CMD_LC_BAG_RESULT, cbBuffer, wPacketSize);
@@ -2712,7 +2692,6 @@ bool CHandleFromGate::On_SUB_CL_BAG_QUERY(VOID * pData, WORD wDataSize, DWORD dw
 	if (wPacketSize>0) g_GameCtrl->SendData(dwSocketID, MDM_SHOP, CMD_LC_BAG_RESULT, cbBuffer, wPacketSize);
 
 	g_GameCtrl->SendData(dwSocketID, MDM_SHOP, CMD_LC_BAG_FINISH, NULL, 0);
-	*/
 	return true;
 }
 
