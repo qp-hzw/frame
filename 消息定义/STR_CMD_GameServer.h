@@ -360,6 +360,16 @@ struct STR_CMD_ROOM_RULE
 	tagTableRule common;			 //创建房间 frame通用房间规则
 	DWORD TableID;                   //房间号
 };
+
+//请求大厅房间信息 返回
+struct STR_CMD_GC_USER_GOLD_INFO
+{
+	BYTE bGoldMod;// 房间等级 1.初级 2.中级 3.高级 4.富豪
+
+	DWORD dwScore;  //底分
+	DWORD dwGold;  //入场金币
+};
+
 //////////////////////////////////////////////////////////////////////////////////
 
 //规则标志

@@ -72,6 +72,10 @@ protected:
 
 	//加入房间  不需要密码
 	static bool On_CMD_GC_USER_JOIN_TABLE_NO_PASS( DWORD dwContextID, VOID * pData, WORD wDataSize );
+
+	//请求金币场房间信息
+	static bool On_SUB_CG_USER_GOLD_INFO(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+	
 	
 #pragma endregion
 

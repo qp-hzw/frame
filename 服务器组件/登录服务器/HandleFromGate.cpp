@@ -152,14 +152,6 @@ bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwScoketID, VOID * p
 		{
 			return On_CMD_LC_SERVICE_PURE_XJ_RECORD_FINISH(dwScoketID,pData,wDataSize);
 		}
-	case DBO_LC_SERVICE_GOLD_INFO:		//请求金币大厅 返回
-		{
-			return On_CMD_LC_SERVICE_GOLD_INFO(dwScoketID,pData,wDataSize);
-		}
-	case DBO_LC_SERVICE_GOLD_INFO_FINISH:	//请求金币大厅 结束
-		{
-			return On_CMD_LC_SERVICE_GOLD_INFO_FINISH(dwScoketID,pData,wDataSize);
-		}
 	case DBO_LC_SERVICE_MATCH_INFO:     //请求比赛场信息 返回
 		{
 			return On_CMD_LC_SERVICE_MATCH_INFO(dwScoketID,pData,wDataSize);
@@ -429,10 +421,6 @@ bool CHandleFromGate::OnTCPNetworkMainService(WORD wSubCmdID, VOID * pData, WORD
 	case SUB_CL_SERVICE_PURE_XJ_RECORD_LIST:	//小局战绩
 		{
 			return On_SUB_CL_SERVICE_PURE_XJ_RECORD_LIST(pData, wDataSize, dwSocketID);
-		}
-	case SUB_CL_SERVICE_GOLD_INFO: //金币场信息
-		{
-			return On_SUB_CL_SERVICE_GOLD_INFO(pData, wDataSize, dwSocketID);
 		}
 	case SUB_CL_SERVICE_XJ_RECORD_PLAYBACK:	//小局录像回放
 		{
@@ -1496,45 +1484,6 @@ bool CHandleFromGate::On_CMD_LC_Service_XJRecordPlayback( DWORD dwScoketID, VOID
 		g_GameCtrl->SendData(dwScoketID, MDM_SERVICE, CMD_LC_SERVICE_XJ_RECORD_PLAYBACK, &CMD, sizeof(CMD));
 
 	}
-
-	return true;
-}
-
-//请求金币大厅信息
-bool CHandleFromGate::On_SUB_CL_SERVICE_GOLD_INFO(VOID * pData, WORD wDataSize, DWORD dwSocketID)
-{
-	//参数校验
-	if(wDataSize!=sizeof(STR_SUB_CL_SERVICE_GOLD_INFO))
-		return false;
-
-	return true;
-	//return g_GameCtrl->PostDataBaseRequest(DBR_CL_SERVICE_GOLD_INFO,dwSocketID,pData, wDataSize);
-}
-//请求金币大厅信息 返回
-bool CHandleFromGate::On_CMD_LC_SERVICE_GOLD_INFO( DWORD dwScoketID, VOID * pData, WORD wDataSize )
-{
-	//参数校验
-	DWORD Count = sizeof(STR_CMD_LC_SERVICE_GOLD_INFO);
-	if(wDataSize<Count || (wDataSize%Count != 0))
-		return false;
-
-	//发送数据
-	g_GameCtrl->SendData(dwScoketID,MDM_SERVICE, CMD_LC_SERVICE_GOLD_INFO, pData, wDataSize);
-
-	return true;
-}
-//请求金币大厅信息 结束
-bool CHandleFromGate::On_CMD_LC_SERVICE_GOLD_INFO_FINISH( DWORD dwScoketID, VOID * pData, WORD wDataSize )
-{
-	//参数校验
-	if(wDataSize!=sizeof(STR_CMD_LC_SERVICE_GOLD_INFO_FINISH))
-		return false;
-
-	STR_CMD_LC_SERVICE_GOLD_INFO_FINISH *pLotteryResult = (STR_CMD_LC_SERVICE_GOLD_INFO_FINISH*)pData;
-	pLotteryResult->byMask = 1;
-
-	//发送数据
-	g_GameCtrl->SendData(dwScoketID,MDM_SERVICE, CMD_LC_SERVICE_GOLD_INFO_FINISH, pLotteryResult, sizeof(STR_CMD_LC_SERVICE_GOLD_INFO_FINISH));
 
 	return true;
 }

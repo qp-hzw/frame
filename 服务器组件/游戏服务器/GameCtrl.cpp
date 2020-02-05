@@ -1,6 +1,7 @@
 #include "Stdafx.h"
 #include "GameCtrl.h"
 #include "RoomRuleManager.h"
+#include "GoldRoomManager.h"
 
 #define MDM_CM_SYSTEM				1000								//系统命令
 #define SUB_CM_SYSTEM_MESSAGE		1									//系统消息
@@ -131,7 +132,11 @@ int CGameCtrl::InitializeService()
 
 
 	//读取房间规则配置文件
-	RoomRuleManager::Instance()->ReadSubGameRoomRule(dwKindId);
+	RoomRuleManager::Instance()->Init(dwKindId);
+
+	//读取金币场房间信息
+	CGoldRoomManager::Init(dwKindId);
+
 	return 0;
 }
 //启动内核

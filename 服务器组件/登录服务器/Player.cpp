@@ -1,5 +1,6 @@
 #include "Player.h"
 #include "DataBaseEngineSink.h"
+#include<algorithm>
 
 std::map< DWORD, std::vector<tagUserProperty>>	CPlayer::m_ArrPrp;
 
@@ -54,6 +55,11 @@ void CPlayer::AddProp(tagUserProperty prop)
 std::vector<tagUserProperty> CPlayer::GetProps()
 {
 	std::vector<tagUserProperty> vec = m_ArrPrp.at(GetUserID());
+	
+	sort(vec.begin(), vec.end(), 
+		[](tagUserProperty a, tagUserProperty b){
+		return a.dwPropID < b.dwPropID;}
+	);
 
 	for(size_t i=0; i < vec.size(); i++)
 	{

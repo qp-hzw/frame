@@ -112,10 +112,6 @@
 
 #define CMD_LC_SERVICE_MARQUEE					18							//跑马灯消息
 
-#define SUB_CL_SERVICE_GOLD_INFO				19							//请求金币大厅信息
-#define CMD_LC_SERVICE_GOLD_INFO				119							//请求金币大厅信息 返回
-#define CMD_LC_SERVICE_GOLD_INFO_FINISH			219							//请求金币大厅信息 结束
-
 #define SUB_CL_SERVICE_MATCH_INFO				22							//请求比赛场信息
 #define CMD_LC_SERVICE_MATCH_INFO				122							//请求比赛场信息  返回
 #define CMD_LC_SERVICE_MATCH_INFO_FINISH		222							//请求比赛场信息  结束
@@ -257,7 +253,6 @@
 #define SUB_CL_BAG_QUERY						2							//背包物品查询
 #define CMD_LC_BAG_RESULT						102							//背包物品返回
 #define CMD_LC_BAG_FINISH						202							//背包物品查询结束
-
 
 #define SUB_CL_GIFT_GIVE_PROPS					3							//赠送道具
 #define CMD_LC_GIFT_GIVE_PROPS					103							//赠送道具返回

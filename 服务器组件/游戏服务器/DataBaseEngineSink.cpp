@@ -228,7 +228,6 @@ bool CDataBaseEngineSink::On_DBR_Logon_UserID(DWORD dwContextID, VOID * pData, W
 	m_TreasureDB->AddParameter(TEXT("@strPassword"),pLogonUserID->szPassword);
 	m_TreasureDB->AddParameter(TEXT("@strClientIP"),szClientAddr);
 	m_TreasureDB->AddParameter(TEXT("@strMachineID"),pLogonUserID->szMachineID);
-	m_TreasureDB->AddParameter(TEXT("@dwGameID"),g_GameCtrl->GetServerID());
 
 	//输出参数
 	TCHAR szDescribeString[128]=TEXT("");
@@ -270,50 +269,49 @@ bool CDataBaseEngineSink::On_DBR_GP_QUIT(DWORD dwContextID, VOID * pData, WORD w
 bool CDataBaseEngineSink::On_DBO_Logon_UserID(DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString)
 {
 	//发送数据
-	STR_DBO_CG_LOGON_USERID LogonUserID;
-	ZeroMemory(&LogonUserID, sizeof(STR_DBO_CG_LOGON_USERID));
+	STR_DBO_CG_LOGON_USERID DBOLogonAccount;
+	ZeroMemory(&DBOLogonAccount, sizeof(STR_DBO_CG_LOGON_USERID));
 
 	//赋值
-	LogonUserID.lResultCode = dwErrorCode;
-	lstrcpyn(LogonUserID.szDescribeString, pszErrorString, CountArray(LogonUserID.szDescribeString));
+	DBOLogonAccount.lResultCode = dwErrorCode;
+	lstrcpyn(DBOLogonAccount.szDescribeString, pszErrorString, CountArray(DBOLogonAccount.szDescribeString));
 
 	//登录成功获取信息
 	if(DB_SUCCESS == dwErrorCode)
 	{
 		//用户标志
-		LogonUserID.useInfo.dwUserID=m_TreasureDB->GetValue_DWORD(TEXT("UserID"));
+		DBOLogonAccount.useInfo.dwUserID=m_TreasureDB->GetValue_DWORD(TEXT("UserID"));
 		//用户昵称
-		m_TreasureDB->GetValue_String(TEXT("NickName"),LogonUserID.useInfo.szNickName,CountArray(LogonUserID.useInfo.szNickName));
+		m_TreasureDB->GetValue_String(TEXT("NickName"),DBOLogonAccount.useInfo.szNickName,CountArray(DBOLogonAccount.useInfo.szNickName));
 		//用户性别
-		LogonUserID.useInfo.cbGender=m_TreasureDB->GetValue_BYTE(TEXT("Gender"));
+		DBOLogonAccount.useInfo.cbGender=m_TreasureDB->GetValue_BYTE(TEXT("Gender"));
 		//头像索引
-		m_TreasureDB->GetValue_String(TEXT("HeadUrl"),LogonUserID.useInfo.szHeadUrl,CountArray(LogonUserID.useInfo.szHeadUrl));
+		m_TreasureDB->GetValue_String(TEXT("HeadUrl"),DBOLogonAccount.useInfo.szHeadUrl,CountArray(DBOLogonAccount.useInfo.szHeadUrl));
 		//个性签名
-		m_TreasureDB->GetValue_String(TEXT("MySignature"),LogonUserID.useInfo.szUnderWrite,CountArray(LogonUserID.useInfo.szUnderWrite));
+		m_TreasureDB->GetValue_String(TEXT("MySignature"),DBOLogonAccount.useInfo.szUnderWrite,CountArray(DBOLogonAccount.useInfo.szUnderWrite));
 
 		//社团ID
+		DBOLogonAccount.useInfo.dwGroupID=m_TreasureDB->GetValue_BYTE(TEXT("GroupID"));
 		//社团名字
+		m_TreasureDB->GetValue_String(TEXT("GroupName"),DBOLogonAccount.useInfo.szGroupName,CountArray(DBOLogonAccount.useInfo.szGroupName));
 
 		//会员等级
-		LogonUserID.useInfo.cbMemberOrder=m_TreasureDB->GetValue_BYTE(TEXT("MemberOrder"));
-		//经验等级
-		LogonUserID.useInfo.dwLevel=m_TreasureDB->GetValue_BYTE(TEXT("UserLevel"));
+		DBOLogonAccount.useInfo.cbMemberOrder=m_TreasureDB->GetValue_BYTE(TEXT("MemberOrder"));
+		//人物等级
+		DBOLogonAccount.useInfo.dwLevel=m_TreasureDB->GetValue_BYTE(TEXT("cbLevel"));
 		//经验数值
+		DBOLogonAccount.useInfo.dwExperience=m_TreasureDB->GetValue_DWORD(TEXT("Experience"));
 
 		//用户房卡
-		LogonUserID.useInfo.lOpenRoomCard = m_TreasureDB->GetValue_LONGLONG(TEXT("UserRoomCard"));
+		DBOLogonAccount.useInfo.lOpenRoomCard = m_TreasureDB->GetValue_LONGLONG(TEXT("UserRoomCard"));
 		//钻石
+		DBOLogonAccount.useInfo.lDiamond = m_TreasureDB->GetValue_LONGLONG(TEXT("UserDiamond"));
 		//用户游戏币
-		LogonUserID.useInfo.lGold = m_TreasureDB->GetValue_LONGLONG(TEXT("UserGold"));
-
-		//胜利盘数
-		//失败盘数
-		//和盘盘数
-		//逃跑盘数
+		DBOLogonAccount.useInfo.lGold = m_TreasureDB->GetValue_LONGLONG(TEXT("UserGold"));
 	}
 
 	//发送数据
-	g_AttemperEngineSink->OnEventDataBaseResult(DBO_CG_LOGON_USERID, dwContextID, &LogonUserID, sizeof(STR_DBO_CG_LOGON_USERID));
+	g_AttemperEngineSink->OnEventDataBaseResult(DBO_CG_LOGON_USERID, dwContextID, &DBOLogonAccount, sizeof(STR_DBO_CG_LOGON_USERID));
 	return true;
 }
 

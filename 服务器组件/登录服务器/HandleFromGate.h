@@ -133,13 +133,6 @@ private:
 	//小局录像回放 返回
 	static bool On_CMD_LC_Service_XJRecordPlayback( DWORD dwContextID, VOID * pData, WORD wDataSize );
 
-	//请求金币大厅信息
-	static bool On_SUB_CL_SERVICE_GOLD_INFO(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//请求金币大厅信息 返回
-	static bool On_CMD_LC_SERVICE_GOLD_INFO( DWORD dwContextID, VOID * pData, WORD wDataSize );
-	//请求金币大厅信息 结束
-	static bool On_CMD_LC_SERVICE_GOLD_INFO_FINISH( DWORD dwContextID, VOID * pData, WORD wDataSize );
-
 	//请求比赛场信息
 	static bool On_SUB_CL_SERVICE_MATCH_INFO(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//请求比赛场信息 返回

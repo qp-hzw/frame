@@ -68,7 +68,7 @@
 #define SUB_CG_USER_JOIN_TABLE_NO_PASS	19									//#加入桌子,不需要密码, 即快速开始
 //返回的为 2, CMD_GC_USER_JOIN_ROOM_SUCCESS;								//不需要加入桌子返回
 
-#define SUB_CG_USER_JOIN_GOLD_HALL_ROOM	20									//加入大厅金币场桌子 -- 返回317
+#define SUB_CG_USER_JOIN_GOLD_HALL_ROOM	20									//加入金币大厅 金币场桌子
 
 #define SUB_CG_CLUB_CREATE_TABLE		21									//#创建桌子 牌友圈特有
 #define CMD_GC_CLUB_CREATE_TABKE		121									//#创建桌子 返回
@@ -81,9 +81,13 @@
 //解散房间
 #define SUB_RG_USER_ASK_DISMISS			24									//发起申请解散房间
 #define CMD_GR_USER_ASK_DISMISS_RESULT	124									//发起申请解散房间 结果
-#define	SUB_RG_USER_VOTE_DISMISS		25									//表决解散房间
-#define CMD_GR_USER_VOTE_DISMISS		125									//广播房间申请解散
-#define	CMD_GR_USER_DISMISS_RESULT		224									//广播表决解散房间结果
+#define	SUB_RG_USER_VOTE_DISMISS		224									//表决解散房间
+#define CMD_GR_USER_VOTE_DISMISS		324									//广播房间申请解散
+#define	CMD_GR_USER_DISMISS_RESULT		424									//广播表决解散房间结果
+
+#define SUB_CG_USER_GOLD_INFO		    25									//请求金币大厅信息
+#define CMD_GC_USER_GOLD_INFO		    125									//请求金币大厅信息 返回
+#define CMD_GC_USER_GOLD_INFO_FINISH	225									//请求金币大厅信息 结束
 
 #pragma endregion
 

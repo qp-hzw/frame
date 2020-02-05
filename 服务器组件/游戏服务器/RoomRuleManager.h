@@ -50,7 +50,7 @@ public:
 
 public:
 	//读取子游戏房间配置文件
-	void ReadSubGameRoomRule(int kindid);
+	void Init(int kindid);
 
 	//辅助函数
 private:

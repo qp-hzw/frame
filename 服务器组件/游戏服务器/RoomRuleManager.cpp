@@ -95,7 +95,7 @@ void RoomRuleManager::SetGoldRule(tagTableRule& roomRule, BYTE byType)
 }
 
 //读取子游戏房间配置文件
-void RoomRuleManager::ReadSubGameRoomRule(int kindid)
+void RoomRuleManager::Init(int kindid)
 {
 	//打开文件
 	string file_path = std::to_string(kindid)+ ".rule";

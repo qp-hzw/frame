@@ -4,6 +4,7 @@
 #include <iostream>
 #include "RoomRuleManager.h"
 #include "RobotManager.h"
+#include "GoldRoomManager.h"
 
 bool CHandleFromGate::HandlePacket(TCP_Command Command, VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
@@ -141,6 +142,10 @@ bool CHandleFromGate::OnTCPNetworkMainUser(WORD wSubCmdID, VOID *pData, WORD wDa
 	case SUB_RG_USER_VOTE_DISMISS:		//表决解散房间
 		{
 			return On_SUB_RG_USER_VOTE_DISMISS(pData, wDataSize, dwSocketID);
+		}
+	case SUB_CG_USER_GOLD_INFO:    //请求金币场房间信息
+		{
+			return On_SUB_CG_USER_GOLD_INFO(pData, wDataSize, dwSocketID);
 		}
 	}
 
@@ -1202,6 +1207,36 @@ bool CHandleFromGate::SendRequestFailure(CPlayer * pIServerUserItem, LPCTSTR psz
 	return true;
 }
 
+
+//请求金币房间信息
+bool CHandleFromGate::On_SUB_CG_USER_GOLD_INFO(VOID * pData, WORD wDataSize, DWORD dwSocketID)
+{
+	//列表发送
+	WORD wPacketSize=0;
+	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
+	wPacketSize=0;
+	STR_CMD_GC_USER_GOLD_INFO * pDBO=NULL;
+
+	for (auto item : CGoldRoomManager::GetAllRoomInfo())
+	{
+		//发送信息
+		if ((wPacketSize+sizeof(STR_CMD_GC_USER_GOLD_INFO))>sizeof(cbBuffer))
+		{
+			g_GameCtrl->SendData(dwSocketID, MDM_USER, CMD_GC_USER_GOLD_INFO,  cbBuffer, wPacketSize);
+			wPacketSize=0;
+		}
+		//读取信息
+		pDBO=(STR_CMD_GC_USER_GOLD_INFO *)(cbBuffer+wPacketSize);
+		memcpy(pDBO, &item, sizeof(STR_CMD_GC_USER_GOLD_INFO));
+
+		//设置位移
+		wPacketSize+=sizeof(STR_CMD_GC_USER_GOLD_INFO);
+	}
+	if (wPacketSize>0) g_GameCtrl->SendData(dwSocketID, MDM_USER, CMD_GC_USER_GOLD_INFO,  cbBuffer, wPacketSize);
+
+	g_GameCtrl->SendData(dwSocketID, MDM_USER, CMD_GC_USER_GOLD_INFO_FINISH,  NULL, 0);
+	return true;
+}
 
 //////////////////////////////////////////////////////////////////////////////////
 //添加替他人开房

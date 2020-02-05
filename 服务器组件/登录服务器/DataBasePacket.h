@@ -93,10 +93,6 @@ struct STR_DBR_CL_LOGON_REGISTER
 #define DBO_LC_SERVICE_PURE_XJ_RECORD_LIST_PINFO 2318							//pure小局玩家信息 返回
 #define DBO_LC_SERVICE_PURE_XJ_RECORD_FINISH	3318							//pure小局战绩 结束
 
-#define DBR_CL_SERVICE_GOLD_INFO				319								//请求金币大厅信息
-#define DBO_LC_SERVICE_GOLD_INFO				1319							//请求金币大厅信息 返回
-#define DBO_LC_SERVICE_GOLD_INFO_FINISH			2319							//请求金币大厅信息 结束
-
 #define DBR_CL_SERVICE_MATCH_INFO				322								//请求比赛场信息
 #define DBO_LC_SERVICE_MATCH_INFO				1322							//请求比赛场信息 返回
 #define DBO_LC_SERVICE_MATCH_INFO_FINISH		2322							//请求比赛场信息 结束

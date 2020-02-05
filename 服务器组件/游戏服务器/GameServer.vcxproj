@@ -349,6 +349,7 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
   <ItemGroup>
     <ClCompile Include="AttemperEngineSink.cpp" />
     <ClCompile Include="DataBaseEngineSink.cpp" />
+    <ClCompile Include="GoldRoomManager.cpp" />
     <ClCompile Include="HandleFromCenter.cpp" />
     <ClCompile Include="HandleFromDB.cpp" />
     <ClCompile Include="HandleFromGate.cpp" />
@@ -366,6 +367,7 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClInclude Include="AttemperEngineSink.h" />
     <ClInclude Include="DataBaseEngineSink.h" />
     <ClInclude Include="DataBasePacket.h" />
+    <ClInclude Include="GoldRoomManager.h" />
     <ClInclude Include="MatchManager.h" />
     <ClInclude Include="RobotManager.h" />
     <ClInclude Include="RoomRuleManager.h" />
