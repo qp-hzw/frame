@@ -846,20 +846,11 @@ bool CHandleFromGate::On_CMD_LC_Logon_Logon_Reward(DWORD dwScoketID, SYSTEMTIME 
 		 cmd.dwFolwerNum = g_AccountsDB->GetValue_DWORD(TEXT("FlowerNum"));
 		 //我的粉丝
 		 cmd.dwFolwingNum = g_AccountsDB->GetValue_DWORD(TEXT("FlowingNum"));
-		  //我的粉丝
-		 BYTE bGuanzhu	= g_AccountsDB->GetValue_BYTE(TEXT("cbIsGuanzhu")); //0表示没有关注
-		 if ( (bGuanzhu == 0 ) && (sub->dwTargetID != player->GetUserID())) //没有关注, 并且不是自身
-		 {
-			 cmd.cbIsGuanzhu = 1;
-		 }
-		 else
-		 {
-			 cmd.cbIsGuanzhu = 0;
-		 }
 
 		 int i = 0;
 		 while(g_AccountsDB->IsRecordsetEnd() == false)
 		 {
+			 if(i >= 5) break;
 			 STR_CMD_LC_SERVICE_FLOWER_P cmd_p;
 			 cmd_p.dwUserID = g_AccountsDB->GetValue_DWORD(TEXT("UserID"));
 			 g_AccountsDB->GetValue_String(TEXT("NickName"),cmd_p.szNickName,CountArray(cmd_p.szNickName));
@@ -869,6 +860,17 @@ bool CHandleFromGate::On_CMD_LC_Logon_Logon_Reward(DWORD dwScoketID, SYSTEMTIME 
 
 			 memcpy(&cmd.folwingInfo[i], &cmd_p, sizeof(cmd_p));
 			 i++;
+		 }
+
+		 //是否显示关注按钮
+		 BYTE bGuanzhu	= g_AccountsDB->GetValue_DWORD(TEXT("cbIsGuanzhu")); //0表示没有关注
+		 if ( (bGuanzhu == 0 ) && (sub->dwTargetID != player->GetUserID())) //没有关注, 并且不是自身
+		 {
+			 cmd.cbIsGuanzhu = 1;
+		 }
+		 else
+		 {
+			 cmd.cbIsGuanzhu = 0;
 		 }
 
 		 g_GameCtrl->SendData(dwSocketID, MDM_SERVICE, CMD_LC_SERVICE_FLOWER, &cmd, sizeof(cmd));
