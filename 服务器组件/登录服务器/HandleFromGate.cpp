@@ -78,10 +78,6 @@ bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwScoketID, VOID * p
 		{
 			return On_CMD_LC_Service_RequestLottery(dwScoketID,pData,wDataSize);
 		}
-	case DBO_CL_SERVICE_MODIFY_PERSONAL_INFO:	//修改个人资料返回
-		{
-			return On_CMD_LC_Service_ModifyPersonalInfo(dwScoketID,pData,wDataSize);
-		}
 	case DBO_CL_USER_COMMAND_RESULT:		//公共操作结果
 		{
 			return On_CMD_LC_CommonOperateResult(dwScoketID,pData,wDataSize);
@@ -1588,34 +1584,38 @@ bool CHandleFromGate::On_CMD_LC_SERVICE_MATCH_INFO_FINISH(DWORD dwContextID, VOI
 //修改个人资料
 bool CHandleFromGate::On_SUB_CL_Service_ModifyPersonalInfo(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//校验
 	if (wDataSize != sizeof(STR_SUB_CL_SERVICE_MODIFY_PERSONAL_INFO)) return false;
+	STR_SUB_CL_SERVICE_MODIFY_PERSONAL_INFO* sub = (STR_SUB_CL_SERVICE_MODIFY_PERSONAL_INFO*)pData;
 
-	//投递请求
-	g_GameCtrl->PostDataBaseRequest(DBR_CL_SERVICE_MODIFY_PERSONAL_INFO, dwSocketID, pData, wDataSize);
+	CPlayer* player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	if(player == NULL) return false;
+
+	//输入参数
+	g_AccountsDB->ResetParameter();
+	g_AccountsDB->AddParameter(TEXT("@UserID"), player->GetUserID());
+	g_AccountsDB->AddParameter(TEXT("@NickName"), sub->szNickName);
+	g_AccountsDB->AddParameter(TEXT("@Gender"), sub->cbGender);
+	g_AccountsDB->AddParameter(TEXT("@HeadImageUrl"), sub->szHeadImageUrl);
+	g_AccountsDB->AddParameter(TEXT("@Signature"), sub->szSignature);
+	g_AccountsDB->AddParameter(TEXT("@RealName"), sub->szRealName);
+	g_AccountsDB->AddParameter(TEXT("@IDCardNum"), sub->szIDCardNum);
+	g_AccountsDB->AddParameter(TEXT("@PhoneNum"), sub->szPhoneNum);
+
+	//执行查询
+	LONG lResultCode = g_AccountsDB->ExecuteProcess(TEXT("GSP_CL_Modify_UserlInfo"), true);
+
+	if(lResultCode == 0)
+	{
+		g_GameCtrl->SendDataMsg(dwSocketID, "操作成功");
+	}
+	else
+	{
+		g_GameCtrl->SendDataMsg(dwSocketID, "操作失败");
+	}
 
 	return true;
 }
 
-//修改个人资料返回
-bool CHandleFromGate::On_CMD_LC_Service_ModifyPersonalInfo( DWORD dwScoketID, VOID * pData, WORD wDataSize )
-{
-	//参数校验
-	if(wDataSize!=sizeof(STR_DBO_CL_MODIFY_PERSONL_INFO))
-		return false;
-
-	STR_DBO_CL_MODIFY_PERSONL_INFO *pModifyInfo = (STR_DBO_CL_MODIFY_PERSONL_INFO*)pData;
-
-	//构造数据
-	STR_CMD_LC_SERVICE_MODIFY_PERSONL_INFO PersonalInfo;
-	ZeroMemory(&PersonalInfo,sizeof(STR_CMD_LC_SERVICE_MODIFY_PERSONL_INFO));
-	CopyMemory(&PersonalInfo, pModifyInfo, sizeof(PersonalInfo));
-
-	//发送数据
-	g_GameCtrl->SendData(dwScoketID, MDM_SERVICE, CMD_LC_SERVICE_MODIFY_PERSONAL_INFO, &PersonalInfo, sizeof(STR_CMD_LC_SERVICE_MODIFY_PERSONL_INFO));
-
-	return true;
-}
 
 //公共操作结果
 bool CHandleFromGate::On_CMD_LC_CommonOperateResult( DWORD dwScoketID, VOID * pData, WORD wDataSize )

@@ -119,11 +119,6 @@ protected:
 	//小局录像回放
 	bool On_DBR_CL_Service_XJRecordPlayback(DWORD dwContextID, void * pData, WORD wDataSize);
 
-	//修改个人资料
-	bool On_DBR_Service_ModifyPersonalInfo(DWORD dwContextID, void * pData, WORD wDataSize);
-	//修改个人资料返回
-	bool On_DBO_Service_ModifyPersonalInfo(DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString);
-
 #pragma endregion
 
 #pragma region MDM_GIFT 礼物道具

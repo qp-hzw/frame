@@ -96,10 +96,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 		{
 			return On_DBR_CL_Service_XJRecordPlayback(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_SERVICE_MODIFY_PERSONAL_INFO:	//修改个人资料
-		{
-			return On_DBR_Service_ModifyPersonalInfo(dwContextID,pData,wDataSize);
-		}
 	case DBR_CL_USER_RECHARGE_INFO:				//充值信息
 		{
 			return On_DBR_Other_RechargeInfo(dwContextID,pData,wDataSize);
@@ -1304,66 +1300,6 @@ bool CDataBaseEngineSink::On_DBR_CL_Service_XJRecordPlayback(DWORD dwContextID, 
 
 	}
 
-
-	return true;
-}
-
-//修改个人资料
-bool CDataBaseEngineSink::On_DBR_Service_ModifyPersonalInfo(DWORD dwContextID, void * pData, WORD wDataSize)
-{
-
-	if (sizeof(STR_SUB_CL_SERVICE_MODIFY_PERSONAL_INFO) != wDataSize)
-	{
-		return false;
-	}
-
-	STR_SUB_CL_SERVICE_MODIFY_PERSONAL_INFO* pDbReq = (STR_SUB_CL_SERVICE_MODIFY_PERSONAL_INFO*)pData;
-
-	//输入参数
-	m_AccountsDB->ResetParameter();
-	m_AccountsDB->AddParameter(TEXT("@UserID"), pDbReq->dwUserID);
-	m_AccountsDB->AddParameter(TEXT("@OldLogonPassword"), pDbReq->szOldLogonPassword);
-	m_AccountsDB->AddParameter(TEXT("@NewLogonPassword"), pDbReq->szNewLogonPassword);		
-	m_AccountsDB->AddParameter(TEXT("@NickName"), pDbReq->szNickName);
-	m_AccountsDB->AddParameter(TEXT("@Gender"), pDbReq->cbGender);
-	m_AccountsDB->AddParameter(TEXT("@HeadImageUrl"), pDbReq->szHeadImageUrl);
-	m_AccountsDB->AddParameter(TEXT("@Signature"), pDbReq->szSignature);
-	m_AccountsDB->AddParameter(TEXT("@RealName"), pDbReq->szRealName);
-	m_AccountsDB->AddParameter(TEXT("@IDCardNum"), pDbReq->szIDCardNum);
-	m_AccountsDB->AddParameter(TEXT("@PhoneNum"), pDbReq->szPhoneNum);
-	m_AccountsDB->AddParameter(TEXT("@ProxyUserID"), pDbReq->dwProxyUserID);		//TODO 代理ID在数据库中暂时未增加，后面增加
-
-	//输出变量
-	WCHAR szDescribe[128] = L"";
-	m_AccountsDB->AddParameterOutput(TEXT("@strErrorDescribe"), szDescribe, sizeof(szDescribe), adParamOutput);
-
-	//执行查询
-	LONG lResultCode = m_AccountsDB->ExecuteProcess(TEXT("GSP_CL_Service_ModifyPersonalInfo"), true);
-
-	//结果处理
-	CDBVarValue DBVarValue;
-	m_AccountsDB->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
-
-	//处理
-	On_DBO_Service_ModifyPersonalInfo(dwContextID, lResultCode, CW2CT(DBVarValue.bstrVal));
-
-
-	return true;
-}
-
-//修改个人资料返回
-bool CDataBaseEngineSink::On_DBO_Service_ModifyPersonalInfo(DWORD dwContextID, DWORD dwErrorCode, LPCTSTR pszErrorString)
-{
-	//个人信息
-	STR_DBO_CL_MODIFY_PERSONL_INFO PersonalInfo;
-	ZeroMemory(&PersonalInfo, sizeof(PersonalInfo));
-
-	//数据赋值
-	PersonalInfo.lResultCode = dwErrorCode;
-	lstrcpyn(PersonalInfo.szDescribeString, pszErrorString, CountArray(PersonalInfo.szDescribeString));
-
-	//发送资产更新消息
-	g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_SERVICE_MODIFY_PERSONAL_INFO, dwContextID, &PersonalInfo, sizeof(STR_DBO_CL_MODIFY_PERSONL_INFO));
 
 	return true;
 }

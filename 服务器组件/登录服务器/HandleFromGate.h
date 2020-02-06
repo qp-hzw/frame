@@ -136,8 +136,6 @@ private:
 
 	//修改个人资料
 	static bool On_SUB_CL_Service_ModifyPersonalInfo(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//修改个人资料返回
-	static bool On_CMD_LC_Service_ModifyPersonalInfo( DWORD dwContextID, VOID * pData, WORD wDataSize );
 
 	//公共操作结果返回	
 	static bool On_CMD_LC_CommonOperateResult( DWORD dwContextID, VOID * pData, WORD wDataSize );

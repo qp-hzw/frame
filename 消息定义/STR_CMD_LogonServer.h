@@ -214,22 +214,16 @@ struct STR_CMD_LC_SERVICE_QUERY_ROOMLIST
 //修改个人资料	
 struct STR_SUB_CL_SERVICE_MODIFY_PERSONAL_INFO
 {
-	//用户标识
-	DWORD							dwUserID;							//用户ID
-	TCHAR							szOldLogonPassword[LEN_PASSWORD];	//旧的登陆密码
-	//基本信息
-	TCHAR							szNewLogonPassword[LEN_PASSWORD];	//新的登陆密码（若无修改，和旧的一样）
 	TCHAR							szNickName[LEN_NICKNAME];			//用户昵称
 	BYTE							cbGender;							//用户性别	
-	TCHAR							szHeadImageUrl[LEN_HEAD_URL];			//头像地址
+	TCHAR							szHeadImageUrl[LEN_HEAD_URL];		//头像地址
 	TCHAR							szSignature[LEN_MY_SIGNATURE];		//个性签名
 	//联系方式
 	TCHAR							szRealName[LEN_IDENTITY_NAME];		//真实姓名
 	TCHAR							szIDCardNum[LEN_IDENTITY_NUM];		//身份证号
 	TCHAR							szPhoneNum[LEN_MOBILE_PHONE];		//绑定手机号
-	//附加属性
-	DWORD							dwProxyUserID;						//代理用户ID		//TODO 代理ID在数据库中暂时未增加，后面增加
 };
+
 //修改个人资料返回
 struct STR_CMD_LC_SERVICE_MODIFY_PERSONL_INFO
 {
