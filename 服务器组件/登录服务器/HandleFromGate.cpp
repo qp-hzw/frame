@@ -370,6 +370,10 @@ bool CHandleFromGate::OnTCPNetworkMainService(WORD wSubCmdID, VOID * pData, WORD
 		{
 			return On_SUB_CL_SERVICE_FLOWING_QUERY(pData, wDataSize, dwSocketID);
 		}
+	case SUB_CL_SERVICE_FLOWER_ACT: //关注, 取消关注
+		{
+			return On_SUB_CL_SERVICE_FLOWER_ACT(pData, wDataSize, dwSocketID);
+		}
 	case SUB_CL_SERVICE_REFRESH_USER_INFO:		//刷新用户信息
 		{
 			return On_SUB_CL_Service_RefreshUserInfo(pData, wDataSize, dwSocketID);
@@ -864,13 +868,17 @@ bool CHandleFromGate::On_CMD_LC_Logon_Logon_Reward(DWORD dwScoketID, SYSTEMTIME 
 
 		 //是否显示关注按钮
 		 BYTE bGuanzhu	= g_AccountsDB->GetValue_DWORD(TEXT("cbIsGuanzhu")); //0表示没有关注
-		 if ( (bGuanzhu == 0 ) && (sub->dwTargetID != player->GetUserID())) //没有关注, 并且不是自身
+		 if ( sub->dwTargetID == player->GetUserID()) //自己
 		 {
-			 cmd.cbIsGuanzhu = 1;
+			 cmd.cbIsGuanzhu = 0;
+		 }
+		 else if (bGuanzhu == 0 )
+		 {
+			  cmd.cbIsGuanzhu = 1;
 		 }
 		 else
 		 {
-			 cmd.cbIsGuanzhu = 0;
+			 cmd.cbIsGuanzhu = 2;
 		 }
 
 		 g_GameCtrl->SendData(dwSocketID, MDM_SERVICE, CMD_LC_SERVICE_FLOWER, &cmd, sizeof(cmd));
@@ -971,6 +979,30 @@ bool CHandleFromGate::On_SUB_CL_SERVICE_FLOWING_QUERY(VOID * pData, WORD wDataSi
 	 {
 		 g_GameCtrl->SendDataMsg(dwSocketID, "查询失败");
 	 }
+}
+//关注,取消关注
+bool CHandleFromGate::On_SUB_CL_SERVICE_FLOWER_ACT(VOID * pData, WORD wDataSize, DWORD dwSocketID)
+{
+	if(sizeof(STR_SUB_CL_SERVICE_FLOWER_ACT) != wDataSize) return false;
+	STR_SUB_CL_SERVICE_FLOWER_ACT* sub = (STR_SUB_CL_SERVICE_FLOWER_ACT*) pData;
+
+	CPlayer * player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	if(player == NULL) return false;
+
+	if(player->GetUserID() == sub->dwTargetID) return true;
+
+	g_AccountsDB->ResetParameter();
+	g_AccountsDB->AddParameter(TEXT("@dwTargetID"), sub->dwTargetID); 
+	g_AccountsDB->AddParameter(TEXT("@dwMyID"), player->GetUserID()); 
+	g_AccountsDB->AddParameter(TEXT("@cbMask"), sub->cbMask); 
+
+	//执行查询
+	LONG lResultCode = g_AccountsDB->ExecuteProcess(TEXT("GSP_CL_FLOWER_ACT"),true);
+
+	STR_CMD_LC_SERVICE_FLOWER_ACT cmd;
+	cmd.cbResult = lResultCode;
+	cmd.cbMask = sub->cbMask;
+	g_GameCtrl->SendData(dwSocketID, MDM_SERVICE, CMD_LC_SERVICE_FLOWER_ACT, &cmd, sizeof(cmd));
 }
 
 //刷新用户信息

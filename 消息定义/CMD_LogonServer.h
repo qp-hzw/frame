@@ -69,11 +69,14 @@
 #define CMD_LC_SERVICE_FLOWING_QUERY			103							//查看粉丝 返回
 #define CMD_LC_SERVICE_FLOWING_QUERY_FINISH		203							//查看关注 返回
 
+#define SUB_CL_SERVICE_FLOWER_ACT			    4							//关注, 取消关注
+#define CMD_LC_SERVICE_FLOWER_ACT			    104							//关注, 取消关注 返回
+
 #define SUB_CL_SERVICE_REFRESH_USER_INFO		5							//刷新用户信息
 #define CMD_CL_SERVICE_REFRESH_USER_INFO		105							//刷新用户信息返回
 
-#define SUB_CL_SERVICE_MODIFY_PERSONAL_INFO		4							//修改个人资料（所有用户能修改的资料都在这里处理）
-#define CMD_LC_SERVICE_MODIFY_PERSONAL_INFO		104							//修改个人资料返回
+#define SUB_CL_SERVICE_MODIFY_PERSONAL_INFO		12							//修改个人资料（所有用户能修改的资料都在这里处理）
+#define CMD_LC_SERVICE_MODIFY_PERSONAL_INFO		112							//修改个人资料返回
 
 
 /* START 老大厅的战绩, 之后可以删除掉 */
@@ -95,12 +98,6 @@
 
 #define SUB_CL_SERVICE_REQUEST_LOTTERY			11							//请求抽奖
 #define CMD_LC_SERVICE_REQUEST_LOTTERY			111							//请求抽奖返回
-
-#define SUB_CL_SERVICE_GET_RANK_LIST			12							//获取指定排行榜			TOOD 真正的数据是从子游戏获取的，小局结算，但只有今日的数据，没有更新到昨日之类的
-#define CMD_LC_SERVICE_GET_RANK_LIST			112							//获取指定排行榜返回
-
-#define SUB_CL_SERVICE_GET_RANK_REWARD			13							//领取排行榜奖励
-#define CMD_LC_SERVICE_GET_RANK_REWARD			113							//领取排行榜奖励返回
 
 #define CMD_LC_USER_QUERY_SCORE_INFO			114							//查询（修改）用户金币房卡钻石信息返回(涉及到金币房卡改变的都会用到这个消息)
 
@@ -126,6 +123,13 @@
 
 #define SUB_CL_SERVICE_XJ_RECORD_PLAYBACK		20							//小局录像回放
 #define CMD_LC_SERVICE_XJ_RECORD_PLAYBACK		120							//小局录像回放 返回
+
+#define SUB_CL_SERVICE_GET_RANK_LIST			21							//获取指定排行榜			TOOD 真正的数据是从子游戏获取的，小局结算，但只有今日的数据，没有更新到昨日之类的
+#define CMD_LC_SERVICE_GET_RANK_LIST			121							//获取指定排行榜返回
+
+#define SUB_CL_SERVICE_GET_RANK_REWARD			22							//领取排行榜奖励
+#define CMD_LC_SERVICE_GET_RANK_REWARD			122							//领取排行榜奖励返回
+
 #pragma endregion
 
 #pragma region MDM_CLUB  牌友圈

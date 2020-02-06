@@ -124,6 +124,19 @@ struct STR_CMD_LC_SERVICE_FLOWER
 	STR_CMD_LC_SERVICE_FLOWER_P folwingInfo[5];
 };
 
+//关注, 取消关注
+struct STR_SUB_CL_SERVICE_FLOWER_ACT
+{
+	DWORD   dwTargetID;  //查看对象的useID
+	BYTE    cbMask;      //1关注, 2取消关注
+};
+//关注， 取消关注 返回
+struct STR_CMD_LC_SERVICE_FLOWER_ACT
+{
+	BYTE    cbResult;    //0成功， 其他失败
+	BYTE    cbMask;      //1关注, 2取消关注
+};
+
 
 //玩家反馈
 struct STR_SUB_CL_SERVICE_FEEDBACK
