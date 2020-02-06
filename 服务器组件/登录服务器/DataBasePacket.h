@@ -65,9 +65,6 @@ struct STR_DBR_CL_LOGON_REGISTER
 #define DBR_CL_SERVICE_REQUEST_LOTTERY			310								//请求抽奖
 #define DBO_CL_SERVICE_REQUEST_LOTTERY			1310							//请求抽奖返回
 
-#define DBR_CL_SERVICE_MODIFY_PERSONAL_INFO		311								//修改个人资料
-#define DBO_CL_SERVICE_MODIFY_PERSONAL_INFO		1311							//修改个人资料返回
-
 #define DBO_CL_USER_QUERY_SCORE_INFO			1312							//查询（变更）金币房卡信息返回
 
 //下面这些排行榜的消息号，是自身的排行榜类调用的消息 TODO 暂时放在这里
