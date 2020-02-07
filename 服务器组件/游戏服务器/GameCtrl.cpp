@@ -130,7 +130,7 @@ int CGameCtrl::InitializeService()
 	SetServerID(dwKindId << 16);
 
 	//读取房间规则配置文件
-	RoomRuleManager::Init(dwKindId);
+	RoomRuleManager::Init(dwKindId, m_subgame_dll_name);
 
 	return 0;
 }

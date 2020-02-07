@@ -9,10 +9,12 @@ ISubRoomRuleManager*            RoomRuleManager::m_SubRoomRuleManager = NULL;
 std::map<BYTE,  STR_CMD_GC_USER_GOLD_INFO> RoomRuleManager::s_RoomInfo;
 
 //初始化
-void RoomRuleManager::Init(int kindid)
+void RoomRuleManager::Init(int kindid, string dll_name)
 {
 	InitFK(kindid);
 	InitGold(kindid);
+
+	m_SubRoomRuleManager = static_cast<ISubRoomRuleManager*>(CWHModule::GetSubRuleManager(dll_name));
 }
 //初始化 房卡场 
 void RoomRuleManager::InitFK(int kindid)

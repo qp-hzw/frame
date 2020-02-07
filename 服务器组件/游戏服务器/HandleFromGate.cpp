@@ -972,13 +972,12 @@ bool CHandleFromGate::On_SUB_CG_USER_JOIN_GOLD_HALL_ROOM(VOID * pData, WORD wDat
 {
 	//校验用户
 	CPlayer *player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
-	if (NULL == player) return true;
+	if (NULL == player) return false;
 
 	//校验数据包
 	if(wDataSize != sizeof(STR_SUB_CG_USER_JOIN_GOLD_HALL_ROOM))
 	{
-		SendRequestFailure(player,TEXT("加入房间 结构体数据错误！"),REQUEST_FAILURE_NORMAL);
-		return true;
+		return false;
 	}
 
 	//数据定义

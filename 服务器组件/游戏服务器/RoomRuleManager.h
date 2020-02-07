@@ -18,7 +18,7 @@ private:
 
 public:
 	//初始化
-	static void Init(int kindid);
+	static void Init(int kindid, string dll_name);
 
 private:
 	//初始化 房卡场
