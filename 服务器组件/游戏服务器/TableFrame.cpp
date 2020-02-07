@@ -28,6 +28,14 @@
 #define IDI_CHECK_DISMISS_ROOM		(TIME_TABLE_SINK_RANGE+7)			//表决解散房间
 #define TIME_CHECK_DISMISS_ROOM		4*1000L								//事件 --4秒钟 
 
+//玩家自动准备
+#define IDI_PLAYER_AUTO_READY		(TIME_TABLE_SINK_RANGE+8)			//玩家自动准备
+#define TIME_PLAYER_AUTO_READY		4*1000L								//四秒钟
+
+//开始下一阶段比赛
+#define IDI_MATCH_NEXT_STAGE_START	(TIME_TABLE_SINK_RANGE+9)			//开始比赛下一阶段
+#define TIME_MATCH_NEXT_STAGE_START	10*1000L							//10S
+
 /////////////////////////////////////////////////////////////////////////////////
 
 enum PLAYER_OP_ERRORCODE
@@ -130,6 +138,21 @@ void CTableFrame::KillVoteDismissRoom()
 	KillGameTimer(IDI_VOTE_DISMISS_ROOM);
 }
 
+//设置玩家自动准备定时器
+void CTableFrame::SetPlayerAutoReady()
+{
+	SetGameTimer(IDI_PLAYER_AUTO_READY, TIME_PLAYER_AUTO_READY, 1, NULL);
+}
+//设置开始下一阶段定时器
+void CTableFrame::SetStageTimer()
+{
+	SetGameTimer(IDI_MATCH_NEXT_STAGE_START, TIME_MATCH_NEXT_STAGE_START, 1, NULL);
+}
+
+
+<<<<<<< HEAD
+=======
+>>>>>>> 鏇存柊姣旇禌鍦?2.7
 /***************************************   游戏流程函数    ***************************************************/
 //开始游戏
 bool CTableFrame::StartGame()
@@ -178,6 +201,7 @@ bool CTableFrame::HandleXJGameEnd(BYTE byRound, SCORE *lUserTreasure, VOID* pDat
 		XJTickets();
 	}
 
+<<<<<<< HEAD
 	//更新用户财富  -- 用户财富变更记录表
 	XJModifyUserTreasure(lUserTreasure);
 
@@ -197,6 +221,8 @@ bool CTableFrame::HandleXJGameEnd(BYTE byRound, SCORE *lUserTreasure, VOID* pDat
 #pragma region 桌子信息
 	//更新桌子战绩
 	XJUpdateTableRecord(byRound, OnlyID);
+=======
+>>>>>>> 鏇存柊姣旇禌鍦?2.7
 
 	//更新桌子录像
 	XJUpdateTableVideo(byRound, OnlyID, pData, dwDataSize);
@@ -518,8 +544,11 @@ int CTableFrame::PlayerLeaveTable(CPlayer* pPlayer)
 	//广播发送
 	SendTableData(INVALID_CHAIR, CMD_GR_USER_STATUS, &GameStatus, sizeof(GameStatus), MDM_G_FRAME);
 
+<<<<<<< HEAD
 	//断开用户 socket (金币场结束不断)
 	if ( m_tagTableRule.GameMode != TABLE_MODE_GOLD)   //断线重连产生问题
+=======
+>>>>>>> 鏇存柊姣旇禌鍦?2.7
 		CPlayerManager::CloseSocket(pPlayer);
 
 	//2. Table
@@ -888,6 +917,27 @@ bool CTableFrame::OnEventTimer(DWORD dwTimerID, WPARAM dwBindParameter)
 			}
 			return true;
 #pragma endregion
+		}
+	case IDI_PLAYER_AUTO_READY:		//玩家自动准备
+		{
+			KillGameTimer(IDI_PLAYER_AUTO_READY);
+
+			for (auto player : m_player_list)
+			{
+				if (!player) continue;
+
+				PlayerReady(player);
+			}
+
+			return true;
+		}
+	case IDI_MATCH_NEXT_STAGE_START:	//开始比赛下一阶段
+		{
+			KillGameTimer(IDI_MATCH_NEXT_STAGE_START);
+
+			StartNextStage();
+
+			return true;
 		}
 	case IDI_WAIT_CONTINUE:
 		{

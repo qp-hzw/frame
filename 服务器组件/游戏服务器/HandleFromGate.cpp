@@ -25,6 +25,10 @@ bool CHandleFromGate::HandlePacket(TCP_Command Command, VOID * pData, WORD wData
 		{
 			return OnTCPNetworkMainGame(Command.wSubCmdID,pData,wDataSize,dwSocketID);
 		}
+	case MDM_GR_MATCH:		//比赛命令
+		{
+			return OnTCPNetworkMainMatch(Command.wSubCmdID,pData,wDataSize,dwSocketID);
+		}
 	}
 
 	return true;
@@ -200,6 +204,25 @@ bool CHandleFromGate::OnTCPNetworkMainFrame(WORD wSubCmdID, VOID * pData, WORD w
 	return pTableFrame->OnEventSocketFrame(wSubCmdID,pData,wDataSize,pIServerUserItem);
 }
 
+//比赛处理
+bool CHandleFromGate::OnTCPNetworkMainMatch(WORD wSubCmdID, VOID * pData, WORD wDataSize, DWORD dwSocketID)
+{
+	switch (wSubCmdID)
+	{
+	case SUB_CG_MATCH_INFO:		//请求比赛场信息
+		{
+			return On_SUB_CG_MATCH_INFO(pData, wDataSize, dwSocketID);
+		}
+	case SUB_CG_MATCH_APPLY:	//玩家报名
+		{
+
+		}
+	case SUB_CG_MATCH_UNAPPLY:	//取消报名
+		{
+
+		}
+	}
+}
 
 #pragma region 登录模块 MDM_LOGON
 //I D 登录
@@ -1595,6 +1618,19 @@ bool CHandleFromGate::OnEventModifyUserTreasure(CPlayer *pIServerUserItem, DWORD
 
 	//发送数据
 	g_GameCtrl->PostDataBaseRequest(DBR_GR_MODIFY_USER_TREASURE, pIServerUserItem->GetSocketID(), &DBR, sizeof(DBR));
+
+	return true;
+}
+
+/***************************************【主消息 7】*******************************************************/
+//请求比赛场信息
+bool CHandleFromGate::On_SUB_CG_MATCH_INFO(VOID * pData, WORD wDataSize, DWORD dwSocketID)
+{
+	//校验
+
+	//构造数据
+
+	//发送
 
 	return true;
 }

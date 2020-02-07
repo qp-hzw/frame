@@ -200,3 +200,28 @@ std::list<CTableFrame*> CTableManager::GetAllGlodTable()
 
 	return glod_talbe_array;
 }
+
+//创建比赛场桌子
+CMatchRoom* CTableManager::CreateMatchRoom(CMatchItem* Item)
+{
+	if (Item == NULL)
+		return NULL;
+
+	//获取房间号
+	srand(static_cast<unsigned int >(time(NULL)));
+	DWORD dwPassword = GenerateTablePassword();
+	if(dwPassword == 0) return NULL;
+
+	//构建
+	CMatchRoom *pMatch = new CMatchRoom(Item);
+	if (pMatch == NULL)
+		return NULL;
+
+	//设置房间
+	pMatch->SetGameStatus(GAME_STATUS_FREE);
+	pMatch->SetTableID(dwPassword);
+
+	s_TableArray.push_back(pMatch);
+
+	return pMatch;
+}

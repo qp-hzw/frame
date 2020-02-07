@@ -413,50 +413,106 @@ struct CMD_GR_KickUser
 #pragma endregion
 
 #pragma region  MDM_GR_MATCH 比赛命令
-//比赛人数
-struct CMD_GR_Match_Num
+
+//单个比赛场配置
+struct MATCH_CONFIG
 {
-	DWORD							dwWaitting;							//等待人数
-	DWORD							dwTotal;							//开赛人数
-	DWORD							dwMatchTotal;						//总人数
+	//阶段信息
+	struct STAGE_INFO
+	{
+		TCHAR	szName[MAX_MATCH_TITLE];	//初赛、半决赛、决赛..
+		WORD	wXJCount;					//小局数
+		WORD	wPlayerCount;				//人数
+		WORD	wJinJi_Rule;				//晋级规则   同桌比较/全桌比较
+		WORD	wJinJi_Count;				//晋级名额
+	};
+
+	//比赛场信息
+	WORD		wMatchID;							//比赛场ID标识
+	TCHAR		szTitle[MAX_MATCH_TITLE];			//标题
+	TCHAR		szDescribe[MAX_MATCH_TITLE];		//比赛描述
+	STAGE_INFO	stage[MAX_MATCH_STAGE];				//阶段信息
+	WORD		wStageSize;							//阶段个数
+	SCORE		llBaseScore;						//底分
+
+	//比赛场属性
+	DWORD		dwStartTime;						//开始时间 （-1表示人满即开）
+	WORD		wStartType;							//开始类型  (0-人满开始  1-定时开始)
+	DWORD		dwLowestPlayer;						//最少参赛人数
+	SCORE		llFee;								//报名费
+	SCORE		llReword;							//奖励
+
+	//机器人信息
+	DWORD		dwRobotCount;						//机器人数量
+	DWORD		dwRobotJoinMin;						//机器人最小加入周期
+	DWORD		dwRobotJoinMax;						//机器人最大加入周期
 };
 
-//赛事信息
-struct CMD_GR_Match_Info
+//请求比赛场信息
+struct STR_CMD_GC_MATCH_INFO
 {
-	TCHAR							szTitle[4][64];						//信息标题
-    WORD							wGameCount;							//游戏局数
+	MATCH_CONFIG	cfg[MAX_MATCH];
+	WORD			wCfgSize;
 };
 
-//提示信息
-struct CMD_GR_Match_Wait_Tip
+//比赛场报名
+struct STR_SUB_CG_MATCH_APPLY
 {
-	SCORE							lScore;								//当前积分
-	WORD							wRank;								//当前名次
-	WORD							wCurTableRank;						//本桌名次
-	WORD							wUserCount;							//当前人数
-	WORD							wPlayingTable;						//游戏桌数
-	TCHAR							szMatchName[LEN_SERVER];			//比赛名称
+	WORD			wMatchID;		//比赛场ID
 };
 
-//比赛结果
-struct CMD_GR_MatchResult
+//报名返回
+struct STR_CMD_GC_MATCH_APPLY
 {
-	TCHAR							szDescribe[256];					//得奖描述
-	DWORD							dwGold;								//金币奖励
-	DWORD							dwMedal;							//奖牌奖励
-	DWORD							dwExperience;						//经验奖励
+	bool			bSuccess;			//是否成功报名 0-成功 -1-失败
+	TCHAR			szDescribe[256];	//描述
+	WORD			wApplyCount;		//已报名人数
+	WORD			wRule;				//开赛规则 0-人满 1-定时
+	DWORD			dwLeaveTime;		//定时赛 开赛剩余时间
+	WORD			wLeaveCount;		//人满赛 还需报名人数
 };
 
-#define MAX_MATCH_DESC				4									//最多描述
-//比赛描述
-struct CMD_GR_MatchDesc
+//取消报名
+struct STR_SUB_CG_MATCH_UNAPPLY
 {
-	TCHAR							szTitle[MAX_MATCH_DESC][16];		//信息标题
-	TCHAR							szDescribe[MAX_MATCH_DESC][64];		//描述内容
-	COLORREF						crTitleColor;						//标题颜色
-	COLORREF						crDescribeColor;					//描述颜色
+	WORD			wMatchID;		//比赛ID
 };
+
+//取消报名返回
+struct STR_CMD_GC_MATCH_UNAPPLY
+{
+	bool			bSuccess;			//成功标识  0-成功 -1-失败
+	TCHAR			szDescribe[256];	//描述
+};
+
+//比赛阶段结果
+struct STR_CMD_GC_MATCH_RESULT
+{
+	WORD			wResult;			// 0-淘汰 1-晋级
+	WORD			wRanking;			//排名
+	WORD			wWaitCount;			//等待桌数
+};
+
+//更新排名
+struct STR_CMD_GC_MATCH_RANKING
+{
+	struct player_info
+	{
+		TCHAR		szName[128];		//玩家昵称
+		WORD		wRanking;			//排名
+		SCORE		llScore;			//总得分
+	};
+
+	player_info		player[80];			//
+	WORD			wPlayerCount;		//玩家人数
+};
+
+//决赛
+struct CMD_GC_MATCH_JUESAI_RECODE
+{
+
+};
+
 #pragma endregion
 
 #pragma region MDM_G_FRAME 框架命令

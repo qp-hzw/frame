@@ -25,6 +25,10 @@
 #define IDI_TABLE_MODULE_START		10000								//起始标识
 #define IDI_TABLE_MODULE_FINISH		50010000							//终止标识
 
+//比赛场事件范围
+#define IDI_MATCH_MODULE_START		150									//起始
+#define IDI_MATCH_MODULE_FINISH		200									//终止
+
 //回调事件范围
 #define TIME_TABLE_SINK_RANGE		40									//标识范围
 #define TIME_TABLE_MODULE_RANGE		50									//标识范围
@@ -148,6 +152,23 @@ public:
 	//检测房间
 	void CheckRoomTruePlayer();
 
+	//比赛场相关
+public:
+	//房间是否满了
+	bool IsRoomFull() { return (m_wChairCount == m_user_list.size()); }
+
+	//玩家自动准备定时器
+	void SetPlayerAutoReady();
+
+	//获取桌子里所有玩家
+	std::vector<CPlayer *> GetPlayer_list() { return m_player_list; }
+
+	//设置开始下一阶段定时器
+	void SetStageTimer();
+
+	//开始下一阶段比赛
+	virtual void StartNextStage() {};
+
 #pragma endregion
 
 	//子游戏与框架接口函数
@@ -228,17 +249,17 @@ public:
 	//玩家动作
 public:
 	//玩家加入
-	int PlayerEnterTable(CPlayer* pPlayer);
+	virtual int PlayerEnterTable(CPlayer* pPlayer);
 	//玩家坐下		只有创建和加入房间时，用户坐下时需要校验GPS，故加此字段
-	int PlayerSitTable(CPlayer * pIServerUserItem, WORD wChairID = INVALID_CHAIR, bool bCheckUserGPS = false);
+	virtual int PlayerSitTable(CPlayer * pIServerUserItem, WORD wChairID = INVALID_CHAIR, bool bCheckUserGPS = false);
 	//玩家起立
-	bool PlayerUpTable(CPlayer * pIServerUserItem);
+	virtual bool PlayerUpTable(CPlayer * pIServerUserItem);
 	//玩家离开
-	int PlayerLeaveTable(CPlayer* pPlayer);
+	virtual int PlayerLeaveTable(CPlayer* pPlayer);
 	//玩家准备
-	int PlayerReady(CPlayer* pPlayer);
+	virtual int PlayerReady(CPlayer* pPlayer);
 	//玩家断线
-	int PlayerOffline(CPlayer* pPlayer);
+	virtual int PlayerOffline(CPlayer* pPlayer);
 
 	//玩家动作辅助函数
 private:

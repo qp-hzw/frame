@@ -164,6 +164,13 @@ public:
 
 #pragma endregion
 
+	#pragma region 比赛事件 MDM_GR_MATCH
+private:
+	//请求比赛场信息
+	static bool On_SUB_CG_MATCH_INFO(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+
+#pragma endregion
+
 		//用户接口
 public:
 	//更新用户财富信息

@@ -35,9 +35,15 @@ public:
 
 	//金币场
 public:
+<<<<<<< HEAD
 	//获取金币场 房间规则
 	static tagTableRule GetGoldRoomRule(BYTE byType);
-
+=======
+>>>>>>> 鏇存柊姣旇禌鍦?2.7
+	//获取房间配置选项
+	rule_arry GetRoomRuleSetting();
+	//设置比赛场规则
+	void SetMatchRule(tagTableRule& roomRule);
 	//获取金币场 所有房间数据
 	static std::vector<STR_CMD_GC_USER_GOLD_INFO>  GetAllRoomInfo();
 	//获取金币场 特定房间等级的 房间数据

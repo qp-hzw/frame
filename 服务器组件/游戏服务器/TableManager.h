@@ -1,9 +1,11 @@
 #ifndef TABLE_MANAGER_HEAD_FILE
 #define TABLE_MANAGER_HEAD_FILE
 
-#include <vector>
 #include "Stdafx.h"
+#include <vector>
 #include <list>
+#include "MatchRoom.h"
+#include "MatchItem.h"
 
 class CTableFrame;
 
@@ -31,6 +33,8 @@ public:
 	static CTableFrame* GetGlodTable(BYTE byType);
 	//获取所有空闲金币场桌子
 	static std::list<CTableFrame*> GetAllGlodTable();
+	//创建比赛场桌子
+	static CMatchRoom* CreateMatchRoom(CMatchItem* Item);
 
 	//
 public:

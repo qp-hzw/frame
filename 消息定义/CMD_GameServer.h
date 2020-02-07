@@ -98,15 +98,21 @@
 ** *********************************************************************************/
 #define MDM_GR_MATCH				7									//比赛命令
 
-#define SUB_GR_MATCH_FEE			400									//报名费用
-#define SUB_GR_MATCH_NUM			401									//等待人数
-#define SUB_GR_LEAVE_MATCH			402									//退出比赛
-#define SUB_GR_MATCH_INFO			403									//比赛信息
-#define SUB_GR_MATCH_WAIT_TIP		404									//等待提示
-#define SUB_GR_MATCH_RESULT			405									//比赛结果
-#define SUB_GR_MATCH_STATUS			406									//比赛状态
-#define SUB_GR_MATCH_USER_COUNT		407									//参赛人数
-#define SUB_GR_MATCH_DESC			408									//比赛描述
+#define SUB_CG_MATCH_INFO			1									//请求比赛场信息
+#define CMD_GC_MATCH_INFO			11									//请求比赛场信息  返回
+
+#define SUB_CG_MATCH_APPLY			2									//比赛场报名
+#define CMD_GC_MATCH_APPLY			12									//比赛场报名	返回
+#define SUB_CG_MATCH_UNAPPLY		3									//玩家取消报名
+#define CMD_GC_MATCH_UNAPPLY		13									//玩家取消报名  返回
+
+#define CMD_GC_MATCH_START			4									//比赛开始
+#define CMD_GC_MATCH_CANCEL			5									//比赛取消
+
+#define CMD_GC_MATCH_RESULT			6									//比赛阶段结果 玩家淘汰/晋级
+
+#define CMD_GC_MATCH_RANKING		7									//更新排名
+#define CMD_GC_MATCH_JUESAI_RECODE	8									//决赛战绩
 
 #pragma endregion
 
