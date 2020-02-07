@@ -119,9 +119,6 @@ public:
 	//创建牌友圈桌子(先读取数据库中的房间规则)
 	static bool CreateTableClub(STR_DBO_GC_CLUB_CREATE_TABLE* , CPlayer *pCPlayer);
 
-	//创建桌子 金币大厅桌子  -- 玩家进入金币大厅时候, 如果没有找到可用的桌子,就会创建桌子
-	static bool CreateTableHallGold(STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD* , CPlayer *pCPlayer);
-
 	//创建桌子 俱乐部桌子  -- 玩家进入俱乐部桌子时候, 如果没有找到可用的桌子,就会创建桌子
 	static bool CreateTableAutoClub(STR_DBO_CG_USER_JOIN_TABLE_NO_PASS* , CPlayer *pCPlayer);
 
@@ -140,19 +137,6 @@ protected:
 #pragma endregion 
 
 	#pragma region DB事件通知
-	//替他人开房
-public:
-	//添加替他人开房
-	static bool AddOtherRoomInfo(DBR_GR_UpdateTableInfo* pTableInfo);
-	//替他人开房结束  && club 游戏开始
-	static  void ConcludeTable(DWORD dwTableID);
-	//替他人开房开始 && club小局结束
-	static  void StartTable(DWORD dwTableID);
-	//用户加入替他人开房 && club桌子解散
-	static  void JoinTable(DWORD dwTableID, DWORD dwUserID);
-	//用户离开替他人开房
-	static  void LeaveTable(DWORD dwTableID, DWORD dwUserID);
-
 
 	//Club牌友圈2  &&  金币大厅（1.用户信息  2.桌子信息）
 public:

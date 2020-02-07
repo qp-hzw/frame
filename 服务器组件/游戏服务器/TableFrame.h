@@ -23,7 +23,7 @@
 
 //桌子事件范围
 #define IDI_TABLE_MODULE_START		10000								//起始标识
-#define IDI_TABLE_MODULE_FINISH		50010000								//终止标识
+#define IDI_TABLE_MODULE_FINISH		50010000							//终止标识
 
 //回调事件范围
 #define TIME_TABLE_SINK_RANGE		40									//标识范围
@@ -46,23 +46,20 @@ class CTableFrame : public ITableFrame
 
 #pragma region 成员变量
 	/****************************************** 静态数据 **************************************************/
+	//组件接口
+protected:
+	ITableFrameSink	*				m_pITableFrameSink;					//桌子接口
+
 private:
 	DWORD							m_wTableID;							//桌子标志 6位
 	WORD							m_wChairCount;						//椅子数目
 
-	BYTE							m_cbTableMode;						//桌子游戏模式  房卡场, 金币场, 房卡金币场, 比赛场
-	BYTE							m_cbGoldType;						//金币桌子 的场次
-
-	tagTableRule					m_tagTableRule;						//通用房间规则(client传给服务端大厅的)
-	tagTableSubGameRule				m_tagTableSubGameRule;				//子游戏特有房间规则(client传给子游戏的)
-
-	//TODOLATER 只保留一个字段
-	DWORD							m_dwTableOwner;						//房主（第一个坐下的玩家）
-	DWORD							m_dwCreateTableUser;				//创建桌子用户
-
 	//TODOLATER 待整理
 	DWORD							m_dwGroupID;						//所在牌友圈ID
 
+	tagTableRule					m_tagTableRule;						//通用房间规则(client传给服务端大厅的)
+
+	DWORD							m_dwTableOwner;						//房主（第一个坐下的玩家）
 
 	/****************************************** 动态数据 **************************************************/
 private:
@@ -74,18 +71,10 @@ private:
 	
 	//房间解散
 public:
-	bool							m_bAgree[MAX_CHAIR];					//同意解散
-	bool							m_bResponseDismiss[MAX_CHAIR];			//响应解散
-	bool							m_bUnderDissState;						//桌子是否处于解散状态
-	WORD							m_dissmisserChaiID;						//解散发起者
-
-	//时间变量
-protected:
-	SYSTEMTIME						m_SystemTimeStart;					//开始时间
-
-	//组件接口
-protected:
-	ITableFrameSink	*				m_pITableFrameSink;					//桌子接口
+	bool							m_bAgree[MAX_CHAIR];				//同意解散
+	bool							m_bResponseDismiss[MAX_CHAIR];		//响应解散
+	bool							m_bUnderDissState;					//桌子是否处于解散状态
+	WORD							m_dissmisserChaiID;					//解散发起者
 
 	//游戏记录
 protected:
@@ -109,6 +98,17 @@ public:
 	virtual bool ConcludeService(){return true;}
 #pragma endregion
 
+#pragma region 桌子只读属性
+public:
+	//获取房间模式
+	virtual BYTE GetTableMode(){return m_tagTableRule.GameMode;};
+	//获取金币场场次
+	BYTE GetGoldType() { return m_tagTableRule.GameRoomLevel; }
+
+	//获取椅子数目
+	WORD GetChairCount() { return m_wChairCount; }
+
+#pragma endregion
 #pragma region 桌子属性设置与获取
 public:
 	//桌子编号
@@ -116,76 +116,34 @@ public:
 	//设置密码
 	virtual void SetTableID(DWORD dwTableID){ m_wTableID=dwTableID; }
 
-	//获取椅子数目
-	WORD GetChairCount() { return m_wChairCount; }
-	//获取子游戏组件
-	ITableFrameSink	* GetTableFrameSink() { return m_pITableFrameSink; }
-
 	//获取状态
 	virtual BYTE GetGameStatus() { return m_cbGameStatus; }
 	//设置状态
 	virtual VOID SetGameStatus(BYTE cbGameStatus) { m_cbGameStatus=cbGameStatus; }
-
-	//设置金币场场次
-	void SetGoldType(BYTE byType) { m_cbGoldType = byType; }
-	//获取金币场场次
-	BYTE GetGoldType() { return m_cbGoldType; }
 
 	//设置桌主，第一个坐下的人
 	virtual void SetTableOwner(DWORD dwUserID) {m_dwTableOwner = dwUserID;}
 	//获得桌主，第一个坐下的人
 	virtual DWORD GetTableOwner() {return m_dwTableOwner;}
 
-	//获取房间模式
-	virtual BYTE GetTableMode(){return m_cbTableMode;};
-	//设置房间模式
-	virtual void SetTableMode(BYTE mode){ m_cbTableMode = mode; };
-
-	//设置创建桌子的用户
-	virtual void SetCreateTableUser(DWORD dwUserID){m_dwCreateTableUser = dwUserID;};
-	virtual DWORD GetCreateTableUser(){return m_dwCreateTableUser;};
-
 	//获取、设置用户圈房卡
 	virtual void SetGroupID(DWORD dwGroupID){m_dwGroupID = dwGroupID;};
 	virtual DWORD GetGroupID(){return m_dwGroupID;};
 
 	//读取房间通用规则
-	virtual VOID * GetCustomRule() { return &m_tagTableRule;};
+	virtual tagTableRule* GetCustomRule() { return &m_tagTableRule;};
 	//设置房间通用规则
 	virtual void SetCommonRule(tagTableRule* pRule)
 	{
+		//初始化大厅规则
 		memcpy(&m_tagTableRule, pRule, sizeof(m_tagTableRule));
 		m_wChairCount = pRule->PlayerCount;
 		m_player_list.resize(m_wChairCount, NULL);
 		m_user_list.resize(m_wChairCount, NULL);
-		SetTableMode(pRule->GameMode);
 
-		InitTableFrameSink();
+		//初始化子游戏规则
+		m_pITableFrameSink->Initialization(this, &m_tagTableRule);
 	};
-
-	//读取子游戏特有房间规则
-	virtual VOID * GetSubGameRule() { return &m_tagTableSubGameRule;};
-	//设置子游戏特有房间规则
-	virtual void SetSubGameRule(tagTableSubGameRule* pRule)
-	{
-		memcpy(&m_tagTableSubGameRule, pRule, sizeof(m_tagTableSubGameRule));
-	};
-
-	//初始化子游戏
-	bool InitTableFrameSink();
-
-	//房间是否处于解散状态
-	bool GetDismissState();
-	//设置房间处于解散状态
-	void SetDismissState(bool bState);
-
-	//设置表决解散房间定时器
-	void SetVoteDismissRoom();
-	//取消表决解散房间定时器
-	void KillVoteDismissRoom();
-
-	//设置房间自动解散时间 added by lizhihu
-	virtual void SetTableAutoDismiss(DWORD dwMinutes = 1);
 
 	//检测房间
 	void CheckRoomTruePlayer();
@@ -195,7 +153,7 @@ public:
 	//子游戏与框架接口函数
 public:
 	// 0房卡 1比赛; 2金币; 3房卡金币 4牌友圈
-	virtual int GameType() { return m_cbTableMode; }
+	virtual int GameType() { return m_tagTableRule.GameMode; }
 	//is roboot
 	virtual bool IsRobot(WORD wChairID);
 	//get player base info
@@ -203,30 +161,31 @@ public:
 
 #pragma region 游戏流程函数
 	//自身调用，与子游戏无关
-public:
+private:
 	//开始游戏
-	virtual bool StartGame();
+	bool StartGame();
 
 	//与子游戏交互函数
 public:
 	//小局结束处理函数
-	virtual bool HandleXJGameEnd(BYTE cbCurGameCount, BYTE cbGameMode, SCORE *lGameScore);
+	virtual bool HandleXJGameEnd(BYTE cbCurGameCount, SCORE *lGameScore, VOID* pData, DWORD dwDataSize);
 	//大局结束处理函数  之前名字为: HandleDJGameEnd
 	virtual bool HandleDJGameEnd(BYTE cbGameStatus);
 
-	//写入录像记录(战绩回放) 参数 小局数,数据和长度
-	bool WriteRecordInfo(WORD wXJCount,TCHAR strScore[], VOID* pData, DWORD dwDataSize);
-
 	//小局大局结束辅助函数
-protected:	
+private:	
 	//每局游戏结束后, 判断并扣除用户门票
-	bool XJGameTickets(BYTE byTableMode, BYTE byRound);
+	bool XJTickets();
 	//每局游戏结束后，更新用户财富信息
-	bool XJModifyUserTreasure(BYTE byTableMode, BYTE byRound, SCORE *lGameScore, tagTableRule *pCfg);	
-	//每局游戏结束后, 检测用户财富是否可以继续游戏
-	bool CheckUserLeave(BYTE byTableMode, CPlayer* pIServerUserItem, tagTableRule* pCfg);
+	bool XJModifyUserTreasure(SCORE *lGameScore);
 	//每局游戏结束后，更新游戏任务状态
 	bool XJUpdateGameTaskStatus(const BYTE &cbTableMode, const BYTE &cbCurGameCount);
+
+	//每局游戏结束后, 更新桌子战绩表
+	bool XJUpdateTableRecord(BYTE round, string OnlyID);
+	//每局游戏结束后, 更新桌子录像表
+	bool XJUpdateTableVideo(BYTE round, string OnlyID, VOID* pData, DWORD dwDataSize);
+
 #pragma endregion
 
 #pragma region 定时器
@@ -245,9 +204,8 @@ public:
 public:
 	//发送数据
 	virtual bool SendTableData(WORD wChairID, WORD wSubCmdID, VOID * pData, WORD wDataSize, WORD wMainCmdID = MDM_GF_GAME);
-
 	//发送场景
-	virtual bool SendGameScene(IServerUserItem * pIServerUserItem, VOID * pData, WORD wDataSize);
+	virtual bool SendGameScene(WORD wChairID, VOID * pData, WORD wDataSize);
 
 	//系统消息
 public:
@@ -282,7 +240,6 @@ public:
 	//玩家断线
 	int PlayerOffline(CPlayer* pPlayer);
 
-
 	//玩家动作辅助函数
 private:
 	int CanPlayerEnterTable(CPlayer* pPlayer);
@@ -290,9 +247,6 @@ private:
 	int CanPlayerUpTable(CPlayer* pPlayer);
 	int CanPlayerLeaveTable(CPlayer* pPlayer);
 	int CanPlayerReady(CPlayer* pPlayer);
-
-	//门票检测
-	int CheckTicket(CPlayer* pPlayer);
 
 #pragma endregion
 
@@ -316,6 +270,19 @@ public:
 	bool OnEventApplyDismissRoom(WORD wChairID, bool bAgree);
 	//表决是否解散房间
 	bool OnEventVoteDismissRoom(WORD wChairID,bool bAgree);
+
+	//房间是否处于解散状态
+	bool GetDismissState();
+	//设置房间处于解散状态
+	void SetDismissState(bool bState);
+
+	//设置表决解散房间定时器
+	void SetVoteDismissRoom();
+	//取消表决解散房间定时器
+	void KillVoteDismissRoom();
+
+	//设置房间自动解散时间 added by lizhihu
+	virtual void SetTableAutoDismiss(DWORD dwMinutes = 1);
 #pragma endregion
 
 	//系统事件

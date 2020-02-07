@@ -1,5 +1,6 @@
 #include "Stdafx.h"
 #include "Player.h"
+#include "DataBaseEngineSink.h"
 
 //构造函数
 CPlayer::CPlayer(tagUserInfo & UserInfo)
@@ -79,20 +80,6 @@ bool CPlayer::SetUserStatus(BYTE cbUserStatus, DWORD wTableID, WORD wChairID)
 	return true;
 }
 
-//更新用户财富信息
-bool CPlayer::ModifyUserTreasure(DWORD dwTableID, BYTE byTableMode, BYTE byRound, SCORE lUserTreasuse, BYTE byWin) 
-{
-	/*
-	//发送状态
-	if (m_pIServerUserItemSink!=NULL) 
-	{
-		m_pIServerUserItemSink->OnEventModifyUserTreasure(this, dwTableID, byTableMode, byRound, lUserTreasuse, byWin);
-	}
-	*/
-
-	return true;
-}
-
 //重置数据
 VOID CPlayer::ResetUserItem()
 {
@@ -113,4 +100,60 @@ VOID CPlayer::ResetUserItem()
 	m_UserInfo.wTableID=INVALID_TABLE;
 	m_UserInfo.wChairID=INVALID_CHAIR;
 	return;
+}
+
+
+//修改用户财富
+bool CPlayer::ModifyUserTreasure(BYTE byTreasureType,  SCORE lUserTreasuse, string strPayMsg) 
+{
+	if( (byTreasureType < TREASURE_FK) || (byTreasureType > TREASURE_DIAMOND) )
+	{
+		return false;
+	}
+
+	//输入参数
+	g_TreasureDB->ResetParameter();
+	g_TreasureDB->AddParameter(TEXT("@UserID"), GetUserID());
+	g_TreasureDB->AddParameter(TEXT("@TreasureType"),byTreasureType);
+	g_TreasureDB->AddParameter(TEXT("@TreasureNum"),lUserTreasuse);
+	g_TreasureDB->AddParameter(TEXT("@Comment"), strPayMsg.c_str());
+
+	//执行查询
+	LONG lResultCode = g_TreasureDB->ExecuteProcess(TEXT("GSP_TreasureRecord_Insert"), true);
+
+	//TODONOW 修改用户在server中的数据
+
+	return true;
+}
+
+//更新用户输赢记录表
+bool CPlayer::ModifyPlayerScore(BYTE round, SCORE lUserTreasuse, string Msg)
+{
+	//输入参数
+	g_TreasureDB->ResetParameter();
+	g_TreasureDB->AddParameter(TEXT("@UserID"), GetUserID());
+	g_TreasureDB->AddParameter(TEXT("@CurCount"),round);
+	g_TreasureDB->AddParameter(TEXT("@Score"),lUserTreasuse);
+	g_TreasureDB->AddParameter(TEXT("@OnlyID"), Msg.c_str());
+
+	//执行查询
+	LONG lResultCode = g_TreasureDB->ExecuteProcess(TEXT("GSP_PlayerScore_Insert"), true);
+
+	return true;
+}
+
+//更新用户经验值
+bool CPlayer::ModifyPlayerExp()
+{
+	/*
+	//输入参数
+	g_TreasureDB->ResetParameter();
+	g_TreasureDB->AddParameter(TEXT("@UserID"), GetUserID());
+	g_TreasureDB->AddParameter(TEXT("@CurCount"),round);
+
+	//执行查询
+	LONG lResultCode = g_TreasureDB->ExecuteProcess(TEXT("GSP_PlayerScore_Insert"), true);
+	*/
+
+	return true;
 }

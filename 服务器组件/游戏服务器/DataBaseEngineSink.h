@@ -3,6 +3,8 @@
 
 #include "Stdafx.h"
 #include "DataBasePacket.h"
+                 
+extern IDataBase		 *g_TreasureDB;
 
 //数据库类
 class CDataBaseEngineSink : public IDataBaseEngineSink
@@ -89,14 +91,6 @@ protected:
 	//写当前库存
 	bool OnWriteCurrentStock(DWORD dwContextID, VOID * pData, WORD wDataSize, DWORD &dwUserID);
 
-protected:
-	//更新用户财富信息
-	bool On_DBR_ModifyUserTreasure(DWORD dwContextID, void * pData, WORD wDataSize, DWORD &dwUserID);
-
-protected:
-	//录像保存
-	bool On_DBR_SaveGameRecord(DWORD dwContextID, void * pData, WORD wDataSize, DWORD &dwUserID);
-
 	//辅助函数
 private:
 
@@ -151,6 +145,8 @@ const CString toHexString(const byte * input, const int datasize);
 
 // string 转为byte数组  TODONOW 暂时放在这里处理
 int StrToBin(TCHAR* inWord, BYTE* OutBin, int source_len_begin, int source_len_end);
+
+
 
 //////////////////////////////////////////////////////////////////////////////////
 

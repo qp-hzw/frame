@@ -11,7 +11,7 @@ using namespace std;
 std::list<CTableFrame*>	               CTableManager::s_TableArray;					//桌子数组
 
 //增
-CTableFrame* CTableManager::CreateTable()
+CTableFrame* CTableManager::CreateTable(tagTableRule* cfg, DWORD fangzhu)
 {
 	//获取房间号
 	srand(static_cast<unsigned int >(time(NULL)));
@@ -26,6 +26,8 @@ CTableFrame* CTableManager::CreateTable()
 	//设置房间
 	pTableFrame->SetGameStatus(GAME_STATUS_FREE);
 	pTableFrame->SetTableID(dwPassword);
+	pTableFrame->SetCommonRule(cfg);
+	pTableFrame->SetTableOwner(fangzhu);
 
 	//设置房间自动解散，默认一分钟 -- 这里是指不开始游戏 自动一分钟后解散
 	//pTableFrame->SetTableAutoDismiss();
@@ -47,7 +49,7 @@ bool CTableManager::DeleteTable(CTableFrame* pTable)
 		{
 			CLog::Log(log_debug, "Delete Table : %d", pTable->GetTableID() );
 			ite = s_TableArray.erase(ite);
-			//delete pTable;
+			delete pTable;
 			pTable = NULL;
 			break;
 		}
@@ -171,22 +173,11 @@ CTableFrame* CTableManager::GetGlodTable(BYTE byType)
 
 	if(pTableFrameReturn == NULL)
 	{
-		pTableFrameReturn = CreateTable();
+		pTableFrameReturn = CreateTable(&(RoomRuleManager::GetGoldRoomRule(byType)), 0);
 		if(pTableFrameReturn == NULL)
 		{
 			CLog::Log(log_error, "GetGlodTable  type:%d  failed", byType);
 		}
-
-		//设置房间规则
-		tagTableRule roomRule;
-		ZeroMemory(&roomRule, sizeof(tagTableRule));
-		RoomRuleManager::Instance()->SetGoldRule(roomRule, byType);
-
-		//设置场次
-		pTableFrameReturn->SetGoldType(byType);
-
-		//设置通用规则
-		pTableFrameReturn->SetCommonRule(&roomRule);
 	}
 
 	return pTableFrameReturn;

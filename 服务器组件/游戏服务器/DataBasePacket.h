@@ -41,9 +41,6 @@ struct DBR_GP_UserQuitInfo
 //配置事件
 #define DBR_GR_LOAD_ANDROID_USER	302									//加载机器
 
-//录像信息保存
-#define DBR_GR_SAVE_RECORDINFO		411									//录像信息保存
-
 
 #define DBR_GR_ADD_TABLE_INFO		413									//更新桌子信息
 #define DBR_GR_START_TABLE			414									//开始桌子
@@ -296,14 +293,6 @@ struct STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD
 	DWORD							dwMinGold;		//进入房间所需的最小金币
 
 	STR_SUB_CG_USER_CREATE_ROOM		strCreateRoom;	//房间规则
-};
-
-//录像信息
-struct DBR_GR_GameRecordInfo
-{
-	DWORD							dwTableID;						//桌子ID
-	WORD							wCurrentCount;					//当前局数
-	BYTE							szData[LEN_MAX_RECORD_SIZE];	//录像数据
 };
 
 //离开房间

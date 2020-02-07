@@ -17,7 +17,7 @@ private:
 	//
 public:
 	//Ôö
-	static CTableFrame* CreateTable();
+	static CTableFrame* CreateTable(tagTableRule* cfg, DWORD fangzhu);
 	//É¾
 	static bool DeleteTable(CTableFrame* pTable);
 	//É¾

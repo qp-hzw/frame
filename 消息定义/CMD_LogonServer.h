@@ -33,7 +33,7 @@
 ** *********************************************************************************/
 #define MDM_LOGON					1									//主消息
 
-#define SUB_CL_COMMON_ERROR		    0									//通用错误 
+#define CMD_LC_COMMON_ERROR		    0									//通用错误 
 
 #define SUB_CL_LOGON_ACCOUNTS		1									//帐号登录
 #define SUB_CL_LOGON_REGISTER	    2									//帐号注册（返回的是登录成功）

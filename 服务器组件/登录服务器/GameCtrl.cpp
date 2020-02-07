@@ -187,7 +187,7 @@ bool CGameCtrl::SendDataMsg(DWORD dwSocketID, string msg)
 	STR_SUB_CL_COMMON_ERROR cmd;
 	memcpy(cmd.szMsg, chr2wch(msg.c_str()), sizeof(TCHAR)*20);
 
-	SendData(dwSocketID, MDM_LOGON, SUB_CL_COMMON_ERROR, &cmd, sizeof(cmd));
+	SendData(dwSocketID, MDM_LOGON, CMD_LC_COMMON_ERROR, &cmd, sizeof(cmd));
 	return true;
 }
 /***************************************************  消息发送  ->DB  *************************************************/

@@ -30,6 +30,7 @@
 ** *********************************************************************************/
 #define MDM_GR_LOGON				1										//登录信息
 
+#define CMD_GC_COMMON_ERROR		    0									    //通用错误 
 //登录
 #define SUB_CG_LOGON_USERID			1										//ID 登录
 #define CMD_GC_LOGON_USERID			101										//ID 登录返回
@@ -57,26 +58,26 @@
 #define CMD_GC_USER_INVITE_USER			15									//*邀请用户进入桌子返回
 #define SUB_CG_USER_KICK_USER			16                                   //*踢出用户		TODO 让玩家起立，返回系统消息，踢出用户
 
-//创建|加入 房间
+#pragma region 创建| 加入 房间
+//房卡场, 房卡金币场
 #define SUB_CG_USER_CREATE_ROOM			17									//申请创建房间
 #define CMD_GC_USER_GET_ROOM_RULE		117									//房间规则选择, 申请创建房间成功后发送
 #define SUB_CG_USER_SET_ROOM_RULE		217									//房间规则设置 返回
 #define CMD_GC_USER_ENTER_SUBGAME_ROOM	317									//进入子游戏
 
-#define SUB_CG_USER_JOIN_FK_ROOM		18									//#加入桌子 需要密码 -- 返回317
+#define SUB_CG_USER_JOIN_FK_ROOM		18									//加入桌子 需要密码
 
-#define SUB_CG_USER_JOIN_TABLE_NO_PASS	19									//#加入桌子,不需要密码, 即快速开始
-//返回的为 2, CMD_GC_USER_JOIN_ROOM_SUCCESS;								//不需要加入桌子返回
-
+//金币场
 #define SUB_CG_USER_JOIN_GOLD_HALL_ROOM	20									//加入金币大厅 金币场桌子
 
+//牌友圈
+#define SUB_CG_USER_JOIN_TABLE_NO_PASS	19									//#加入桌子,不需要密码, 即快速开始 -- 仅牌友群使用
 #define SUB_CG_CLUB_CREATE_TABLE		21									//#创建桌子 牌友圈特有
 #define CMD_GC_CLUB_CREATE_TABKE		121									//#创建桌子 返回
-
+#pragma endregion
 
 #define SUB_GR_GET_TABLELIST			22									//获取房间列表		TODO 指的是竞技场的已开房间列表
 #define SUB_GR_GET_TABLELIST_RESULT		122									//房间列表返回		
-
 
 //解散房间
 #define SUB_RG_USER_ASK_DISMISS			24									//发起申请解散房间

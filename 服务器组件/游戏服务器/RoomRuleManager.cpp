@@ -2,100 +2,20 @@
 #include "RoomRuleManager.h"
 #include <iostream>
 #include <stdlib.h>
+#include "player.h"
 
-RoomRuleManager* RoomRuleManager::_instance =NULL;
+rule_arry						RoomRuleManager::m_rule_arry;
+ISubRoomRuleManager*            RoomRuleManager::m_SubRoomRuleManager = NULL;
+std::map<BYTE,  STR_CMD_GC_USER_GOLD_INFO> RoomRuleManager::s_RoomInfo;
 
-//TCHAR 2 string
-std::string TCHAR2STRING(TCHAR *STR)
-{	
-	int iLen = WideCharToMultiByte(CP_ACP, 0,STR, -1, NULL, 0, NULL, NULL);
-	char* chRtn =new char[iLen*sizeof(char)];
-	WideCharToMultiByte(CP_ACP, 0, STR, -1, chRtn, iLen, NULL, NULL);
-	std::string str(chRtn);
-	return str;
-}
-//char* 2 TCHAR
-TCHAR *chr2wch(const char *buffer)
-{
-        size_t len = strlen(buffer);
-        size_t wlen = MultiByteToWideChar(CP_ACP, 0, (const char*)buffer, int(len), NULL, 0);
-        TCHAR *wBuf = new TCHAR[wlen + 1];
-        MultiByteToWideChar(CP_ACP, 0, (const char*)buffer, int(len), wBuf, int(wlen));
-        return wBuf;
-}
-
-//获取实例
-RoomRuleManager* RoomRuleManager::Instance()
-{
-	if(_instance != NULL) return _instance;
-
-	_instance = new RoomRuleManager();
-	_instance->m_SubRoomRuleManager = static_cast<ISubRoomRuleManager*> (CWHModule::GetSubRuleManager("test.dll"));
-	memset(&(_instance->m_rule_arry), 0, sizeof(_instance->m_rule_arry));
-
-	if(_instance->m_SubRoomRuleManager == NULL)
-	{
-		CLog::Log(log_error, "RoomRuleManager:: m_SubRoomRuleManager is null");
-	}
-
-	return _instance;
-}
-//获取房间配置选项
-rule_arry RoomRuleManager::GetRoomRuleSetting()
-{
-	rule_arry client_rule_item;
-	memcpy(&client_rule_item, &m_rule_arry, sizeof(rule_arry));
-	for(int i =0; i < 20; i ++)
-	{
-		TCHAR szTemp[15];
-		memcpy(szTemp, m_rule_arry.ItemArry[i].szHeadName, sizeof(TCHAR) *15);
-		string clientHead = GetDescribe(TCHAR2STRING(szTemp));
-		if(clientHead.empty()) continue;
-
-		TCHAR szTchar[15] ; 
-		memcpy(szTchar, chr2wch(clientHead.c_str()), sizeof(TCHAR)*15);
-		memcpy(client_rule_item.ItemArry[i].szHeadName, szTchar, sizeof(TCHAR)*15);
-	}
-
-	return client_rule_item;
-}
-//获取房间规则
-void RoomRuleManager::GetRoomRule(tagTableRule& roomRule, byte value[20])
-{
-	//数据初始化
-	m_SubRoomRuleManager->Init();
-
-	for(int i=0; i<20; i++)
-	{
-		TCHAR temp[15];
-		memcpy(temp, m_rule_arry.ItemArry[i].szHeadName, 15*sizeof(TCHAR));
-		string key_name = TCHAR2STRING(temp);
-		if(key_name.empty())
-		{
-			continue;
-		}
-
-		if(value[i] >= 4) continue;
-
-		SetRoomRule(roomRule, key_name, value[i]);
-	}
-}
-
-//设置金币场规则
-void RoomRuleManager::SetGoldRule(tagTableRule& roomRule, BYTE byType)
-{
-	//数据初始化
-	m_SubRoomRuleManager->Init();
-	m_SubRoomRuleManager->SetGoldRule(byType);
-
-	roomRule.GameMode = TABLE_MODE_GOLD;
-	roomRule.GameCount = 1;
-	roomRule.PlayerCount =3;
-	roomRule.dwAmount = (byType == 1) ? 1000 : ((byType == 2) ? 2000 : ((byType == 3) ? 4000 : 10000));
-}
-
-//读取子游戏房间配置文件
+//初始化
 void RoomRuleManager::Init(int kindid)
+{
+	InitFK(kindid);
+	InitGold(kindid);
+}
+//初始化 房卡场 
+void RoomRuleManager::InitFK(int kindid)
 {
 	//打开文件
 	string file_path = std::to_string(kindid)+ ".rule";
@@ -113,7 +33,6 @@ void RoomRuleManager::Init(int kindid)
 		string strTemp;
 		iRet = CWHCfg::Instance()->GetItemValue(psz, "head", strTemp);
 		if(iRet != 0) continue;
-		m_subgame_rule_count ++;
 		swprintf(m_rule_arry.ItemArry[i].szHeadName, 15, L"%S", strTemp.c_str());
 
 		for(int j=0; j<4; j++)
@@ -128,6 +47,203 @@ void RoomRuleManager::Init(int kindid)
 
 	//关闭文件
 	CWHCfg::Instance()->CloseFile();
+}
+//初始化 金币场
+void RoomRuleManager::InitGold(int kindid)
+{
+	//打开文件
+	string file_path = std::to_string(kindid)+ ".gold";
+	int iRet = CWHCfg::Instance()->OpenFile(file_path);
+	if(iRet != 0 )
+	{
+		return ;
+	}
+
+	for(int i=0; i<20; i++)
+	{
+		char psz[20];
+		sprintf(psz, "ROOM_LEVEL_%d", i);
+
+		STR_CMD_GC_USER_GOLD_INFO roomInfo;
+		roomInfo.bGoldMod = i;
+		iRet = CWHCfg::Instance()->GetItemValue(psz, "difen", roomInfo.dwScore);
+		if(iRet != 0) continue;
+		iRet = CWHCfg::Instance()->GetItemValue(psz, "enterGold", roomInfo.dwGold);
+		if(iRet != 0) continue;
+
+		memcpy(&s_RoomInfo[i], &roomInfo, sizeof(STR_CMD_GC_USER_GOLD_INFO));
+	}
+
+	for(auto item : s_RoomInfo)
+	{
+		CLog::Log(log_debug, "level %d,  score: %d,  gold: %d", item.second.bGoldMod, item.second.dwScore, item.second.dwGold);
+	}
+
+	//关闭文件
+	CWHCfg::Instance()->CloseFile();
+}
+
+//TCHAR 2 string
+std::string TCHAR2STRING(TCHAR *STR)
+{	
+	int iLen = WideCharToMultiByte(CP_ACP, 0,STR, -1, NULL, 0, NULL, NULL);
+	char* chRtn =new char[iLen*sizeof(char)];
+	WideCharToMultiByte(CP_ACP, 0, STR, -1, chRtn, iLen, NULL, NULL);
+	std::string str(chRtn);
+	return str;
+}
+//char* 2 TCHAR
+TCHAR *chrTOwch(const char *buffer)
+{
+        size_t len = strlen(buffer);
+        size_t wlen = MultiByteToWideChar(CP_ACP, 0, (const char*)buffer, int(len), NULL, 0);
+        TCHAR *wBuf = new TCHAR[wlen + 1];
+        MultiByteToWideChar(CP_ACP, 0, (const char*)buffer, int(len), wBuf, int(wlen));
+        return wBuf;
+}
+
+//获取房卡场 房间配置选项
+rule_arry RoomRuleManager::GetRoomRuleSetting()
+{
+	rule_arry client_rule_item;
+	memcpy(&client_rule_item, &m_rule_arry, sizeof(rule_arry));
+	for(int i =0; i < 20; i ++)
+	{
+		TCHAR szTemp[15];
+		memcpy(szTemp, m_rule_arry.ItemArry[i].szHeadName, sizeof(TCHAR) *15);
+		string clientHead = GetDescribe(TCHAR2STRING(szTemp));
+		if(clientHead.empty()) continue;
+
+		TCHAR szTchar[15] ; 
+		memcpy(szTchar, chrTOwch(clientHead.c_str()), sizeof(TCHAR)*15);
+		memcpy(client_rule_item.ItemArry[i].szHeadName, szTchar, sizeof(TCHAR)*15);
+	}
+
+	return client_rule_item;
+}
+//获取房卡场 房间规则
+tagTableRule RoomRuleManager::GetFKRoomRule(byte value[20], byte GameMode)
+{
+	tagTableRule roomRule;
+	ZeroMemory(&roomRule, sizeof(roomRule));
+	roomRule.GameMode = GameMode;
+
+	//数据初始化
+	m_SubRoomRuleManager->Init();
+
+	for(int i=0; i<20; i++)
+	{
+		TCHAR temp[15];
+		memcpy(temp, m_rule_arry.ItemArry[i].szHeadName, 15*sizeof(TCHAR));
+		string key_name = TCHAR2STRING(temp);
+		if(key_name.empty())
+		{
+			continue;
+		}
+
+		if(value[i] >= 4) continue;
+
+		SetRoomRule(roomRule, key_name, value[i]);
+	}
+
+	return roomRule;
+}
+
+
+//获取金币场 房间规则
+tagTableRule RoomRuleManager::GetGoldRoomRule(BYTE byType)
+{
+	//数据初始化
+	m_SubRoomRuleManager->Init();
+	m_SubRoomRuleManager->SetGoldRule(byType);
+
+	tagTableRule roomRule;
+	ZeroMemory(&roomRule, sizeof(tagTableRule));
+
+	roomRule.GameMode = TABLE_MODE_GOLD;
+	roomRule.GameRoomLevel = byType;
+	roomRule.GameCount = 1;
+	roomRule.PlayerCount =3;
+	return roomRule;
+}
+//获取金币场 所有房间数据
+std::vector<STR_CMD_GC_USER_GOLD_INFO>  RoomRuleManager::GetAllRoomInfo()
+{
+	std::vector<STR_CMD_GC_USER_GOLD_INFO> vec;
+	for(auto item : s_RoomInfo)
+	{
+		vec.push_back(item.second);
+	}
+
+	return vec;
+}
+//获取金币场 特定房间等级的 房间数据
+STR_CMD_GC_USER_GOLD_INFO RoomRuleManager::GetRoomInfo(BYTE level)
+{
+	return s_RoomInfo[level];
+}
+
+
+//检测玩家 门票是否符合条件
+int RoomRuleManager::CheckTickt(tagTableRule* rule, CPlayer* player)
+{
+	switch( rule->GameMode )
+	{
+	case TABLE_MODE_FK://房卡模式
+		{
+			int CountType = GetCountType(rule->GameCount);
+			if(CountType == 0)
+			{
+				CLog::Log(log_error, "GetCountType error !!!!!");
+				CountType = 1; //TODONOW 如果读取失败了, 则按最低的扣除
+			}
+
+			//房主支付， 房费为 countType * playerCount
+			if (0 == rule->cbPayType)
+			{
+				//非房主 无须校验 TODONOW
+				DWORD pay = (rule->PlayerCount) * CountType;
+				if( player->GetUserRoomCard() < pay)
+				{
+					return -1;
+				}
+			}
+			else if( 1 == rule->cbPayType) //AA支付
+			{
+				DWORD pay = 1 * CountType;
+				if( player->GetUserRoomCard() < pay) return -2;
+			}
+
+			break;
+		}
+	case TABLE_MODE_MATCH: //比赛
+		{
+			break;
+		}
+	case TABLE_MODE_GOLD: //金币
+		{
+			//检验玩家金币数目
+			if(player->GetUserGold()  <  GetRoomInfo(rule->GameRoomLevel).dwGold)
+			{
+				return -201;
+			}
+
+			break;
+		}
+	case TABLE_MODE_FK_GOLD://房卡金币场
+		{
+			break;
+		}
+	case TABLE_MODE_CLUB://牌友圈
+		{
+			break;
+		}
+	default:
+		{
+			return -999;
+		}
+	}
+	return 0;
 }
 
 //获取字段 对应的描述
@@ -166,7 +282,6 @@ string RoomRuleManager::GetDescribe(string key_name)
 
 	return describe;
 }
-
 //根据字段名字, 为结构体对应字段赋值
 void RoomRuleManager::SetRoomRule(tagTableRule &roomrule, string key_name, byte value)
 {
@@ -199,7 +314,6 @@ void RoomRuleManager::SetRoomRule(tagTableRule &roomrule, string key_name, byte 
 		m_SubRoomRuleManager->SetRoomRule(key_name, GetRoomValByKey(key_name, value));
 	}
 }
-
 //根据字段名字, 找到对应的字段值
 string RoomRuleManager::GetRoomValByKey(string key, byte value)
 {
@@ -218,4 +332,30 @@ string RoomRuleManager::GetRoomValByKey(string key, byte value)
 	}
 
 	return NULL;
+}
+//判断当前所选局数, 是第大类
+int RoomRuleManager::GetCountType(byte value)
+{
+	for(int i=0; i<20; i++)
+	{
+		TCHAR szTemp[15];
+		memcpy(szTemp, m_rule_arry.ItemArry[i].szHeadName, sizeof(TCHAR) * 15);
+		string tempkey = TCHAR2STRING(szTemp);
+		if( tempkey == "GameCount")
+		{
+			for(int j=0; j<4; j++)
+			{
+				TCHAR szVal[10];
+				memcpy(szVal, m_rule_arry.ItemArry[i].szItemValue[j], sizeof(TCHAR) * 10);
+				string val = TCHAR2STRING(szVal);
+				int iVal = atoi(val.c_str());
+				if(iVal == value)
+				{
+					return j+1;
+				}
+			}
+		}
+	}
+
+	return 0;
 }

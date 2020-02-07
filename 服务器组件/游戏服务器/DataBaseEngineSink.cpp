@@ -5,7 +5,7 @@
 #include "RobotManager.h"
 #include "MatchManager.h"
 
-//////////////////////////////////////////////////////////////////////////////////
+IDataBase		 *g_TreasureDB = NULL; 
 
 //构造函数
 CDataBaseEngineSink::CDataBaseEngineSink()
@@ -33,6 +33,8 @@ bool CDataBaseEngineSink::OnDataBaseEngineStart(IUnknownEx * pIUnknownEx)
 	{
 		return false;
 	}
+
+	g_TreasureDB = m_TreasureDB;
 	return true;
 }
 
@@ -84,16 +86,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 			bSucceed = OnRequestLoadAndroidUser(dwContextID,pData,wDataSize,dwUserID);
 			break;
 		}
-	case DBR_GR_MODIFY_USER_TREASURE:		//修改用户财富信息
-		{
-			bSucceed = On_DBR_ModifyUserTreasure(dwContextID,pData,wDataSize,dwUserID);
-			break;
-		}
-	case DBR_GR_SAVE_RECORDINFO:			//保存小局录像信息
-		{
-			bSucceed = On_DBR_SaveGameRecord(dwContextID,pData,wDataSize,dwUserID);
-		}
-		break;
 	case DBR_GR_MANAGE_USER_RIGHT:		//用户权限
 		{
 			bSucceed = OnRequestManageUserRight(dwContextID,pData,wDataSize,dwUserID);
@@ -423,101 +415,6 @@ bool CDataBaseEngineSink::OnRequestWriteGameScore(DWORD dwContextID, VOID * pDat
 	return true;
 }
 
-//修改用户财富
-bool CDataBaseEngineSink::On_DBR_ModifyUserTreasure(DWORD dwContextID, void * pData, WORD wDataSize, DWORD &dwUserID)
-{
-	//数据大小校验
-	if (sizeof(STR_DBR_GR_MODIFY_USER_TREASURE) != wDataSize)
-		return false;
-
-	//构造数据
-	STR_DBR_GR_MODIFY_USER_TREASURE* pDBR = (STR_DBR_GR_MODIFY_USER_TREASURE*)pData;
-
-	//输入参数
-	m_TreasureDB->ResetParameter();
-	m_TreasureDB->AddParameter(TEXT("@UserID"),pDBR->dwUserId);
-	m_TreasureDB->AddParameter(TEXT("@dwKind"),pDBR->dwKind);
-	m_TreasureDB->AddParameter(TEXT("@dwTableID"),pDBR->dwTableID);
-	m_TreasureDB->AddParameter(TEXT("@byTableMode"),pDBR->byTableMode);
-	m_TreasureDB->AddParameter(TEXT("@byRound"),pDBR->byRound);
-	m_TreasureDB->AddParameter(TEXT("@lUserTreasure"),pDBR->lUserTreasure);
-
-	BYTE byWinOrLose = 0; //0平;  1赢;  2负
-
-	if( pDBR->byRound != 0xFF) //小局
-	{
-		if(pDBR->lUserTreasure > 0)
-		{
-			byWinOrLose = 1;
-		}
-		else if(pDBR->lUserTreasure < 0)
-		{
-			byWinOrLose = 2;
-		}
-	}
-	else //大局
-	{
-		byWinOrLose = pDBR->byWin;
-	}
-	m_TreasureDB->AddParameter(TEXT("@byWinOrLose"),byWinOrLose);
-
-	//输出参数
-	TCHAR szDescribeString[128] = TEXT("");
-	m_TreasureDB->AddParameterOutput(TEXT("@strErrorDescribe"), szDescribeString, sizeof(szDescribeString), adParamOutput);
-
-	//执行查询
-	LONG lResultCode = m_TreasureDB->ExecuteProcess(TEXT("GSP_MODIFY_USER_TREASURE_TABLE"), true);
-
-	//结果处理
-	CDBVarValue DBVarValue;
-	m_TreasureDB->GetParameter(TEXT("@strErrorDescribe"), DBVarValue);
-
-	//执行成功
-	if(DB_SUCCESS == lResultCode)
-	{
-		//构造数据
-		STR_DBO_GR_MODIFY_USER_TREASURE ModifyTreasure;
-		ZeroMemory(&ModifyTreasure, sizeof(STR_DBO_GR_MODIFY_USER_TREASURE));
-
-		//描述消息
-		ModifyTreasure.dwResultCode = lResultCode;
-		lstrcpyn(ModifyTreasure.szDescribeString, CW2CT(DBVarValue.bstrVal), CountArray(ModifyTreasure.szDescribeString) );
-
-		ModifyTreasure.dwUserID = m_TreasureDB->GetValue_DWORD(TEXT("UserID"));
-		//用户游戏币
-		ModifyTreasure.lUserDiamond = m_TreasureDB->GetValue_LONGLONG(TEXT("UserDiamond"));
-		//用户游戏币
-		ModifyTreasure.lUserGold = m_TreasureDB->GetValue_LONGLONG(TEXT("UserGold"));
-		//用户房卡
-		ModifyTreasure.lOpenRoomCard = m_TreasureDB->GetValue_LONGLONG(TEXT("OpenRoomCard"));
-
-		//发送数据
-		g_AttemperEngineSink->OnEventDataBaseResult(DBO_SG_MODIFY_USER_TREASURE, dwContextID, &ModifyTreasure, sizeof(STR_DBO_GR_MODIFY_USER_TREASURE));
-	}
-	return true;
-}
-
-//保存小局录像信息
-bool CDataBaseEngineSink::On_DBR_SaveGameRecord(DWORD dwContextID, void * pData, WORD wDataSize, DWORD &dwUserID)
-{
-	if (sizeof(DBR_GR_GameRecordInfo) != wDataSize)
-		return false;
-
-	//入参
-	DBR_GR_GameRecordInfo *pDbReq = (DBR_GR_GameRecordInfo*)pData;
-
-	m_TreasureDB->ResetParameter();
-	m_TreasureDB->AddParameter(TEXT("@dwTableID"),pDbReq->dwTableID);
-	m_TreasureDB->AddParameter(TEXT("@curRound"),pDbReq->wCurrentCount);
-	CString szData = toHexString(pDbReq->szData, LEN_MAX_RECORD_SIZE);
-	m_TreasureDB->AddParameter(TEXT("@VideoData"),szData);
-	m_TreasureDB->AddParameter(TEXT("@VideoSize"),LEN_MAX_RECORD_SIZE);
-
-	m_TreasureDB->ExecuteProcess(TEXT("GSP_GR_SaveGameRecord"), true);
-
-
-	return true;
-}
 
 //游戏记录
 bool CDataBaseEngineSink::OnRequestGameScoreRecord(DWORD dwContextID, VOID * pData, WORD wDataSize, DWORD &dwUserID)

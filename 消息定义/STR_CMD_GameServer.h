@@ -28,13 +28,16 @@
 #define TABLE_MODE_FK_GOLD			3									//房卡金币模式
 #define TABLE_MODE_CLUB				4									//牌友圈模式
 
+//财富类型
+#define TREASURE_FK					1									//房卡
+#define TREASURE_GOLD				2									//金币
+#define TREASURE_DIAMOND			3									//钻石
+#define TREASURE_JF					4									//积分
+
+
 //请求错误
 #define REQUEST_FAILURE_NORMAL		0									//常规原因
-#define REQUEST_FAILURE_NOGOLD		1									//金币不足
-#define REQUEST_FAILURE_NOSCORE		2									//积分不足
 #define REQUEST_FAILURE_PASSWORD	3									//密码错误
-#define REQUEST_FAILURE_END			4									//游戏结束
-#define REQUEST_FAILURE_NOROOMCARD	5									//钻石不足
 
 //////////////////////////////////////////////////////////////////////////////////
 #pragma endregion
@@ -361,7 +364,7 @@ struct STR_CMD_ROOM_RULE
 	DWORD TableID;                   //房间号
 };
 
-//请求大厅房间信息 返回
+//金币场房间信息 返回
 struct STR_CMD_GC_USER_GOLD_INFO
 {
 	BYTE bGoldMod;// 房间等级 1.初级 2.中级 3.高级 4.富豪

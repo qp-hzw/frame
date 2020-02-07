@@ -16,7 +16,7 @@ enum User_Action
 	US_FREE,       //没有状态 -- 没有在Table中
 };
 
-class  CPlayer : public IServerUserItem
+class  CPlayer
 {
 	DWORD                           m_dwSocketID;                       //scoketID
 
@@ -118,10 +118,14 @@ public:
 	//游戏局数
 	virtual DWORD GetUserPlayCount() { return m_UserInfo.dwWinCount+m_UserInfo.dwLostCount+m_UserInfo.dwDrawCount+m_UserInfo.dwFleeCount; }
 
-	//修改接口
+	//
 public:
 	//更新用户财富信息
-	virtual bool ModifyUserTreasure(DWORD dwTableID, BYTE byTableMode, BYTE byRound, SCORE lUserTreasuse, BYTE byWin);
+	bool ModifyUserTreasure(BYTE byTreasureType, SCORE lUserTreasuse, string PayMsg);
+	//更新用户输赢记录表
+	bool ModifyPlayerScore(BYTE round, SCORE lUserTreasuse, string PayMsg);
+	//玩家经验
+	bool ModifyPlayerExp();
 
 	//辅助函数
 private:

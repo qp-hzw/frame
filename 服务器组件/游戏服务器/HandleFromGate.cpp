@@ -4,7 +4,6 @@
 #include <iostream>
 #include "RoomRuleManager.h"
 #include "RobotManager.h"
-#include "GoldRoomManager.h"
 
 bool CHandleFromGate::HandlePacket(TCP_Command Command, VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
@@ -525,7 +524,7 @@ bool CHandleFromGate::On_SUB_CG_USER_CREATE_ROOM(VOID * pData, WORD wDataSize, D
 	}
 
 	//发送房间规则选择 给client
-	g_GameCtrl->SendData(player, MDM_USER, CMD_GC_USER_GET_ROOM_RULE, &RoomRuleManager::Instance()->GetRoomRuleSetting(), sizeof(rule_arry));
+	g_GameCtrl->SendData(player, MDM_USER, CMD_GC_USER_GET_ROOM_RULE, &RoomRuleManager::GetRoomRuleSetting(), sizeof(rule_arry));
 
 	return true;
 }
@@ -541,34 +540,28 @@ bool CHandleFromGate::On_SUB_CG_USER_SET_ROOM_RULE(VOID * pData, WORD wDataSize,
 	if(wDataSize != sizeof(STR_SUB_CG_USER_SET_ROOM_RULE)) return false;
 	STR_SUB_CG_USER_SET_ROOM_RULE *pCmd = (STR_SUB_CG_USER_SET_ROOM_RULE *)pData;
 
-	//获取完整房间规则 TODONOW
-	tagTableRule cfg;
-	RoomRuleManager::Instance()->GetRoomRule(cfg, pCmd->byChoose);
-	cfg.GameMode = pCmd->byGameMode;
-	
+	//获取完整房间规则
+	tagTableRule * cfg = &RoomRuleManager::GetFKRoomRule(pCmd->byChoose, pCmd->byGameMode);
+
 	//门票校验
-	if(!CheckCreateTableTicket(&cfg, player))
+	if(0 != RoomRuleManager::CheckTickt(cfg, player))
 	{
-		CLog::Log(log_warn, "%ld create room failed;  check ticker failed ", player->GetUserID());
+		g_GameCtrl->SendDataMsg(dwSocketID, "门票不符");
 		return true;
 	}
 
 	//创建桌子
-	CTableFrame *pTableFrame = CTableManager::CreateTable();
+	CTableFrame *pTableFrame = CTableManager::CreateTable(cfg, player->GetUserID());
 	if(NULL == pTableFrame)
 	{
-		SendRequestFailure(player,TEXT("服务器桌子已满,请稍后重试！"),REQUEST_FAILURE_NORMAL);
+		g_GameCtrl->SendDataMsg(dwSocketID, "创建失败");
 		return true ; 
 	}
-
-	//设置桌子属性
-	pTableFrame->SetCommonRule(&cfg);
-	pTableFrame->SetTableOwner(player->GetUserID());
 	
 	//用户坐下
 	if(pTableFrame->PlayerSitTable(player) != 0)
 	{
-		SendRequestFailure(player, TEXT("用户坐下失败!"), REQUEST_FAILURE_NORMAL);
+		g_GameCtrl->SendDataMsg(dwSocketID, "坐下失败");
 		return false;
 	}
 
@@ -597,15 +590,17 @@ bool CHandleFromGate::CreateRoomClub(tagTableRule * pCfg, CPlayer *pIServerUserI
 	tagTableSubGameRule *pSubGameCfg = new tagTableSubGameRule(); //(tagTableSubGameRule*)pCreateRoom->SubGameRule;
 	if(pSubGameCfg != NULL)
 	{
-		pCurrTableFrame->SetSubGameRule(pSubGameCfg);
+		//pCurrTableFrame->SetSubGameRule(pSubGameCfg);
 	}
 
+	/*
 	// new  获取规则后初始化子游戏
 	if (!pCurrTableFrame->InitTableFrameSink())
 	{
 		SendRequestFailure(pIServerUserItem, TEXT("游戏初始化失败！"), REQUEST_FAILURE_NORMAL);
 		return true; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
 	}
+	*/
 
 	/* 第六步 房间信息保存到数据库 */
 	STR_DBR_CLUB_ROOM_INFO Dbr;
@@ -707,7 +702,7 @@ bool CHandleFromGate::CreateTableClub(STR_DBO_GC_CLUB_CREATE_TABLE * pDbo, CPlay
 	tagTableSubGameRule *pSubGameCfg = new tagTableSubGameRule(); //(tagTableSubGameRule*)(CreateRoom.SubGameRule);
 	if(pSubGameCfg != NULL)
 	{
-		pCurrTableFrame->SetSubGameRule(pSubGameCfg);
+		//pCurrTableFrame->SetSubGameRule(pSubGameCfg);
 	}
 
 	//用户坐下		TODO 后面让客户端主动发送
@@ -719,77 +714,6 @@ bool CHandleFromGate::CreateTableClub(STR_DBO_GC_CLUB_CREATE_TABLE * pDbo, CPlay
 	
 	//发送创建房间成功消息
 	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_CLUB_CREATE_TABKE, NULL, 0);	
-
-	return true;
-}
-
-//创建桌子 金币大厅桌子
-bool CHandleFromGate::CreateTableHallGold(STR_DBO_CG_USER_JOIN_TABLE_HALL_GOLD * pDbo, CPlayer *pIServerUserItem)
-{
-	//内部使用, 不校验指针
-	tagTableRule *pCfg =  new tagTableRule(); //(tagTableRule*)pDbo->strCreateRoom.CommonRule;
-
-	//设置场次最低金币
-	//pCfg->dwLevelGold = pDbo->dwMinGold;
-
-	//检查加入门票
-	if(!CheckJoinTableTicket(pCfg, pIServerUserItem))
-	{
-		return true; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
-	}
-
-	/* 第一步 寻找空闲房间 */
-	CTableFrame *pCurrTableFrame ; //= GetNextEmptyTable();
-
-	//桌子判断
-	if(NULL == pCurrTableFrame)
-	{
-		SendRequestFailure(pIServerUserItem,TEXT("服务器已满,请稍后重试！"),REQUEST_FAILURE_NORMAL);
-		return true; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
-	}
-
-	/* 第二步 生成桌子 */
-	srand(static_cast<unsigned int >(time(NULL)));
-	//DWORD dwPassword = GenerateTablePassword();
-
-	//设置桌子属性
-	std::cout << pIServerUserItem->GetUserID() << std::endl;
-	pCurrTableFrame->SetTableOwner(pIServerUserItem->GetUserID());
-	//pCurrTableFrame->SetTableID(dwPassword);
-
-	//设置金币场场次
-	pCurrTableFrame->SetGoldType(pDbo->byGameType);
-
-	//设置房间自动解散，默认一分钟 -- 这里是指不开始游戏 自动一分钟后解散
-	pCurrTableFrame->SetTableAutoDismiss();
-
-	/* 桌创建子信息写入数据库 && 发送给客户端(在消息号的后续环节中发送) */
-	DWORD dwUserID = pIServerUserItem->GetUserID();
-	DWORD dwKindID = pDbo->dwKindID;
-	BYTE  byGameType = pDbo->byGameType;
-	DWORD dwTableID = pCurrTableFrame->GetTableID();
-	HallTableCreate(dwUserID, dwKindID, byGameType, dwTableID);
-
-	/* 设置房间规则 */
-	//设置通用房间规则  
-	pCurrTableFrame->SetCommonRule(pCfg);
-
-	//设置子游戏房间规则
-	tagTableSubGameRule *pSubGameCfg = new tagTableSubGameRule(); //(tagTableSubGameRule*)(pDbo->strCreateRoom.SubGameRule);
-	if(pSubGameCfg != NULL)
-	{
-		pCurrTableFrame->SetSubGameRule(pSubGameCfg);
-	}
-
-	//用户坐下		TODO 后面让客户端主动发送
-	if(pCurrTableFrame->PlayerSitTable(pIServerUserItem) != 0)
-	{
-		SendRequestFailure(pIServerUserItem, TEXT("用户坐下失败!"), REQUEST_FAILURE_NORMAL);
-		return true; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
-	}
-	
-	//发送加入金币房间成功
-	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_ENTER_SUBGAME_ROOM, NULL, 0);
 
 	return true;
 }
@@ -837,7 +761,7 @@ bool CHandleFromGate::CreateTableAutoClub(STR_DBO_CG_USER_JOIN_TABLE_NO_PASS * p
 	tagTableSubGameRule *pSubGameCfg = new tagTableSubGameRule(); //(tagTableSubGameRule*)(pDbo->strCreateRoom.SubGameRule);
 	if(pSubGameCfg != NULL)
 	{
-		pCurrTableFrame->SetSubGameRule(pSubGameCfg);
+		//pCurrTableFrame->SetSubGameRule(pSubGameCfg);
 	}
 
 	/* 用户坐下 */
@@ -872,41 +796,41 @@ bool CHandleFromGate::On_SUB_User_JoinFkRoom(VOID * pData, WORD wDataSize, DWORD
 	CPlayer *player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
 	if (NULL == player)
 	{
-		CLog::Log(log_error, "加入房间 failed,  player is null");
 		return false;
 	}
 
 	//校验数据包
 	if(wDataSize != sizeof(STR_SUB_CG_USER_JOIN_FK_ROOM)) 
 	{
-		CLog::Log(log_error, "加入房间 failed,  struct size not same");
 		return false;
 	}
 
 	//数据定义
 	STR_SUB_CG_USER_JOIN_FK_ROOM *pJoin = (STR_SUB_CG_USER_JOIN_FK_ROOM *)pData;
 
-	STR_DBR_JOIN_ROOM DBR;
-	DBR.dwTableID = pJoin->dwPassword;
-
 	//房间校验
-	CTableFrame* pTable = CTableManager::FindTableByTableID(DBR.dwTableID);
+	CTableFrame* pTable = CTableManager::FindTableByTableID(pJoin->dwPassword);
 	if(!pTable)
 	{
-		SendRequestFailure(player,TEXT("房间不存在, 请重新输入"),REQUEST_FAILURE_NORMAL);
-		CLog::Log(log_debug, "[%d] 加入房间 failed,  table is null",  player->GetUserID());
-		return false;
+		g_GameCtrl->SendDataMsg(dwSocketID, "房间不存在");
+		return true;
+	}
+
+	//门票检测
+	if(0 != RoomRuleManager::CheckTickt(pTable->GetCustomRule(), player))
+	{
+		g_GameCtrl->SendDataMsg(dwSocketID, "门票不足");
+		return true;
 	}
 
 	//玩家坐下
 	if(pTable->PlayerSitTable(player) != 0)
 	{
-		CLog::Log(log_debug, "[%d] 加入房间 failed,  sit down failed",  player->GetUserID());
-		SendRequestFailure(player,TEXT("加入房间失败, 坐下失败"),REQUEST_FAILURE_PASSWORD);
-		return false;
+		g_GameCtrl->SendDataMsg(dwSocketID, "坐下失败");
+		return true;
 	}	
 
-	//发送加入房卡房间成功
+	//发送加入房间成功
 	g_GameCtrl->SendData(player, MDM_USER, CMD_GC_USER_ENTER_SUBGAME_ROOM, NULL, 0);
 	return true;
 }
@@ -1060,17 +984,25 @@ bool CHandleFromGate::On_SUB_CG_USER_JOIN_GOLD_HALL_ROOM(VOID * pData, WORD wDat
 	//数据定义
 	STR_SUB_CG_USER_JOIN_GOLD_HALL_ROOM *pJoin = (STR_SUB_CG_USER_JOIN_GOLD_HALL_ROOM *)pData;
 
+	//门票检测
+	if(0 != RoomRuleManager::CheckTickt(&RoomRuleManager::GetGoldRoomRule(pJoin->byType), player))
+	{
+		g_GameCtrl->SendDataMsg(dwSocketID, "金币不足");
+		return true;
+	}
+	
+	//获取table
 	CTableFrame *pTable = CTableManager::GetGlodTable(pJoin->byType);
 	if(pTable == NULL)
 	{
-		SendRequestFailure(player,TEXT("加入房间失败, 没有空桌子!"),REQUEST_FAILURE_NORMAL);
+		g_GameCtrl->SendDataMsg(dwSocketID, "没有桌子");
 		return true;
 	}
 
 	//用户坐下
 	if(pTable->PlayerSitTable(player) != 0)
 	{
-		SendRequestFailure(player,TEXT("加入失败, 坐下失败!"),REQUEST_FAILURE_PASSWORD);
+		g_GameCtrl->SendDataMsg(dwSocketID, "坐下失败");
 		return false;
 	}
 
@@ -1217,7 +1149,7 @@ bool CHandleFromGate::On_SUB_CG_USER_GOLD_INFO(VOID * pData, WORD wDataSize, DWO
 	wPacketSize=0;
 	STR_CMD_GC_USER_GOLD_INFO * pDBO=NULL;
 
-	for (auto item : CGoldRoomManager::GetAllRoomInfo())
+	for (auto item : RoomRuleManager::GetAllRoomInfo())
 	{
 		//发送信息
 		if ((wPacketSize+sizeof(STR_CMD_GC_USER_GOLD_INFO))>sizeof(cbBuffer))
@@ -1236,33 +1168,6 @@ bool CHandleFromGate::On_SUB_CG_USER_GOLD_INFO(VOID * pData, WORD wDataSize, DWO
 
 	g_GameCtrl->SendData(dwSocketID, MDM_USER, CMD_GC_USER_GOLD_INFO_FINISH,  NULL, 0);
 	return true;
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-//添加替他人开房
-bool CHandleFromGate::AddOtherRoomInfo(DBR_GR_UpdateTableInfo* pTableInfo)
-{
-	//无效过滤
-	if (pTableInfo==NULL) return false;
-
-	//投递请求
-	g_GameCtrl->PostDataBaseRequest(DBR_GR_ADD_TABLE_INFO, 0, pTableInfo, sizeof(DBR_GR_UpdateTableInfo));
-
-	return true;
-}
-
-//开始替他人开房
-void CHandleFromGate::StartTable(DWORD dwTableID)
-{
-	//投递请求
-	g_GameCtrl->PostDataBaseRequest(DBR_GR_START_TABLE,0,&dwTableID,sizeof(dwTableID));
-}
-
-//结束替他人开房
-void CHandleFromGate::ConcludeTable(DWORD dwTableID)
-{
-	//投递请求
-	g_GameCtrl->PostDataBaseRequest(DBR_GR_END_TABLE,0,&dwTableID,sizeof(dwTableID));
 }
 
 #pragma region Club牌友圈2 事件通知(1.桌子信息 2.玩家信息)
@@ -1398,28 +1303,6 @@ void CHandleFromGate::ClubTableDJ(DWORD dwTableID)
 }
 
 #pragma endregion
-
-//用户加入替他人开房
-void CHandleFromGate::JoinTable(DWORD dwTableID, DWORD dwUserID)
-{
-	
-	DBR_GP_AddTableUser AddTableUser;
-	AddTableUser.dwTableID = dwTableID;
-	AddTableUser.dwUserID = dwUserID;
-	//投递请求
-	g_GameCtrl->PostDataBaseRequest(DBR_GR_ADD_TABLEUSER,0,&AddTableUser,sizeof(DBR_GP_AddTableUser));
-}
-
-//用户离开替他人开房
-void CHandleFromGate::LeaveTable(DWORD dwTableID, DWORD dwUserID)
-{
-	DBR_GP_DeleteTableUser DeleteTableUser;
-	DeleteTableUser.dwTableID = dwTableID;
-	DeleteTableUser.dwUserID = dwUserID;
-
-	//投递请求
-	g_GameCtrl->PostDataBaseRequest(DBR_GR_DELETE_TABLEUSER,0,&DeleteTableUser,sizeof(DBR_GP_DeleteTableUser));
-}
 
 //Club牌友圈创建桌子
 bool CHandleFromGate::On_CMD_CG_CLUB_CREATE_TABLE( DWORD dwSocketID, VOID * pData, WORD wDataSize )

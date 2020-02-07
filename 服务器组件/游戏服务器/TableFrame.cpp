@@ -4,6 +4,7 @@
 #include "GameCtrl.h"
 #include <iostream>
 #include "TableManager.h"
+#include "RoomRuleManager.h"
 //#include <algorithm>
 
 
@@ -51,16 +52,9 @@ CTableFrame::CTableFrame()
 	/******************** 静态属性 **********************/
 	m_wTableID=0;
 	m_wChairCount=0;
-	m_cbTableMode = 0;
-	m_cbGoldType = 0;
 
 	m_dwGroupID = 0;
-	m_dwCreateTableUser = 0;
 	m_dwTableOwner=0L;
-
-	//开始时间
-	GetLocalTime(&m_SystemTimeStart);
-	//ZeroMemory(&m_SystemTimeStart,sizeof(m_SystemTimeStart));
 
 	/******************** 动态属性 **********************/
 	m_cbGameStatus=GAME_STATUS_FREE;
@@ -136,15 +130,6 @@ void CTableFrame::KillVoteDismissRoom()
 	KillGameTimer(IDI_VOTE_DISMISS_ROOM);
 }
 
-//初始化子游戏
-bool CTableFrame::InitTableFrameSink()
-{
-	if (m_pITableFrameSink == NULL)
-		return false;
-
-	return m_pITableFrameSink->Initialization(this);
-}
-
 /***************************************   游戏流程函数    ***************************************************/
 //开始游戏
 bool CTableFrame::StartGame()
@@ -165,20 +150,10 @@ bool CTableFrame::StartGame()
 		m_player_list.at(i)->SetUserStatus(US_PLAYING,m_wTableID,i);
 	}
 
-	//user状态
-	for (size_t i = 0; i< m_player_list.size(); i++)
-	{
-		if (!m_player_list.at(i)) continue;
-
-		if (US_READY == m_player_list.at(i)->GetUserStatus())
-		m_player_list.at(i)->SetUserStatus(US_PLAYING, m_wTableID, i);
-	}
-
 	/* 通知数据库, 桌子开始 */      
 	tagTableRule *pTableCfg = (tagTableRule*)GetCustomRule();
 	BYTE byClubOrHalGold = 0; //1表示俱乐部房间(房卡或者房卡金币模式);  2表示大厅的金币模式;  其他字段无须处理
 	BYTE GameMode = pTableCfg->GameMode;
-
 
 	//TODONOW 需要增加这个功能
 	//g_AttemperEngineSink->ClubTableStart(GetTableID(), byClubOrHalGold);
@@ -193,70 +168,47 @@ bool CTableFrame::StartGame()
 }
 
 //小局结束处理函数
-bool CTableFrame::HandleXJGameEnd(BYTE byRound, BYTE byTableMode_NO_USER, SCORE *lUserTreasure)
+bool CTableFrame::HandleXJGameEnd(BYTE byRound, SCORE *lUserTreasure, VOID* pData, DWORD dwDataSize)
 {
-	//TODONOW 2018/5/27 byTableMode该字段无效，不使用该字段, 下次迭代时候可以删除该字段 
-
-	//tableMode  与  lUserTreasure 对照表
-	//tableMode(桌子模式)      byRound(当前局数  )     lUserTreasure(用户财富)
-	//0 房卡模式			   0					   房卡
-	//0 房卡模式			   非0					   积分
-	//1 竞技场模式									   待定
-	//2 金币模式			   所有					   金币
-	//3 房卡金币模式           0                       房卡
-	//3 房卡金币模式           非0					   金币
-
-	//设置player、user状态
-	for (size_t i = 0; i< m_player_list.size(); i++)
+	string OnlyID;
+#pragma region 用户信息
+	//扣除用户门票
+	if(byRound == 1)
 	{
-		if (!m_player_list.at(i)) continue;
-		m_player_list.at(i)->SetUserStatus(US_SIT, m_wTableID, i);
+		XJTickets();
 	}
 
-	for (size_t i = 0; i< m_user_list.size(); i++)
+	//更新用户财富  -- 用户财富变更记录表
+	XJModifyUserTreasure(lUserTreasure);
+
+	//更新玩家输赢情况表 && 经验值
+	int i =0;
+	for(auto player : m_player_list)
 	{
-		if (!m_user_list.at(i)) continue;
-
-		if (US_PLAYING == m_player_list.at(i)->GetUserStatus())
-			m_player_list.at(i)->SetUserStatus(US_SIT, m_wTableID, i);
+		player ->ModifyPlayerScore(byRound, lUserTreasure[i], OnlyID);
+		player->ModifyPlayerExp();
+		i++;
 	}
-
-	//房间规则
-	tagTableRule* pCfg = (tagTableRule*)GetCustomRule();
-	BYTE byTableMode = pCfg->GameMode;
-
-	//更新用户财富 对应数据库 round =1 
-	//XJModifyUserTreasure(byTableMode, byRound, lUserTreasure, pCfg);
 
 	//更新用户任务状态
 	//XJUpdateGameTaskStatus(byTableMode, byRound); //TODONOW 暂时只为房卡的
+#pragma endregion
 
-	//扣除用户门票 -- 对应数据库 round = 0
-	//XJGameTickets(byTableMode, byRound);
+#pragma region 桌子信息
+	//更新桌子战绩
+	XJUpdateTableRecord(byRound, OnlyID);
 
-	//事件通知
-	STR_DBR_CLUB_TABLE_INFO Dbr;
-	ZeroMemory(&Dbr, sizeof(Dbr));
-	Dbr.dwTableID = GetTableID();
-	Dbr.dwTableState = 1;
-	Dbr.byCurrentRound = 1;//这是一个增量 TODONOW 后面修改
-	Dbr.byMask = 2;
-	
-	//g_GameCtrl->PostDataBaseRequest(DBR_CLUB_TABLE_INFO,0,&Dbr,sizeof(Dbr));
-
+	//更新桌子录像
+	XJUpdateTableVideo(byRound, OnlyID, pData, dwDataSize);
+#pragma endregion
 	return true;
 }
 
 //大局结束处理函数
 bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 {
-	KillGameTimer(IDI_ROOM_AUTO_DISMISS);
-
-	//设置房间不处于解散状态
-	m_bUnderDissState = false;
-	m_dissmisserChaiID = 0xFF;
-
 	//关闭所有定时器
+	KillGameTimer(IDI_ROOM_AUTO_DISMISS);
 
 	//结束等待续费，玩家需要从准备状态退出为坐下
 	if (cbGameStatus == GAME_CONCLUDE_CONTINUE)
@@ -264,40 +216,27 @@ bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 		m_cbGameStatus=GAME_STATUS_FREE;
 
 		ZeroMemory(m_bAgree,sizeof(m_bAgree));
+		//设置房间不处于解散状态
+		m_bUnderDissState = false;
+		m_dissmisserChaiID = 0xFF;
 
 		//状态切换为坐下，可以自由离开
-		for (WORD wChairID = 0;wChairID<m_wChairCount;wChairID++)
+		for(auto player : m_player_list)
 		{
-			//获取用户
-			CPlayer * pIServerUserItem=GetTableUserItem(wChairID);
-			//用户处理
-			if (pIServerUserItem!=NULL)
-			{
-				//设置状态
-				pIServerUserItem->SetUserStatus(US_SIT,m_wTableID,wChairID);
-			}
+			player->SetUserStatus(US_SIT,m_wTableID,player->GetChairID());
 		}
 
 		//设置续费定时器
 		SetGameTimer(IDI_WAIT_CONTINUE,TIME_WAIT_CONTINUE,1,NULL);
-
 		return true;
 	}
 
 	//直接解散玩家全部站起
 	if(cbGameStatus == GAME_CONCLUDE_NORMAL)
 	{
-		for (WORD wChairID = 0;wChairID<m_wChairCount;wChairID++)
+		for(auto player : m_player_list)
 		{
-			//获取用户
-			CPlayer * pIServerUserItem=GetTableUserItem(wChairID);
-
-			//用户处理
-			if (pIServerUserItem!=NULL)
-			{
-				//先让玩家站起
-				PlayerLeaveTable(pIServerUserItem);
-			}
+			PlayerLeaveTable(player);
 		}
 
 		CTableManager::DeleteTable(this);
@@ -310,188 +249,88 @@ bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 
 /*************************************   游戏流程辅助函数    *************************************************/
 //每局游戏结束后，检测并扣除用户门票  
-bool CTableFrame::XJGameTickets(BYTE byTableMode, BYTE byRound)
+bool CTableFrame::XJTickets()
 {
-	//备注1:扣除门票对照表
-	//替他人开房  在创建桌子的时候就扣除了 -- 有必要这么处理???
-	//自己开房 扣除对照表
-	//TableMode			是否需要扣除	第几局扣除       扣除的财富类型
-	//0房卡模式			√				1				 房卡
-	//1金币模式			待定				
-	//2房卡金币模式		√				1				 房卡
-
-	//替他人开房，在创建桌子时已经扣除房卡，不需要再扣除
-	if (0 != m_dwCreateTableUser)
-		return true;
-
-	//房间规则
-	tagTableRule* pCfg = (tagTableRule*)GetCustomRule();
-
-	//获取房主,房主一定在线，创建桌子用户不在桌子上，这里会出错，只能通过房主，但是扣除的时候通过USERID删除数据库数据
-	CPlayer *pOwnerUserItem = CPlayerManager::FindPlayerByID(m_dwTableOwner);
-	if(pOwnerUserItem == NULL)
-		return false;
-
-
-	//俱乐部 房卡场| 房卡金币场  第一小局时候
-	if((byTableMode == TABLE_MODE_FK || byTableMode == TABLE_MODE_FK_GOLD)
-		&& (1 == byRound))
+	switch(m_tagTableRule.GameMode)
 	{
-		BYTE byPlayerNum = pCfg->PlayerCount;
-		/*
-		BYTE byGameCountType = pCfg->GameCountType;
-		SCORE cost = byPlayerNum * byGameCountType;
-
-		//扣除房卡
-		pOwnerUserItem->ModifyUserTreasure(GetTableID(), byTableMode, 0, -cost, 0);//创建房间时候的 byRount = 0
-		*/
-		return true;
-	}
-
-	//非俱乐部 房卡模式、房卡金币模式
-	if( (byTableMode == TABLE_MODE_FK || byTableMode == TABLE_MODE_FK_GOLD)
-		&& (1 == byRound))
-	{
-		if( pCfg->cbPayType == 0 )							//房主支付
+	case TABLE_MODE_FK:
 		{
-			/*
-			BYTE byPlayerNum = pCfg->PlayerCount;
-			BYTE byGameCountType = pCfg->GameCountType;
-			SCORE cost = byPlayerNum * byGameCountType;
-
-			//扣除房卡
-			pOwnerUserItem->ModifyUserTreasure(GetTableID(), byTableMode, 0, -cost, 0);//创建房间时候的 byRount = 0
-			*/
-		}
-		else if(pCfg->cbPayType == 1)						//AA支付
-		{
-			//遍历桌子上的每个人，扣除房卡
-			for (WORD i=0; i<m_wChairCount; i++)
+			if(m_tagTableRule.cbPayType == 0)//房主支付
 			{
-				//获取用户
-				/*
-				CPlayer *pIServerUserItem = GetTableUserItem(i);
-				if (pIServerUserItem == NULL) continue;
+				int CountType = RoomRuleManager::GetCountType(m_tagTableRule.GameCount);
+				SCORE cost = CountType * m_tagTableRule.PlayerCount;
+				CPlayerManager::FindPlayerByID(m_dwTableOwner)->ModifyUserTreasure(TREASURE_FK, -cost, "房卡场房费");
+			}
+			else if(m_tagTableRule.cbPayType == 1) //AA支付
+			{
+				int CountType = RoomRuleManager::GetCountType(m_tagTableRule.GameCount);
+				for(auto player : m_player_list)
+				{
+					player->ModifyUserTreasure(TREASURE_FK, -CountType, "房卡场房费");
+				}
+			}
 
-				BYTE byGameCountType = pCfg->GameCountType;
-				SCORE cost =  byGameCountType;
-
-				//扣除房卡 
-				pIServerUserItem->ModifyUserTreasure(GetTableID(), byTableMode, 0, -cost, 0);//创建房间时候的 byRount = 0
-				*/
-			} 
-		}	
-	}
-
-
-	//非俱乐部 金币模式
-	if( (byTableMode == TABLE_MODE_GOLD)
-		&& (1 == byRound))
-	{
-		//遍历桌子上的每个人，扣除金币
-		for (WORD i=0; i<m_wChairCount; i++)
+			break;
+		}
+	case TABLE_MODE_MATCH:
 		{
-			//获取用户
-			CPlayer *pIServerUserItem = GetTableUserItem(i);
-			if (pIServerUserItem == NULL) continue;
-
-			SCORE cost = 0;// pCfg->lSinglePayCost;
-
-			//扣除房卡 
-			pIServerUserItem->ModifyUserTreasure(GetTableID(), byTableMode, 0, -cost, 0);//创建房间时候的 byRount = 0
+			break;
+		}
+	case TABLE_MODE_GOLD:
+		{
+			break;
+		}
+	case TABLE_MODE_FK_GOLD:
+		{
+			break;
+		}
+	case TABLE_MODE_CLUB:
+		{
+			break;
 		}
 	}
 
 	return true;
 }
 //每局游戏结束后，更新用户财富信息
-bool CTableFrame::XJModifyUserTreasure(BYTE byTableMode, BYTE byRound, SCORE *lGameScore, tagTableRule *pCfg)
+bool CTableFrame::XJModifyUserTreasure(SCORE *lGameScore)
 {
-	bool bIsMoneyEmpty = false; //是否有人满足不继续游戏的条件
-
-	//遍历桌子所有用户
-	for (int i = 0; i < m_wChairCount; i++)
+	BYTE byTreasureType = 0;  //1房卡, 2金币, 3钻石, 4积分
+	switch(m_tagTableRule.GameMode)
 	{
-		//获取用户
-		CPlayer * pIServerUserItem = GetTableUserItem(i);
-
-		//校验用户
-		if(pIServerUserItem == NULL )
-			continue;
-
-		BYTE byWin = 1;	//1代表是大赢家, 0代表不是
-		for(int j = 0; j < m_wChairCount; j++)
+	case TABLE_MODE_FK:
 		{
-			if((i != j) && (lGameScore[j] > lGameScore[i]))
-			{
-				byWin = 0;
-				break;
-			}
+			byTreasureType = TREASURE_JF;
+			break;
 		}
-
-
-		//更改信息
-		pIServerUserItem->ModifyUserTreasure(GetTableID(), byTableMode, byRound, lGameScore[i], byWin);
-
-		//added by WangChengQing 数据库刷新有延迟, 因此此处暂时先更新一下数据
-		if(TABLE_MODE_FK_GOLD == byTableMode)
+	case TABLE_MODE_MATCH:
 		{
-			pIServerUserItem->SetUserGold(pIServerUserItem->GetUserGold() + lGameScore[i]);
+			break;
 		}
-
-		//离场校验
-		if (CheckUserLeave(byTableMode,  pIServerUserItem, pCfg))
-		{
-			bIsMoneyEmpty = true;
-		}
-	}
-
-	//如果有人不满足. 则发送消息
-	if(bIsMoneyEmpty)
-	{
-		for (int i = 0; i < m_wChairCount; i++)
-		{
-			//获取用户
-			CPlayer * pIServerUserItem = GetTableUserItem(i);
-
-			//校验用户
-			if(pIServerUserItem == NULL )
-				continue;
-
-			//通知在座的人 暂时注释掉
-			//SendRequestFailure(pIServerUserItem, szString, REQUEST_FAILURE_NORMAL);
-
-			//设置自动响应定时器
-			SetGameTimer(IDI_CHECK_DISMISS_ROOM, TIME_CHECK_DISMISS_ROOM, 1, NULL);
-		}
-	}
-	return true;
-}
-//每局游戏结束后, 检查用户财富是否可以继续游戏
-bool CTableFrame::CheckUserLeave(BYTE byTableMode,CPlayer *pIServerUserItem, tagTableRule *pCfg)
-{
-	//备注1: true表示不能继续游戏.   false表示可以继续游戏
-	//备注2: 内部使用, 不校验空指针
-	//备注3: 校验对照表
-	//TableMode		Check？			Treasure
-	//0房卡场			×
-	//1竞技场			待定
-	//2金币场			√				金币
-	//3房卡金币场		√				金币
-	switch(byTableMode)
-	{
 	case TABLE_MODE_GOLD:
+		{
+			byTreasureType = TREASURE_GOLD;
+			break;
+		}
 	case TABLE_MODE_FK_GOLD:
 		{
-			/*
-			//这里修改为门票的 10%
-			if(pIServerUserItem->GetUserGold() < (pCfg->dwLevelGold * 0.1))
-			{
-				return true;
-			}*/
+			byTreasureType = TREASURE_GOLD;
+			break;
+		}
+	case TABLE_MODE_CLUB:
+		{
+			byTreasureType = TREASURE_JF;
+			break;
 		}
 	}
-	return false;
+
+	int i =0;
+	for(auto player : m_player_list)
+	{
+		player->ModifyUserTreasure(byTreasureType, lGameScore[i], "小局结算");
+		i++;
+	}
+	return true;
 }
 //每局游戏结束后，更新游戏任务状态
 bool CTableFrame::XJUpdateGameTaskStatus(const BYTE &cbTableMode, const BYTE &cbCurGameCount)
@@ -530,6 +369,50 @@ bool CTableFrame::XJUpdateGameTaskStatus(const BYTE &cbTableMode, const BYTE &cb
 	return true;
 }
 
+//每局游戏结束后, 更新桌子战绩表
+bool CTableFrame::XJUpdateTableRecord(BYTE round, string OnlyID)
+{
+	//输入参数
+	g_TreasureDB->ResetParameter();
+	g_TreasureDB->AddParameter(TEXT("@TableID"), m_wTableID);
+	g_TreasureDB->AddParameter(TEXT("@GameMode"),m_tagTableRule.GameMode);
+	g_TreasureDB->AddParameter(TEXT("@AllCount"),m_tagTableRule.GameCount);
+	g_TreasureDB->AddParameter(TEXT("@CurCount"),round);
+	g_TreasureDB->AddParameter(TEXT("@PlayerCount"),m_tagTableRule.PlayerCount);
+	g_TreasureDB->AddParameter(TEXT("@KindID"),g_GameCtrl->GetKindID());
+	g_TreasureDB->AddParameter(TEXT("@OnlyID"), OnlyID.c_str());
+
+	//执行查询
+	LONG lResultCode = g_TreasureDB->ExecuteProcess(TEXT("GSP_TableRecord_Insert"), true);
+
+	return true;
+}
+//每局游戏结束后, 更新桌子录像表
+bool CTableFrame::XJUpdateTableVideo(BYTE round, string OnlyID, VOID* pData, DWORD dwDataSize)
+{
+	BYTE Data[LEN_MAX_RECORD_SIZE];	//录像数据
+	memcpy_s(Data, dwDataSize*sizeof(BYTE), pData, dwDataSize*sizeof(BYTE));
+
+	if(dwDataSize>LEN_MAX_RECORD_SIZE)
+	{
+		dwDataSize = LEN_MAX_RECORD_SIZE;
+	}
+	
+	//输入参数
+	g_TreasureDB->ResetParameter();
+	g_TreasureDB->AddParameter(TEXT("@TableID"), m_wTableID);
+	g_TreasureDB->AddParameter(TEXT("@CurCount"),round);
+	
+	CString szData = toHexString(Data, LEN_MAX_RECORD_SIZE);
+	g_TreasureDB->AddParameter(TEXT("@VideoData"),szData);
+	g_TreasureDB->AddParameter(TEXT("@VideoSize"),LEN_MAX_RECORD_SIZE);
+	g_TreasureDB->AddParameter(TEXT("@OnlyID"), OnlyID.c_str());
+
+	//执行查询
+	LONG lResultCode = g_TreasureDB->ExecuteProcess(TEXT("GSP_TableVideo_Insert"), true);
+
+	return true;
+}
 
 /****************************************    玩家动作     ***************************************************/
 //玩家加入
@@ -636,7 +519,7 @@ int CTableFrame::PlayerLeaveTable(CPlayer* pPlayer)
 	SendTableData(INVALID_CHAIR, CMD_GR_USER_STATUS, &GameStatus, sizeof(GameStatus), MDM_G_FRAME);
 
 	//断开用户 socket (金币场结束不断)
-	if (m_cbTableMode != TABLE_MODE_GOLD)   //断线重连产生问题
+	if ( m_tagTableRule.GameMode != TABLE_MODE_GOLD)   //断线重连产生问题
 		CPlayerManager::CloseSocket(pPlayer);
 
 	//2. Table
@@ -751,12 +634,6 @@ int CTableFrame::CanPlayerSitTable(CPlayer* pPlayer, WORD &wChairID)
 		return CHAIR_USERD;
 	}
 
-	//4. 门票检测
-	if(0 != CheckTicket(pPlayer))
-	{
-		return TICKET_NOT;
-	}
-
 	return 0;
 }
 //玩家能否站起
@@ -798,55 +675,7 @@ int CTableFrame::CanPlayerReady(CPlayer* pPlayer)
 	return 0;
 }
 
-//检测门票
-int CTableFrame::CheckTicket(CPlayer* player)
-{
-	switch( m_tagTableRule.GameMode)
-	{
-	case TABLE_MODE_FK://房卡模式
-		{
-			//大厅的房卡场：AA支付，且用户房卡不足
-			break;
-		}
-	case TABLE_MODE_GOLD://金币模式
-		{
-			break;
-		}
-	case TABLE_MODE_FK_GOLD://房卡金币场
-		{
-			//大厅的房卡金币场  校验一:  AA支付，且用户房卡不足
-			//俱乐部的房卡金币场 或者 大厅的房卡金币场
-			break;
-		}
-	}
-
-	return 0;
-}
 /*************************************    待整理    *************************************************/
-//写入录像记录 参数 小局数,数据和长度
-bool CTableFrame::WriteRecordInfo(WORD wXJCount,TCHAR strScore[], VOID* pData, DWORD dwDataSize)
-{
-	//添加保存信息:房间号 游戏模式 局数
-	DBR_GR_GameRecordInfo GameRecordInfo;
-	ZeroMemory(&GameRecordInfo,sizeof(DBR_GR_GameRecordInfo));
-
-	//赋值
-	GameRecordInfo.dwTableID = GetTableID();	
-	GameRecordInfo.wCurrentCount = wXJCount;
-
-	if(dwDataSize>LEN_MAX_RECORD_SIZE)
-	{
-		dwDataSize = LEN_MAX_RECORD_SIZE;
-	}
-
-	memcpy_s(GameRecordInfo.szData, dwDataSize*sizeof(BYTE), pData, dwDataSize*sizeof(BYTE));
-
-	//写入数据库
-	g_GameCtrl->PostDataBaseRequest(DBR_GR_SAVE_RECORDINFO, 0, &GameRecordInfo, sizeof(DBR_GR_GameRecordInfo));
-
-	return true;
-}
-
 //游戏用户
 CPlayer * CTableFrame::GetTableUserItem(WORD wChairID)
 {
@@ -934,13 +763,13 @@ bool CTableFrame::SendTableData(WORD wChairID, WORD wSubCmdID, VOID * pData, WOR
 	return false;
 }
 
-//发送场景
-bool CTableFrame::SendGameScene(IServerUserItem * pIServerUserItem, VOID * pData, WORD wDataSize)
+//发送场景 TODONOW 准备删除
+bool CTableFrame::SendGameScene(WORD wChairID, VOID * pData, WORD wDataSize)
 {
 	//用户效验
-	if ((pIServerUserItem==NULL)) return false;
+	if(wChairID > m_player_list.size()) return false;
 
-	g_GameCtrl->SendData((CPlayer* )pIServerUserItem,MDM_G_FRAME,CMD_GR_FRAME_GAME_OPTION,pData,wDataSize);
+	g_GameCtrl->SendData(m_player_list.at(wChairID), MDM_G_FRAME,CMD_GR_FRAME_GAME_OPTION,pData,wDataSize);
 
 	return true;
 }
@@ -1004,7 +833,6 @@ bool CTableFrame::OnEventTimer(DWORD dwTimerID, WPARAM dwBindParameter)
 	//回调事件
 	if ((dwTimerID>=0)&&(dwTimerID<TIME_TABLE_SINK_RANGE))
 	{
-		ASSERT(m_pITableFrameSink!=NULL);
 		return m_pITableFrameSink->OnTimerMessage(dwTimerID,dwBindParameter);
 	}
 
@@ -1158,7 +986,7 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 			WORD wChairID = pIServerUserItem->GetChairID();
 
 			//发送场景
-			m_pITableFrameSink->OnEventSendGameScene(wChairID, pIServerUserItem, m_cbGameStatus, true);
+			m_pITableFrameSink->OnEventSendGameScene(wChairID);
 
 			
 			//发送解散面板状态 -- 只有处于解散状态 才会发送
@@ -1858,7 +1686,7 @@ bool CTableFrame::EfficacyScoreRule(CPlayer * pIServerUserItem)
 //牌友圈群主解散房间
 void CTableFrame::OnEventClubDismissRoom()
 {
-	m_pITableFrameSink->OnEventGameConclude(INVALID_CHAIR, NULL, GER_DISMISS);
+	m_pITableFrameSink->OnEventGameConclude(GER_DISMISS);
 }
 
 /****************************************    解散房间     ***************************************************/
@@ -2018,9 +1846,8 @@ bool CTableFrame::OnEventVoteDismissRoom(WORD wChairID, bool bAgree)
 			m_dissmisserChaiID = 0xFF;
 
 			//游戏中，结束子游戏（大局结束）
-			ITableFrameSink * m_pITableFrameSink = GetTableFrameSink();
 			if (m_pITableFrameSink != NULL)
-				m_pITableFrameSink->OnEventGameConclude(INVALID_CHAIR, NULL, GER_DISMISS);
+				m_pITableFrameSink->OnEventGameConclude(GER_DISMISS);
 
 			return true;
 		}
