@@ -430,39 +430,39 @@ struct DBR_GR_MatchReward
 	DWORD								dwClientAddr;						//连接地址
 };
 
-//单个比赛场配置
-struct MATCH_CONFIG
-{
-	//阶段信息
-	struct STAGE_INFO
-	{
-		TCHAR	szName[MAX_MATCH_TITLE];	//初赛、半决赛、决赛..
-		WORD	wXJCount;					//小局数
-		WORD	wPlayerCount;				//人数
-		WORD	wJinJi_Rule;				//晋级规则   同桌比较/全桌比较
-		WORD	wJinJi_Count;				//晋级名额
-	};
-
-	//比赛场信息
-	WORD		wMatchID;							//比赛场ID标识
-	TCHAR		szTitle[MAX_MATCH_TITLE];			//标题
-	TCHAR		szDescribe[MAX_MATCH_TITLE];		//比赛描述
-	STAGE_INFO	stage[MAX_MATCH_STAGE];				//阶段信息
-	WORD		wStageSize;							//阶段个数
-	SCORE		llBaseScore;						//底分
-
-	//比赛场属性
-	DWORD		dwStartTime;						//开始时间 （-1表示人满即开）
-	WORD		wStartType;							//开始类型  (0-人满开始  1-定时开始)
-	DWORD		dwLowestPlayer;						//最少参赛人数
-	SCORE		llFee;								//报名费
-	SCORE		llReword;							//奖励
-
-	//机器人信息
-	DWORD		dwRobotCount;						//机器人数量
-	DWORD		dwRobotJoinMin;						//机器人最小加入周期
-	DWORD		dwRobotJoinMax;						//机器人最大加入周期
-};
+////单个比赛场配置
+//struct MATCH_CONFIG
+//{
+//	//阶段信息
+//	struct STAGE_INFO
+//	{
+//		TCHAR	szName[MAX_MATCH_TITLE];	//初赛、半决赛、决赛..
+//		WORD	wXJCount;					//小局数
+//		WORD	wPlayerCount;				//人数
+//		WORD	wJinJi_Rule;				//晋级规则   同桌比较/全桌比较
+//		WORD	wJinJi_Count;				//晋级名额
+//	};
+//
+//	//比赛场信息
+//	WORD		wMatchID;							//比赛场ID标识
+//	TCHAR		szTitle[MAX_MATCH_TITLE];			//标题
+//	TCHAR		szDescribe[MAX_MATCH_TITLE];		//比赛描述
+//	STAGE_INFO	stage[MAX_MATCH_STAGE];				//阶段信息
+//	WORD		wStageSize;							//阶段个数
+//	SCORE		llBaseScore;						//底分
+//
+//	//比赛场属性
+//	DWORD		dwStartTime;						//开始时间 （-1表示人满即开）
+//	WORD		wStartType;							//开始类型  (0-人满开始  1-定时开始)
+//	DWORD		dwLowestPlayer;						//最少参赛人数
+//	SCORE		llFee;								//报名费
+//	SCORE		llReword;							//奖励
+//
+//	//机器人信息
+//	DWORD		dwRobotCount;						//机器人数量
+//	DWORD		dwRobotJoinMin;						//机器人最小加入周期
+//	DWORD		dwRobotJoinMax;						//机器人最大加入周期
+//};
 
 //比赛配置
 struct STR_DBR_GR_MATCH_CONFIG

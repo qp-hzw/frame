@@ -3,7 +3,6 @@
 
 # include "stdafx.h"
 # include "DataBaseEngineSink.h"
-# include "DataBasePacket.h"
 # include "MatchItem.h"
 # include <list>
 
@@ -25,7 +24,7 @@ public:
 	//删除
 	static bool Delete_Match(CMatchItem *Item);
 	//查找
-	static bool Find_Match_ByItemID(WORD wMatchID);
+	static CMatchItem* Find_Match_ByItemID(WORD wMatchID);
 	//开始比赛
 	static void On_Match_Start(CMatchItem *Item);
 	//比赛取消

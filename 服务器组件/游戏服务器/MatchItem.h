@@ -3,7 +3,7 @@
 
 #include "Stdafx.h"
 #include "Player.h"
-#include "DataBasePacket.h"
+#include "MatchRoom.h"
 #include <list>
 #include <map>
 #include <vector>
@@ -30,6 +30,7 @@ class CMatchItem
 {
 private:
 	MATCH_CONFIG				m_config;			//房间配置
+	CMatchRoom*					m_wait_room;		//等待房间
 
 private:
 	bool						m_Start;			//比赛开始标识

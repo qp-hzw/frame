@@ -143,7 +143,10 @@ public:
 		memcpy(&m_tagTableRule, pRule, sizeof(m_tagTableRule));
 		m_wChairCount = pRule->PlayerCount;
 		m_player_list.resize(m_wChairCount, NULL);
+<<<<<<< HEAD
 		m_user_list.resize(m_wChairCount, NULL);
+=======
+>>>>>>> 鍚堝苟浠ｇ爜
 
 		//初始化子游戏规则
 		m_pITableFrameSink->Initialization(this, &m_tagTableRule);
@@ -155,7 +158,7 @@ public:
 	//比赛场相关
 public:
 	//房间是否满了
-	bool IsRoomFull() { return (m_wChairCount == m_user_list.size()); }
+	bool IsRoomFull() { return (m_wChairCount == m_player_list.size()); }
 
 	//玩家自动准备定时器
 	void SetPlayerAutoReady();

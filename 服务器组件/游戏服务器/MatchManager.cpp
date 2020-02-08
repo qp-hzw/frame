@@ -86,7 +86,7 @@ bool CMatchManager::Delete_Match(CMatchItem *Item)
 }
 
 //≤È’“
-bool CMatchManager::Find_Match_ByItemID(WORD wMatchID)
+CMatchItem* CMatchManager::Find_Match_ByItemID(WORD wMatchID)
 {
 	for (auto Item : s_Item_Array)
 	{

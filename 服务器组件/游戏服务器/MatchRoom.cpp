@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "MatchRoom.h"
+#include "MatchItem.h"
 #include "RoomRuleManager.h"
 #include "GameCtrl.h"
 
@@ -75,4 +76,10 @@ bool CMatchRoom::HandleDJGameEnd(BYTE cbGameStatus)
 bool CMatchRoom::StartGame()
 {
 	return true;
+}
+
+//开始下一阶段比赛
+void CMatchRoom::StartNextStage()
+{
+	m_Match_Item->On_Stage_Start();
 }

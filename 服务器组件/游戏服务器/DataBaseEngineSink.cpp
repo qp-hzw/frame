@@ -91,32 +91,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 			bSucceed = OnRequestManageUserRight(dwContextID,pData,wDataSize,dwUserID);
 		}
 		break;
-
-	case DBR_GR_MATCH_FEE:				//比赛费用
-		{
-			bSucceed = OnRequestMatchFee(dwContextID,pData,wDataSize,dwUserID);
-		}
-		break;
-	case DBR_GR_MATCH_START:			//比赛开始
-		{
-			bSucceed = OnRequestMatchStart(dwContextID,pData,wDataSize,dwUserID);
-		}
-		break;
-	case DBR_GR_MATCH_OVER:				//比赛结束
-		{
-			bSucceed = OnRequestMatchOver(dwContextID,pData,wDataSize,dwUserID);
-		}
-		break;
-	case DBR_GR_MATCH_REWARD:			//比赛奖励
-		{
-			bSucceed = OnRequestMatchReward(dwContextID,pData,wDataSize,dwUserID);
-		}
-		break;
-	case DBR_GR_MATCH_QUIT:				//退出比赛
-		{
-			bSucceed = OnRequestMatchQuit(dwContextID,pData,wDataSize,dwUserID);
-		}
-		break;
 	case DBR_GR_WRITE_CURRENT_STOCK:
 		{
 			bSucceed = OnWriteCurrentStock(dwContextID,pData,wDataSize,dwUserID);

@@ -475,7 +475,18 @@ int CTableFrame::PlayerSitTable(CPlayer * pPlayer, WORD wChairID, bool bCheckUse
 
 	//2. Table
 	m_player_list[wChairID] = pPlayer;
-	m_user_list[wChairID] = pPlayer;
+
+	bool bflag = false;
+	for (auto user : m_user_list)
+	{
+		if (user && user == pPlayer)
+		{
+			bflag = true;
+			break;
+		}
+	}
+	if (bflag == false)
+		m_user_list.push_back(pPlayer);
 
 	//3. Player
 	pPlayer->SetUserStatus(US_SIT, m_wTableID, wChairID);
@@ -555,7 +566,7 @@ int CTableFrame::PlayerLeaveTable(CPlayer* pPlayer)
 	auto ite1 = find(m_user_list.begin(), m_user_list.end(), pPlayer);
 	if (ite1 != m_user_list.end())
 	{
-		*ite1 = NULL;
+		m_user_list.erase(ite1);
 	}
 
 	auto ite2 = find(m_player_list.begin(), m_player_list.end(), pPlayer);
@@ -597,7 +608,7 @@ int CTableFrame::PlayerReady(CPlayer* pPlayer)
 
 	//判断三个玩家是否都准备
 	WORD ReadyNum = 0;
-	for (auto it = m_user_list.begin(); it != m_user_list.end(); it++)
+	for (auto it = m_player_list.begin(); it != m_player_list.end(); it++)
 	{
 		if ((*it) != NULL && (US_READY == (*it)->GetUserStatus()))
 			ReadyNum++;
@@ -637,6 +648,9 @@ int CTableFrame::PlayerOffline(CPlayer* pPlayer)
 //玩家能否加入
 int CTableFrame::CanPlayerEnterTable(CPlayer* pPlayer)
 {
+	if (US_FREE != pPlayer->GetUserStatus())
+		return -1;
+
 	return 0;
 }
 //玩家能否坐下

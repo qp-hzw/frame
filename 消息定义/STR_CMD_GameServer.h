@@ -438,7 +438,7 @@ struct MATCH_CONFIG
 	//比赛场属性
 	DWORD		dwStartTime;						//开始时间 （-1表示人满即开）
 	WORD		wStartType;							//开始类型  (0-人满开始  1-定时开始)
-	DWORD		dwLowestPlayer;						//最少参赛人数
+	WORD		dwLowestPlayer;						//最少参赛人数
 	SCORE		llFee;								//报名费
 	SCORE		llReword;							//奖励
 

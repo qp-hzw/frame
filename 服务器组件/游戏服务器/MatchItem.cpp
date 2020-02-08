@@ -13,6 +13,9 @@ CMatchItem::CMatchItem(MATCH_CONFIG config)
 	m_Start = false;
 	m_Stage = 0;
 
+	//新建一个等待房间
+	m_wait_room = new CMatchRoom(this);
+
 	CopyMemory(&m_config, &config, sizeof(MATCH_CONFIG));
 }
 
@@ -40,6 +43,9 @@ bool CMatchItem::On_User_Apply(CPlayer *player)
 		return false;
 
 	m_Apply_Player.push_back(player);
+
+	//玩家加入等待房间
+	m_wait_room->PlayerEnterTable(player);
 
 	return true;
 }
@@ -358,6 +364,8 @@ bool CMatchItem::Update_Ranking(CMatchRoom *room)
 
 	//向Client发送玩家排名
 	Send_Ranking();
+
+	return true;
 }
 
 //更新排名
@@ -387,6 +395,7 @@ bool CMatchItem::On_Match_End(std::vector<player_info> player)
 	//玩家奖励
 
 	//战绩
+	return true;
 }
 
 //群发数据

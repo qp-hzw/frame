@@ -4,7 +4,6 @@
 #include <list>
 #include <map>
 #include "TableFrame.h"
-#include "MatchItem.h"
 
 enum room_state
 {
@@ -12,6 +11,8 @@ enum room_state
 	wait_next,	//等待下一轮
     game,       //游戏中
 };
+
+class CMatchItem;
 
 class CMatchRoom : public CTableFrame
 {
@@ -46,7 +47,7 @@ public:
 	//游戏开始
 	virtual bool StartGame();
 	//开始下一阶段比赛
-	virtual void StartNextStage() { m_Match_Item->On_Stage_Start(); }
+	virtual void StartNextStage();
 };
 
 #endif
