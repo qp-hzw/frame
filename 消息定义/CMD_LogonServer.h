@@ -117,13 +117,6 @@
 
 #define CMD_LC_SERVICE_MARQUEE					18							//跑马灯消息
 
-<<<<<<< HEAD
-#define SUB_CL_SERVICE_MATCH_INFO				22							//请求比赛场信息
-#define CMD_LC_SERVICE_MATCH_INFO				122							//请求比赛场信息  返回
-#define CMD_LC_SERVICE_MATCH_INFO_FINISH		222							//请求比赛场信息  结束
-=======
->>>>>>> 鏇存柊姣旇禌鍦?2.7
-
 #define SUB_CL_SERVICE_XJ_RECORD_PLAYBACK		20							//小局录像回放
 #define CMD_LC_SERVICE_XJ_RECORD_PLAYBACK		120							//小局录像回放 返回
 

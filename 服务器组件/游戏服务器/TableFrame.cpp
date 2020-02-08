@@ -149,10 +149,6 @@ void CTableFrame::SetStageTimer()
 	SetGameTimer(IDI_MATCH_NEXT_STAGE_START, TIME_MATCH_NEXT_STAGE_START, 1, NULL);
 }
 
-
-<<<<<<< HEAD
-=======
->>>>>>> 鏇存柊姣旇禌鍦?2.7
 /***************************************   游戏流程函数    ***************************************************/
 //开始游戏
 bool CTableFrame::StartGame()
@@ -201,7 +197,6 @@ bool CTableFrame::HandleXJGameEnd(BYTE byRound, SCORE *lUserTreasure, VOID* pDat
 		XJTickets();
 	}
 
-<<<<<<< HEAD
 	//更新用户财富  -- 用户财富变更记录表
 	XJModifyUserTreasure(lUserTreasure);
 
@@ -221,8 +216,6 @@ bool CTableFrame::HandleXJGameEnd(BYTE byRound, SCORE *lUserTreasure, VOID* pDat
 #pragma region 桌子信息
 	//更新桌子战绩
 	XJUpdateTableRecord(byRound, OnlyID);
-=======
->>>>>>> 鏇存柊姣旇禌鍦?2.7
 
 	//更新桌子录像
 	XJUpdateTableVideo(byRound, OnlyID, pData, dwDataSize);
@@ -555,11 +548,8 @@ int CTableFrame::PlayerLeaveTable(CPlayer* pPlayer)
 	//广播发送
 	SendTableData(INVALID_CHAIR, CMD_GR_USER_STATUS, &GameStatus, sizeof(GameStatus), MDM_G_FRAME);
 
-<<<<<<< HEAD
 	//断开用户 socket (金币场结束不断)
-	if ( m_tagTableRule.GameMode != TABLE_MODE_GOLD)   //断线重连产生问题
-=======
->>>>>>> 鏇存柊姣旇禌鍦?2.7
+	if ( m_tagTableRule.GameMode != TABLE_MODE_GOLD && m_tagTableRule.GameMode != TABLE_MODE_MATCH) 
 		CPlayerManager::CloseSocket(pPlayer);
 
 	//2. Table

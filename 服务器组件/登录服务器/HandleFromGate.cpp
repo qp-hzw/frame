@@ -140,17 +140,6 @@ bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwScoketID, VOID * p
 		{
 			return On_CMD_LC_SERVICE_PURE_XJ_RECORD_FINISH(dwScoketID,pData,wDataSize);
 		}
-<<<<<<< HEAD
-	case DBO_LC_SERVICE_MATCH_INFO:     //请求比赛场信息 返回
-		{
-			return On_CMD_LC_SERVICE_MATCH_INFO(dwScoketID,pData,wDataSize);
-		}
-	case DBO_LC_SERVICE_MATCH_INFO_FINISH:   //请求比赛场信息 结束
-		{
-			return On_CMD_LC_SERVICE_MATCH_INFO_FINISH(dwScoketID,pData,wDataSize);
-=======
->>>>>>> 鏇存柊姣旇禌鍦?2.7
-		}
 			 
 #pragma region MDM_CLUB 牌友圈
 	case DBO_LC_CLUB_ALL_CLUB_INFO_LIST:		//查询牌友圈列表 返回
@@ -424,13 +413,6 @@ bool CHandleFromGate::OnTCPNetworkMainService(WORD wSubCmdID, VOID * pData, WORD
 	case SUB_CL_SERVICE_XJ_RECORD_PLAYBACK:	//小局录像回放
 		{
 			return On_SUB_CL_Service_XJRecordPlayback(pData, wDataSize, dwSocketID);
-		}
-<<<<<<< HEAD
-	case SUB_CL_SERVICE_MATCH_INFO: //比赛场信息
-		{
-			return On_SUB_CL_SERVICE_MATCH_INFO(pData, wDataSize, dwSocketID);
-=======
->>>>>>> 鏇存柊姣旇禌鍦?2.7
 		}
 	}
 
@@ -1571,24 +1553,6 @@ bool CHandleFromGate::On_CMD_LC_Service_XJRecordPlayback( DWORD dwScoketID, VOID
 	return true;
 }
 
-<<<<<<< HEAD
-//请求比赛场信息
-bool CHandleFromGate::On_SUB_CL_SERVICE_MATCH_INFO(VOID * pData, WORD wDataSize, DWORD dwSocketID)
-{
-	return true;
-}
-//请求比赛场信息 返回
-bool CHandleFromGate::On_CMD_LC_SERVICE_MATCH_INFO(DWORD dwContextID, VOID * pData, WORD wDataSize)
-{
-	return true;
-}
-//请求比赛场信息 结束
-bool CHandleFromGate::On_CMD_LC_SERVICE_MATCH_INFO_FINISH(DWORD dwContextID, VOID * pData, WORD wDataSize)
-{
-=======
->>>>>>> 鏇存柊姣旇禌鍦?2.7
-	return true;
-}
 
 //修改个人资料
 bool CHandleFromGate::On_SUB_CL_Service_ModifyPersonalInfo(VOID * pData, WORD wDataSize, DWORD dwSocketID)

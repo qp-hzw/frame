@@ -143,10 +143,6 @@ public:
 		memcpy(&m_tagTableRule, pRule, sizeof(m_tagTableRule));
 		m_wChairCount = pRule->PlayerCount;
 		m_player_list.resize(m_wChairCount, NULL);
-<<<<<<< HEAD
-		m_user_list.resize(m_wChairCount, NULL);
-=======
->>>>>>> 鍚堝苟浠ｇ爜
 
 		//初始化子游戏规则
 		m_pITableFrameSink->Initialization(this, &m_tagTableRule);

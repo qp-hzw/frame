@@ -181,11 +181,8 @@ void RoomRuleManager::SetMatchRule(tagTableRule& roomRule)
 	roomRule.PlayerCount =3;
 }
 
-<<<<<<< HEAD
 //获取金币场 所有房间数据
 std::vector<STR_CMD_GC_USER_GOLD_INFO>  RoomRuleManager::GetAllRoomInfo()
-=======
->>>>>>> 鏇存柊姣旇禌鍦?2.7
 {
 	std::vector<STR_CMD_GC_USER_GOLD_INFO> vec;
 	for(auto item : s_RoomInfo)

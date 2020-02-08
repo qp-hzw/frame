@@ -11,7 +11,7 @@ CMatchRoom::CMatchRoom(CMatchItem *item)
 	//获取房间规则
 	tagTableRule rule;
 	ZeroMemory(&rule, sizeof(tagTableRule));
-	RoomRuleManager::Instance()->SetMatchRule(rule);
+	RoomRuleManager::SetMatchRule(rule);
 
 	//设置规则
 	SetCommonRule(&rule);
@@ -40,10 +40,10 @@ int CMatchRoom::PlayerSitTable(CPlayer * pIServerUserItem, WORD wChairID, bool b
 }
 
 //小局结束
-bool CMatchRoom::HandleXJGameEnd(BYTE cbCurGameCount, BYTE cbGameMode, SCORE *lGameScore)
+bool CMatchRoom::HandleXJGameEnd(BYTE byRound, SCORE *lUserTreasure, VOID* pData, DWORD dwDataSize)
 {
 	//正常小局结束流程
-	CTableFrame::HandleXJGameEnd(cbCurGameCount, cbGameMode, lGameScore);
+	CTableFrame::HandleXJGameEnd(byRound, lUserTreasure, pData, dwDataSize);
 
 	//更新排名
 	m_Match_Item->Update_Ranking(this);
