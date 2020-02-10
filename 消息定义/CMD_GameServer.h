@@ -114,6 +114,8 @@
 #define CMD_GC_MATCH_RANKING		7									//更新排名
 #define CMD_GC_MATCH_JUESAI_RECODE	8									//决赛战绩
 
+#define CMD_GC_MATCH_WAIT_COUNT		9									//等待桌数消息
+
 #pragma endregion
 
 #pragma region MDM_G_FRAME 框架命令

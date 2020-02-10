@@ -5,6 +5,7 @@
 #include "HandleFromCenter.h"
 #include "HandleFromGate.h"
 #include "RobotManager.h"
+#include "MatchManager.h"
 #include <vector>
 #include <algorithm>
 
@@ -90,6 +91,18 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 				return true;
 			}
 		}
+	}
+
+	//比赛时间
+	if ((dwTimerID>=IDI_MATCH_MODULE_START)&&(dwTimerID<=IDI_MATCH_MODULE_FINISH))
+	{
+		//比赛ID
+		DWORD dwMatchID = dwTimerID - IDI_MATCH_MODULE_START;
+		CLog::Log(log_debug, "dwMatchID: %d", dwMatchID);
+
+		//查找比赛场
+		CMatchItem * match = CMatchManager::Find_Match_ByItemID(dwMatchID);
+		match->On_Apply_End();
 	}
 
 	//桌子时间

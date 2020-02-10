@@ -43,6 +43,12 @@
     <ClCompile Include="MatchManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="MatchItem.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchRoom.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AttemperEngineSink.h">
@@ -91,6 +97,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="MatchManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchItem.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchRoom.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

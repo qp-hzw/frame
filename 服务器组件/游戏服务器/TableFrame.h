@@ -2,6 +2,7 @@
 #define TABLE_FRAME_HEAD_FILE
 
 #include <vector>
+#include <list>
 #include "Stdafx.h"
 #include "Player.h"
 #include "TableFrameBase.h"
@@ -16,10 +17,6 @@
 //调度事件范围
 #define IDI_MAIN_MODULE_START		1									//起始标识
 #define IDI_MAIN_MODULE_FINISH		99									//终止标识
-
-//机器人事件范围
-#define IDI_ROBOT_MODULE_START		100									//起始表示
-#define IDI_ROBOT_MODULE_FINISH		149									//终止标识
 
 //桌子事件范围
 #define IDI_TABLE_MODULE_START		10000								//起始标识
@@ -70,9 +67,13 @@ private:
 	WORD                            m_wCurGameRound;                    //当前游戏局数
 	BYTE							m_cbGameStatus;						//游戏状态
 
-	std::vector<CPlayer*>			m_user_list;				        //所有玩家(包含旁观)
+	std::list<CPlayer*>				m_user_list;				        //所有玩家(包含旁观)
 	std::vector<CPlayer*>			m_player_list;				        //游戏用户(坐在椅子上的玩家)
-	
+
+	//比赛相关
+	std::vector<SCORE>				m_total_score;						//总分
+	WORD							m_CurXJcount;						//当前小局数
+
 	//房间解散
 public:
 	bool							m_bAgree[MAX_CHAIR];				//同意解散
@@ -154,16 +155,20 @@ public:
 	//比赛场相关
 public:
 	//房间是否满了
-	bool IsRoomFull() { return (m_wChairCount == m_player_list.size()); }
+	bool IsRoomFull();
 
 	//玩家自动准备定时器
 	void SetPlayerAutoReady();
-
 	//获取桌子里所有玩家
 	std::vector<CPlayer *> GetPlayer_list() { return m_player_list; }
 
 	//设置开始下一阶段定时器
 	void SetStageTimer();
+
+	//获取小局数
+	WORD GetXJCount() { return m_CurXJcount; }
+	//获取总分
+	std::vector<SCORE> GetTotalScore() { return m_total_score; }
 
 	//开始下一阶段比赛
 	virtual void StartNextStage() {};

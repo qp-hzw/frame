@@ -3,10 +3,13 @@
 #include "MatchItem.h"
 #include "RoomRuleManager.h"
 #include "GameCtrl.h"
+#include "TableManager.h"
 
 CMatchRoom::CMatchRoom(CMatchItem *item)
 {
 	m_Match_Item = item;
+	m_state = wait_start;
+	m_index = 0;
 
 	//获取房间规则
 	tagTableRule rule;
@@ -44,12 +47,12 @@ bool CMatchRoom::HandleXJGameEnd(BYTE byRound, SCORE *lUserTreasure, VOID* pData
 {
 	//正常小局结束流程
 	CTableFrame::HandleXJGameEnd(byRound, lUserTreasure, pData, dwDataSize);
-
+	CLog::Log(log_debug, "小局结束！");
 	//更新排名
 	m_Match_Item->Update_Ranking(this);
 
 	//判断大局是否结束
-	if (false)
+	if (GetXJCount() !=	GetCustomRule()->GameCount)
 	{
 		//更新比赛场信息
 
@@ -63,11 +66,17 @@ bool CMatchRoom::HandleXJGameEnd(BYTE byRound, SCORE *lUserTreasure, VOID* pData
 //大局结束
 bool CMatchRoom::HandleDJGameEnd(BYTE cbGameStatus)
 {
-	//处理正常大局结束流程
-	CTableFrame::HandleDJGameEnd(cbGameStatus);
+	//玩家离开房间
+	for(auto player : GetPlayer_list())
+	{
+		PlayerLeaveTable(player);
+	}
 
 	//处理比赛场一轮结束流程
 	m_Match_Item->On_Room_End(this);
+
+	//删除桌子
+	CTableManager::DeleteTable(this);
 
 	return true;
 }

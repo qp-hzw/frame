@@ -1,6 +1,7 @@
 #include "Stdafx.h"
 #include "GameCtrl.h"
 #include "RoomRuleManager.h"
+#include "MatchManager.h"
 
 #define MDM_CM_SYSTEM				1000								//系统命令
 #define SUB_CM_SYSTEM_MESSAGE		1									//系统消息
@@ -71,9 +72,6 @@ bool CGameCtrl::StartService()
 	//加载机器人
 	PostDataBaseRequest(DBR_GR_LOAD_ANDROID_USER,0L,NULL,0L);
 
-	//加载比赛场配置
-	PostDataBaseRequest(DBR_GR_MATCH_CONFIG, 0L, NULL, 0L);
-
 	return true;
 }
 //停止服务
@@ -131,6 +129,9 @@ int CGameCtrl::InitializeService()
 
 	//读取房间规则配置文件
 	RoomRuleManager::Init(dwKindId, m_subgame_dll_name);
+
+	//加载比赛场配置
+	CMatchManager::ReadMatchConfig(dwKindId);
 
 	return 0;
 }

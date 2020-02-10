@@ -353,7 +353,9 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClCompile Include="HandleFromDB.cpp" />
     <ClCompile Include="HandleFromGate.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MatchItem.cpp" />
     <ClCompile Include="MatchManager.cpp" />
+    <ClCompile Include="MatchRoom.cpp" />
     <ClCompile Include="PlayerManager.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="GameCtrl.cpp" />
@@ -366,7 +368,9 @@ copy /y ..\..\..\运行\Release\Unicode\$(TargetFileName) ..\..\..\发布组件\
     <ClInclude Include="AttemperEngineSink.h" />
     <ClInclude Include="DataBaseEngineSink.h" />
     <ClInclude Include="DataBasePacket.h" />
+    <ClInclude Include="MatchItem.h" />
     <ClInclude Include="MatchManager.h" />
+    <ClInclude Include="MatchRoom.h" />
     <ClInclude Include="RobotManager.h" />
     <ClInclude Include="RoomRuleManager.h" />
     <ClInclude Include="TableFrameBase.h" />

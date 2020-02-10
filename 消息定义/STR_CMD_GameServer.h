@@ -421,26 +421,28 @@ struct MATCH_CONFIG
 	struct STAGE_INFO
 	{
 		TCHAR	szName[MAX_MATCH_TITLE];	//初赛、半决赛、决赛..
-		WORD	wXJCount;					//小局数
-		WORD	wPlayerCount;				//人数
-		WORD	wJinJi_Rule;				//晋级规则   同桌比较/全桌比较
-		WORD	wJinJi_Count;				//晋级名额
+		DWORD	wXJCount;					//小局数
+		DWORD	wPlayerCount;				//人数
+		DWORD	wJinJi_Rule;				//晋级规则   同桌比较/全桌比较 1,2
+		DWORD	wJinJi_Count;				//晋级名额
 	};
 
 	//比赛场信息
-	WORD		wMatchID;							//比赛场ID标识
+	DWORD		wMatchID;							//比赛场ID标识
 	TCHAR		szTitle[MAX_MATCH_TITLE];			//标题
 	TCHAR		szDescribe[MAX_MATCH_TITLE];		//比赛描述
 	STAGE_INFO	stage[MAX_MATCH_STAGE];				//阶段信息
-	WORD		wStageSize;							//阶段个数
-	SCORE		llBaseScore;						//底分
+	DWORD		wStageSize;							//阶段个数
+	DWORD		llBaseScore;						//底分
 
 	//比赛场属性
 	DWORD		dwStartTime;						//开始时间 （-1表示人满即开）
-	WORD		wStartType;							//开始类型  (0-人满开始  1-定时开始)
-	WORD		dwLowestPlayer;						//最少参赛人数
-	SCORE		llFee;								//报名费
-	SCORE		llReword;							//奖励
+	DWORD		dwTimePeriod;						//创建周期
+	DWORD		wStartType;							//开始类型  (0-人满开始  1-定时开始)
+	DWORD		dwLowestPlayer;						//最少参赛人数
+	DWORD		FeeType;							//报名费类型 0-金币 1-砖石 2-门票
+	DWORD		llFee;								//报名费
+	DWORD		llReword;							//奖励
 
 	//机器人信息
 	DWORD		dwRobotCount;						//机器人数量
@@ -472,6 +474,12 @@ struct STR_CMD_GC_MATCH_APPLY
 	WORD			wLeaveCount;		//人满赛 还需报名人数
 };
 
+//比赛取消
+struct STR_CMD_GC_MATCH_CANCEL
+{
+	TCHAR			szDescribe[128];	//为啥取消
+};
+
 //取消报名
 struct STR_SUB_CG_MATCH_UNAPPLY
 {
@@ -498,7 +506,7 @@ struct STR_CMD_GC_MATCH_RANKING
 {
 	struct player_info
 	{
-		TCHAR		szName[128];		//玩家昵称
+		TCHAR		szName[LEN_NICKNAME];		//玩家昵称
 		WORD		wRanking;			//排名
 		SCORE		llScore;			//总得分
 	};
@@ -508,9 +516,15 @@ struct STR_CMD_GC_MATCH_RANKING
 };
 
 //决赛
-struct CMD_GC_MATCH_JUESAI_RECODE
+struct STR_CMD_GC_MATCH_JUESAI_RECODE
 {
 
+};
+
+//等待桌数
+struct STR_CMD_GC_MATCH_WAIT_COUNT
+{
+	WORD			wait_count;
 };
 
 #pragma endregion

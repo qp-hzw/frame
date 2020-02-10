@@ -70,6 +70,8 @@ CTableFrame::CTableFrame()
 	
 	m_user_list.clear();
 	m_player_list.clear();
+	m_total_score.clear();
+	m_CurXJcount = 0;
 
 	//解散信息
 	ZeroMemory(m_bResponseDismiss,sizeof(m_bResponseDismiss));
@@ -125,6 +127,18 @@ bool CTableFrame::IsRobot(WORD wChairID)
 		return false;
 
 	return player->IsAndroidUser();
+}
+//房间是否满了
+bool CTableFrame::IsRoomFull()
+{
+	WORD wSitcount = 0;
+	for (auto player : m_player_list)
+	{
+		if (NULL != player) 
+			wSitcount++;
+	}
+
+	return m_wChairCount == wSitcount;
 }
 
 //设置表决解散房间定时器
@@ -196,6 +210,23 @@ bool CTableFrame::HandleXJGameEnd(BYTE byRound, SCORE *lUserTreasure, VOID* pDat
 	{
 		XJTickets();
 	}
+
+	//玩家状态
+	for (int i = 0; i < m_player_list.size(); i++)
+	{
+		if (m_player_list[i] == NULL)	continue;
+		m_player_list[i]->SetUserStatus(US_SIT, GetTableID(), i);
+	}
+
+	//记录分数 --比赛
+	if (m_total_score.empty())	m_total_score.resize(m_player_list.size(), 0);
+	for (int i = 0; i < m_total_score.size(); i++)
+	{
+		m_total_score[i] += lUserTreasure[i];
+	}
+
+	//小局数 --比赛
+	m_CurXJcount++;
 
 	//更新用户财富  -- 用户财富变更记录表
 	XJModifyUserTreasure(lUserTreasure);
@@ -565,8 +596,8 @@ int CTableFrame::PlayerLeaveTable(CPlayer* pPlayer)
 		*ite2 = NULL;
 	}
 
-	//检测房间里是否还有真人 没有真人大局结束
-	if (!pPlayer->IsAndroidUser())
+	//检测房间里是否还有真人 没有真人大局结束   比赛场不走自动检测流程
+	if ((!pPlayer->IsAndroidUser()) && (m_tagTableRule.GameMode != TABLE_MODE_MATCH))
 		CheckRoomTruePlayer();
 
 	return 0;
@@ -723,7 +754,8 @@ CPlayer * CTableFrame::GetTableUserItem(WORD wChairID)
 CPlayer * CTableFrame::EnumLookonUserItem(WORD wEnumIndex)
 {
 	if (wEnumIndex>=m_user_list.size()) return NULL;
-	return m_user_list[wEnumIndex];
+	return NULL;
+	//return m_user_list[wEnumIndex];
 }
 
 //设置时间
@@ -1184,16 +1216,16 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 				for (size_t i=0;i<m_user_list.size();i++)
 				{
 					//获取用户
-					CPlayer * pILookonUserItem=m_user_list[i];
-					if (pILookonUserItem->GetUserID()!=pLookonConfig->dwUserID) continue;
-					if (pILookonUserItem->GetChairID()!=pIServerUserItem->GetChairID()) continue;
+					//CPlayer * pILookonUserItem=m_user_list[i];
+					//if (pILookonUserItem->GetUserID()!=pLookonConfig->dwUserID) continue;
+					//if (pILookonUserItem->GetChairID()!=pIServerUserItem->GetChairID()) continue;
 
-					//构造消息
-					CMD_GF_LookonStatus LookonStatus;
-					LookonStatus.cbAllowLookon=pLookonConfig->cbAllowLookon;
+					////构造消息
+					//CMD_GF_LookonStatus LookonStatus;
+					//LookonStatus.cbAllowLookon=pLookonConfig->cbAllowLookon;
 
-					//发送消息
-					g_GameCtrl->SendData(pILookonUserItem,MDM_G_FRAME,CMD_GF_LOOKON_STATUS,&LookonStatus,sizeof(LookonStatus));
+					////发送消息
+					//g_GameCtrl->SendData(pILookonUserItem,MDM_G_FRAME,CMD_GF_LOOKON_STATUS,&LookonStatus,sizeof(LookonStatus));
 
 					break;
 				}
@@ -1207,12 +1239,12 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 				//发送消息
 				for (size_t i=0;i<m_user_list.size();i++)
 				{
-					//获取用户
-					CPlayer * pILookonUserItem=m_user_list[i];
-					if (pILookonUserItem->GetChairID()!=pIServerUserItem->GetChairID()) continue;
+					////获取用户
+					//CPlayer * pILookonUserItem=m_user_list[i];
+					//if (pILookonUserItem->GetChairID()!=pIServerUserItem->GetChairID()) continue;
 
-					//发送消息
-					g_GameCtrl->SendData(pILookonUserItem,MDM_G_FRAME,CMD_GF_LOOKON_STATUS,&LookonStatus,sizeof(LookonStatus));
+					////发送消息
+					//g_GameCtrl->SendData(pILookonUserItem,MDM_G_FRAME,CMD_GF_LOOKON_STATUS,&LookonStatus,sizeof(LookonStatus));
 				}
 			}
 

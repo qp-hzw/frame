@@ -4,9 +4,10 @@
 #include "GameCtrl.h"
 #include "TableManager.h"
 #include "PlayerManager.h"
+#include "MatchManager.h"
 
 #define IDI_LOAD_ANDROID_USER			(IDI_MAIN_MODULE_START+1)			//加载机器人
-#define TIME_LOAD_ANDROID_USER				3000L							//加载机器
+#define TIME_LOAD_ANDROID_USER				1000L							//加载机器
 
 
 std::vector<CPlayer *> CRobotManager::s_RobotArray;
@@ -66,6 +67,7 @@ void CRobotManager::SetRobotTimer()
 //设置机器人自动加入房间
 void CRobotManager::On_ANDROID_JOIN_GAME()
 {
+	//金币场
 	std::list<CTableFrame*> table_array(CTableManager::GetAllGlodTable());
 	for(auto pTable :table_array )
 	{
@@ -97,6 +99,34 @@ void CRobotManager::On_ANDROID_JOIN_GAME()
 		if (0 != pTable->PlayerReady(pPlayer)) 
 		{
 			CLog::Log(log_debug, "金币场 桌子【%d】 机器人准备失败", pTable->GetTableID());
+			continue;
+		}
+	}
+
+	//比赛场
+	std::list<CMatchItem *>	match_array = CMatchManager::Find_Match_All();
+	for (auto match : match_array)
+	{
+		if (match == NULL)	continue;
+		if (match->IsMatchStart())	continue;
+
+		//查找空闲机器人
+		CPlayer *pPlayer = GetFreeAndroid();
+		if (pPlayer == NULL) 
+		{
+			break;
+		}
+
+		//比赛场机器人是否已达上限
+		if ( match->IsRobotFull() )
+		{
+			continue;
+		}
+
+		//机器人报名比赛
+		if (!match->On_User_Apply(pPlayer))
+		{
+			CLog::Log(log_debug, "比赛场 ID: 【%d】 机器人报名失败", match->GetMatchID());
 			continue;
 		}
 	}

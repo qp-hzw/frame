@@ -12,17 +12,17 @@ struct player_info
 {
     CPlayer* user;
     int score;
-    int ju_score;
     int room_id;
     int seat;
+	TCHAR szname[LEN_NICKNAME];
 
     player_info()
     {
         user = NULL;
         score = 0;
-        ju_score = 0;
         room_id = 0;
         seat = -1;
+		ZeroMemory(&szname, sizeof(LEN_NICKNAME));
     }
 };
 
@@ -38,10 +38,9 @@ private:
 	WORD						m_Stage;			//当前阶段
 
 private:
-	std::vector<CPlayer *>		m_Apply_Player;	//报名的玩家
+	std::list<CPlayer *>		m_Apply_Player;	//报名的玩家
 	std::vector<player_info>	m_Cur_Ranking;	//正在比赛的玩家排名
-	std::map<int, int>			m_Last_Score;	//上一轮积分
-	std::map<int, std::vector<player_info>>	m_room_player;	//在房间里的玩家  tableID ---> playerinfo
+	std::map<int, std::list<player_info>>	m_room_player;	//在房间里的玩家  tableID ---> playerinfo
 
 	//构造函数
 public:
@@ -67,16 +66,18 @@ public:
 	//一轮结束处理
 	bool On_Room_End(CMatchRoom *room);
 	//淘汰玩家
-	bool On_Player_TaoTai(std::vector<player_info> TaoTai_player, CMatchRoom *room);
+	bool On_Player_TaoTai(std::list<player_info> TaoTai_player);
 	//晋级玩家
-	bool On_Player_JinJi(std::vector<player_info> JinJi_player, CMatchRoom *room);
+	bool On_Player_JinJi(std::list<player_info> JinJi_player);
 	//比赛结束
-	bool On_Match_End(std::vector<player_info> player);
+	bool On_Match_End(std::list<player_info> player);
 
 	//更新排名
 	bool Update_Ranking(CMatchRoom *room);
 	//发送排名
 	void Send_Ranking();
+	//发送等待桌数
+	void Updata_WaitCount(CPlayer *player);
 
 
 	//功能函数
@@ -85,9 +86,14 @@ public:
 	void Init();
 
 	//获取MatchID
-	WORD GetMatchID() {	return m_config.wMatchID; }
+	DWORD GetMatchID() {	return m_config.wMatchID; }
 	//获取比赛配置
 	MATCH_CONFIG GetConfig() { return m_config; }
+
+	//机器人是否报名满了
+	bool IsRobotFull();
+	//比赛是否已开始
+	bool IsMatchStart() { return m_Start; }
 
 	//群发数据
 	void SendDataAllPlayer(WORD wSubCmdID, VOID * pData, WORD wDataSize);
