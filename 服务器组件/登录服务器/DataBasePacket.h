@@ -363,14 +363,6 @@ struct STR_DBO_CL_SERCIVR_FAIL
 /* *******************************************************************************
 **          MAIN:6      MDM_CLUB  牌友圈(版本2)
 ** ******************************************************************************/
-#define DBR_CL_CLUB_ALL_CLUB_INFO_LIST			601							//查询牌友圈列表
-#define DBO_LC_CLUB_ALL_CLUB_INFO_LIST			1601						//查询牌友圈列表 返回
-#define DBO_LC_CLUB_ALL_INFO_FINISH				2601						//查询牌友圈列表 结束
-
-#define DBR_CL_CLUB_ROOM_LIST					602							//查询指定牌友圈房间列表
-#define DBO_LC_CLUB_ROOM_LIST					1602						//查询指定牌友圈房间列表 
-#define DBO_LC_CLUB_ROOM_LIST_FINISH			2602						//查询指定牌友圈房间列表 结束
-
 #define DBR_CL_CLUB_RANDOM_CLUB_LIST			603							//查询未满员, 随机牌友圈(最大9个)
 #define DBO_LC_CLUB_RANDOM_CLUB_LIST			1603						//查询未满员随机牌友圈 
 #define DBO_LC_CLUB_RANDOM_CLUB_LIST_FINISH		2603						//查询未满员随机牌友圈 结束
@@ -379,9 +371,6 @@ struct STR_DBO_CL_SERCIVR_FAIL
 #define DBO_LC_CLUB_JOIN_CLUB					1604						//申请加入牌友圈 返回
 #define DBO_LC_CLUB_JOIN_CLUB_BDCAST			2604						//申请加入牌友圈 广播
 #define DBO_LC_CLUB_JOIN_CLUB_RE				3604						//申请加入牌友圈 自动加入, 通知客户端实时刷新
-
-#define DBR_CL_CLUB_CREATE_CLUB					605							//创建牌友圈
-#define DBO_LC_CLUB_CREATE_CLUB					1605						//创建牌友圈返回
 
 #define DBR_CL_CLUB_JOIN_ROOM					607							//申请加入房间
 #define DBO_LC_CLUB_JOIN_ROOM					1607						//申请加入房间 返回

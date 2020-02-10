@@ -142,17 +142,11 @@ private:
 #pragma endregion
 
 #pragma region MDM_CLUB 牌友圈
-	//查询牌友圈列表
+	//查询自身工会列表
 	static bool On_SUB_CL_CLUB_ALL_CLUB_INFO_LIST(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//查询牌友圈列表结果
-	static bool On_CMD_LC_CLUB_ALL_CLUB_INFO_LIST( DWORD dwContextID, VOID * pData, WORD wDataSize);
-	//查询牌友圈列表结束
-	static bool On_CMD_LC_CLUB_ALL_INFO_FINISH( DWORD dwContextID, VOID * pData, WORD wDataSize);
 
 	//查询指定牌友圈房间列表
 	static bool On_SUB_CL_CLUB_ROOM_LIST(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//查询指定牌友圈房间列表 返回
-	static bool On_CMD_LC_CLUB_ROOM_LIST( DWORD dwContextID, VOID * pData, WORD wDataSize );
 
 	//查询未满员, 随机牌友圈(最大9个)
 	static bool On_SUB_CL_CLUB_RANDOM_CLUB_LIST(VOID * pData, WORD wDataSize, DWORD dwSocketID);
@@ -177,8 +171,6 @@ private:
 
 	//创建牌友圈
 	static bool On_SUB_CL_CLUB_CREATE_CLUB(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//创建牌友圈 返回
-	static bool On_CMD_LC_CLUB_CREATE_CLUB( DWORD dwContextID, VOID * pData, WORD wDataSize);
 
 	//房间设置
 	static bool On_SUB_CL_CLUB_ROOM_SETTING(VOID * pData, WORD wDataSize, DWORD dwSocketID);

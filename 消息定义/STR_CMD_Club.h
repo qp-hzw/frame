@@ -67,12 +67,6 @@ struct STR_CMD_LC_CLUB_DISS_CLUB
 	TCHAR	szDescribe[128];							//失败原因
 };
 
-//请求自身牌友圈列表
-struct STR_SUB_CL_CLUB_ALL_CLUB_INFO_LIST
-{
-	DWORD	dwUserID;									//玩家ID
-};
-
 //请求自身牌友圈列表 返回
 struct STR_CMD_LC_CLUB_ALL_CLUB_INFO_LIST
 {
@@ -131,7 +125,7 @@ struct STR_CMD_LC_CLUB_ROOM_LIST
 	//底注 && 最低身价
 	BYTE	byMask;										//1 AA支付;  2大赢家支付
 	DWORD	dwDizhu;									//底注
-	DWORD	dwGold;										//最低身价
+	DWORD	dwGold;										//最低身价, 低于此值, 不抽税收
 };
 
 //房间设置请求

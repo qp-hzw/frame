@@ -157,12 +157,6 @@ protected:
 
 #pragma region MDM_CLUB 牌友圈(版本2)
 protected:
-	//查询牌友圈列表
-	bool On_DBR_CL_CLUB_ALL_CLUB_INFO_LIST(DWORD dwContextID, VOID * pData, WORD wDataSize);
-
-	//查询指定牌友圈房间列表
-	bool On_DBR_CL_CLUB_ROOM_LIST(DWORD dwContextID, VOID * pData, WORD wDataSize);
-
 	//查询未满员, 随机牌友圈(最大9个)
 	bool On_DBR_CL_CLUB_RANDOM_CLUB_LIST(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
@@ -227,9 +221,6 @@ protected:
 	//工会战绩统计
 	bool On_DBR_CL_CLUB_RECORD_LIST(DWORD dwContextID, VOID * pData, WORD wDataSize);
 	
-	//创建牌友圈
-	bool On_DBR_CL_CLUB_CREATE_CLUB(DWORD dwContextID, VOID * pData, WORD wDataSize);
-
 	//申请加入房间
 	bool On_DBR_CL_CLUB_JOIN_ROOM(DWORD dwContextID, VOID * pData, WORD wDataSize);
 

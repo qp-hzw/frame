@@ -127,14 +127,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 			return OnModifyUserInsure(dwContextID,pData,wDataSize);
 		}
 #pragma region MDM_CLUB 牌友圈(版本2)
-	case DBR_CL_CLUB_ALL_CLUB_INFO_LIST:  //查询牌友圈列表
-		{
-			return On_DBR_CL_CLUB_ALL_CLUB_INFO_LIST(dwContextID,pData,wDataSize);
-		}
-	case DBR_CL_CLUB_ROOM_LIST: //查询指定牌友圈房间列表
-		{
-			return On_DBR_CL_CLUB_ROOM_LIST(dwContextID,pData,wDataSize); 
-		}
 	case DBR_CL_CLUB_RANDOM_CLUB_LIST:  //查询未满员, 随机牌友圈(最大9个)
 		{
 			return On_DBR_CL_CLUB_RANDOM_CLUB_LIST(dwContextID,pData,wDataSize);
@@ -222,10 +214,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 	case DBR_CL_CLUB_RECORD_LIST: //工会战绩统计
 		{
 			return On_DBR_CL_CLUB_RECORD_LIST(dwContextID,pData,wDataSize);
-		}
-	case DBR_CL_CLUB_CREATE_CLUB:  //创建牌友圈
-		{
-			return On_DBR_CL_CLUB_CREATE_CLUB(dwContextID,pData,wDataSize);
 		}
 	case DBR_CL_CLUB_JOIN_ROOM:  //申请加入房间
 		{
@@ -1732,133 +1720,6 @@ VOID CDataBaseEngineSink::On_DBO_CommonOperateResult( DWORD dwContextID, DWORD d
 	return;
 }
 #pragma region MDM_CLUB 牌友圈(版本2)
-//查询牌友圈列表
-bool CDataBaseEngineSink::On_DBR_CL_CLUB_ALL_CLUB_INFO_LIST(DWORD dwContextID, VOID * pData, WORD wDataSize)
-{
-	//效验参数
-	if (wDataSize!=sizeof(STR_SUB_CL_CLUB_ALL_CLUB_INFO_LIST)) return false;
-	STR_SUB_CL_CLUB_ALL_CLUB_INFO_LIST *pDbr = (STR_SUB_CL_CLUB_ALL_CLUB_INFO_LIST *)pData;
-
-	//加载类型
-	m_AccountsDB->ResetParameter();
-
-	m_AccountsDB->AddParameter(TEXT("@UserID"),pDbr->dwUserID);
-	m_AccountsDB->ExecuteProcess(TEXT("GSP_CL_CLUB_ALL_CLUB_INFO_LIST"),true);
-
-	//列表发送
-	WORD wPacketSize=0;
-	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
-	wPacketSize=0;
-	STR_CMD_LC_CLUB_ALL_CLUB_INFO_LIST * pCMD=NULL;
-	while (m_AccountsDB->IsRecordsetEnd()==false)
-	{
-		//发送信息
-		if ((wPacketSize+sizeof(STR_CMD_LC_CLUB_ALL_CLUB_INFO_LIST))>sizeof(cbBuffer))
-		{
-			g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_ALL_CLUB_INFO_LIST,dwContextID,cbBuffer,wPacketSize);
-			wPacketSize=0;
-		}
-
-		//读取信息
-		pCMD=(STR_CMD_LC_CLUB_ALL_CLUB_INFO_LIST *)(cbBuffer+wPacketSize);
-		pCMD->dwClubID=m_AccountsDB->GetValue_DWORD(TEXT("ClubID"));	
-		m_AccountsDB->GetValue_String(TEXT("ClubName"),pCMD->szClubName,CountArray(pCMD->szClubName));
-		pCMD->byClubRole=m_AccountsDB->GetValue_BYTE(TEXT("ClubRole"));
-
-		//设置位移
-		wPacketSize+=sizeof(STR_CMD_LC_CLUB_ALL_CLUB_INFO_LIST);
-
-		//移动记录
-		m_AccountsDB->MoveToNext();
-	}
-	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_ALL_CLUB_INFO_LIST,dwContextID,cbBuffer,wPacketSize);
-
-	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_ALL_INFO_FINISH,dwContextID,NULL,0);
-
-	return true;
-}
-
-//查询指定牌友圈房间列表
-bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_LIST(DWORD dwContextID, VOID * pData, WORD wDataSize)
-{
-	//效验参数
-	if (wDataSize!=sizeof(STR_DBR_CL_CLUB_ROOM_LIST)) return false;
-
-	STR_DBR_CL_CLUB_ROOM_LIST *pDBR = (STR_DBR_CL_CLUB_ROOM_LIST*) pData;
-
-	STR_DBR_CL_CLUB_ROOM_LIST DBR;
-	DBR.dwClubID = pDBR->dwClubID;
-
-	//加载类型
-	m_AccountsDB->ResetParameter();
-
-	//构造参数
-	m_AccountsDB->AddParameter(TEXT("@ClubID"),DBR.dwClubID);
-
-	LONG lResultCode = m_AccountsDB->ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_LIST"),true);
-
-	//列表发送
-	//变量定义
-	WORD wPacketSize=0;
-	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
-	wPacketSize=0;
-	STR_CMD_LC_CLUB_ROOM_LIST * pDBO=NULL;
-	while ((lResultCode == DB_SUCCESS) && (m_AccountsDB->IsRecordsetEnd()==false))
-	{
-		//发送信息
-		if ((wPacketSize+sizeof(STR_CMD_LC_CLUB_ROOM_LIST))>sizeof(cbBuffer))
-		{
-			g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_ROOM_LIST,dwContextID,cbBuffer,wPacketSize);
-			wPacketSize=0;
-		}
-
-		//读取信息
-		pDBO=(STR_CMD_LC_CLUB_ROOM_LIST *)(cbBuffer+wPacketSize);
-		pDBO->dwRoomID=m_AccountsDB->GetValue_DWORD(TEXT("RoomID"));
-		DWORD dwGameID =m_AccountsDB->GetValue_DWORD(TEXT("GameID"));
-		pDBO->dwKindID = (dwGameID >> 16);
-
-		BYTE byMode = m_AccountsDB->GetValue_BYTE(TEXT("ModeID"));
-		pDBO->byGoldOrFK = 1;
-		if(0 == byMode) //房卡场  是俱乐部中的房卡成
-		{
-			pDBO->byGoldOrFK = 1;
-		}
-		else if(3 == byMode) //房卡金币场  是俱乐部中金币场
-		{
-			pDBO->byGoldOrFK = 2;
-		}
-
-		m_AccountsDB->GetValue_String(TEXT("KindName"),pDBO->szKindName,CountArray(pDBO->szKindName));
-		m_AccountsDB->GetValue_String(TEXT("RoomName"),pDBO->szRoomName,CountArray(pDBO->szRoomName));
-
-		pDBO->wPlayerNum=m_AccountsDB->GetValue_WORD(TEXT("PlayerNum"));
-		m_AccountsDB->GetValue_String(TEXT("RoomRule"),pDBO->szRoomRule,CountArray(pDBO->szRoomRule));
-		pDBO->byAllRound=m_AccountsDB->GetValue_BYTE(TEXT("AllRound"));
-		pDBO->byChairNum=m_AccountsDB->GetValue_BYTE(TEXT("ChairNum"));
-
-		pDBO->bDissolve=m_AccountsDB->GetValue_BYTE(TEXT("DissolveMinute"));
-
-		pDBO->dwAmount=m_AccountsDB->GetValue_DWORD(TEXT("ServiceGold"));
-		pDBO->dwOwnerPercentage=m_AccountsDB->GetValue_DWORD(TEXT("Revenue"));
-
-		pDBO->byMask=m_AccountsDB->GetValue_BYTE(TEXT("Mask"));
-		pDBO->dwDizhu=m_AccountsDB->GetValue_DWORD(TEXT("Dizhu"));
-		pDBO->dwGold=m_AccountsDB->GetValue_DWORD(TEXT("Gold"));
-
-		//设置位移
-		wPacketSize+=sizeof(STR_CMD_LC_CLUB_ROOM_LIST);
-
-		//移动记录
-		m_AccountsDB->MoveToNext();
-	}
-	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_ROOM_LIST,dwContextID,cbBuffer,wPacketSize);
-
-	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_ROOM_LIST_FINISH,dwContextID,NULL,0);
-
-	return true;
-}
-
 //查询未满员, 随机牌友圈(最大9个)
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_RANDOM_CLUB_LIST(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
@@ -2900,46 +2761,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_DISS_CLUB(DWORD dwContextID, VOID * pDa
 	lstrcpyn(CMD.szDescribe,CW2CT(DBVarValue.bstrVal),CountArray(CMD.szDescribe));
 
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_DISS_CLUB,dwContextID,&CMD,sizeof(CMD));
-	return true;
-}
-
-//创建牌友圈
-bool CDataBaseEngineSink::On_DBR_CL_CLUB_CREATE_CLUB(DWORD dwContextID, VOID * pData, WORD wDataSize)
-{
-	//效验参数
-	ASSERT(wDataSize==sizeof(STR_DBR_CL_CLUB_CREATE_CLUB));
-	if (wDataSize!=sizeof(STR_DBR_CL_CLUB_CREATE_CLUB)) return false;
-
-	STR_DBR_CL_CLUB_CREATE_CLUB *pDBR = (STR_DBR_CL_CLUB_CREATE_CLUB*) pData;
-
-	//加载类型
-	m_AccountsDB->ResetParameter();
-
-	//构造参数
-	m_AccountsDB->AddParameter(TEXT("@Mystery"),_MYSTERY);
-	m_AccountsDB->AddParameter(TEXT("@UserID"),pDBR->dwUserID);
-	m_AccountsDB->AddParameter(TEXT("@ClubName"),pDBR->szClubName);
-	m_AccountsDB->AddParameter(TEXT("@MajorKindID"),pDBR->dwMajorKindID);
-	m_AccountsDB->AddParameter(TEXT("@MinorKindID"), pDBR->szMinorKindID);
-	m_AccountsDB->AddParameter(TEXT("@szNotice"), pDBR->szNotice);
-	m_AccountsDB->AddParameter(TEXT("@szMessag"), pDBR->szMessag);
-
-	//输出参数
-	TCHAR szDescribeString[128]=TEXT("");
-	m_AccountsDB->AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
-
-	LONG lResultCode = m_AccountsDB->ExecuteProcess(TEXT("GSP_CL_CLUB_CREATE_CLUB"),true);
-
-	//结果处理
-	CDBVarValue DBVarValue;
-	m_AccountsDB->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
-
-	//结构体构造
-	STR_CMD_LC_CLUB_CREATE_CLUB CMD;
-	ZeroMemory(&CMD, sizeof(CMD));
-	CMD.lResultCode = lResultCode;
-
-	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_CREATE_CLUB,dwContextID,&CMD,sizeof(CMD));
 	return true;
 }
 
