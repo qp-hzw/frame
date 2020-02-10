@@ -72,11 +72,6 @@ protected:
 	//查询开房信息列表返回
 	bool On_DBO_Service_QueryRoomList(DWORD dwContextID, DWORD dwResultCode);
 
-	//获取富豪榜
-	bool On_DBR_Service_GetRichList(DWORD dwContextID, void * pData, WORD wDataSize);
-	//获取富豪榜返回
-	bool On_DBO_Service_GetRichList(DWORD dwContextID, DWORD dwResultCode);
-
 	//获取用户录像列表（大局）
 	bool On_DBR_Service_GetUserRecordList(DWORD dwContextID, void * pData, WORD wDataSize);
 	//获取用户录像列表返回
@@ -179,9 +174,6 @@ protected:
 	
 	//房间设置
 	bool On_DBR_CL_CLUB_ROOM_SETTING(DWORD dwContextID, VOID * pData, WORD wDataSize);
-
-	//请求房间设置
-	bool On_DBR_CL_CLUB_ROOM_QUERY_SETTING(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
 	//解散房间请求
 	bool On_DBR_CL_CLUB_ROOM_DISSOLVE(DWORD dwContextID, VOID * pData, WORD wDataSize);

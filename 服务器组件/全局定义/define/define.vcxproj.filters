@@ -42,5 +42,11 @@
     <ClInclude Include="..\..\..\全局定义\Define.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\消息定义\CMD_Club.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\消息定义\STR_CMD_Club.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

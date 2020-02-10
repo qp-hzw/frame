@@ -182,12 +182,6 @@ struct STR_DBO_CL_SERCIVR_QUERY_ROOMLIST
 	DWORD dwScore[5];					//用户积分
 };
 
-//获取富豪榜返回
-struct STR_DBO_CL_SERCIVR_GET_RICHLIST
-{
-	BYTE byCount;						//排行榜数量
-	tagSingleRichInfo RegalInfoList[15];	//排行列表
-};
 
 //获取用户录像列表
 struct STR_DBR_CL_SERCIVR_GET_RECORDLIST

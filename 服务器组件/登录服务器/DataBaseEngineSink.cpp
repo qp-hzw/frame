@@ -151,10 +151,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 		{
 			return On_DBR_CL_CLUB_ROOM_SETTING(dwContextID,pData,wDataSize);	
 		}
-	case DBR_CL_CLUB_ROOM_QUERY_SETTING: //请求房间设置
-		{
-			return On_DBR_CL_CLUB_ROOM_QUERY_SETTING(dwContextID,pData,wDataSize);
-		}
 	case DBR_CL_CLUB_ROOM_DISSOLVE: //解散房间请求
 		{
 			return On_DBR_CL_CLUB_ROOM_DISSOLVE(dwContextID,pData,wDataSize);
@@ -437,50 +433,6 @@ bool CDataBaseEngineSink::On_DBO_Service_QueryRoomList(DWORD dwContextID, DWORD 
 	else			//TODO 失败是否需要加入通用处理
 	{
 
-	}
-
-	return true;
-}
-
-//获取富豪榜
-bool CDataBaseEngineSink::On_DBR_Service_GetRichList(DWORD dwContextID, void * pData, WORD wDataSize)
-{
-	m_AccountsDB->ResetParameter();
-
-	//执行查询
-	LONG lResultCode = m_AccountsDB->ExecuteProcess(TEXT("GSP_CL_Service_GetRichList"), true);		//查询数据库[QPAccountsDB]中的RegalRank表
-
-	//结果处理
-	On_DBO_Service_GetRichList(dwContextID, lResultCode);
-
-
-	return true;
-
-}
-
-//获取富豪榜返回
-bool CDataBaseEngineSink::On_DBO_Service_GetRichList(DWORD dwContextID, DWORD dwResultCode)
-{
-	if(dwResultCode == DB_SUCCESS)
-	{
-		STR_DBO_CL_SERCIVR_GET_RICHLIST result;
-		ZeroMemory(&result,sizeof(STR_DBO_CL_SERCIVR_GET_RICHLIST));
-
-		for(int i=0;i < m_AccountsDB->GetRecordCount() && i < 15;i++)
-		{
-			result.byCount ++;
-			m_AccountsDB->GetValue_String(TEXT("Name"),result.RegalInfoList[i].szName,CountArray(result.RegalInfoList[i].szName));
-			result.RegalInfoList[i].dwMoney = m_AccountsDB->GetValue_DWORD(TEXT("Money"));
-			m_AccountsDB->GetValue_String(TEXT("Wechat"),result.RegalInfoList[i].szWechatAccount,CountArray(result.RegalInfoList[i].szWechatAccount));
-			result.RegalInfoList[i].dwRegistID = m_AccountsDB->GetValue_DWORD(TEXT("RegistID"));	
-			m_AccountsDB->GetValue_String(TEXT("QQ"),result.RegalInfoList[i].szQQ,CountArray(result.RegalInfoList[i].szQQ));
-			m_AccountsDB->GetValue_String(TEXT("MobilePhone"),result.RegalInfoList[i].szMobilePhone,CountArray(result.RegalInfoList[i].szMobilePhone));
-
-			m_AccountsDB->MoveToNext();
-		}
-
-		if(result.byCount > 0)
-			g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_SERVICE_GET_RICH_LIST,dwContextID,&result,sizeof(STR_DBO_CL_SERCIVR_GET_RICHLIST));
 	}
 
 	return true;
@@ -1886,7 +1838,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_LIST(DWORD dwContextID, VOID * pDa
 		pDBO->byChairNum=m_AccountsDB->GetValue_BYTE(TEXT("ChairNum"));
 
 		pDBO->bDissolve=m_AccountsDB->GetValue_BYTE(TEXT("DissolveMinute"));
-		pDBO->dwDissolveTime=m_AccountsDB->GetValue_DWORD(TEXT("DissolveMinute"));
 
 		pDBO->dwAmount=m_AccountsDB->GetValue_DWORD(TEXT("ServiceGold"));
 		pDBO->dwOwnerPercentage=m_AccountsDB->GetValue_DWORD(TEXT("Revenue"));
@@ -1911,6 +1862,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_LIST(DWORD dwContextID, VOID * pDa
 //查询未满员, 随机牌友圈(最大9个)
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_RANDOM_CLUB_LIST(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
+	/*
 	//效验参数
 	if (wDataSize!=sizeof(STR_SUB_CL_CLUB_RANDOM_CLUB_LIST)) return false;
 	STR_SUB_CL_CLUB_RANDOM_CLUB_LIST *pDBR = (STR_SUB_CL_CLUB_RANDOM_CLUB_LIST*) pData;
@@ -1918,8 +1870,8 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_RANDOM_CLUB_LIST(DWORD dwContextID, VOI
 	//加载类型
 	m_AccountsDB->ResetParameter();
 	//构造参数
-	m_AccountsDB->AddParameter(TEXT("@Mystery"),_MYSTERY);
 	m_AccountsDB->AddParameter(TEXT("@UserID"),pDBR->dwUserID);
+	*/
 
 	LONG lResultCode = m_AccountsDB->ExecuteProcess(TEXT("GSP_CL_CLUB_RANDOM_CLUB_LIST"),true);
 
@@ -1941,8 +1893,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_RANDOM_CLUB_LIST(DWORD dwContextID, VOI
 		pDBO=(STR_CMD_LC_CLUB_RANDOM_CLUB_LIST *)(cbBuffer+wPacketSize);
 		pDBO->dwClubID = m_AccountsDB->GetValue_DWORD(TEXT("ClubID"));
 		m_AccountsDB->GetValue_String(TEXT("ClubName"),pDBO->szClubName,CountArray(pDBO->szClubName));
-		pDBO->dwMajorKindID=m_AccountsDB->GetValue_DWORD(TEXT("MajorKindID"));
-		//TODONOW ManiorKindID 需要转换
 		//KINDID
 		pDBO->byClubLevel=m_AccountsDB->GetValue_BYTE(TEXT("ClubLevel"));
 		pDBO->wMemberNum=m_AccountsDB->GetValue_WORD(TEXT("MemberNum"));
@@ -1975,9 +1925,8 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_JOIN_CLUB(DWORD dwContextID, VOID * pDa
 	m_AccountsDB->ResetParameter();
 	//构造参数
 	m_AccountsDB->AddParameter(TEXT("@Mystery"),_MYSTERY);
-	m_AccountsDB->AddParameter(TEXT("@UserID"),pDbr->dwUserID);
+//	m_AccountsDB->AddParameter(TEXT("@UserID"),pDbr->dwUserID);
 	m_AccountsDB->AddParameter(TEXT("@ClubID"),pDbr->dwClubID);
-	m_AccountsDB->AddParameter(TEXT("@Note"),pDbr->szNote);
 
 	//输出参数
 	TCHAR szDescribeString[128]=TEXT("");
@@ -1993,7 +1942,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_JOIN_CLUB(DWORD dwContextID, VOID * pDa
 	STR_CMD_LC_CLUB_JOIN_CLUB CMD;
 	ZeroMemory(&CMD, sizeof(CMD));
 	CMD.lResultCode = lResultCode;
-	lstrcpyn(CMD.szDescribe,CW2CT(DBVarValue.bstrVal),CountArray(CMD.szDescribe));
 
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_JOIN_CLUB,dwContextID,&CMD,sizeof(CMD));
 
@@ -2030,7 +1978,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_NOTICE(DWORD dwContextID, VOID * pData,
 	m_AccountsDB->ResetParameter();
 
 	//构造参数
-	m_AccountsDB->AddParameter(TEXT("UserID"),pDbr->dwUserID);
+//	m_AccountsDB->AddParameter(TEXT("UserID"),pDbr->dwUserID);
 	m_AccountsDB->AddParameter(TEXT("ClubID"),pDbr->dwClubID);
 	m_AccountsDB->AddParameter(TEXT("Notice"),pDbr->szNotice);
 
@@ -2065,7 +2013,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_MESSAGE(DWORD dwContextID, VOID * pData
 	m_AccountsDB->ResetParameter();
 
 	//构造参数
-	m_AccountsDB->AddParameter(TEXT("UserID"),pDbr->dwUserID);
+//	m_AccountsDB->AddParameter(TEXT("UserID"),pDbr->dwUserID);
 	m_AccountsDB->AddParameter(TEXT("ClubID"),pDbr->dwClubID);
 	m_AccountsDB->AddParameter(TEXT("Message"),pDbr->szMessage);
 
@@ -2100,7 +2048,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_CONTRIBUTE_FK(DWORD dwContextID, VOID *
 	m_AccountsDB->ResetParameter();
 
 	//构造参数
-	m_AccountsDB->AddParameter(TEXT("UserID"),pDbr->dwUserID);
+//	m_AccountsDB->AddParameter(TEXT("UserID"),pDbr->dwUserID);
 	m_AccountsDB->AddParameter(TEXT("ClubID"),pDbr->dwClubID);
 	m_AccountsDB->AddParameter(TEXT("FK"),pDbr->dwFK);
 
@@ -2136,7 +2084,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_AUTO_AGREE(DWORD dwContextID, VOID * pD
 	m_AccountsDB->ResetParameter();
 
 	//构造参数
-	m_AccountsDB->AddParameter(TEXT("UserID"),pDbr->dwUserID);
+//	m_AccountsDB->AddParameter(TEXT("UserID"),pDbr->dwUserID);
 	m_AccountsDB->AddParameter(TEXT("ClubID"),pDbr->dwClubID);
 	m_AccountsDB->AddParameter(TEXT("AutoAgree"),pDbr->byAutoAgree);
 	m_AccountsDB->AddParameter(TEXT("Sex"),pDbr->bySex);
@@ -2174,7 +2122,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_INVITE(DWORD dwContextID, VOID * pData,
 
 	//构造参数
 	m_AccountsDB->AddParameter(TEXT("Mystery"),_MYSTERY);
-	m_AccountsDB->AddParameter(TEXT("UserID"),pDbr->dwUserID);
+//	m_AccountsDB->AddParameter(TEXT("UserID"),pDbr->dwUserID);
 	m_AccountsDB->AddParameter(TEXT("ClubID"),pDbr->dwClubID);
 	m_AccountsDB->AddParameter(TEXT("TagID"),pDbr->dwTagID);
 
@@ -2216,7 +2164,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_INVITE_RESULT(DWORD dwContextID, VOID *
 	m_AccountsDB->ResetParameter();
 
 	//构造参数
-	m_AccountsDB->AddParameter(TEXT("UserID"),pDbr->dwUserID);
+//	m_AccountsDB->AddParameter(TEXT("UserID"),pDbr->dwUserID);
 	m_AccountsDB->AddParameter(TEXT("ClubID"),pDbr->dwClubID);
 	m_AccountsDB->AddParameter(TEXT("Agree"),pDbr->byAgree);
 
@@ -2244,16 +2192,17 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_INVITE_RESULT(DWORD dwContextID, VOID *
 //被邀请人查看自己的邀请列表
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_INQUERY_LIST(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
+	/*
 	//效验参数
 	if (wDataSize != sizeof(STR_SUB_CL_CLUB_INQUERY_LIST)) return false;
 	STR_SUB_CL_CLUB_INQUERY_LIST* pDbr = (STR_SUB_CL_CLUB_INQUERY_LIST*) pData;
 
 	//加载类型
 	m_AccountsDB->ResetParameter();
-
+	
 	//构造参数
 	m_AccountsDB->AddParameter(TEXT("UserID"),pDbr->dwUserID);
-
+	*/
 	LONG lResultCode = m_AccountsDB->ExecuteProcess(TEXT("GSP_CL_CLUB_INQUERY_LIST"),true);
 
 	//发送列表
@@ -2274,8 +2223,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_INQUERY_LIST(DWORD dwContextID, VOID * 
 		pDBO=(STR_CMD_LC_CLUB_INQUERY_LIST *)(cbBuffer+wPacketSize);
 		pDBO->dwClubID = m_AccountsDB->GetValue_DWORD(TEXT("ClubID"));
 		m_AccountsDB->GetValue_String(TEXT("ClubName"),pDBO->szClubName,CountArray(pDBO->szClubName));
-		pDBO->dwMajorKindID=m_AccountsDB->GetValue_DWORD(TEXT("MajorKindID"));
-		//TODONOW ManiorKindID 需要转换
 		//KINDID
 		pDBO->byClubLevel=m_AccountsDB->GetValue_BYTE(TEXT("ClubLevel"));
 		pDBO->wMemberNum=m_AccountsDB->GetValue_WORD(TEXT("MemberNum"));
@@ -2307,7 +2254,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_APPLICANT_LIST(DWORD dwContextID, VOID 
 	m_AccountsDB->ResetParameter();
 
 	//构造参数
-	m_AccountsDB->AddParameter(TEXT("UserID"),pDbr->dwUserID);
+	//m_AccountsDB->AddParameter(TEXT("UserID"),pDbr->dwUserID);
 	m_AccountsDB->AddParameter(TEXT("ClubID"),pDbr->dwClubID);
 
 	LONG lResultCode = m_AccountsDB->ExecuteProcess(TEXT("GSP_CL_CLUB_APPLICANT_LIST"),true);
@@ -2358,7 +2305,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_APPOINTMENT(DWORD dwContextID, VOID * p
 	m_AccountsDB->ResetParameter();
 
 	//构造参数
-	m_AccountsDB->AddParameter(TEXT("UserID"),pDbr->dwUserID);
+//	m_AccountsDB->AddParameter(TEXT("UserID"),pDbr->dwUserID);
 	m_AccountsDB->AddParameter(TEXT("ClubID"),pDbr->dwClubID);
 	m_AccountsDB->AddParameter(TEXT("TagID"),pDbr->dwTagID);
 	m_AccountsDB->AddParameter(TEXT("Action"),pDbr->byAction);
@@ -2694,6 +2641,7 @@ bool CDataBaseEngineSink::On_DBR_CL_STICKY_POST(DWORD dwContextID, VOID * pData,
 //玩家离开俱乐部房间
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_USER_LEAVE(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
+	/*
 	//效验参数
 	if (wDataSize != sizeof(STR_SUB_CL_CLUB_ROOM_USER_LEAVE)) return false;
 	STR_SUB_CL_CLUB_ROOM_USER_LEAVE* pDbr = (STR_SUB_CL_CLUB_ROOM_USER_LEAVE*) pData;
@@ -2704,6 +2652,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_USER_LEAVE(DWORD dwContextID, VOID
 	//构造参数
 	m_AccountsDB->AddParameter(TEXT("UserID"),pDbr->dwUserID);
 	m_AccountsDB->AddParameter(TEXT("RoomID"),pDbr->dwClubRoomID);
+	*/
 
 	LONG lResultCode = m_AccountsDB->ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_USER_LEAVE"),true);
 
@@ -2842,65 +2791,10 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_SETTING(DWORD dwContextID, VOID * 
 	return true;
 }
 
-//请求房间设置
-bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_QUERY_SETTING(DWORD dwContextID, VOID * pData, WORD wDataSize)
-{
-	//效验参数
-	if (wDataSize != sizeof(STR_SUB_CL_CLUB_ROOM_QUERY_SETTING)) return false;
-	STR_SUB_CL_CLUB_ROOM_QUERY_SETTING* pDbr = (STR_SUB_CL_CLUB_ROOM_QUERY_SETTING*) pData;
-
-	//加载类型
-	m_AccountsDB->ResetParameter();
-
-	//构造参数
-	m_AccountsDB->AddParameter(TEXT("UserID"),pDbr->dwUserID);
-	m_AccountsDB->AddParameter(TEXT("RoomID"),pDbr->dwRoomID);	
-
-	//输出参数
-	TCHAR szDescribeString[128]=TEXT("");
-	m_AccountsDB->AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
-
-	LONG lResultCode = m_AccountsDB->ExecuteProcess(TEXT("GSP_CL_CLUB_ROOM_QUERY_SETTING"),true);
-
-	//结果处理
-	CDBVarValue DBVarValue;
-	m_AccountsDB->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
-
-	//结构体构造
-	STR_CMD_LC_CLUB_ROOM_QUERY_SETTING CMD;
-	ZeroMemory(&CMD, sizeof(CMD));
-	CMD.lResultCode = lResultCode;
-	lstrcpyn(CMD.szDescribe,CW2CT(DBVarValue.bstrVal),CountArray(CMD.szDescribe));
-
-	CMD.dwRoomID=m_AccountsDB->GetValue_DWORD(TEXT("RoomID"));
-
-	//数值转换
-	BYTE byResultModeID = m_AccountsDB->GetValue_BYTE(TEXT("ModeID"));;
-	if(0 == byResultModeID)//俱乐部的房卡场 就是普通房卡场
-	{
-		CMD.byGoldOrFK  = 1;
-	}
-	else if( 3 == byResultModeID)//俱乐部的金币场 其实是 房卡金币场
-	{
-		CMD.byGoldOrFK  = 2;
-	}
-
-	CMD.dwDissolveTime=m_AccountsDB->GetValue_DWORD(TEXT("DissolveMinute"));
-	CMD.byDissolve= m_AccountsDB->GetValue_BYTE(TEXT("DissolveMinute"));
-	CMD.dwAmount=m_AccountsDB->GetValue_DWORD(TEXT("ServiceGold"));
-	CMD.dwOwnerPercentage=m_AccountsDB->GetValue_DWORD(TEXT("Revenue"));
-	CMD.byMask = m_AccountsDB->GetValue_BYTE(TEXT("Mask"));
-	CMD.dwDizhu = m_AccountsDB->GetValue_DWORD(TEXT("Dizhu"));
-	CMD.dwGold = m_AccountsDB->GetValue_DWORD(TEXT("Gold"));
-	m_AccountsDB->GetValue_String(TEXT("RoomName"), CMD.szRoomName,CountArray(CMD.szRoomName));
-
-	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_ROOM_QUERY_SETTING,dwContextID,&CMD,sizeof(CMD));
-	return true;
-}
-
 //解散房间请求
 bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_DISSOLVE(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
+	/*
 	//效验参数
 	if (wDataSize != sizeof(STR_SUB_CL_CLUB_ROOM_DISSOLVE)) return false;
 	STR_SUB_CL_CLUB_ROOM_DISSOLVE* pDbr = (STR_SUB_CL_CLUB_ROOM_DISSOLVE*) pData;
@@ -2912,6 +2806,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_ROOM_DISSOLVE(DWORD dwContextID, VOID *
 	m_AccountsDB->AddParameter(TEXT("UserID"),pDbr->dwUserID);
 	m_AccountsDB->AddParameter(TEXT("ClubID"),pDbr->dwClubID);
 	m_AccountsDB->AddParameter(TEXT("RoomID"),pDbr->dwClubRoomID);
+	*/
 
 	//输出参数
 	TCHAR szDescribeString[128]=TEXT("");
@@ -2944,8 +2839,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_TABLE_DISSOLVE(DWORD dwContextID, VOID 
 	m_AccountsDB->ResetParameter();
 
 	//构造参数
-	m_AccountsDB->AddParameter(TEXT("UserID"),pDbr->dwUserID);
-	m_AccountsDB->AddParameter(TEXT("ClubID"),pDbr->dwClubID);
+	//m_AccountsDB->AddParameter(TEXT("UserID"),pDbr->dwUserID);
 	m_AccountsDB->AddParameter(TEXT("RoomID"),pDbr->dwClubRoomID);
 	m_AccountsDB->AddParameter(TEXT("TableID"),pDbr->dwTableID);
 
@@ -2965,11 +2859,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_TABLE_DISSOLVE(DWORD dwContextID, VOID 
 		CDBVarValue DBVarValue;
 		m_AccountsDB->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 		lstrcpyn(CMD.szDescribe,CW2CT(DBVarValue.bstrVal),CountArray(CMD.szDescribe));
-
-		CMD.byMask = m_AccountsDB->GetValue_BYTE(TEXT("Mask"));
-		CMD.dwGameID = m_AccountsDB->GetValue_DWORD(TEXT("GameID"));
-		CMD.dwTableID = pDbr->dwTableID;
-
 		CMD.lResultCode = lResultCode;
 
 		g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_TABLE_DISSOLVE,dwContextID,&CMD,sizeof(CMD));
@@ -2991,7 +2880,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_DISS_CLUB(DWORD dwContextID, VOID * pDa
 	m_AccountsDB->ResetParameter();
 
 	//构造参数
-	m_AccountsDB->AddParameter(TEXT("UserID"),pDbr->dwUserID);
+//	m_AccountsDB->AddParameter(TEXT("UserID"),pDbr->dwUserID);
 	m_AccountsDB->AddParameter(TEXT("ClubID"),pDbr->dwClubID);
 
 	//输出参数
@@ -3049,14 +2938,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_CREATE_CLUB(DWORD dwContextID, VOID * p
 	STR_CMD_LC_CLUB_CREATE_CLUB CMD;
 	ZeroMemory(&CMD, sizeof(CMD));
 	CMD.lResultCode = lResultCode;
-	lstrcpyn(CMD.szDescribe,CW2CT(DBVarValue.bstrVal),CountArray(CMD.szDescribe));
-
-	if(lResultCode == DB_SUCCESS)
-	{
-		CMD.dwClubID =m_AccountsDB->GetValue_DWORD(TEXT("ClubID"));
-		CMD.byClubLevel=m_AccountsDB->GetValue_BYTE(TEXT("ClubLevel"));
-		CMD.dwFK=m_AccountsDB->GetValue_BYTE(TEXT("FK"));
-	}
 
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_CREATE_CLUB,dwContextID,&CMD,sizeof(CMD));
 	return true;
@@ -3078,7 +2959,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_JOIN_ROOM(DWORD dwContextID, VOID * pDa
 	m_AccountsDB->ResetParameter();
 
 	//构造参数
-	m_AccountsDB->AddParameter(TEXT("@UserID"),pDBbr->dwUserID);
+	//m_AccountsDB->AddParameter(TEXT("@UserID"),pDBbr->dwUserID);
 	m_AccountsDB->AddParameter(TEXT("@RoomID"),pDBbr->dwRoomID);
 
 	//输出参数
@@ -3092,7 +2973,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_JOIN_ROOM(DWORD dwContextID, VOID * pDa
 	m_AccountsDB->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
 
 	CMD1.lResultCode = ResultCode;
-	lstrcpyn(CMD1.szDescribe, CW2CT(DBVarValue.bstrVal), CountArray(CMD1.szDescribe));
+	//lstrcpyn(CMD1.szDescribe, CW2CT(DBVarValue.bstrVal), CountArray(CMD1.szDescribe));
 
 	//列表发送
 	WORD wPacketSize=0;
@@ -3113,13 +2994,13 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_JOIN_ROOM(DWORD dwContextID, VOID * pDa
 
 		pDBO->dwClubRoomID  = m_AccountsDB->GetValue_DWORD(TEXT("RoomID"));
 		pDBO->dwTableID=m_AccountsDB->GetValue_DWORD(TEXT("TableID"));
-		pDBO->dwClubID = m_AccountsDB->GetValue_DWORD(TEXT("ClubID"));
-		pDBO->byMask = m_AccountsDB->GetValue_BYTE(TEXT("IsOwner"));
+	//	pDBO->dwClubID = m_AccountsDB->GetValue_DWORD(TEXT("ClubID"));
+		//pDBO->byMask = m_AccountsDB->GetValue_BYTE(TEXT("IsOwner"));
 
 		pDBO->TableState=m_AccountsDB->GetValue_DWORD(TEXT("TableState"));
 		pDBO->LockState=m_AccountsDB->GetValue_DWORD(TEXT("LockState"));
 		pDBO->CurrentRound=m_AccountsDB->GetValue_DWORD(TEXT("CurrentRound"));
-		pDBO->dwOwnerID=m_AccountsDB->GetValue_DWORD(TEXT("OwnerID"));
+		//pDBO->dwOwnerID=m_AccountsDB->GetValue_DWORD(TEXT("OwnerID"));
 		pDBO->byDel = 0;
 
 		//设置位移
@@ -3139,7 +3020,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_JOIN_ROOM(DWORD dwContextID, VOID * pDa
 	m_AccountsDB->ResetParameter();
 
 	//构造参数
-	m_AccountsDB->AddParameter(TEXT("@UserID"),pDBbr->dwUserID);
+	//m_AccountsDB->AddParameter(TEXT("@UserID"),pDBbr->dwUserID);
 	m_AccountsDB->AddParameter(TEXT("@RoomID"),pDBbr->dwRoomID);
 
 	//输出参数
@@ -3164,7 +3045,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_JOIN_ROOM(DWORD dwContextID, VOID * pDa
 
 		//读取信息
 		pDBO2=(STR_CMD_LC_CLUB_TABLE_USER_LIST *)(cbBuffer2+wPacketSize2);
-		pDBO2->dwClubRoomID=m_AccountsDB->GetValue_DWORD(TEXT("ClubRoomID"));
+		//pDBO2->dwClubRoomID=m_AccountsDB->GetValue_DWORD(TEXT("ClubRoomID"));
 		pDBO2->dwUserID=m_AccountsDB->GetValue_DWORD(TEXT("UserID"));
 		m_AccountsDB->GetValue_String(TEXT("UserName"),pDBO2->szUserName,CountArray(pDBO2->szUserName));
 		pDBO2->bySex=m_AccountsDB->GetValue_BYTE(TEXT("Sex"));
@@ -3172,9 +3053,9 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_JOIN_ROOM(DWORD dwContextID, VOID * pDa
 		m_AccountsDB->GetValue_String(TEXT("HeadUrl"),pDBO2->szHeadUrl,CountArray(pDBO2->szHeadUrl));
 		pDBO2->byClubRole=m_AccountsDB->GetValue_BYTE(TEXT("ClubRole"));
 		pDBO2->byClubReputation=m_AccountsDB->GetValue_BYTE(TEXT("ClubReputation"));
-		pDBO2->dwTableID=m_AccountsDB->GetValue_DWORD(TEXT("TableID"));
+		//pDBO2->dwTableID=m_AccountsDB->GetValue_DWORD(TEXT("TableID"));
 		pDBO2->byChairID=m_AccountsDB->GetValue_BYTE(TEXT("ChairID"));
-		pDBO2->byDel = 0;
+		//pDBO2->byDel = 0;
 
 		//设置位移
 		wPacketSize2+=sizeof(STR_CMD_LC_CLUB_TABLE_USER_LIST);
@@ -3195,7 +3076,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_JOIN_ROOM(DWORD dwContextID, VOID * pDa
 
 	if(ResultCode2 == DB_SUCCESS)
 	{
-		CMD1.dwPlayerNum = m_AccountsDB->GetValue_DWORD(TEXT("PlayerNum"));
+	//	CMD1.dwPlayerNum = m_AccountsDB->GetValue_DWORD(TEXT("PlayerNum"));
 	}
 
 #pragma endregion
@@ -3258,7 +3139,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_QUIT(DWORD dwContextID, VOID * pData, W
 	m_AccountsDB->ResetParameter();
 
 	//构造参数
-	m_AccountsDB->AddParameter(TEXT("@UserID"),pDBR->dwUserID);
+//	m_AccountsDB->AddParameter(TEXT("@UserID"),pDBR->dwUserID);
 	m_AccountsDB->AddParameter(TEXT("@ClubID"),pDBR->dwClubID);
 
 	//输出参数
@@ -3275,7 +3156,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_QUIT(DWORD dwContextID, VOID * pData, W
 	STR_CMD_LC_CLUB_QUIT DBO;
 	ZeroMemory(&DBO, sizeof(DBO));
 	DBO.lResultCode = lResultCode;
-	lstrcpyn(DBO.szDescribe,CW2CT(DBVarValue.bstrVal),CountArray(DBO.szDescribe));
 
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_CLUB_QUIT,dwContextID,&DBO,sizeof(DBO));
 	return true;
@@ -3292,7 +3172,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_MEMBER_MANAGER(DWORD dwContextID, VOID 
 	m_AccountsDB->ResetParameter();
 
 	//构造参数
-	m_AccountsDB->AddParameter(TEXT("@UserID"),pDBR->dwUserID);
+//	m_AccountsDB->AddParameter(TEXT("@UserID"),pDBR->dwUserID);
 	m_AccountsDB->AddParameter(TEXT("@ClubID"),pDBR->dwClubID);
 
 	LONG lResultCode2 =  m_AccountsDB->ExecuteProcess(TEXT("GSP_CL_CLUB_DATA"),true);
@@ -3304,8 +3184,6 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_MEMBER_MANAGER(DWORD dwContextID, VOID 
 		m_AccountsDB->GetValue_String(TEXT("ClubOwnerName"),CMD1.szClubOwnerName,CountArray(CMD1.szClubOwnerName));
 		CMD1.dwClubID =m_AccountsDB->GetValue_DWORD(TEXT("ClubID"));
 		CMD1.dwClubOwner =m_AccountsDB->GetValue_DWORD(TEXT("ClubOwner"));
-		CMD1.dwMajorKindID =m_AccountsDB->GetValue_DWORD(TEXT("MajorKindID"));
-		//TODONOW dwMinorKindID
 		CMD1.byClubLevel =m_AccountsDB->GetValue_BYTE(TEXT("ClubLevel"));
 		CMD1.wMemberNum =m_AccountsDB->GetValue_WORD(TEXT("MemberNum"));
 		m_AccountsDB->GetValue_String(TEXT("Notice"),CMD1.szNotice,CountArray(CMD1.szNotice));
@@ -3328,7 +3206,7 @@ bool CDataBaseEngineSink::On_DBR_CL_CLUB_MEMBER_MANAGER(DWORD dwContextID, VOID 
 	m_AccountsDB->ResetParameter();
 
 	//构造参数
-	m_AccountsDB->AddParameter(TEXT("@UserID"),pDBR->dwUserID);
+//	m_AccountsDB->AddParameter(TEXT("@UserID"),pDBR->dwUserID);
 	m_AccountsDB->AddParameter(TEXT("@ClubID"),pDBR->dwClubID);
 
 	LONG lResultCode = m_AccountsDB->ExecuteProcess(TEXT("GSP_CL_CLUB_MEMBER_MANAGER"),true);

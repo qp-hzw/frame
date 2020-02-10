@@ -1,22 +1,16 @@
 #ifndef STRUCT_HEAD_FILE
 #define STRUCT_HEAD_FILE
-
 #pragma pack(1)
 #include "Define.h"
 
-//////////////////////////////////////////////////////////////////////////////////
-//用户信息
-
-
-//用户道具
+//用户道具 -- 与client保持一致
 struct tagUserProperty
 {
 	DWORD       dwPropID;		  //item id
 	DWORD       dwPropCount;      //item count;
 };
 
-
-//用户信息
+//用户信息 -- 与client保持一致
 struct tagUserInfo
 {
 	//基本属性
@@ -52,8 +46,6 @@ struct tagUserInfo
 	BYTE							cbUserStatus;						//用户状态
 	SCORE							lScore;								//积分
 };
-
-//////////////////////////////////////////////////////////////////////////////////
 
 //游戏记录
 struct tagGameScoreRecord

@@ -74,7 +74,7 @@ bool CHandleFromCenter::OnTCPSocketMainTransfer(WORD wSubCmdID, VOID * pData, WO
 			if (wDataSize!=sizeof(STR_CMD_LC_CLUB_TABLE_USER_LIST)) return true;
 
 			//发送通知 -- 全部客户端
-			g_GameCtrl->SendDataBatch(MDM_CLUB, CMD_LC_CLUB_TABLE_LIST_USER,pData,wDataSize);
+			//g_GameCtrl->SendDataBatch(MDM_CLUB, CMD_LC_CLUB_TABLE_LIST_USER,pData,wDataSize);
 			return true;
 		}
 	case CPO_PL_CREATE_TABLE:	//创建桌子 查询可用的GameID

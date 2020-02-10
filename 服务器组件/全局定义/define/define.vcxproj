@@ -115,9 +115,11 @@
     <ClInclude Include="..\..\..\全局定义\Setting.h" />
     <ClInclude Include="..\..\..\全局定义\Define.h" />
     <ClInclude Include="..\..\..\全局定义\struct.h" />
+    <ClInclude Include="..\..\..\消息定义\CMD_Club.h" />
     <ClInclude Include="..\..\..\消息定义\CMD_Correspond.h" />
     <ClInclude Include="..\..\..\消息定义\CMD_GameServer.h" />
     <ClInclude Include="..\..\..\消息定义\CMD_LogonServer.h" />
+    <ClInclude Include="..\..\..\消息定义\STR_CMD_Club.h" />
     <ClInclude Include="..\..\..\消息定义\STR_CMD_Correspond.h" />
     <ClInclude Include="..\..\..\消息定义\STR_CMD_LogonServer.h" />
     <ClInclude Include="..\..\..\消息定义\STR_CMD_GameServer.h" />

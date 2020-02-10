@@ -894,13 +894,13 @@ bool CDataBaseEngineSink::On_DBR_CLUB_TABLE_INFO(DWORD dwContextID, VOID * pData
 	STR_CMD_LC_CLUB_TABLE_LIST CMD;
 	CMD.dwClubRoomID  = m_TreasureDB->GetValue_DWORD(TEXT("RoomID"));
 	CMD.dwTableID = m_TreasureDB->GetValue_DWORD(TEXT("TableID"));
-	CMD.dwClubID = m_TreasureDB->GetValue_DWORD(TEXT("ClubID"));
-	CMD.byMask = m_TreasureDB->GetValue_BYTE(TEXT("IsOwner"));
+	//CMD.dwClubID = m_TreasureDB->GetValue_DWORD(TEXT("ClubID"));
+//	CMD.byMask = m_TreasureDB->GetValue_BYTE(TEXT("IsOwner"));
 	CMD.TableState = m_TreasureDB->GetValue_DWORD(TEXT("TableState"));
 
 	DWORD dwResuleLockState =  m_TreasureDB->GetValue_DWORD(TEXT("LockState"));
 	CMD.CurrentRound =  m_TreasureDB->GetValue_DWORD(TEXT("CurrentRound"));
-	CMD.dwOwnerID =  m_TreasureDB->GetValue_DWORD(TEXT("OwnerID"));
+	//CMD.dwOwnerID =  m_TreasureDB->GetValue_DWORD(TEXT("OwnerID"));
 	CMD.byDel = (pTableInfo->byMask == 3) ? 1 : 0;
 
 	//发送结果
@@ -931,7 +931,9 @@ bool CDataBaseEngineSink::On_DBR_CLUB_PLAYER_INFO(DWORD dwContextID, VOID * pDat
 		return true;
 	}
 
+	
 	STR_CMD_LC_CLUB_TABLE_USER_LIST CMD;
+	/*
 	CMD.dwClubRoomID=m_TreasureDB->GetValue_DWORD(TEXT("ClubRoomID"));
 	CMD.dwUserID=m_TreasureDB->GetValue_DWORD(TEXT("UserID"));
 	m_TreasureDB->GetValue_String(TEXT("UserName"),CMD.szUserName,CountArray(CMD.szUserName));
@@ -943,7 +945,7 @@ bool CDataBaseEngineSink::On_DBR_CLUB_PLAYER_INFO(DWORD dwContextID, VOID * pDat
 	CMD.dwTableID=m_TreasureDB->GetValue_DWORD(TEXT("TableID"));
 	CMD.byChairID=m_TreasureDB->GetValue_BYTE(TEXT("ChairID"));
 	CMD.byDel = (pTableInfo->byMask == 1) ? 0 : 1;
-
+	*/
 	//发送结果
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_GC_CLUB_UPDATE_PLAYER_INFO,dwContextID,&CMD,sizeof(CMD));
 

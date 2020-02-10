@@ -2,6 +2,7 @@
 #define CMD_GAME_SERVER_HEAD_FILE
 
 #include "STR_CMD_GameServer.h"
+#include "CMD_Club.h"
 
 /*
 ** 简要描述:  游戏服 与 其他进程的 消息
@@ -69,11 +70,6 @@
 
 //金币场
 #define SUB_CG_USER_JOIN_GOLD_HALL_ROOM	20									//加入金币大厅 金币场桌子
-
-//牌友圈
-#define SUB_CG_USER_JOIN_TABLE_NO_PASS	19									//#加入桌子,不需要密码, 即快速开始 -- 仅牌友群使用
-#define SUB_CG_CLUB_CREATE_TABLE		21									//#创建桌子 牌友圈特有
-#define CMD_GC_CLUB_CREATE_TABKE		121									//#创建桌子 返回
 #pragma endregion
 
 #define SUB_GR_GET_TABLELIST			22									//获取房间列表		TODO 指的是竞技场的已开房间列表

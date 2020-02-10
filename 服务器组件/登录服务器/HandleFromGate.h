@@ -153,8 +153,6 @@ private:
 	static bool On_SUB_CL_CLUB_ROOM_LIST(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//查询指定牌友圈房间列表 返回
 	static bool On_CMD_LC_CLUB_ROOM_LIST( DWORD dwContextID, VOID * pData, WORD wDataSize );
-	//查询指定牌友圈房间列表 结束
-	static bool On_CMD_LC_CLUB_ROOM_LIST_FINISH( DWORD dwContextID, VOID * pData, WORD wDataSize );
 
 	//查询未满员, 随机牌友圈(最大9个)
 	static bool On_SUB_CL_CLUB_RANDOM_CLUB_LIST(VOID * pData, WORD wDataSize, DWORD dwSocketID);
@@ -186,14 +184,6 @@ private:
 	static bool On_SUB_CL_CLUB_ROOM_SETTING(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//房间设置 返回
 	static bool On_CMD_LC_CLUB_ROOM_SETTING( DWORD dwContextID, VOID * pData, WORD wDataSize );
-
-	//请求房间设置
-	static bool On_SUB_CL_CLUB_ROOM_QUERY_SETTING(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//房间设置 返回
-	static bool On_CMD_LC_CLUB_ROOM_QUERY_SETTING( DWORD dwContextID, VOID * pData, WORD wDataSize );
-
-	//玩家离开俱乐部房间
-	static bool On_SUB_CL_CLUB_ROOM_USER_LEAVE(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 
 	//解散房间请求
 	static bool On_SUB_CL_CLUB_ROOM_DISSOLVE(VOID * pData, WORD wDataSize, DWORD dwSocketID);
@@ -243,11 +233,6 @@ private:
 	//牌友圈聊天 广播
 	static bool On_CMD_LC_CLUB_CHAT_BDCAST(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
-	//牌友圈置顶
-	static bool On_SUB_CL_CLUBSTICKY_POST(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//牌友圈置顶 返回
-	static bool On_CMD_LC_CLUB_STICKY_POST( DWORD dwContextID, VOID * pData, WORD wDataSize );
-	
 	//群主|管理对申请消息的答复(同意|拒绝)
 	static bool On_SUB_CL_CLUB_APPLICANT_RESULT(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//群主|管理对申请消息的答复(同意|拒绝) 返回
