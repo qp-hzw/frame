@@ -1436,15 +1436,15 @@ void CHandleFromGate::ClubLastPlayerSitUp(DWORD dwTableID, DWORD dwUserID, BYTE 
 bool CHandleFromGate::CheckCreateRoom(CPlayer * player, BYTE gameMode)
 {
 	//用户效验
-	if (INVALID_CHAIR != player->GetChairID())   //有问题
+	if (INVALID_CHAIR != player->GetChairID()) 
 	{
 		SendRequestFailure(player, TEXT("正在游戏中,无法创建房间！"), REQUEST_FAILURE_NORMAL);
-		return true;
+		return false;
 	}
 	if(INVALID_TABLE != player->GetTableID())
 	{
 		SendRequestFailure(player, TEXT("正在房间中,无法创建房间！"), REQUEST_FAILURE_NORMAL);
-		return true;
+		return false;
 	}
 
 	switch(gameMode)
@@ -1455,11 +1455,11 @@ bool CHandleFromGate::CheckCreateRoom(CPlayer * player, BYTE gameMode)
 		}
 	case TABLE_MODE_MATCH:
 		{
-			return false;
+			return true;
 		}
 	case TABLE_MODE_GOLD:
 		{
-			return false;
+			return true;
 		}
 	case TABLE_MODE_FK_GOLD:
 		{

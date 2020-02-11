@@ -7,7 +7,7 @@
 #define MAX_ANDROID					256									//最大机器
 
 //参数定义
-#define INVALID_CHAIR				0xFFFF								//无效椅子
+#define INVALID_CHAIR				0xFF								//无效椅子
 #define INVALID_TABLE				0xFFFF								//无效桌子
 
 //////////////////////////////////////////////////////////////////////////////////
