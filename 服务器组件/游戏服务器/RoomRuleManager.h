@@ -45,7 +45,7 @@ public:
 	//比赛场
 public:
 	//设置比赛场规则
-	static void SetMatchRule(tagTableRule& roomRule);
+	static void SetMatchRule(tagTableRule& roomRule, MATCH_CONFIG *config, WORD wstage);
 
 	//门票检测
 public:

@@ -245,6 +245,9 @@ bool CTableFrame::HandleXJGameEnd(BYTE byRound, SCORE *lUserTreasure, VOID* pDat
 #pragma endregion
 
 #pragma region 桌子信息
+	//设置桌子状态
+	SetGameStatus(GAME_STATUS_FREE);
+
 	//更新桌子战绩
 	XJUpdateTableRecord(byRound, OnlyID);
 
@@ -720,6 +723,10 @@ int CTableFrame::CanPlayerLeaveTable(CPlayer* pPlayer)
 	//校验
 	if (pPlayer == NULL)
 		return 2;
+
+	//玩家不再房间里  不能离开
+	if (m_wTableID != pPlayer->GetTableID())
+		return 3;
 
 	//如果玩家在游戏中 不可离开
 	if (US_PLAYING == pPlayer->GetUserStatus())

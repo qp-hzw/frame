@@ -171,7 +171,7 @@ public:
 	std::vector<SCORE> GetTotalScore() { return m_total_score; }
 
 	//开始下一阶段比赛
-	virtual void StartNextStage() {};
+	virtual void StartNextStage() { CLog::Log(log_debug, "no"); }
 
 #pragma endregion
 

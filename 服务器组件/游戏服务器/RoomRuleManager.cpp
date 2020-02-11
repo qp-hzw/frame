@@ -170,14 +170,14 @@ tagTableRule RoomRuleManager::GetGoldRoomRule(BYTE byType)
 }
 
 //设置比赛场规则
-void RoomRuleManager::SetMatchRule(tagTableRule& roomRule)
+void RoomRuleManager::SetMatchRule(tagTableRule& roomRule, MATCH_CONFIG *config, WORD wstage)
 {
 	//数据初始化
 	m_SubRoomRuleManager->Init();
-	//m_SubRoomRuleManager->SetMatchRule();
+	m_SubRoomRuleManager->SetMatchRule((VOID *)config);
 
 	roomRule.GameMode = TABLE_MODE_MATCH;
-	roomRule.GameCount = 1;
+	roomRule.GameCount = config->stage[wstage].wXJCount;
 	roomRule.PlayerCount =3;
 }
 

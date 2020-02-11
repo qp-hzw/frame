@@ -22,7 +22,7 @@ private:
 	CMatchItem			*m_Match_Item;	//归属的比赛场	
 
 public:
-	CMatchRoom(CMatchItem *item);
+	CMatchRoom(CMatchItem *item, WORD stage);
 	~CMatchRoom(void);
 
 public:

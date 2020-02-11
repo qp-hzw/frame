@@ -96,13 +96,16 @@ bool CAttemperEngineSink::OnEventTimer(DWORD dwTimerID, WPARAM wBindParam)
 	//比赛时间
 	if ((dwTimerID>=IDI_MATCH_MODULE_START)&&(dwTimerID<=IDI_MATCH_MODULE_FINISH))
 	{
+		g_GameCtrl->KillTimer(dwTimerID);
+
 		//比赛ID
-		DWORD dwMatchID = dwTimerID - IDI_MATCH_MODULE_START;
+		WORD dwMatchID = dwTimerID - IDI_MATCH_MODULE_START;
 		CLog::Log(log_debug, "dwMatchID: %d", dwMatchID);
 
 		//查找比赛场
 		CMatchItem * match = CMatchManager::Find_Match_ByItemID(dwMatchID);
-		match->On_Apply_End();
+		if (match != NULL)
+			return match->On_Apply_End();
 	}
 
 	//桌子时间

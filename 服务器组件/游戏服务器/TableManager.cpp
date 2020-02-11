@@ -202,7 +202,7 @@ std::list<CTableFrame*> CTableManager::GetAllGlodTable()
 }
 
 //创建比赛场桌子
-CMatchRoom* CTableManager::CreateMatchRoom(CMatchItem* Item)
+CMatchRoom* CTableManager::CreateMatchRoom(CMatchItem* Item, WORD stage)
 {
 	if (Item == NULL)
 		return NULL;
@@ -213,7 +213,7 @@ CMatchRoom* CTableManager::CreateMatchRoom(CMatchItem* Item)
 	if(dwPassword == 0) return NULL;
 
 	//构建
-	CMatchRoom *pMatch = new CMatchRoom(Item);
+	CMatchRoom *pMatch = new CMatchRoom(Item, stage);
 	if (pMatch == NULL)
 		return NULL;
 

@@ -5,7 +5,7 @@
 #include "GameCtrl.h"
 #include "TableManager.h"
 
-CMatchRoom::CMatchRoom(CMatchItem *item)
+CMatchRoom::CMatchRoom(CMatchItem *item, WORD stage)
 {
 	m_Match_Item = item;
 	m_state = wait_start;
@@ -14,7 +14,7 @@ CMatchRoom::CMatchRoom(CMatchItem *item)
 	//获取房间规则
 	tagTableRule rule;
 	ZeroMemory(&rule, sizeof(tagTableRule));
-	RoomRuleManager::SetMatchRule(rule);
+	RoomRuleManager::SetMatchRule(rule, &(item->GetConfig()), stage);
 
 	//设置规则
 	SetCommonRule(&rule);

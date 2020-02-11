@@ -34,7 +34,7 @@ private:
 
 private:
 	bool						m_Start;			//比赛开始标识
-	std::vector<bool>			m_Room_state;		//当前比赛所有房间的游戏状态
+	std::list<bool>				m_Room_state;		//当前比赛所有房间的游戏状态
 	WORD						m_Stage;			//当前阶段
 
 private:

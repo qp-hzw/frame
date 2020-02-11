@@ -6,7 +6,7 @@
 #include <algorithm>
 
 //定时器定义
-#define	IDI_MATCH_TYPE_TIME			IDI_MATCH_MODULE_START			//定时开赛
+#define	IDI_MATCH_TYPE_TIME			(IDI_MATCH_MODULE_START)			//定时开赛
 
 CMatchItem::CMatchItem(MATCH_CONFIG config)
 {
@@ -17,15 +17,16 @@ CMatchItem::CMatchItem(MATCH_CONFIG config)
 	m_Cur_Ranking.clear();
 	m_room_player.clear();
 
-	//新建一个等待房间
-	m_wait_room = new CMatchRoom(this);
-
 	CopyMemory(&m_config, &config, sizeof(MATCH_CONFIG));
+
+	//新建一个等待房间
+	m_wait_room = CTableManager::CreateMatchRoom(this, m_Stage);
 }
 
 
 CMatchItem::~CMatchItem(void)
 {
+	CTableManager::DeleteTable(m_wait_room);
 }
 
 //初始化
@@ -224,7 +225,7 @@ bool CMatchItem::On_Stage_Start()
 		if (NULL == room)
 		{
 			CLog::Log(log_debug, "创建房间");
-			room = CTableManager::CreateMatchRoom(this);
+			room = CTableManager::CreateMatchRoom(this, m_Stage);
 			room->set_index(index++);
 		}
 
@@ -270,7 +271,13 @@ bool CMatchItem::On_Stage_Start()
 bool CMatchItem::On_Room_End(CMatchRoom *room)
 {
 	//设置Item房间状态
-	m_Room_state[room->get_index()] = true;
+	int index = 0;
+	for (auto ite = m_Room_state.begin(); ite != m_Room_state.end(); ite++)
+	{
+		if (index == room->get_index())
+			*ite = true;
+		index ++;
+	}
 
 	//是否要等待别的桌打完
 	bool stage_end = true;
@@ -368,22 +375,37 @@ bool CMatchItem::On_Player_TaoTai(std::list<player_info> TaoTai_player)
 	//发送玩家淘汰
 	for (auto item : TaoTai_player)
 	{
+		CLog::Log(log_debug, "玩家 :%d 淘汰！", item.user->GetUserID());
 		if (!item.user->IsAndroidUser())
 			g_GameCtrl->SendData(item.user, MDM_GR_MATCH, CMD_GC_MATCH_RESULT, NULL, 0);
 	}
 
 	//从列表里删除玩家
-	for (auto ite = m_Apply_Player.begin(); ite != m_Apply_Player.end(); ite++)
+	for (auto taotai : TaoTai_player)
 	{
-		CPlayer *player = *ite;
-		for (auto taotai : TaoTai_player)
+		for (auto ite = m_Apply_Player.begin(); ite != m_Apply_Player.end(); ite++)
 		{
-			if (player && player == taotai.user)
+			if ((*ite) == taotai.user)
+			{
 				ite = m_Apply_Player.erase(ite);
+				break;
+			}
 		}
 	}
 
 	//从排行表里删除玩家
+	for (auto taotai : TaoTai_player)
+	{
+		for (auto ite = m_Cur_Ranking.begin(); ite != m_Cur_Ranking.end(); ite++)
+		{
+			if ((*ite).user == taotai.user)
+			{
+				ite = m_Cur_Ranking.erase(ite);
+				break;
+			}
+		}
+	}
+	
 
 	return true;
 }
@@ -394,6 +416,7 @@ bool CMatchItem::On_Player_JinJi(std::list<player_info> JinJi_player)
 	//发送玩家晋级消息
 	for (auto jinji : JinJi_player)
 	{
+		CLog::Log(log_debug, "玩家 :%d 晋级！", jinji.user->GetUserID());
 		if (!jinji.user->IsAndroidUser())
 			g_GameCtrl->SendData(jinji.user, MDM_GR_MATCH, CMD_GC_MATCH_RESULT, NULL, 0);
 	}
@@ -420,11 +443,12 @@ bool CMatchItem::On_Stage_End(CMatchRoom *room)
 
 		//比赛结束
 		CMatchManager::On_Match_End(this, ite->second);
+		return true;
 	}
 
 	//开始下一轮
 	m_Stage ++;
-	room->SetStageTimer();
+	m_wait_room->SetStageTimer();
 
 	return true;
 }
@@ -439,13 +463,14 @@ bool CMatchItem::Update_Ranking(CMatchRoom *room)
 	//更新玩家信息
 	for (int i = 0; i < room->GetChairCount(); i++)
 	{
-		for (auto player : m_Cur_Ranking)
+		for (auto ite = m_Cur_Ranking.begin(); ite != m_Cur_Ranking.end(); ite++)
 		{
-			if (player.user == player_list[i])
+			player_info *info = &(*ite);
+			if (info->user == player_list[i])
 			{
-				player.score = TotalScore[i];
-				player.room_id = room->GetTableID();
-				player.seat = room->GetPlayerChair(player_list[i]);
+				info->score = TotalScore[i];
+				info->room_id = room->GetTableID();
+				info->seat = room->GetPlayerChair(player_list[i]);
 				break;
 			}
 		}
@@ -500,7 +525,7 @@ void CMatchItem::Send_Ranking()
 bool CMatchItem::On_Match_End(std::list<player_info> player)
 {
 	//玩家奖励
-	CLog::Log(log_debug, "比赛结束!!! %d");
+	CLog::Log(log_debug, "比赛结束!!!");
 	//战绩
 	return true;
 }

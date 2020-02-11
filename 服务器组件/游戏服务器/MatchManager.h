@@ -21,8 +21,6 @@ public:
 	static bool ReadMatchConfig(DWORD kindid);
 	//配置比赛场
 	static bool MatchConfig();
-	//获取描述
-	static string GetDescribe(string key_name);
 	//创建
 	static bool Create_Match(MATCH_CONFIG config);
 	//删除

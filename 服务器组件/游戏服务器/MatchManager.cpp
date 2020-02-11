@@ -83,7 +83,7 @@ bool CMatchManager::MatchConfig()
 			if (config->dwStartTime < time(0))	//已经开始
 			{
 				//开始下一场
-				config->dwStartTime = time(0) + 16000/**config->dwTimePeriod*/;	
+				config->dwStartTime = time(0) + 12000/**config->dwTimePeriod*/;	
 			}
 		}
 
@@ -114,34 +114,6 @@ bool CMatchManager::MatchConfig()
 	return true;
 }
 
-//获取字段 对应的描述
-string CMatchManager::GetDescribe(string key_name)
-{
-	string describe;
-	if(key_name == "gold")
-	{
-		describe = "金币赛";
-	}
-	else if(key_name == "diamond")
-	{
-		describe = "钻石赛";
-	}
-	else if(key_name == "ddz")
-	{
-		describe = "斗地主玩法";
-	}
-	else if(key_name == "banjuesai")
-	{
-		describe = "半决赛";
-	}
-	else if(key_name == "juesai")
-	{
-		describe = "决赛";
-	}
-
-	return describe;
-}
-
 //创建比赛场
 bool CMatchManager::Create_Match(MATCH_CONFIG config)
 {
@@ -169,6 +141,7 @@ bool CMatchManager::Delete_Match(CMatchItem *Item)
 		{
 			it = s_Item_Array.erase(it);
 			delete match;
+			break;
 		}
 	}
 
@@ -201,7 +174,7 @@ void CMatchManager::On_Match_Start(CMatchItem *Item)
 	MATCH_CONFIG cfg = Item->GetConfig();
 	if (cfg.wStartType == MATCH_START_TYPE_TIME)
 	{
-		cfg.dwStartTime = time(0) + 60000/**Item->GetConfig().dwTimePeriod*/;
+		cfg.dwStartTime = time(0) + 60000*Item->GetConfig().dwTimePeriod;
 	}
 	Create_Match(cfg);
 }
@@ -217,5 +190,7 @@ void CMatchManager::On_Match_Cancel(CMatchItem *Item)
 void CMatchManager::On_Match_End(CMatchItem *Item, std::list<player_info> playerInfo)
 {
 	Item->On_Match_End(playerInfo);
+	CLog::Log(log_debug, "Delete Match begin");
 	Delete_Match(Item);
+	CLog::Log(log_debug, "Delete Match end");
 }

@@ -95,12 +95,12 @@
 #define MDM_GR_MATCH				7									//比赛命令
 
 #define SUB_CG_MATCH_INFO			1									//请求比赛场信息
-#define CMD_GC_MATCH_INFO			11									//请求比赛场信息  返回
+#define CMD_GC_MATCH_INFO			101									//请求比赛场信息  返回
 
 #define SUB_CG_MATCH_APPLY			2									//比赛场报名
-#define CMD_GC_MATCH_APPLY			12									//比赛场报名	返回
+#define CMD_GC_MATCH_APPLY			102									//比赛场报名	返回
 #define SUB_CG_MATCH_UNAPPLY		3									//玩家取消报名
-#define CMD_GC_MATCH_UNAPPLY		13									//玩家取消报名  返回
+#define CMD_GC_MATCH_UNAPPLY		103									//玩家取消报名  返回
 
 #define CMD_GC_MATCH_START			4									//比赛开始
 #define CMD_GC_MATCH_CANCEL			5									//比赛取消

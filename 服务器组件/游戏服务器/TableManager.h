@@ -34,7 +34,7 @@ public:
 	//获取所有空闲金币场桌子
 	static std::list<CTableFrame*> GetAllGlodTable();
 	//创建比赛场桌子
-	static CMatchRoom* CreateMatchRoom(CMatchItem* Item);
+	static CMatchRoom* CreateMatchRoom(CMatchItem* Item, WORD stage);
 
 	//
 public:
