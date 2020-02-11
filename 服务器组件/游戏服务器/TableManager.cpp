@@ -49,7 +49,7 @@ bool CTableManager::DeleteTable(CTableFrame* pTable)
 		{
 			CLog::Log(log_debug, "Delete Table : %d", pTable->GetTableID() );
 			ite = s_TableArray.erase(ite);
-			delete pTable;
+			//delete pTable;
 			pTable = NULL;
 			break;
 		}
