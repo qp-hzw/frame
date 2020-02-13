@@ -221,9 +221,6 @@ protected:
 	//工会战绩统计
 	bool On_DBR_CL_CLUB_RECORD_LIST(DWORD dwContextID, VOID * pData, WORD wDataSize);
 	
-	//申请加入房间
-	bool On_DBR_CL_CLUB_JOIN_ROOM(DWORD dwContextID, VOID * pData, WORD wDataSize);
-
 	//群主|管理对申请消息的答复(同意|拒绝)
 	bool On_DBR_CL_CLUB_APPLICANT_RESULT(DWORD dwContextID, VOID * pData, WORD wDataSize);
 

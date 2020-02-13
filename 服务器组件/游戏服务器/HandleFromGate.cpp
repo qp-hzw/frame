@@ -29,6 +29,10 @@ bool CHandleFromGate::HandlePacket(TCP_Command Command, VOID * pData, WORD wData
 		{
 			return OnTCPNetworkMainMatch(Command.wSubCmdID,pData,wDataSize,dwSocketID);
 		}
+	case MDM_CLUB:			//工会
+		{
+			return OnTCPNetworkMainClub(Command.wSubCmdID,pData,wDataSize,dwSocketID);
+		}
 	}
 
 	return true;
@@ -50,26 +54,9 @@ bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwSocketID, VOID * p
 		{
 			return On_CMD_GC_User_ModifyUserTreasure(dwSocketID, pData, wDataSize);
 		}
-
-	case DBO_GC_CLUB_CREATE_TABLE:	//club牌友圈创建桌子
-		{
-			return On_CMD_CG_CLUB_CREATE_TABLE(dwSocketID,pData,wDataSize);
-		}
 	case DBO_GC_USER_JOIN_TABLE_NO_PASS://加入桌子 不需要密码
 		{
 			return On_CMD_GC_USER_JOIN_TABLE_NO_PASS(dwSocketID,pData,wDataSize);
-		}
-	case DBO_GC_CLUB_UPDATE_TABLE_INFO:// 更新桌子信息
-		{
-			if(sizeof(STR_CMD_LC_CLUB_TABLE_LIST) != wDataSize) return false;
-			g_TCPSocketEngine->SendData(CPD_MDM_TRANSFER, CPR_GP_CLUB_TABLE_INFO, pData, wDataSize);
-			return true;;
-		}
-	case DBO_GC_CLUB_UPDATE_PLAYER_INFO://更新玩家信息
-		{
-			if(sizeof(STR_CMD_LC_CLUB_TABLE_USER_LIST) != wDataSize) return false;
-			g_TCPSocketEngine->SendData(CPD_MDM_TRANSFER, CPR_GP_CLUB_PLAYER_INFO, pData, wDataSize);
-			return true;
 		}
 	}
 
@@ -220,6 +207,22 @@ bool CHandleFromGate::OnTCPNetworkMainMatch(WORD wSubCmdID, VOID * pData, WORD w
 	case SUB_CG_MATCH_UNAPPLY:	//取消报名
 		{
 
+		}
+	}
+}
+
+//工会
+bool CHandleFromGate::OnTCPNetworkMainClub(WORD wSubCmdID, VOID * pData, WORD wDataSize, DWORD dwSocketID)
+{
+	switch (wSubCmdID)
+	{
+	case SUB_CG_CLUB_ROOM_CREATE://创建房间
+		{
+			return On_SUB_CG_CLUB_ROOM_CREATE(pData, wDataSize, dwSocketID);
+		}
+	case SUB_CG_CLUB_TABLE_LIST_TABLE: //请求该房间的桌子信息
+		{
+			return On_SUB_CG_CLUB_TABLE_LIST_TABLE(pData, wDataSize, dwSocketID);
 		}
 	}
 }
@@ -590,153 +593,6 @@ bool CHandleFromGate::On_SUB_CG_USER_SET_ROOM_RULE(VOID * pData, WORD wDataSize,
 
 	//发送创建房间成功消息
 	g_GameCtrl->SendData(player, MDM_USER, CMD_GC_USER_ENTER_SUBGAME_ROOM, NULL, 0);
-
-	return true;
-}
-
-//创建牌友圈房间
-bool CHandleFromGate::CreateRoomClub(tagTableRule * pCfg, CPlayer *pIServerUserItem, STR_SUB_CG_USER_CREATE_ROOM* pCreateRoom)
-{
-	/* 第三步  寻找空闲桌子 */
-	CTableFrame *pCurrTableFrame; // = GetNextEmptyTable();
-	if(NULL == pCurrTableFrame)
-	{
-		SendRequestFailure(pIServerUserItem,TEXT("服务器桌子已满,请稍后重试"),REQUEST_FAILURE_NORMAL);
-		return false;
-	}
-	
-	/* 第五步 设置房间规则 */
-	//设置通用房间规则  
-	pCurrTableFrame->SetCommonRule(pCfg);
-
-	//设置子游戏房间规则
-	tagTableSubGameRule *pSubGameCfg = new tagTableSubGameRule(); //(tagTableSubGameRule*)pCreateRoom->SubGameRule;
-	if(pSubGameCfg != NULL)
-	{
-		//pCurrTableFrame->SetSubGameRule(pSubGameCfg);
-	}
-
-	/*
-	// new  获取规则后初始化子游戏
-	if (!pCurrTableFrame->InitTableFrameSink())
-	{
-		SendRequestFailure(pIServerUserItem, TEXT("游戏初始化失败！"), REQUEST_FAILURE_NORMAL);
-		return true; //TODONOW 如果为false 客户端就断线重连了， 之后修改掉
-	}
-	*/
-
-	/* 第六步 房间信息保存到数据库 */
-	STR_DBR_CLUB_ROOM_INFO Dbr;
-	//Dbr.dwUserID = pCfg->dwUserID;
-	//Dbr.dwClubID = pCfg->dwClubID;
-	Dbr.dwGameID = (pCfg->dwKindID) << 16;
-	Dbr.byModeID = 0;
-
-	if(1 == pCfg->byGoldOrFK)//俱乐部的房卡场 就是普通房卡场
-	{
-		Dbr.byModeID  = 0;
-	}
-	else if( 2 == pCfg->byGoldOrFK)//俱乐部的金币场 其实是 房卡金币场
-	{
-		Dbr.byModeID  = 3;
-	}
-
-	//Dbr.szKindName ; 数据库自己查询
-	Dbr.dwServiceGold = pCfg->dwAmount;
-	Dbr.dwRevenue = pCfg->dwOwnerPercentage;
-	Dbr.byMask = pCfg->byMask;
-	Dbr.dwDizhu = pCfg->dwDizhu;
-	//Dbr.dwGold = pCfg->dwLevelGold;
-	Dbr.byAllRound = pCfg->GameCount;
-	Dbr.byChairNum = pCfg->PlayerCount;
-	Dbr.DissolveMinute = pCfg->bDissolve;
-	memcpy(Dbr.szRealRoomRule, pCfg, 256);
-
-	WriteClubRoomToDB(&Dbr);
-
-	//发送创建房间成功消息
-	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_USER_ENTER_SUBGAME_ROOM, NULL, 0);	
-
-	//TODONOWW 需要发送给协调服, 然后协调服 发送给登录服.  登录服通知客户端实时刷新俱乐部房间
-	STR_CMD_LC_CLUB_ROOM_RE RECMD;
-	//RECMD.dwClubID = pCfg->dwClubID;
-	g_GameCtrl->SendData(pIServerUserItem, MDM_CLUB, CMD_LC_CLUB_ROOM_RE, &RECMD, sizeof(STR_CMD_LC_CLUB_ROOM_RE));	
-	
-	return true; 
-}
-
-//创建牌友圈桌子
-bool CHandleFromGate::CreateTableClub(STR_DBO_GC_CLUB_CREATE_TABLE * pDbo, CPlayer *pIServerUserItem)
-{
-	//用户效验
-	if (INVALID_CHAIR != pIServerUserItem->GetChairID()) 
-	{
-		SendRequestFailure(pIServerUserItem, TEXT("椅子号不为空,无法创建牌友圈桌子"), REQUEST_FAILURE_NORMAL);
-		return false;
-	}
-	if(INVALID_TABLE != pIServerUserItem->GetTableID())
-	{
-		SendRequestFailure(pIServerUserItem, TEXT("桌子号不为空,无法创建牌友圈桌子"), REQUEST_FAILURE_NORMAL);
-		return false;
-	}
-	
-	/* 第0步  判断公会房卡是否足够 */
-	if(pDbo->lResultCode != 0)
-	{
-		SendRequestFailure(pIServerUserItem,TEXT("工会房卡不足, 请联系管理员！"),REQUEST_FAILURE_NORMAL);
-		return false;
-	}
-
-	STR_SUB_CG_USER_CREATE_ROOM CreateRoom = pDbo->strCreateRoom;
-	tagTableRule *pCfg = new tagTableRule(); //(tagTableRule*)CreateRoom.CommonRule;
-
-	/* 第一步 寻找空闲房间 */
-	CTableFrame *pCurrTableFrame; // = GetNextEmptyTable();
-
-	//桌子判断
-	if(NULL == pCurrTableFrame)
-	{
-		SendRequestFailure(pIServerUserItem,TEXT("服务器已满,请稍后重试！"),REQUEST_FAILURE_NORMAL);
-		return false;
-	}
-
-	/* 第二步 生成桌子 */
-	srand(static_cast<unsigned int >(time(NULL)));
-	DWORD dwPassword = 0; //GenerateTablePassword();
-
-	//设置桌子属性
-	pCurrTableFrame->SetTableOwner(pIServerUserItem->GetUserID());
-	pCurrTableFrame->SetTableID(dwPassword);
-
-	//设置房间自动解散，默认一分钟 -- 这里是指不开始游戏 自动一分钟后解散
-	pCurrTableFrame->SetTableAutoDismiss();
-
-	/* 桌创建子信息写入数据库 && 发送给客户端(在消息号的后续环节中发送) */
-	DWORD dwClubRoomID = pDbo->dwClubRoomID;
-	DWORD dwUserID = pIServerUserItem->GetUserID();
-	DWORD dwTableID = pCurrTableFrame->GetTableID();
-    DWORD dwLockState = (pDbo->byTableMode == 2) ? 0 : 1;
-	ClubTableCreate(dwClubRoomID, dwUserID, dwTableID, dwLockState);
-
-	//设置通用房间规则  
-	pCurrTableFrame->SetCommonRule(pCfg);
-
-	//设置子游戏房间规则
-	tagTableSubGameRule *pSubGameCfg = new tagTableSubGameRule(); //(tagTableSubGameRule*)(CreateRoom.SubGameRule);
-	if(pSubGameCfg != NULL)
-	{
-		//pCurrTableFrame->SetSubGameRule(pSubGameCfg);
-	}
-
-	//用户坐下		TODO 后面让客户端主动发送
-	if(pCurrTableFrame->PlayerSitTable(pIServerUserItem) != 0 )
-	{
-		SendRequestFailure(pIServerUserItem, TEXT("用户坐下失败!"), REQUEST_FAILURE_NORMAL);
-		return false;
-	}
-	
-	//发送创建房间成功消息
-	g_GameCtrl->SendData(pIServerUserItem, MDM_USER, CMD_GC_CLUB_CREATE_TABKE, NULL, 0);	
 
 	return true;
 }
@@ -1193,6 +1049,111 @@ bool CHandleFromGate::On_SUB_CG_USER_GOLD_INFO(VOID * pData, WORD wDataSize, DWO
 }
 
 #pragma region Club牌友圈2 事件通知(1.桌子信息 2.玩家信息)
+//创建房间
+bool CHandleFromGate::On_SUB_CG_CLUB_ROOM_CREATE(VOID * pData, WORD wDataSize, DWORD dwSocketID)
+{
+	//校验参数
+	CPlayer * player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	if(player == NULL) return false;
+	if(wDataSize != sizeof(STR_SUB_CL_CLUB_ROOM_CREATE)) return false;
+	STR_SUB_CL_CLUB_ROOM_CREATE *pSub = (STR_SUB_CL_CLUB_ROOM_CREATE*) pData;
+
+	//获取到房间规则
+	tagTableRule roomRule = RoomRuleManager::GetFKRoomRule(pSub->rule.byChoose, pSub->rule.byGameMode);
+	string strRoomRule = RoomRuleManager::GetFKRoomRuleMsg();
+
+	//写入数据库
+	g_TreasureDB->ResetParameter();
+	g_TreasureDB->AddParameter(TEXT("@RoomName"),pSub->setting.szRoomName);
+	g_TreasureDB->AddParameter(TEXT("@ClubID"),pSub->setting.dwClubID);
+	g_TreasureDB->AddParameter(TEXT("@KindID"),pSub->setting.dwKindID);
+	g_TreasureDB->AddParameter(TEXT("@KindName")," ");
+	g_TreasureDB->AddParameter(TEXT("@ModeID"),pSub->setting.byGoldOrFK);
+	g_TreasureDB->AddParameter(TEXT("@PlayerNum"),0);
+	g_TreasureDB->AddParameter(TEXT("@AllRound"),roomRule.GameCount);
+	g_TreasureDB->AddParameter(TEXT("@ChairNum"),roomRule.PlayerCount);
+	
+	//TODONOW 房间规则, 写入数据库
+	g_TreasureDB->AddParameter(TEXT("@RoomRule"), " "); // strRoomRule);				//房间规则描述
+	g_TreasureDB->AddParameter(TEXT("@RealRoomRule"), " "); //pDBbr->dwRoomID);
+
+	g_TreasureDB->AddParameter(TEXT("@Dissolve"),pSub->setting.bDissolve);	//是否可以解散
+	g_TreasureDB->AddParameter(TEXT("@Gold"),pSub->setting.dwGold);			//入场最低身价
+	g_TreasureDB->AddParameter(TEXT("@Revenue"),pSub->setting.dwOwnerPercentage); //固定抽税金额
+
+	g_TreasureDB->AddParameter(TEXT("@Mask"),pSub->setting.byMask);			//1 AA支付  2大赢家支付
+	g_TreasureDB->AddParameter(TEXT("@Dizhu"),pSub->setting.dwDizhu);		//低分
+	g_TreasureDB->AddParameter(TEXT("@ServiceGold"),pSub->setting.dwAmount); //抽水下限
+
+
+	long ResultCode = g_TreasureDB->ExecuteProcess(TEXT("GSP_CG_CLUB_CREATE_ROOM"),true);
+
+	STR_CMD_LC_CLUB_ROOM_CREATE cmd;
+	cmd.lResultCode = ResultCode;
+
+	g_GameCtrl->SendData(dwSocketID, MDM_CLUB, CMD_LC_CLUB_ROOM_CREATE, &cmd, sizeof(cmd));
+	return true;
+}
+
+//请求该房间的桌子信息
+bool CHandleFromGate::On_SUB_CG_CLUB_TABLE_LIST_TABLE(VOID * pData, WORD wDataSize, DWORD dwSocketID)
+{
+	//效验参数
+	if (wDataSize!=sizeof(STR_SUB_CG_CLUB_TABLE_LIST_TABLE)) return false;
+	STR_SUB_CG_CLUB_TABLE_LIST_TABLE * pSub = (STR_SUB_CG_CLUB_TABLE_LIST_TABLE*)pData;
+
+	//列表发送
+	WORD wPacketSize=0;
+	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
+	wPacketSize=0;
+	STR_CMD_LC_CLUB_TABLE_LIST * pCMD=NULL;
+	for (auto table : CTableManager::GetAllClubRoomTable(pSub->dwClubID, pSub->dwRoomID))
+	{
+		tagClubRoomRule *rule = table->GetClubRoomRule();
+
+		//发送信息
+		if ((wPacketSize+sizeof(STR_CMD_LC_CLUB_TABLE_LIST))>sizeof(cbBuffer))
+		{
+			g_GameCtrl->SendData(dwSocketID, MDM_CLUB, CMD_GC_CLUB_TABLE_LIST_TABLE, cbBuffer, wPacketSize);
+			wPacketSize=0;
+		}
+
+		//读取信息
+		pCMD=(STR_CMD_LC_CLUB_TABLE_LIST *)(cbBuffer+wPacketSize);
+
+		pCMD->byDel = 0;
+		pCMD->dwClubID = rule->dwClubID;
+		pCMD->dwRoomID = rule->dwRoomID;
+		pCMD->dwTableID = table->GetTableID();
+		
+		pCMD->TableState = (table->GetGameStatus() == GAME_STATUS_FREE) ?  0 : 1;
+		pCMD->LockState = (rule->dwPasswd != 0) ? 0 : 1;
+		pCMD->CurrentRound = table->GetCurGameRound();
+		pCMD->AllRound = table->GetCustomRule()->GameCount;
+
+		STR_CMD_LC_CLUB_TABLE_USER_LIST * player_info;
+		int i = 0;
+		for(auto player : table->GetPlayer_list())
+		{
+			if(player == NULL) continue;
+			if(i >= 6) continue;
+			player_info->dwUserID = player->GetUserID();
+			memcpy(player_info->szUserName, player->GetNickName(), sizeof(TCHAR) * LEN_NICKNAME);
+			player_info->bySex = player->GetSex();
+			memcpy(player_info->szHeadUrl, player->GetUserInfo()->szHeadUrl, sizeof(TCHAR) * LEN_HEAD_URL);
+			player_info->wLevel = player->GetUserInfo()->dwLevel;
+			//BYTE	byClubRole;									//玩家职务 0 群主; 1管理; 2一般成员
+			//BYTE	byClubReputation;							//玩家在工会中的声望等级
+			player_info->byChairID = player->GetChairID();
+		}
+		//设置位移
+		wPacketSize+=sizeof(STR_CMD_LC_CLUB_TABLE_LIST);
+	}
+	if (wPacketSize>0) g_GameCtrl->SendData(dwSocketID, MDM_CLUB, CMD_GC_CLUB_TABLE_LIST_TABLE, cbBuffer, wPacketSize);
+
+	return true;
+}
+
 //club 创建桌子
 void CHandleFromGate::ClubTableCreate(DWORD dwClubRoomID, DWORD dwUserID, DWORD dwTableID, DWORD dwLockState)
 {
@@ -1325,24 +1286,6 @@ void CHandleFromGate::ClubTableDJ(DWORD dwTableID)
 }
 
 #pragma endregion
-
-//Club牌友圈创建桌子
-bool CHandleFromGate::On_CMD_CG_CLUB_CREATE_TABLE( DWORD dwSocketID, VOID * pData, WORD wDataSize )
-{
-	//获取用户
-	CPlayer *pIServerUserItem = CPlayerManager::FindPlayerBySocketID (dwSocketID);
-	//用户校验
-	if (pIServerUserItem==NULL) return false;
-
-	//校验参数
-	if(wDataSize!=sizeof(STR_DBO_GC_CLUB_CREATE_TABLE))
-		return false;
-
-	STR_DBO_GC_CLUB_CREATE_TABLE *pDbo = (STR_DBO_GC_CLUB_CREATE_TABLE*)pData;
-
-	//流程处理
-	return CreateTableClub(pDbo, pIServerUserItem);
-}
 
 //用户坐下
 void CHandleFromGate::ClubPlayerSitDown(DWORD dwTableID, DWORD dwUserID, BYTE byChairID, BYTE byClubOrHallGold)

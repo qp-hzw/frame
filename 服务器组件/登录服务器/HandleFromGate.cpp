@@ -238,18 +238,6 @@ bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwScoketID, VOID * p
 		{
 			return On_CMD_LC_CLUB_INQUERY_LIST_FINISH(dwScoketID,pData,wDataSize);
 		}
-	case DBO_LC_CLUB_TABLE_LIST_TABLE: //桌子列表
-		{
-			return On_CMD_LC_CLUB_TABLE_LIST_TABLE(dwScoketID,pData,wDataSize);
-		}
-	case DBO_LC_CLUB_TABLE_LIST_USER:	//桌子玩家列表
-		{
-			return On_CMD_LC_CLUB_TABLE_LIST_USER(dwScoketID,pData,wDataSize);
-		}
-	case DBO_LC_CLUB_JOIN_ROOM: //申请加入房间 返回
-		{
-			return On_CMD_LC_CLUB_JOIN_ROOM(dwScoketID,pData,wDataSize);
-		}
 	case DBO_LC_CLUB_APPLICANT_RESULT: //群主|管理对申请消息的答复(同意|拒绝) 返回
 		{
 			return On_CMD_LC_CLUB_APPLICANT_RESULT(dwScoketID,pData,wDataSize);
@@ -418,10 +406,6 @@ bool CHandleFromGate::On_MDM_CLUB(WORD wSubCmdID, VOID * pData, WORD wDataSize, 
 	case SUB_CL_CLUB_CREATE_CLUB:	 //创建牌友圈
 		{
 			return On_SUB_CL_CLUB_CREATE_CLUB(pData, wDataSize, dwSocketID);
-		}
-	case SUB_CL_CLUB_JOIN_ROOM: //申请加入房间
-		{
-			return On_SUB_CL_CLUB_JOIN_ROOM(pData, wDataSize, dwSocketID);
 		}
 	case SUB_CL_CLUB_ROOM_SETTING: //房间设置
 		{
@@ -2076,53 +2060,6 @@ bool CHandleFromGate::On_CMD_LC_CLUB_AUTO_AGREE( DWORD dwScoketID, VOID * pData,
 	g_GameCtrl->SendData(dwScoketID, MDM_CLUB, CMD_LC_CLUB_AUTO_AGREE, pData, wDataSize);
 	return true;
 }
-
-//申请加入房间
-bool CHandleFromGate::On_SUB_CL_CLUB_JOIN_ROOM(VOID * pData, WORD wDataSize, DWORD dwSocketID)
-{
-	//校验参数
-	if(wDataSize != sizeof(STR_SUB_CL_CLUB_JOIN_ROOM)) return false;
-
-	//投递请求
-	g_GameCtrl->PostDataBaseRequest(DBR_CL_CLUB_JOIN_ROOM, dwSocketID, pData, wDataSize);
-	return true;
-}
-//申请加入房间 返回
-bool CHandleFromGate::On_CMD_LC_CLUB_JOIN_ROOM( DWORD dwScoketID, VOID * pData, WORD wDataSize)
-{
-	//校验参数
-	WORD Size = sizeof(STR_CMD_LC_CLUB_JOIN_ROOM);
-	if( wDataSize != Size) return false;
-
-	//处理消息
-	g_GameCtrl->SendData(dwScoketID, MDM_CLUB, CMD_LC_CLUB_JOIN_ROOM, pData, wDataSize);
-	return true;
-}
-//桌子列表
-bool CHandleFromGate::On_CMD_LC_CLUB_TABLE_LIST_TABLE( DWORD dwScoketID, VOID * pData, WORD wDataSize)
-{
-	//校验参数
-	WORD Size = sizeof(STR_CMD_LC_CLUB_TABLE_LIST);
-	if( (wDataSize % Size) != 0) return false;
-
-	//处理消息
-	g_GameCtrl->SendData(dwScoketID, MDM_CLUB, CMD_LC_CLUB_TABLE_LIST_TABLE, pData, wDataSize);
-	return true;
-}
-//桌子玩家列表
-bool CHandleFromGate::On_CMD_LC_CLUB_TABLE_LIST_USER( DWORD dwScoketID, VOID * pData, WORD wDataSize)
-{
-	/*
-	//校验参数
-	WORD Size = sizeof(STR_CMD_LC_CLUB_TABLE_USER_LIST);
-	if( (wDataSize % Size) != 0) return false;
-
-	//处理消息
-	g_GameCtrl->SendData(dwScoketID, MDM_CLUB, CMD_LC_CLUB_TABLE_LIST_USER, pData, wDataSize);
-	*/
-	return true;
-}
-
 
 
 //群主|管理对申请消息的答复(同意|拒绝)

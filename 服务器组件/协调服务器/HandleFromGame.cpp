@@ -21,15 +21,6 @@ bool CHandleFromGame::OnTCPNetworkMainTransfer(WORD wSubCmdID, VOID * pData, WOR
 {
 	switch (wSubCmdID)
 	{
-	case CPR_GP_CLUB_TABLE_INFO: //club俱乐部桌子信息更新
-		{
-			//效验数据
-			if (wDataSize!=sizeof(STR_CMD_LC_CLUB_TABLE_LIST)) return true;
-			
-			//发送通知 -- 全部登录服
-			g_GameCtrl->SendDataBatch(CPD_MDM_TRANSFER,CPO_PL_CLUB_TABLE_INFO,pData,wDataSize);
-			return true;
-		}
 	case CPR_GP_CLUB_PLAYER_INFO: //club俱乐部玩家信息更新
 		{
 			//效验数据

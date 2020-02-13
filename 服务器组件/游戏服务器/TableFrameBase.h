@@ -31,24 +31,7 @@ struct tagTableRule
 	BYTE	bRefuseSameIP;			//允许同IP    0-不允许 1-允许
 	BYTE	bDistanceIn300;			//允许300米	  0-不许云 1-允许
 	BYTE	bAllowStranger;			//允许陌生人加入
-
-	/********************************** 牌友圈相关 ************************************/
-	//DWORD	dwUserID;				//群主ID
-    //DWORD	dwClubID;				//牌友群/俱乐部编号
-	DWORD	dwKindID;			    //游戏ID
-	BYTE	byGoldOrFK;				//(2.金币 1.房卡)
-
-	BYTE	bDissolve;				//是否允许解散 0允许 1不允许
-	DWORD	dwDissolveTime;			//解散时长 (分钟)
-
-	//金币房特用
-	DWORD	dwAmount;				//最低额度
-	DWORD	dwOwnerPercentage;		//群主提成
-    
-	BYTE	byMask;					//1 AA支付;  2大赢家支付
-	DWORD	dwDizhu;				//底注
 };
-
 
 //玩家基础信息 DB use player base info
 struct BASE_PLAYERINFO

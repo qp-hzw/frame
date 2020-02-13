@@ -7,6 +7,7 @@
 rule_arry						RoomRuleManager::m_rule_arry;
 ISubRoomRuleManager*            RoomRuleManager::m_SubRoomRuleManager = NULL;
 std::map<BYTE,  STR_CMD_GC_USER_GOLD_INFO> RoomRuleManager::s_RoomInfo;
+string							RoomRuleManager::m_roomRuleMsg;			 
 
 //初始化
 void RoomRuleManager::Init(int kindid, string dll_name)
@@ -148,7 +149,15 @@ tagTableRule RoomRuleManager::GetFKRoomRule(byte value[20], byte GameMode)
 		SetRoomRule(roomRule, key_name, value[i]);
 	}
 
+	m_roomRuleMsg = "游戏局数: " + std::to_string(roomRule.GameCount) + "\n"
+		+ "椅子数: " + std::to_string(roomRule.PlayerCount);
+
 	return roomRule;
+}
+//获取房卡场 房间规则
+string RoomRuleManager::GetFKRoomRuleMsg()
+{
+	return m_roomRuleMsg;
 }
 
 
@@ -264,7 +273,7 @@ int RoomRuleManager::CheckTickt(tagTableRule* rule, CPlayer* player)
 //获取字段 对应的描述
 string RoomRuleManager::GetDescribe(string key_name)
 {
-	string describe;
+	string describe ;
 	if(key_name == "GameCount")
 	{
 		describe = "局数";
@@ -374,3 +383,130 @@ int RoomRuleManager::GetCountType(byte value)
 
 	return 0;
 }
+
+// string 转为byte数组  TODONOW 暂时放在这里处理
+int StrToBin2(TCHAR* inWord, BYTE* OutBin, int source_len_begin, int source_len_end)
+{
+	TCHAR t2;
+	int count = 0;
+
+	for(int t = source_len_begin ;t < source_len_end; t ++)
+	{   
+		t2 = inWord[t];
+
+		BYTE intTemp = 0;
+		if(t2 == '0')
+		{
+			intTemp=0;
+		}
+		else if(t2 == '1')
+		{
+			intTemp=1;
+		}
+		else if(t2 == '2')
+		{
+			intTemp=2;
+		}
+		else if(t2 == '3')
+		{
+			intTemp=3;
+		}
+		else if(t2 == '4')
+		{
+			intTemp=4;
+		}
+		else if(t2 == '5')
+		{
+			intTemp=5;
+		}
+		else if(t2 == '6')
+		{
+			intTemp=6;
+		}
+		else if(t2 == '7')
+		{
+			intTemp=7;
+		}
+		else if(t2 == '8')
+		{
+			intTemp=8;
+		}
+		else if(t2 == '9')
+		{
+			intTemp=9;
+		}
+		else if(t2 == 'a' || t2 == 'A')
+		{
+			intTemp=10;
+		}
+		else if(t2 == 'b' || t2 == 'B')
+		{
+			intTemp=11;
+		}
+		else if(t2 == 'c' || t2 == 'C')
+		{
+			intTemp=12;
+		}
+		else if(t2 == 'd' || t2 == 'D')
+		{
+			intTemp=13;
+		}
+		else if(t2 == 'e' || t2 == 'E')
+		{
+			intTemp=14;
+		}
+		else if(t2 == 'f' || t2 =='F')
+		{
+			intTemp=15;
+		}
+
+		count = (t-source_len_begin)/2;
+
+		if((t % 2) == 0) //高位
+		{
+			OutBin[count] = intTemp<<4;
+		}
+		else if((t % 2) == 1) //低位
+		{
+			OutBin[count] += intTemp;
+		}
+	}
+
+	return count;
+}
+
+// byte数组转为 string  TODONOW 暂时放在这里处理
+const string toHexString(const byte * input, const int datasize)
+{
+	string output;
+	char ch[3];
+
+	for(int i = 0; i < datasize; ++i)
+	{
+		if( (input+i) != NULL)
+		{
+			sprintf_s(ch, 3, "%02x", input[i]);
+			output += ch;
+		}
+	}
+	return output;
+} 
+
+//房间value -> DB字符串
+string RoomRuleManager::GetRuleHexString(STR_SUB_CG_USER_SET_ROOM_RULE rule_setting)
+{
+	return toHexString((byte*)(&rule_setting), sizeof(rule_setting));
+}
+//DB字符串  -> 房间value
+STR_SUB_CG_USER_SET_ROOM_RULE RoomRuleManager::GetRuleSettingValue(string hex_string)
+{
+	//获取录像数据
+	TCHAR szData[2*LEN_MAX_RECORD_SIZE];
+	//m_TreasureDB->GetValue_String(TEXT("VideoData"), szData, CountArray(szData));
+
+	STR_SUB_CG_USER_SET_ROOM_RULE value;
+	StrToBin2(szData, (byte*)&value, 0, LEN_MAX_RECORD_SIZE*2-1);
+
+	return value;
+}
+

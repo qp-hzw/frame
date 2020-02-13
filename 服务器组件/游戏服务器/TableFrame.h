@@ -39,6 +39,26 @@ struct tagTableSubGameRule
 {
 	BYTE SubGameRule[LEN_PRIVATE_TABLE_RULE/2];						//子游戏房间规则
 };
+
+//工会房间规则
+struct tagClubRoomRule
+{
+    DWORD	dwClubID;				//工会
+	DWORD	dwRoomID;				//房间
+	DWORD   dwPasswd;               //密码
+
+	BYTE	byGoldOrFK;				//(2.金币 1.房卡)
+
+	BYTE	bDissolve;				//是否允许解散 0允许 1不允许
+	DWORD	dwDissolveTime;			//解散时长 (分钟)
+
+	//金币房特用
+	DWORD	dwAmount;				//最低额度
+	DWORD	dwOwnerPercentage;		//群主提成
+    
+	BYTE	byMask;					//1 AA支付;  2大赢家支付
+	DWORD	dwDizhu;				//底注
+};
 //////////////////////////////////////////////////////////////////////////////////
 
 //桌子框架
@@ -59,6 +79,7 @@ private:
 	DWORD							m_dwGroupID;						//所在牌友圈ID
 
 	tagTableRule					m_tagTableRule;						//通用房间规则(client传给服务端大厅的)
+	tagClubRoomRule                 m_tagClubRoomRule;					//工会房间规则
 
 	DWORD							m_dwTableOwner;						//房主（第一个坐下的玩家）
 
@@ -121,6 +142,9 @@ public:
 	//设置密码
 	virtual void SetTableID(DWORD dwTableID){ m_wTableID=dwTableID; }
 
+	//当前游戏局数
+	virtual DWORD GetCurGameRound() { return m_wCurGameRound; }
+
 	//获取状态
 	virtual BYTE GetGameStatus() { return m_cbGameStatus; }
 	//设置状态
@@ -147,6 +171,14 @@ public:
 
 		//初始化子游戏规则
 		m_pITableFrameSink->Initialization(this, &m_tagTableRule);
+	};
+
+	//读取工会房间规则
+	virtual tagClubRoomRule* GetClubRoomRule() { return &m_tagClubRoomRule;};
+	//设置工会房间规则
+	virtual void SetClubRoomRule(tagClubRoomRule* pRule)
+	{
+		memcpy(&m_tagClubRoomRule, pRule, sizeof(m_tagClubRoomRule));
 	};
 
 	//检测房间

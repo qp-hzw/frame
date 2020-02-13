@@ -62,7 +62,7 @@ public:
 	//用户昵称
 	LPCTSTR GetNickName() { return m_UserInfo.szNickName; }
 	//用户性别
-	BYTE GetGender() { return m_UserInfo.cbGender; }
+	BYTE GetSex() { return m_UserInfo.cbGender; }
 
 	 //是否机器人
 	  bool IsAndroidUser() { return m_bAndroidUser; }

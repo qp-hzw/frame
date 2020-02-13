@@ -101,16 +101,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 			bSucceed = On_DBR_CLUB_ROOM_INFO(dwContextID,pData,wDataSize);
 			break;
 		}
-	case DBR_CLUB_TABLE_INFO: //club牌友圈桌子信息
-		{
-			bSucceed = On_DBR_CLUB_TABLE_INFO(dwContextID,pData,wDataSize);
-			break;
-		}
-	case DBR_CLUB_PLAYER_INFO:	//club牌友圈玩家信息
-		{
-			bSucceed = On_DBR_CLUB_PLAYER_INFO(dwContextID,pData,wDataSize);
-			break;
-		}
 	case DBR_HALL_GOLD_TABLE_INFO: //金币大厅 桌子信息
 		{
 			bSucceed = On_DBR_HALL_GOLD_TABLE_INFO(dwContextID,pData,wDataSize);
@@ -796,23 +786,6 @@ VOID CDataBaseEngineSink::OnClearDB()
 
 #pragma region Club牌友圈
 
-// byte数组转为 string  TODONOW 暂时放在这里处理
-const CString toHexString(const byte * input, const int datasize)
-{
-	CString output;
-	char ch[3];
-
-	for(int i = 0; i < datasize; ++i)
-	{
-		if( (input+i) != NULL)
-		{
-			sprintf_s(ch, 3, "%02x", input[i]);
-			output += ch;
-		}
-	}
-	return output;
-} 
-
 //club牌友圈房间信息
 bool CDataBaseEngineSink::On_DBR_CLUB_ROOM_INFO(DWORD dwContextID, VOID * pData, WORD wDataSize)
 {
@@ -860,94 +833,6 @@ bool CDataBaseEngineSink::On_DBR_CLUB_ROOM_INFO(DWORD dwContextID, VOID * pData,
 	{
 	}
 
-
-	return true;
-}
-
-//club牌友圈桌子信息
-bool CDataBaseEngineSink::On_DBR_CLUB_TABLE_INFO(DWORD dwContextID, VOID * pData, WORD wDataSize)
-{
-	//效验参数
-	if (wDataSize!=sizeof(STR_DBR_CLUB_TABLE_INFO)) return false;
-	STR_DBR_CLUB_TABLE_INFO* pTableInfo = (STR_DBR_CLUB_TABLE_INFO*)pData;
-
-	//构造参数
-	m_TreasureDB->ResetParameter();
-	m_TreasureDB->AddParameter(TEXT("@dwUserID"),pTableInfo->dwUserID);
-	m_TreasureDB->AddParameter(TEXT("@dwClubRoomID"),pTableInfo->dwClubRoomID);
-	m_TreasureDB->AddParameter(TEXT("@dwTableID"),pTableInfo->dwTableID);
-	m_TreasureDB->AddParameter(TEXT("@dwTableState"),pTableInfo->dwTableState);
-	m_TreasureDB->AddParameter(TEXT("@dwLockState"),pTableInfo->dwLockState);
-	m_TreasureDB->AddParameter(TEXT("@byCurrentRound"),pTableInfo->byCurrentRound);
-	m_TreasureDB->AddParameter(TEXT("@byMask"),pTableInfo->byMask);
-	m_TreasureDB->AddParameter(TEXT("@byCompanyID"),pTableInfo->byCompanyID);
-	m_TreasureDB->AddParameter(TEXT("@dwGameID"),pTableInfo->dwGameID);
-
-	//执行过程
-	LONG lResultCode=m_TreasureDB->ExecuteProcess(TEXT("GSP_WRITE_CLUB_TABLE_INFO"),true);
-
-	if (lResultCode != DB_SUCCESS)
-	{
-		return true;
-	}
-
-	STR_CMD_LC_CLUB_TABLE_LIST CMD;
-	CMD.dwClubRoomID  = m_TreasureDB->GetValue_DWORD(TEXT("RoomID"));
-	CMD.dwTableID = m_TreasureDB->GetValue_DWORD(TEXT("TableID"));
-	//CMD.dwClubID = m_TreasureDB->GetValue_DWORD(TEXT("ClubID"));
-//	CMD.byMask = m_TreasureDB->GetValue_BYTE(TEXT("IsOwner"));
-	CMD.TableState = m_TreasureDB->GetValue_DWORD(TEXT("TableState"));
-
-	DWORD dwResuleLockState =  m_TreasureDB->GetValue_DWORD(TEXT("LockState"));
-	CMD.CurrentRound =  m_TreasureDB->GetValue_DWORD(TEXT("CurrentRound"));
-	//CMD.dwOwnerID =  m_TreasureDB->GetValue_DWORD(TEXT("OwnerID"));
-	CMD.byDel = (pTableInfo->byMask == 3) ? 1 : 0;
-
-	//发送结果
-	g_AttemperEngineSink->OnEventDataBaseResult(DBO_GC_CLUB_UPDATE_TABLE_INFO,dwContextID,&CMD,sizeof(CMD));
-
-	return true;
-}
-
-//club牌友圈玩家信息
-bool CDataBaseEngineSink::On_DBR_CLUB_PLAYER_INFO(DWORD dwContextID, VOID * pData, WORD wDataSize)
-{
-	//效验参数
-	if (wDataSize!=sizeof(STR_DBR_CLUB_PLAYER_INFO)) return false;
-	STR_DBR_CLUB_PLAYER_INFO* pTableInfo = (STR_DBR_CLUB_PLAYER_INFO*)pData;
-
-	//构造参数
-	m_TreasureDB->ResetParameter();
-	m_TreasureDB->AddParameter(TEXT("@dwUserID"),pTableInfo->dwUserID);
-	m_TreasureDB->AddParameter(TEXT("@dwTableID"),pTableInfo->dwTableID);
-	m_TreasureDB->AddParameter(TEXT("@byChairID"),pTableInfo->byChairID);
-	m_TreasureDB->AddParameter(TEXT("@byMask"),pTableInfo->byMask);
-
-	//执行过程
-	LONG lResultCode=m_TreasureDB->ExecuteProcess(TEXT("GSP_WRITE_CLUB_PLAYER_INFO"),true);
-
-	if (lResultCode != DB_SUCCESS)
-	{
-		return true;
-	}
-
-	
-	STR_CMD_LC_CLUB_TABLE_USER_LIST CMD;
-	/*
-	CMD.dwClubRoomID=m_TreasureDB->GetValue_DWORD(TEXT("ClubRoomID"));
-	CMD.dwUserID=m_TreasureDB->GetValue_DWORD(TEXT("UserID"));
-	m_TreasureDB->GetValue_String(TEXT("UserName"),CMD.szUserName,CountArray(CMD.szUserName));
-	CMD.bySex=m_TreasureDB->GetValue_BYTE(TEXT("Sex"));
-	CMD.wLevel=m_TreasureDB->GetValue_WORD(TEXT("UserLevel"));
-	m_TreasureDB->GetValue_String(TEXT("HeadUrl"),CMD.szHeadUrl,CountArray(CMD.szHeadUrl));
-	CMD.byClubRole=m_TreasureDB->GetValue_BYTE(TEXT("ClubRole"));
-	CMD.byClubReputation=m_TreasureDB->GetValue_BYTE(TEXT("ClubReputation"));
-	CMD.dwTableID=m_TreasureDB->GetValue_DWORD(TEXT("TableID"));
-	CMD.byChairID=m_TreasureDB->GetValue_BYTE(TEXT("ChairID"));
-	CMD.byDel = (pTableInfo->byMask == 1) ? 0 : 1;
-	*/
-	//发送结果
-	g_AttemperEngineSink->OnEventDataBaseResult(DBO_GC_CLUB_UPDATE_PLAYER_INFO,dwContextID,&CMD,sizeof(CMD));
 
 	return true;
 }
@@ -1376,88 +1261,22 @@ int StrToBin(TCHAR* inWord, BYTE* OutBin, int source_len_begin, int source_len_e
 	return count;
 }
 
-// add lihao 
-int BinToStr(BYTE *inBin, TCHAR *OutWord, int begin, int end)
+// byte数组转为 string  TODONOW 暂时放在这里处理
+const CString toHexString(const byte * input, const int datasize)
 {
-	int t = 0;
+	CString output;
+	char ch[3];
 
-	for (int i = begin; i < end; i++)
+	for(int i = 0; i < datasize; ++i)
 	{
-		int t2 = inBin[i] >> 4;
-		int t3 = t2;
-
-		for (int j = 0; j < 2; j++)
+		if( (input+i) != NULL)
 		{
-			if (t2 == 0)
-			{
-				OutWord[t++] = '0';
-			}
-			else if (t2 == 1)
-			{
-				OutWord[t++] = '1';
-			}
-			else if (t2 == 2)
-			{
-				OutWord[t++] = '2';
-			}
-			else if (t2 == 3)
-			{
-				OutWord[t++] = '3';
-			}
-			else if (t2 == 4)
-			{
-				OutWord[t++] = '4';
-			}
-			else if (t2 == 5)
-			{
-				OutWord[t++] = '5';
-			}
-			else if (t2 == 6)
-			{
-				OutWord[t++] = '6';
-			}
-			else if (t2 == 7)
-			{
-				OutWord[t++] = '7';
-			}
-			else if (t2 == 8)
-			{
-				OutWord[t++] = '8';
-			}
-			else if (t2 == 9)
-			{
-				OutWord[t++] = '9';
-			}
-			else if (t2 == 10)
-			{
-				OutWord[t++] = 'a';
-			}
-			else if (t2 == 11)
-			{
-				OutWord[t++] = 'b';
-			}
-			else if (t2 == 12)
-			{
-				OutWord[t++] = 'c';
-			}
-			else if (t2 == 13)
-			{
-				OutWord[t++] = 'd';
-			}
-			else if (t2 == 14)
-			{
-				OutWord[t++] = 'e';
-			}
-			else if (t2 == 15)
-			{
-				OutWord[t++] = 'f';
-			}
-			t2 = inBin[i] - (t3 << 4);
+			sprintf_s(ch, 3, "%02x", input[i]);
+			output += ch;
 		}
 	}
-
-	return 0;
-}
+	return output;
+} 
 
 
 //牌友圈创建桌子信息

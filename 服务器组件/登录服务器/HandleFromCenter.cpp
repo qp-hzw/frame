@@ -55,28 +55,6 @@ bool CHandleFromCenter::OnTCPSocketMainTransfer(WORD wSubCmdID, VOID * pData, WO
 {
 	switch (wSubCmdID)
 	{
-	case CPO_PL_CLUB_TABLE_INFO:  //俱乐部桌子信息
-		{
-			//TODONOW 暂时先改为通知所有client, 后面改为通知在该房间内的人
-			//added by WangChengQing 2018/5/21
-			//效验数据
-			if (wDataSize!=sizeof(STR_CMD_LC_CLUB_TABLE_LIST)) return true;
-
-			//发送通知 -- 全部客户端
-			g_GameCtrl->SendDataBatch(MDM_CLUB,CMD_LC_CLUB_TABLE_LIST_TABLE,pData,wDataSize);
-			return true;
-		}
-	case CPO_PL_CLUB_PLAYER_INFO: //俱乐部玩家信息
-		{
-			//TODONOW 暂时先改为通知所有client, 后面改为通知在该房间内的人
-			//added by WangChengQing 2018/5/21
-			//效验数据
-			if (wDataSize!=sizeof(STR_CMD_LC_CLUB_TABLE_USER_LIST)) return true;
-
-			//发送通知 -- 全部客户端
-			//g_GameCtrl->SendDataBatch(MDM_CLUB, CMD_LC_CLUB_TABLE_LIST_USER,pData,wDataSize);
-			return true;
-		}
 	case CPO_PL_CREATE_TABLE:	//创建桌子 查询可用的GameID
 		{
 			//效验数据

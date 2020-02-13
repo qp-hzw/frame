@@ -25,6 +25,8 @@ private:
 	static bool OnTCPNetworkMainGame(WORD wSubCmdID, VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//比赛命令 MDM_MATCH
 	static bool OnTCPNetworkMainMatch(WORD wSubCmdID, VOID * pData, WORD wDataSize, DWORD dwSocketID);
+	//工会
+	static bool OnTCPNetworkMainClub(WORD wSubCmdID, VOID * pData, WORD wDataSize, DWORD dwSocketID);
 
 	//具体处理
 private:
@@ -67,9 +69,6 @@ protected:
 	//表决解散房间
 	static bool On_SUB_RG_USER_VOTE_DISMISS(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 
-	//Club牌友圈创建桌子
-	static bool On_CMD_CG_CLUB_CREATE_TABLE( DWORD dwContextID, VOID * pData, WORD wDataSize );
-
 	//加入房间  不需要密码
 	static bool On_CMD_GC_USER_JOIN_TABLE_NO_PASS( DWORD dwContextID, VOID * pData, WORD wDataSize );
 
@@ -77,12 +76,6 @@ protected:
 	static bool On_SUB_CG_USER_GOLD_INFO(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	
 	
-#pragma endregion
-
-	#pragma region 框架命令 MDM_FRAME
-	//框架命令 MDM_FRAME
-protected:
-
 #pragma endregion
 
 	#pragma region 待处理
@@ -114,11 +107,6 @@ public:
 	//设置房间规则
 	static bool On_SUB_CG_USER_SET_ROOM_RULE(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	
-	//创建牌友圈房间
-	static bool CreateRoomClub(tagTableRule * pCfg, CPlayer *pCPlayer, STR_SUB_CG_USER_CREATE_ROOM* pCreateRoom);
-	//创建牌友圈桌子(先读取数据库中的房间规则)
-	static bool CreateTableClub(STR_DBO_GC_CLUB_CREATE_TABLE* , CPlayer *pCPlayer);
-
 	//创建桌子 俱乐部桌子  -- 玩家进入俱乐部桌子时候, 如果没有找到可用的桌子,就会创建桌子
 	static bool CreateTableAutoClub(STR_DBO_CG_USER_JOIN_TABLE_NO_PASS* , CPlayer *pCPlayer);
 
@@ -171,6 +159,14 @@ private:
 
 #pragma endregion
 
+#pragma region 工会
+	//创建房间
+	static bool On_SUB_CG_CLUB_ROOM_CREATE(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+
+	//请求该房间的桌子信息
+	static bool On_SUB_CG_CLUB_TABLE_LIST_TABLE(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+	
+#pragma endregion
 		//用户接口
 public:
 	//更新用户财富信息

@@ -100,10 +100,6 @@ private:
 protected: //Club牌友圈
 	//club牌友圈房间信息
 	bool On_DBR_CLUB_ROOM_INFO(DWORD dwContextID, VOID * pData, WORD wDataSize);
-	//club牌友圈桌子信息
-	bool On_DBR_CLUB_TABLE_INFO(DWORD dwContextID, VOID * pData, WORD wDataSize);
-	//club牌友圈玩家信息
-	bool On_DBR_CLUB_PLAYER_INFO(DWORD dwContextID, VOID * pData, WORD wDataSize);
 	
 protected: //金币大厅 桌子
 	//金币大厅 桌子信息

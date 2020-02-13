@@ -58,6 +58,7 @@ CTableFrame::CTableFrame()
 	//子游戏
 	m_pITableFrameSink= g_GameCtrl->GetITableFrameSink();
 	/******************** 静态属性 **********************/
+	ZeroMemory(&m_tagClubRoomRule, sizeof(m_tagClubRoomRule));
 	m_wTableID=0;
 	m_wChairCount=0;
 
@@ -203,6 +204,7 @@ bool CTableFrame::StartGame()
 //小局结束处理函数
 bool CTableFrame::HandleXJGameEnd(BYTE byRound, SCORE *lUserTreasure, VOID* pData, DWORD dwDataSize)
 {
+	m_wCurGameRound = byRound;
 	string OnlyID;
 #pragma region 用户信息
 	//扣除用户门票
@@ -1802,7 +1804,7 @@ bool CTableFrame::OnEventApplyDismissRoom(WORD wChairID, bool bAgree)
 		//判断房间是否可以解散
 		tagTableRule* pCfg = (tagTableRule*)GetCustomRule();
 		//俱乐部模式 && 房间设置不可解散 时候才生效 金币场也不可以解散
-		if ((1 == pCfg->bDissolve) || (pCfg->GameMode == 2))
+		if ((1 == GetClubRoomRule()->bDissolve) || (pCfg->GameMode == 2))
 		{
 			STR_CMD_GR_FRMAE_ASK_DISMISS_RESULT cmdResult;
 			ZeroMemory(&cmdResult, sizeof(cmdResult));

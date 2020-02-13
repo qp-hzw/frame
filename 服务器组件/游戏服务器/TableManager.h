@@ -20,6 +20,8 @@ private:
 public:
 	//增
 	static CTableFrame* CreateTable(tagTableRule* cfg, DWORD fangzhu);
+	//增 比赛场
+	static CMatchRoom* CreateMatchRoom(CMatchItem* Item, WORD stage);
 	//删
 	static bool DeleteTable(CTableFrame* pTable);
 	//删
@@ -33,8 +35,9 @@ public:
 	static CTableFrame* GetGlodTable(BYTE byType);
 	//获取所有空闲金币场桌子
 	static std::list<CTableFrame*> GetAllGlodTable();
-	//创建比赛场桌子
-	static CMatchRoom* CreateMatchRoom(CMatchItem* Item, WORD stage);
+
+	//获取俱乐部 房间 所有桌子列表
+	static std::list<CTableFrame*> GetAllClubRoomTable(DWORD dwClubID, DWORD dwRoomID); 
 
 	//
 public:

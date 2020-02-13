@@ -16,8 +16,8 @@
 #define MDM_CLUB								6							//工会
 
 //【子消息号】
-#define CMD_LC_CLUB_LIST_RE						116							//实时刷新工会列表
-#define CMD_LC_CLUB_ROOM_RE						117							//实时刷新工会房间列表
+#define CMD_LC_CLUB_LIST_RE						50							//实时刷新工会列表
+#define CMD_LC_CLUB_ROOM_RE						51							//实时刷新工会房间列表
 
 #pragma region 工会 创建|加入|列表
 #define SUB_CL_CLUB_CREATE_CLUB					1							//创建工会请求
@@ -44,18 +44,19 @@
 #define CMD_LC_CLUB_ROOM_LIST					111							//请求该工会房间列表 返回
 #define CMD_LC_CLUB_ROOM_LIST_FINISH			211							//请求该工会房间列表 结束
 
-#define SUB_CL_CLUB_JOIN_ROOM					12							//申请加入房间
-#define CMD_LC_CLUB_JOIN_ROOM					112							//申请加入房间 返回
-
 #define SUB_CL_CLUB_ROOM_SETTING				13							//房间设置请求 
 #define CMD_LC_CLUB_ROOM_SETTING				113							//房间设置请求 返回
+
+#define SUB_CG_CLUB_ROOM_CREATE					14							//创建房间
+#define CMD_LC_CLUB_ROOM_CREATE					114							//创建房间 返回
 
 #define SUB_CL_CLUB_ROOM_DISSOLVE				15							//解散房间请求 
 #define CMD_LC_CLUB_ROOM_DISSOLVE				115							//解散房间请求 返回
 #pragma endregion
 
 #pragma region  工会桌子 创建|加入|列表
-#define CMD_LC_CLUB_TABLE_LIST_TABLE			212							//该房间的桌子信息
+#define SUB_CG_CLUB_TABLE_LIST_TABLE			16							//请求该房间的桌子信息
+#define CMD_GC_CLUB_TABLE_LIST_TABLE			116							//请求该房间的桌子信息 返回
 
 //牌友圈
 #define SUB_CG_USER_JOIN_TABLE_NO_PASS	19									//#加入桌子,不需要密码, 即快速开始 -- 仅牌友群使用

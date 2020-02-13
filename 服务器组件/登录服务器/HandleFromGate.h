@@ -187,15 +187,6 @@ private:
 	//解散桌子请求 返回
 	static bool On_CMD_LC_CLUB_TABLE_DISSOLVE( DWORD dwContextID, VOID * pData, WORD wDataSize );
 
-	//申请加入房间
-	static bool On_SUB_CL_CLUB_JOIN_ROOM(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//申请加入房间 返回
-	static bool On_CMD_LC_CLUB_JOIN_ROOM( DWORD dwContextID, VOID * pData, WORD wDataSize );
-	//桌子列表
-	static bool On_CMD_LC_CLUB_TABLE_LIST_TABLE(DWORD dwContextID, VOID * pData, WORD wDataSize);
-	//桌子玩家列表
-	static bool On_CMD_LC_CLUB_TABLE_LIST_USER(DWORD dwContextID, VOID * pData, WORD wDataSize);
-
 	//牌友圈公告
 	static bool On_SUB_CL_CLUB_NOTICE(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//牌友圈公告 返回
