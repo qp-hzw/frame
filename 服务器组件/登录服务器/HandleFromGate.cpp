@@ -1648,7 +1648,7 @@ bool CHandleFromGate::On_SUB_CL_CLUB_ROOM_LIST(VOID * pData, WORD wDataSize, DWO
 		pDBO=(STR_CMD_LC_CLUB_ROOM_LIST *)(cbBuffer+wPacketSize);
 		pDBO->dwRoomID=g_AccountsDB->GetValue_DWORD(TEXT("RoomID"));
 		g_AccountsDB->GetValue_String(TEXT("RoomName"),pDBO->szRoomName,CountArray(pDBO->szRoomName));
-		DWORD dwGameID =g_AccountsDB->GetValue_DWORD(TEXT("KindID"));
+		pDBO->dwKindID =g_AccountsDB->GetValue_DWORD(TEXT("KindID"));
 		pDBO->byGoldOrFK = g_AccountsDB->GetValue_BYTE(TEXT("ModeID")); //1房卡场 2金币场
 		g_AccountsDB->GetValue_String(TEXT("KindName"),pDBO->szKindName,CountArray(pDBO->szKindName));
 

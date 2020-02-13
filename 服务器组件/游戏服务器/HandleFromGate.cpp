@@ -1130,6 +1130,7 @@ bool CHandleFromGate::On_SUB_CG_CLUB_TABLE_LIST_TABLE(VOID * pData, WORD wDataSi
 		pCMD->LockState = (rule->dwPasswd != 0) ? 0 : 1;
 		pCMD->CurrentRound = table->GetCurGameRound();
 		pCMD->AllRound = table->GetCustomRule()->GameCount;
+		pCMD->ChairCount = table->GetCustomRule()->PlayerCount;
 
 		STR_CMD_LC_CLUB_TABLE_USER_LIST * player_info;
 		int i = 0;

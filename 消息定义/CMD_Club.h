@@ -58,10 +58,9 @@
 #define SUB_CG_CLUB_TABLE_LIST_TABLE			16							//请求该房间的桌子信息
 #define CMD_GC_CLUB_TABLE_LIST_TABLE			116							//请求该房间的桌子信息 返回
 
-//牌友圈
-#define SUB_CG_USER_JOIN_TABLE_NO_PASS	19									//#加入桌子,不需要密码, 即快速开始 -- 仅牌友群使用
-#define SUB_CG_CLUB_CREATE_TABLE		21									//#创建桌子 牌友圈特有
-#define CMD_GC_CLUB_CREATE_TABKE		121									//#创建桌子 返回
+#define SUB_CG_USER_JOIN_TABLE_NO_PASS			19							//#加入桌子,不需要密码, 即快速开始 -- 仅牌友群使用
+#define SUB_CG_CLUB_CREATE_TABLE				21							//创建桌子 
+#define CMD_GC_CLUB_CREATE_TABKE				121							//创建桌子 返回
 
 #define SUB_CL_CLUB_TABLE_DISSOLVE				18							//解散桌子请求 
 #define CMD_LC_CLUB_TABLE_DISSOLVE				118							//解散桌子请求 返回

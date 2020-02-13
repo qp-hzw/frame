@@ -210,6 +210,7 @@ struct STR_CMD_LC_CLUB_TABLE_LIST
 	DWORD	LockState;									//0桌子需要密码  1桌子不需要密码
 	DWORD	CurrentRound;								//当前局数
 	DWORD	AllRound;									//总局数
+	DWORD	ChairCount;									//椅子数目
 
 	STR_CMD_LC_CLUB_TABLE_USER_LIST player_info[6];     //玩家信息
 };
