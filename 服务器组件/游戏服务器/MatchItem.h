@@ -90,6 +90,8 @@ public:
 	//获取比赛配置
 	MATCH_CONFIG GetConfig() { return m_config; }
 
+	//已报名人数
+	WORD GetApplyCount() { return m_Apply_Player.size(); }
 	//机器人是否报名满了
 	bool IsRobotFull();
 	//比赛是否已开始

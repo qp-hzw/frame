@@ -1,5 +1,6 @@
 #ifndef STR_CMD_GAME_SERVER_HEAD_FILE
 #define STR_CMD_GAME_SERVER_HEAD_FILE
+#include <winsock2.h>
 #include "../服务器组件/游戏服务器/TableFrameBase.h" //因为改结构体tagTableRule
 #pragma pack(1)
 
@@ -420,7 +421,7 @@ struct MATCH_CONFIG
 	//阶段信息
 	struct STAGE_INFO
 	{
-		TCHAR	szName[MAX_MATCH_TITLE];	//初赛、半决赛、决赛..
+		TCHAR	szName[16];	//初赛、半决赛、决赛..
 		DWORD	wXJCount;					//小局数
 		DWORD	wPlayerCount;				//人数
 		DWORD	wJinJi_Rule;				//晋级规则   同桌比较/全桌比较 1,2
@@ -429,9 +430,9 @@ struct MATCH_CONFIG
 
 	//比赛场信息
 	DWORD		wMatchID;							//比赛场ID标识
-	TCHAR		szTitle[MAX_MATCH_TITLE];			//标题
-	TCHAR		szDescribe[MAX_MATCH_TITLE];		//比赛描述
-	STAGE_INFO	stage[MAX_MATCH_STAGE];				//阶段信息
+	TCHAR		szTitle[32];			//标题
+	TCHAR		szDescribe[128];		//比赛描述
+	STAGE_INFO	stage[5];				//阶段信息
 	DWORD		wStageSize;							//阶段个数
 	DWORD		llBaseScore;						//底分
 
@@ -446,15 +447,6 @@ struct MATCH_CONFIG
 
 	//机器人信息
 	DWORD		dwRobotCount;						//机器人数量
-	DWORD		dwRobotJoinMin;						//机器人最小加入周期
-	DWORD		dwRobotJoinMax;						//机器人最大加入周期
-};
-
-//请求比赛场信息
-struct STR_CMD_GC_MATCH_INFO
-{
-	MATCH_CONFIG	cfg[MAX_MATCH];
-	WORD			wCfgSize;
 };
 
 //比赛场报名
@@ -466,8 +458,6 @@ struct STR_SUB_CG_MATCH_APPLY
 //报名返回
 struct STR_CMD_GC_MATCH_APPLY
 {
-	bool			bSuccess;			//是否成功报名 0-成功 -1-失败
-	TCHAR			szDescribe[256];	//描述
 	WORD			wApplyCount;		//已报名人数
 	WORD			wRule;				//开赛规则 0-人满 1-定时
 	DWORD			dwLeaveTime;		//定时赛 开赛剩余时间
@@ -484,13 +474,6 @@ struct STR_CMD_GC_MATCH_CANCEL
 struct STR_SUB_CG_MATCH_UNAPPLY
 {
 	WORD			wMatchID;		//比赛ID
-};
-
-//取消报名返回
-struct STR_CMD_GC_MATCH_UNAPPLY
-{
-	bool			bSuccess;			//成功标识  0-成功 -1-失败
-	TCHAR			szDescribe[256];	//描述
 };
 
 //比赛阶段结果

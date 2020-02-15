@@ -29,19 +29,17 @@ bool CMatchManager::ReadMatchConfig(DWORD kindid)
 		CWHCfg::Instance()->GetItemValue("MATCH", "fee", config.llFee);
 		CWHCfg::Instance()->GetItemValue("MATCH", "reword", config.llReword);
 		CWHCfg::Instance()->GetItemValue("MATCH", "robotcount", config.dwRobotCount);
-		CWHCfg::Instance()->GetItemValue("MATCH", "robotjoinmin", config.dwRobotJoinMin);
-		CWHCfg::Instance()->GetItemValue("MATCH", "robotjoinmax", config.dwRobotJoinMax);
 		CWHCfg::Instance()->GetItemValue("MATCH", "timeperiod", config.dwTimePeriod);
 
 		//标题
 		string strTemp;
 		CWHCfg::Instance()->GetItemValue("MATCH", "title", strTemp);
-		swprintf(config.szTitle, 15, L"%S", strTemp.c_str());
+		swprintf(config.szTitle, 32, L"%S", strTemp.c_str());
 
 		//描述
 		strTemp = "";
 		CWHCfg::Instance()->GetItemValue("MATCH", "describe", strTemp);
-		swprintf(config.szDescribe, 100, L"%S", strTemp.c_str());
+		swprintf(config.szDescribe, 128, L"%S", strTemp.c_str());
 
 		for(int j=0; j<MAX_MATCH_STAGE; j++)
 		{
@@ -55,7 +53,7 @@ bool CMatchManager::ReadMatchConfig(DWORD kindid)
 
 			string tmp;
 			CWHCfg::Instance()->GetItemValue(psz, "name", tmp);
-			swprintf(config.stage[j].szName, 15, L"%S", tmp.c_str());
+			swprintf(config.stage[j].szName, 16, L"%S", tmp.c_str());
 
 			config.wStageSize++;
 		}
@@ -67,7 +65,7 @@ bool CMatchManager::ReadMatchConfig(DWORD kindid)
 
 	//配置比赛场
 	MatchConfig();
-
+	CLog::Log(log_debug, "sizeof: %d", sizeof(MATCH_CONFIG));
 	return true;
 }
 
@@ -83,7 +81,7 @@ bool CMatchManager::MatchConfig()
 			if (config->dwStartTime < time(0))	//已经开始
 			{
 				//开始下一场
-				config->dwStartTime = time(0) + 12000/**config->dwTimePeriod*/;	
+				config->dwStartTime = time(0) + 60000*config->dwTimePeriod;	
 			}
 		}
 
@@ -112,6 +110,12 @@ bool CMatchManager::MatchConfig()
 	}
 
 	return true;
+}
+
+//获取所有配置信息
+std::list<MATCH_CONFIG> CMatchManager::GetAllMatchConfig()
+{
+	return m_match_cfg;
 }
 
 //创建比赛场

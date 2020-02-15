@@ -4,6 +4,7 @@
 #include <iostream>
 #include "RoomRuleManager.h"
 #include "RobotManager.h"
+#include "MatchManager.h"
 
 bool CHandleFromGate::HandlePacket(TCP_Command Command, VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
@@ -202,11 +203,11 @@ bool CHandleFromGate::OnTCPNetworkMainMatch(WORD wSubCmdID, VOID * pData, WORD w
 		}
 	case SUB_CG_MATCH_APPLY:	//玩家报名
 		{
-
+			return On_SUB_CG_MATCH_APPLY(pData, wDataSize, dwSocketID);
 		}
 	case SUB_CG_MATCH_UNAPPLY:	//取消报名
 		{
-
+			return On_SUB_CG_MATCH_UNAPPLY(pData, wDataSize, dwSocketID);
 		}
 	}
 }
@@ -1528,10 +1529,113 @@ bool CHandleFromGate::OnEventModifyUserTreasure(CPlayer *pIServerUserItem, DWORD
 bool CHandleFromGate::On_SUB_CG_MATCH_INFO(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
 	//校验
+	CPlayer *player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	if (player == NULL)
+		return false;
+
+	//获取比赛项
+	std::list<MATCH_CONFIG> array = CMatchManager::GetAllMatchConfig();
+
+	WORD wPacketSize=0;
+	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
+	MATCH_CONFIG * pcfg = NULL;
+	for (auto cfg : array)
+	{
+		//发送信息
+		if ((wPacketSize+sizeof(MATCH_CONFIG))>sizeof(cbBuffer))
+		{
+			g_GameCtrl->SendData(dwSocketID, MDM_GR_MATCH, CMD_GC_MATCH_INFO, cbBuffer, wPacketSize);
+			wPacketSize=0;
+		}
+		
+		//读取信息
+		pcfg=(MATCH_CONFIG *)(cbBuffer+wPacketSize);
+		CopyMemory(pcfg, &cfg, sizeof(MATCH_CONFIG));
+
+		wPacketSize+=sizeof(MATCH_CONFIG);
+	}
+	if (wPacketSize>0) g_GameCtrl->SendData(dwSocketID, MDM_GR_MATCH, CMD_GC_MATCH_INFO, cbBuffer, wPacketSize);
+
+	return true;
+}
+
+//玩家报名
+bool CHandleFromGate::On_SUB_CG_MATCH_APPLY(VOID * pData, WORD wDataSize, DWORD dwSocketID)
+{
+	//大小检验
+	if (sizeof(STR_SUB_CG_MATCH_APPLY) != wDataSize)
+		return false;
+
+	//玩家校验
+	CPlayer *player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	if (player == NULL)
+		return false;
+
+	//获取数据
+	STR_SUB_CG_MATCH_APPLY *apply = (STR_SUB_CG_MATCH_APPLY *)pData;
+
+	//获取比赛场
+	CMatchItem *match = CMatchManager::Find_Match_ByItemID(apply->wMatchID);
+	if (match->IsMatchStart())
+	{
+		g_GameCtrl->SendDataMsg(player->GetSocketID(), "比赛已经开始了！");
+		return false;
+	}
+
+	//玩家报名
+	if (!match->On_User_Apply(player))
+	{
+		g_GameCtrl->SendDataMsg(player->GetSocketID(), "报名失败！");
+		return false;
+	}
 
 	//构造数据
+	STR_CMD_GC_MATCH_APPLY cmdApply;
+	ZeroMemory(&cmdApply, sizeof(STR_CMD_GC_MATCH_APPLY));
 
-	//发送
+	cmdApply.wRule = match->GetConfig().wStartType;
+	cmdApply.wApplyCount = match->GetApplyCount();
+	cmdApply.wLeaveCount = match->GetConfig().dwLowestPlayer - match->GetApplyCount();
+	cmdApply.dwLeaveTime = match->GetConfig().dwStartTime - time(0);
+
+	//发送数据
+	g_GameCtrl->SendData(player, MDM_GR_MATCH, CMD_GC_MATCH_APPLY, &cmdApply, sizeof(STR_CMD_GC_MATCH_APPLY));
+
+	return true;
+}
+
+//玩家取消报名
+bool CHandleFromGate::On_SUB_CG_MATCH_UNAPPLY(VOID * pData, WORD wDataSize, DWORD dwSocketID)
+{
+	//大小检验
+	if (sizeof(STR_SUB_CG_MATCH_UNAPPLY) != wDataSize)
+		return false;
+
+	//玩家校验
+	CPlayer *player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	if (player == NULL)
+		return false;
+
+	//获取数据
+	STR_SUB_CG_MATCH_UNAPPLY *apply = (STR_SUB_CG_MATCH_UNAPPLY *)pData;
+
+	//获取比赛场
+	CMatchItem *match = CMatchManager::Find_Match_ByItemID(apply->wMatchID);
+	if (match->IsMatchStart())
+	{
+		g_GameCtrl->SendDataMsg(player->GetSocketID(), "比赛已经开始了！");
+		return false;
+	}
+
+	//玩家报名
+	if (!match->On_User_UnApply(player))
+	{
+		g_GameCtrl->SendDataMsg(player->GetSocketID(), "取消报名失败！");
+		return false;
+	}
+
+	//发送数据
+	g_GameCtrl->SendData(player, MDM_GR_MATCH, CMD_GC_MATCH_UNAPPLY, NULL, 0);
 
 	return true;
 }

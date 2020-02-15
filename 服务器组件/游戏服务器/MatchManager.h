@@ -19,6 +19,8 @@ private:
 public:
 	//读取比赛的配置信息
 	static bool ReadMatchConfig(DWORD kindid);
+	//获取所有配置信息
+	static std::list<MATCH_CONFIG> GetAllMatchConfig();
 	//配置比赛场
 	static bool MatchConfig();
 	//创建

@@ -150,6 +150,10 @@ public:
 private:
 	//请求比赛场信息
 	static bool On_SUB_CG_MATCH_INFO(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+	//玩家报名
+	static bool On_SUB_CG_MATCH_APPLY(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+	//玩家取消报名
+	static bool On_SUB_CG_MATCH_UNAPPLY(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 
 #pragma endregion
 
