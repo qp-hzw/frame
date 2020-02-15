@@ -62,7 +62,6 @@ CTableFrame::CTableFrame()
 	m_wTableID=0;
 	m_wChairCount=0;
 
-	m_dwGroupID = 0;
 	m_dwTableOwner=0L;
 
 	/******************** 动态属性 **********************/
@@ -72,7 +71,6 @@ CTableFrame::CTableFrame()
 	m_user_list.clear();
 	m_player_list.clear();
 	m_total_score.clear();
-	m_CurXJcount = 0;
 
 	//解散信息
 	ZeroMemory(m_bResponseDismiss,sizeof(m_bResponseDismiss));
@@ -226,9 +224,6 @@ bool CTableFrame::HandleXJGameEnd(BYTE byRound, SCORE *lUserTreasure, VOID* pDat
 	{
 		m_total_score[i] += lUserTreasure[i];
 	}
-
-	//小局数 --比赛
-	m_CurXJcount++;
 
 	//更新用户财富  -- 用户财富变更记录表
 	XJModifyUserTreasure(lUserTreasure);

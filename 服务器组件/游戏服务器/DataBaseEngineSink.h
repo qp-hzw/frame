@@ -127,13 +127,6 @@ protected:
 	//*********桌子信息记录函数**********
 	//更新游戏任务状态
 	bool On_Table_UpdateGameTaskStatus(DWORD dwContextID, void *pData, WORD wDataSize);
-
-
-	//club牌友圈创建桌子
-	bool On_DBR_CG_CLUB_CREATE_TABLE(DWORD dwContextID, void *pData, WORD wDataSize);
-
-	//加入桌子 不需要密码
-	bool On_DBR_CG_USER_JOIN_TABLE_NO_PASS(DWORD dwContextID, void *pData, WORD wDataSize);
 };
 
 // byte数组转为 string  TODONOW 暂时放在这里处理

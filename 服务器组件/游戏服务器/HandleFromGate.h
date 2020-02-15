@@ -49,7 +49,6 @@ protected:
 	//修改用户财富信息
 	static bool On_CMD_GC_User_ModifyUserTreasure(DWORD dwContextID, VOID * pData, WORD wDataSize);
 
-
 	//用户坐下
 	static bool On_SUB_CG_User_SitDown(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//用户起立
@@ -107,9 +106,6 @@ public:
 	//设置房间规则
 	static bool On_SUB_CG_USER_SET_ROOM_RULE(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	
-	//创建桌子 俱乐部桌子  -- 玩家进入俱乐部桌子时候, 如果没有找到可用的桌子,就会创建桌子
-	static bool CreateTableAutoClub(STR_DBO_CG_USER_JOIN_TABLE_NO_PASS* , CPlayer *pCPlayer);
-
     //辅助函数
 protected: 
 	//校验 申请创建桌子
@@ -135,8 +131,6 @@ public:
 	//最后一个用户起立
 	static void ClubLastPlayerSitUp(DWORD dwTableID, DWORD dwUserID, BYTE byChairID, BYTE byClubOrHallGold);
 	
-	//创建桌子 -- 俱乐部
-	static void ClubTableCreate(DWORD dwClubRoomID, DWORD dwUserID, DWORD dwTableID, DWORD dwLockState);
 	//创建桌子 -- 金币大厅
 	static void HallTableCreate(DWORD dwUserID, DWORD dwKindID,BYTE byGameType, DWORD dwTableID);
 	//房间开始游戏
@@ -165,6 +159,9 @@ private:
 
 	//请求该房间的桌子信息
 	static bool On_SUB_CG_CLUB_TABLE_LIST_TABLE(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+	
+	//创建桌子
+	static bool On_SUB_CG_CLUB_CREATE_TABLE(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	
 #pragma endregion
 		//用户接口

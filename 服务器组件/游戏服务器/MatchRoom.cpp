@@ -52,7 +52,7 @@ bool CMatchRoom::HandleXJGameEnd(BYTE byRound, SCORE *lUserTreasure, VOID* pData
 	m_Match_Item->Update_Ranking(this);
 
 	//判断大局是否结束
-	if (GetXJCount() !=	GetCustomRule()->GameCount)
+	if (GetCurGameRound() !=	GetCustomRule()->GameCount)
 	{
 		//更新比赛场信息
 

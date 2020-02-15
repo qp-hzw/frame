@@ -40,25 +40,6 @@ struct tagTableSubGameRule
 	BYTE SubGameRule[LEN_PRIVATE_TABLE_RULE/2];						//子游戏房间规则
 };
 
-//工会房间规则
-struct tagClubRoomRule
-{
-    DWORD	dwClubID;				//工会
-	DWORD	dwRoomID;				//房间
-	DWORD   dwPasswd;               //密码
-
-	BYTE	byGoldOrFK;				//(2.金币 1.房卡)
-
-	BYTE	bDissolve;				//是否允许解散 0允许 1不允许
-	DWORD	dwDissolveTime;			//解散时长 (分钟)
-
-	//金币房特用
-	DWORD	dwAmount;				//最低额度
-	DWORD	dwOwnerPercentage;		//群主提成
-    
-	BYTE	byMask;					//1 AA支付;  2大赢家支付
-	DWORD	dwDizhu;				//底注
-};
 //////////////////////////////////////////////////////////////////////////////////
 
 //桌子框架
@@ -75,9 +56,6 @@ private:
 	DWORD							m_wTableID;							//桌子标志 6位
 	WORD							m_wChairCount;						//椅子数目
 
-	//TODOLATER 待整理
-	DWORD							m_dwGroupID;						//所在牌友圈ID
-
 	tagTableRule					m_tagTableRule;						//通用房间规则(client传给服务端大厅的)
 	tagClubRoomRule                 m_tagClubRoomRule;					//工会房间规则
 
@@ -93,7 +71,6 @@ private:
 
 	//比赛相关
 	std::vector<SCORE>				m_total_score;						//总分
-	WORD							m_CurXJcount;						//当前小局数
 
 	//房间解散
 public:
@@ -155,10 +132,6 @@ public:
 	//获得桌主，第一个坐下的人
 	virtual DWORD GetTableOwner() {return m_dwTableOwner;}
 
-	//获取、设置用户圈房卡
-	virtual void SetGroupID(DWORD dwGroupID){m_dwGroupID = dwGroupID;};
-	virtual DWORD GetGroupID(){return m_dwGroupID;};
-
 	//读取房间通用规则
 	virtual tagTableRule* GetCustomRule() { return &m_tagTableRule;};
 	//设置房间通用规则
@@ -197,8 +170,6 @@ public:
 	//设置开始下一阶段定时器
 	void SetStageTimer();
 
-	//获取小局数
-	WORD GetXJCount() { return m_CurXJcount; }
 	//获取总分
 	std::vector<SCORE> GetTotalScore() { return m_total_score; }
 

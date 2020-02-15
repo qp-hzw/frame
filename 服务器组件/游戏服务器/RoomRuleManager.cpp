@@ -3,11 +3,107 @@
 #include <iostream>
 #include <stdlib.h>
 #include "player.h"
+#include "DataBaseEngineSink.h"
 
 rule_arry						RoomRuleManager::m_rule_arry;
 ISubRoomRuleManager*            RoomRuleManager::m_SubRoomRuleManager = NULL;
-std::map<BYTE,  STR_CMD_GC_USER_GOLD_INFO> RoomRuleManager::s_RoomInfo;
-string							RoomRuleManager::m_roomRuleMsg;			 
+std::map<BYTE,  STR_CMD_GC_USER_GOLD_INFO> RoomRuleManager::s_RoomInfo; 
+
+// string 转为byte数组  TODONOW 暂时放在这里处理
+void StrToBin2(TCHAR* inWord, BYTE* OutBin, int source_len_begin, int source_len_end)
+{
+	TCHAR t2;
+	int count = 0;
+
+	for(int t = source_len_begin ;t < source_len_end; t ++)
+	{   
+		t2 = inWord[t];
+
+		BYTE intTemp = 0;
+		if(t2 == '0')
+		{
+			intTemp=0;
+		}
+		else if(t2 == '1')
+		{
+			intTemp=1;
+		}
+		else if(t2 == '2')
+		{
+			intTemp=2;
+		}
+		else if(t2 == '3')
+		{
+			intTemp=3;
+		}
+		else if(t2 == '4')
+		{
+			intTemp=4;
+		}
+		else if(t2 == '5')
+		{
+			intTemp=5;
+		}
+		else if(t2 == '6')
+		{
+			intTemp=6;
+		}
+		else if(t2 == '7')
+		{
+			intTemp=7;
+		}
+		else if(t2 == '8')
+		{
+			intTemp=8;
+		}
+		else if(t2 == '9')
+		{
+			intTemp=9;
+		}
+		else if(t2 == 'a' || t2 == 'A')
+		{
+			intTemp=10;
+		}
+		else if(t2 == 'b' || t2 == 'B')
+		{
+			intTemp=11;
+		}
+		else if(t2 == 'c' || t2 == 'C')
+		{
+			intTemp=12;
+		}
+		else if(t2 == 'd' || t2 == 'D')
+		{
+			intTemp=13;
+		}
+		else if(t2 == 'e' || t2 == 'E')
+		{
+			intTemp=14;
+		}
+		else if(t2 == 'f' || t2 =='F')
+		{
+			intTemp=15;
+		}
+
+		OutBin[t] = intTemp;
+	}
+}
+// byte数组转为 string  TODONOW 暂时放在这里处理
+const string toHexString2(const byte * input, const int datasize)
+{
+	string output;
+	char ch[3];
+
+	for(int i = 0; i < datasize; ++i)
+	{
+		if( (input+i) != NULL)
+		{
+			sprintf_s(ch, 3, "%01x", input[i]);
+			output += ch;
+		}
+	}
+	return output;
+} 
 
 //初始化
 void RoomRuleManager::Init(int kindid, string dll_name)
@@ -148,18 +244,8 @@ tagTableRule RoomRuleManager::GetFKRoomRule(byte value[20], byte GameMode)
 
 		SetRoomRule(roomRule, key_name, value[i]);
 	}
-
-	m_roomRuleMsg = "游戏局数: " + std::to_string(roomRule.GameCount) + "\n"
-		+ "椅子数: " + std::to_string(roomRule.PlayerCount);
-
 	return roomRule;
 }
-//获取房卡场 房间规则
-string RoomRuleManager::GetFKRoomRuleMsg()
-{
-	return m_roomRuleMsg;
-}
-
 
 //获取金币场 房间规则
 tagTableRule RoomRuleManager::GetGoldRoomRule(BYTE byType)
@@ -188,6 +274,56 @@ void RoomRuleManager::SetMatchRule(tagTableRule& roomRule, MATCH_CONFIG *config,
 	roomRule.GameMode = TABLE_MODE_MATCH;
 	roomRule.GameCount = config->stage[wstage].wXJCount;
 	roomRule.PlayerCount =3;
+}
+
+//获取工会 通用房间规则
+tagTableRule RoomRuleManager::GetClubComRoomRule(DWORD dwClubID, DWORD dwRoomID)
+{
+	//获取房间规则配置value
+	BYTE value[20];
+	memset(value, 0, 20);
+
+	g_TreasureDB->ResetParameter();
+	g_TreasureDB->AddParameter(TEXT("@ClubID"), dwClubID);
+	g_TreasureDB->AddParameter(TEXT("@RoomID"), dwRoomID);
+	LONG lResultCode=g_TreasureDB->ExecuteProcess(TEXT("GSP_CG_CLUB_QUERY_RULE"),true);
+	
+	if(lResultCode == DB_SUCCESS)
+	{
+		TCHAR ch[20];
+		g_TreasureDB->GetValue_String(TEXT("RealRoomRule"), ch, 20);
+
+		StrToBin2(ch, value, 0, 19);
+	}
+
+	//获取具体房间规则
+	return GetFKRoomRule(value, TABLE_MODE_CLUB);
+}
+//获取工会房间规则
+tagClubRoomRule RoomRuleManager::GetClubRoomRule(DWORD dwClubID, DWORD dwRoomID, DWORD dwPasswd)
+{
+	tagClubRoomRule cfg;
+	memset(&cfg, 0, sizeof(cfg));
+	cfg.dwClubID = dwClubID;
+	cfg.dwRoomID = dwRoomID;
+	cfg.dwPasswd = dwPasswd;
+
+	g_TreasureDB->ResetParameter();
+	g_TreasureDB->AddParameter(TEXT("@ClubID"), dwClubID);
+	g_TreasureDB->AddParameter(TEXT("@RoomID"), dwRoomID);
+	LONG lResultCode=g_TreasureDB->ExecuteProcess(TEXT("GSP_CG_CLUB_QUERY_RULE"),true);
+
+	if(lResultCode == DB_SUCCESS)
+	{
+		cfg.byGoldOrFK = g_TreasureDB->GetValue_BYTE(TEXT("ModeID"));
+		cfg.bDissolve = g_TreasureDB->GetValue_BYTE(TEXT("Dissolve"));
+		cfg.dwAmount = g_TreasureDB->GetValue_DWORD(TEXT("Gold"));
+		cfg.dwOwnerPercentage = g_TreasureDB->GetValue_DWORD(TEXT("Revenue"));
+		cfg.byMask = g_TreasureDB->GetValue_BYTE(TEXT("Mask"));
+		cfg.dwDizhu = g_TreasureDB->GetValue_DWORD(TEXT("Dizhu"));
+	}
+
+	return cfg;
 }
 
 //获取金币场 所有房间数据
@@ -384,129 +520,8 @@ int RoomRuleManager::GetCountType(byte value)
 	return 0;
 }
 
-// string 转为byte数组  TODONOW 暂时放在这里处理
-int StrToBin2(TCHAR* inWord, BYTE* OutBin, int source_len_begin, int source_len_end)
-{
-	TCHAR t2;
-	int count = 0;
-
-	for(int t = source_len_begin ;t < source_len_end; t ++)
-	{   
-		t2 = inWord[t];
-
-		BYTE intTemp = 0;
-		if(t2 == '0')
-		{
-			intTemp=0;
-		}
-		else if(t2 == '1')
-		{
-			intTemp=1;
-		}
-		else if(t2 == '2')
-		{
-			intTemp=2;
-		}
-		else if(t2 == '3')
-		{
-			intTemp=3;
-		}
-		else if(t2 == '4')
-		{
-			intTemp=4;
-		}
-		else if(t2 == '5')
-		{
-			intTemp=5;
-		}
-		else if(t2 == '6')
-		{
-			intTemp=6;
-		}
-		else if(t2 == '7')
-		{
-			intTemp=7;
-		}
-		else if(t2 == '8')
-		{
-			intTemp=8;
-		}
-		else if(t2 == '9')
-		{
-			intTemp=9;
-		}
-		else if(t2 == 'a' || t2 == 'A')
-		{
-			intTemp=10;
-		}
-		else if(t2 == 'b' || t2 == 'B')
-		{
-			intTemp=11;
-		}
-		else if(t2 == 'c' || t2 == 'C')
-		{
-			intTemp=12;
-		}
-		else if(t2 == 'd' || t2 == 'D')
-		{
-			intTemp=13;
-		}
-		else if(t2 == 'e' || t2 == 'E')
-		{
-			intTemp=14;
-		}
-		else if(t2 == 'f' || t2 =='F')
-		{
-			intTemp=15;
-		}
-
-		count = (t-source_len_begin)/2;
-
-		if((t % 2) == 0) //高位
-		{
-			OutBin[count] = intTemp<<4;
-		}
-		else if((t % 2) == 1) //低位
-		{
-			OutBin[count] += intTemp;
-		}
-	}
-
-	return count;
-}
-
-// byte数组转为 string  TODONOW 暂时放在这里处理
-const string toHexString(const byte * input, const int datasize)
-{
-	string output;
-	char ch[3];
-
-	for(int i = 0; i < datasize; ++i)
-	{
-		if( (input+i) != NULL)
-		{
-			sprintf_s(ch, 3, "%02x", input[i]);
-			output += ch;
-		}
-	}
-	return output;
-} 
-
 //房间value -> DB字符串
-string RoomRuleManager::GetRuleHexString(STR_SUB_CG_USER_SET_ROOM_RULE rule_setting)
+string RoomRuleManager::GetRuleHexString(BYTE vlaue[20])
 {
-	return toHexString((byte*)(&rule_setting), sizeof(rule_setting));
+	return toHexString2(vlaue, 20);
 }
-//DB字符串  -> 房间value
-STR_SUB_CG_USER_SET_ROOM_RULE RoomRuleManager::GetRuleSettingValue(string hex_string)
-{
-	//获取录像数据
-	TCHAR szData[2*LEN_MAX_RECORD_SIZE];
-	//m_TreasureDB->GetValue_String(TEXT("VideoData"), szData, CountArray(szData));
-
-	STR_SUB_CG_USER_SET_ROOM_RULE value;
-	StrToBin2(szData, (byte*)&value, 0, LEN_MAX_RECORD_SIZE*2-1);
-
-	return value;
-}
-

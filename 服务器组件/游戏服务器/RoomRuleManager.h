@@ -15,7 +15,6 @@ private:
 
 	static std::map<BYTE,  STR_CMD_GC_USER_GOLD_INFO> s_RoomInfo;     //金币场 房间数据  <房间等级, 房间信息> 
 	static rule_arry						m_rule_arry;			  //房卡场 房间配置选项
-	static string							m_roomRuleMsg;			  //房间规则描述符
 
 public:
 	//初始化
@@ -33,8 +32,6 @@ public:
 	static rule_arry GetRoomRuleSetting();
 	//获取房卡场 房间规则
 	static tagTableRule GetFKRoomRule(byte value[20], byte GameMode);
-	//获取房卡场 房间规则描述符
-	static string GetFKRoomRuleMsg();
 
 	//金币场
 public:
@@ -50,6 +47,12 @@ public:
 	//设置比赛场规则
 	static void SetMatchRule(tagTableRule& roomRule, MATCH_CONFIG *config, WORD wstage);
 
+	//工会
+public:
+	//获取工会 房间规则
+	static tagTableRule GetClubComRoomRule(DWORD dwClubID, DWORD dwRoomID);
+	//获取工会 俱乐部规则
+	static tagClubRoomRule GetClubRoomRule(DWORD dwClubID, DWORD dwRoomID, DWORD dwPassw);
 	//门票检测
 public:
 	//检测玩家 门票是否符合条件
@@ -58,9 +61,7 @@ public:
 	//房间规则 存储在DB
 public:
 	//房间value -> DB字符串
-	static string GetRuleHexString(STR_SUB_CG_USER_SET_ROOM_RULE rule_setting);
-	//DB字符串  -> 房间value
-	static STR_SUB_CG_USER_SET_ROOM_RULE GetRuleSettingValue(string hex_string);
+	static string GetRuleHexString(BYTE value[20]);
 
 	//辅助函数
 private:

@@ -33,6 +33,25 @@ struct tagTableRule
 	BYTE	bAllowStranger;			//允许陌生人加入
 };
 
+//工会房间规则
+struct tagClubRoomRule
+{
+    DWORD	dwClubID;				//工会
+	DWORD	dwRoomID;				//房间
+	DWORD   dwPasswd;               //密码
+
+	BYTE	byGoldOrFK;				//(2.金币 1.房卡)
+
+	BYTE	bDissolve;				//是否允许解散 0允许 1不允许
+
+	//金币房特用
+	DWORD	dwAmount;				//最低额度
+	DWORD	dwOwnerPercentage;		//群主提成
+    
+	BYTE	byMask;					//1 AA支付;  2大赢家支付
+	DWORD	dwDizhu;				//底注
+};
+
 //玩家基础信息 DB use player base info
 struct BASE_PLAYERINFO
 {

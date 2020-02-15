@@ -22,6 +22,8 @@ public:
 	static CTableFrame* CreateTable(tagTableRule* cfg, DWORD fangzhu);
 	//增 比赛场
 	static CMatchRoom* CreateMatchRoom(CMatchItem* Item, WORD stage);
+	//增 工会桌子
+	static CTableFrame* CreateClubTable(tagTableRule* cfg, tagClubRoomRule* clubCfg);
 	//删
 	static bool DeleteTable(CTableFrame* pTable);
 	//删

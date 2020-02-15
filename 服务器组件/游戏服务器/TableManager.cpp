@@ -5,6 +5,7 @@
 #include <chrono>
 #include "GameCtrl.h"
 #include "RoomRuleManager.h"
+#include "DataBaseEngineSink.h"
 
 using namespace std;
 
@@ -61,6 +62,34 @@ CMatchRoom* CTableManager::CreateMatchRoom(CMatchItem* Item, WORD stage)
 	s_TableArray.push_back(pMatch);
 
 	return pMatch;
+}
+
+//增 工会桌子
+CTableFrame* CTableManager::CreateClubTable(tagTableRule* cfg, tagClubRoomRule* clubCfg)
+{
+	//获取房间号
+	srand(static_cast<unsigned int >(time(NULL)));
+	DWORD dwTableID = GenerateTablePassword();
+	if(dwTableID == 0) return NULL;
+
+	//构建
+	CTableFrame *pTableFrame = new CTableFrame();
+	if (pTableFrame == NULL)
+		return false;
+
+	//设置房间
+	pTableFrame->SetGameStatus(GAME_STATUS_FREE);
+	pTableFrame->SetTableID(dwTableID);
+	pTableFrame->SetCommonRule(cfg);
+	pTableFrame->SetClubRoomRule(clubCfg);
+
+	//设置房间自动解散，默认一分钟 -- 这里是指不开始游戏 自动一分钟后解散
+	//pTableFrame->SetTableAutoDismiss();
+
+	//加入vector
+	s_TableArray.push_back(pTableFrame);
+
+	return pTableFrame;
 }
 
 //删

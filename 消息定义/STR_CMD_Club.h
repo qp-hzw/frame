@@ -215,14 +215,6 @@ struct STR_CMD_LC_CLUB_TABLE_LIST
 	STR_CMD_LC_CLUB_TABLE_USER_LIST player_info[6];     //玩家信息
 };
 
-
-//设置房间规则
-struct STR_SUB_CG_USER_SET_ROOM_RULE_P
-{
-	BYTE							byGameMode;				//游戏模式 0房卡约局; 1比赛模式; 2金币模式; 3金币约局; 4牌友圈
-	BYTE							byChoose[20];			//规则选择
-};
-
 //创建房间
 struct STR_SUB_CL_CLUB_ROOM_CREATE
 {
@@ -230,7 +222,7 @@ struct STR_SUB_CL_CLUB_ROOM_CREATE
 	STR_SUB_CL_CLUB_ROOM_SETTING setting;
 
     //房间规则
-    STR_SUB_CG_USER_SET_ROOM_RULE_P rule;
+	BYTE							byChoose[20];			//规则选择
 };
 
 //创建房间 返回
@@ -248,6 +240,14 @@ struct STR_SUB_CG_CLUB_TABLE_LIST_TABLE
 	DWORD	dwRoomID;								//room id
 };
 
+//创建桌子
+struct STR_SUB_CG_CLUB_CREATE_TABLE
+{
+	DWORD	dwClubID;								//club id 
+	DWORD	dwRoomID;								//room id
+	BYTE	byType;									//1.普通桌子 2.私密桌子
+	DWORD	dwPasswd;								//私密桌子 密码
+};
 
 //解散桌子请求
 struct STR_SUB_CL_CLUB_TABLE_DISSOLVE
