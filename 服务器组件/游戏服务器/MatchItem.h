@@ -72,10 +72,12 @@ public:
 	//比赛结束
 	bool On_Match_End(std::list<player_info> player);
 
-	//更新排名
+	//更新所有人排名
 	bool Update_Ranking(CMatchRoom *room);
-	//发送排名
-	void Send_Ranking();
+	//发送所有人排名
+	void Send_Ranking(CPlayer *player = NULL);
+	//发送自己排名
+	void Send_Self_Ranking(CPlayer *player);
 	//发送等待桌数
 	void Updata_WaitCount(CPlayer *player);
 
@@ -96,6 +98,9 @@ public:
 	bool IsRobotFull();
 	//比赛是否已开始
 	bool IsMatchStart() { return m_Start; }
+
+	//获取玩家排名
+	WORD GetRanking(CPlayer *player);
 
 	//群发数据
 	void SendDataAllPlayer(WORD wSubCmdID, VOID * pData, WORD wDataSize);

@@ -1,6 +1,5 @@
 #ifndef STR_CMD_GAME_SERVER_HEAD_FILE
 #define STR_CMD_GAME_SERVER_HEAD_FILE
-#include <winsock2.h>
 #include "../服务器组件/游戏服务器/TableFrameBase.h" //因为改结构体tagTableRule
 #pragma pack(1)
 
@@ -458,10 +457,7 @@ struct STR_SUB_CG_MATCH_APPLY
 //报名返回
 struct STR_CMD_GC_MATCH_APPLY
 {
-	WORD			wApplyCount;		//已报名人数
-	WORD			wRule;				//开赛规则 0-人满 1-定时
-	DWORD			dwLeaveTime;		//定时赛 开赛剩余时间
-	WORD			wLeaveCount;		//人满赛 还需报名人数
+	BYTE			byResult;			//0-成功  1-失败
 };
 
 //比赛取消
@@ -476,32 +472,60 @@ struct STR_SUB_CG_MATCH_UNAPPLY
 	WORD			wMatchID;		//比赛ID
 };
 
-//比赛阶段结果
-struct STR_CMD_GC_MATCH_RESULT
+//取消报名返回
+struct STR_CMD_GC_MATCH_UNAPPLY
 {
-	WORD			wResult;			// 0-淘汰 1-晋级
+	BYTE			byResult;			//0-成功  1-失败
+};
+
+//比赛场请求返回
+struct STR_CMD_GC_MATCH_QUERY_PLAYER
+{
+	WORD			wMatchID;		//ID
+	DWORD			dwApplyCount;	//报名人数
+	DWORD			dwTimer;		//剩余时间
+};
+
+//比赛阶段结果 晋级
+struct STR_CMD_GC_MATCH_RESULT_JINJI
+{
 	WORD			wRanking;			//排名
 	WORD			wWaitCount;			//等待桌数
+	TCHAR			szStageName[16];		//阶段名
+};
+
+//比赛阶段结果 淘汰
+struct STR_CMD_GC_MATCH_RESULT_TAOTAI
+{
+	WORD			wRanking;			//排名
+	TCHAR			szStageName[16];		//阶段名
+};
+
+//更新自己排名
+struct STR_CMD_CG_MATCH_RANKING_MY
+{
+	TCHAR			szStageName[16];	//阶段名
+	DWORD			dwRanking;			//玩家排名
+	DWORD			dwAllUserCount;		//玩家数
+	DWORD			dwCurCount;			//小局数
+	DWORD			dwAllCount;			//总局数
 };
 
 //更新排名
 struct STR_CMD_GC_MATCH_RANKING
 {
-	struct player_info
-	{
-		TCHAR		szName[LEN_NICKNAME];		//玩家昵称
-		WORD		wRanking;			//排名
-		SCORE		llScore;			//总得分
-	};
-
-	player_info		player[80];			//
-	WORD			wPlayerCount;		//玩家人数
+	TCHAR			szName[LEN_NICKNAME];		//昵称
+	WORD			wRanking;					//排名
+	SCORE			llScore;					//总分
 };
 
 //决赛
 struct STR_CMD_GC_MATCH_JUESAI_RECODE
 {
-
+	TCHAR			szResult[16];				//名次 冠亚季
+	WORD			wRanking;					//排名
+	DWORD			dwRewordType;				//奖励类型  0-金币 1-钻石 2-房卡 3-其他
+	DWORD			dwReword;					//奖励
 };
 
 //等待桌数
@@ -669,7 +693,5 @@ struct STR_CMD_GC_EFFECT_BRODCAST
 };
 
 #pragma endregion
-
-#pragma pack()
 
 #endif

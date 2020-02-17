@@ -30,7 +30,7 @@
 
 //玩家自动准备
 #define IDI_PLAYER_AUTO_READY		(TIME_TABLE_SINK_RANGE+8)			//玩家自动准备
-#define TIME_PLAYER_AUTO_READY		4*1000L								//四秒钟
+#define TIME_PLAYER_AUTO_READY		3*1000L								//四秒钟
 
 //开始下一阶段比赛
 #define IDI_MATCH_NEXT_STAGE_START	(TIME_TABLE_SINK_RANGE+9)			//开始比赛下一阶段
@@ -154,7 +154,9 @@ void CTableFrame::KillVoteDismissRoom()
 //设置玩家自动准备定时器
 void CTableFrame::SetPlayerAutoReady()
 {
-	SetGameTimer(IDI_PLAYER_AUTO_READY, TIME_PLAYER_AUTO_READY, 1, NULL);
+	//比赛场校验
+	if (GetTableMode() == TABLE_MODE_MATCH)
+		SetGameTimer(IDI_PLAYER_AUTO_READY, TIME_PLAYER_AUTO_READY, 1, NULL);
 }
 //设置开始下一阶段定时器
 void CTableFrame::SetStageTimer()
@@ -564,20 +566,20 @@ int CTableFrame::PlayerLeaveTable(CPlayer* pPlayer)
 	int ret = CanPlayerLeaveTable(pPlayer);
 	if(ret!=0) return ret;
 
-	//3. Player
-	pPlayer->SetUserStatus(US_FREE, INVALID_TABLE, INVALID_CHAIR);
-
 	//发送给客户端
 	CMD_GF_GameStatus GameStatus;
 	ZeroMemory(&GameStatus, sizeof(GameStatus));
 
 	//赋值
-	GameStatus.cbUserAction = pPlayer->GetUserStatus();
+	GameStatus.cbUserAction = US_LEAVE;
 	tagUserInfo *pUserInfo = pPlayer->GetUserInfo();
 	CopyMemory(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
 
 	//广播发送
 	SendTableData(INVALID_CHAIR, CMD_GR_USER_STATUS, &GameStatus, sizeof(GameStatus), MDM_G_FRAME);
+
+	//3. Player
+	pPlayer->SetUserStatus(US_FREE, INVALID_TABLE, INVALID_CHAIR);
 
 	//断开用户 socket (金币场结束不断)
 	if ( m_tagTableRule.GameMode != TABLE_MODE_GOLD && m_tagTableRule.GameMode != TABLE_MODE_MATCH) 
@@ -1040,7 +1042,7 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 			tagUserInfo *pUserInfo = pIServerUserItem->GetUserInfo();
 			memset(&GameStatus1.UserInfo, 0, sizeof(tagUserInfo));
 			memcpy(&GameStatus1.UserInfo, pUserInfo, sizeof(tagUserInfo));
-			CLog::Log(log_debug, "wChairID: %d", GameStatus1.UserInfo.wChairID);
+			CLog::Log(log_debug, "UserID: %d, wChairID: %d", GameStatus1.UserInfo.dwUserID, GameStatus1.UserInfo.wChairID);
 
 			g_GameCtrl->SendData(pIServerUserItem, MDM_G_FRAME, CMD_GR_USER_STATUS, &GameStatus1, sizeof(GameStatus1));
 
@@ -1060,6 +1062,8 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 					tagUserInfo *pUserInfo = (*it)->GetUserInfo();
 					memset(&GameStatus.UserInfo, 0, sizeof(tagUserInfo));
 					memcpy(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
+
+					CLog::Log(log_debug, "UserID: %d, wChairID: %d", GameStatus.UserInfo.dwUserID, GameStatus.UserInfo.wChairID);
 
 					g_GameCtrl->SendData(pIServerUserItem, MDM_G_FRAME, CMD_GR_USER_STATUS, &GameStatus, sizeof(GameStatus));
 				}

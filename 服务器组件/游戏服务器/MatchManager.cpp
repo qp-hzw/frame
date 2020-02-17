@@ -65,7 +65,7 @@ bool CMatchManager::ReadMatchConfig(DWORD kindid)
 
 	//配置比赛场
 	MatchConfig();
-	CLog::Log(log_debug, "sizeof: %d", sizeof(MATCH_CONFIG));
+
 	return true;
 }
 
@@ -82,6 +82,7 @@ bool CMatchManager::MatchConfig()
 			{
 				//开始下一场
 				config->dwStartTime = time(0) + 60000*config->dwTimePeriod;	
+				//config->dwStartTime = time(0) + 10000;	
 			}
 		}
 

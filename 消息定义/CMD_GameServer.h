@@ -105,12 +105,20 @@
 #define CMD_GC_MATCH_START			4									//比赛开始
 #define CMD_GC_MATCH_CANCEL			5									//比赛取消
 
-#define CMD_GC_MATCH_RESULT			6									//比赛阶段结果 玩家淘汰/晋级
+#define SUB_CG_MATCH_QUERY_PLAYER   6									//请求信息 人数时间
+#define CMD_GC_MATCH_QUERY_PLAYER   106									//请求信息 人数时间  返回
 
-#define CMD_GC_MATCH_RANKING		7									//更新排名
-#define CMD_GC_MATCH_JUESAI_RECODE	8									//决赛战绩
+#define SUB_CG_MATCH_RANKING		7									//更新排名  所有人
+#define CMD_GC_MATCH_RANKING		107									//更新排名  所有人  返回
 
-#define CMD_GC_MATCH_WAIT_COUNT		9									//等待桌数消息
+#define SUB_CG_MATCH_RANKING_MY		8									//更新排名  自己
+#define CMD_GC_MATCH_RANKING_MY		108									//更新排名  自己  返回
+
+#define CMD_GC_MATCH_RESULT_JINJI	9									//比赛阶段结果 玩家晋级
+#define CMD_GC_MATCH_RESULT_TAOTAI	10									//比赛阶段结果 玩家淘汰
+
+#define CMD_GC_MATCH_JUESAI_RECODE	11									//决赛
+#define CMD_GC_MATCH_WAIT_COUNT		12									//等待桌数消息
 
 #pragma endregion
 
@@ -176,7 +184,5 @@
 #define MDM_GF_GAME					200									//游戏命令
 
 #pragma endregion
-
-#pragma pack()
 
 #endif

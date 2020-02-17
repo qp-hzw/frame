@@ -665,6 +665,4 @@ struct STR_DBR_GR_LOAD_OFFLINE
 	DWORD		dwGameID;		//”Œœ∑ID
 };
 
-#pragma pack()
-
 #endif

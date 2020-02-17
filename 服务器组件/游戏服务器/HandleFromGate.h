@@ -154,6 +154,12 @@ private:
 	static bool On_SUB_CG_MATCH_APPLY(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//玩家取消报名
 	static bool On_SUB_CG_MATCH_UNAPPLY(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+	//玩家请求信息
+	static bool On_SUB_CG_MATCH_QUERY_PLAYER(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+	//更新所有人排名
+	static bool On_SUB_CG_MATCH_RANKING(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+	//更新自己排名
+	static bool On_SUB_CG_MATCH_RANKING_MY(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 
 #pragma endregion
 

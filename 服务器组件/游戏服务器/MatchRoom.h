@@ -36,6 +36,9 @@ public:
 	//获取房间标识
 	WORD get_index() { return m_index; }
 
+	//获取比赛场
+	CMatchItem * GetMatchItem() { return m_Match_Item; }
+
 	//玩家动作 && 房间流程
 public:
 	//玩家坐下	

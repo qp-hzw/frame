@@ -197,6 +197,4 @@ struct STR_CMD_LC_OTHER_OPERATE_RESULT
 
 #pragma endregion
 
-#pragma pack()
-
 #endif

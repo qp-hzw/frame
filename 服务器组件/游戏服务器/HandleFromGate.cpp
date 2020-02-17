@@ -209,6 +209,18 @@ bool CHandleFromGate::OnTCPNetworkMainMatch(WORD wSubCmdID, VOID * pData, WORD w
 		{
 			return On_SUB_CG_MATCH_UNAPPLY(pData, wDataSize, dwSocketID);
 		}
+	case SUB_CG_MATCH_QUERY_PLAYER:		//玩家请求信息
+		{
+			return On_SUB_CG_MATCH_QUERY_PLAYER(pData, wDataSize, dwSocketID);
+		}
+	case SUB_CG_MATCH_RANKING:	//更新所有人排名
+		{
+			return On_SUB_CG_MATCH_RANKING(pData, wDataSize, dwSocketID);
+		}
+	case SUB_CG_MATCH_RANKING_MY:	//更新自己排名
+		{
+			return On_SUB_CG_MATCH_RANKING_MY(pData, wDataSize, dwSocketID);
+		}
 	}
 }
 
@@ -1556,6 +1568,8 @@ bool CHandleFromGate::On_SUB_CG_MATCH_INFO(VOID * pData, WORD wDataSize, DWORD d
 	}
 	if (wPacketSize>0) g_GameCtrl->SendData(dwSocketID, MDM_GR_MATCH, CMD_GC_MATCH_INFO, cbBuffer, wPacketSize);
 
+	On_SUB_CG_MATCH_QUERY_PLAYER(NULL, 0, dwSocketID);
+
 	return true;
 }
 
@@ -1574,29 +1588,28 @@ bool CHandleFromGate::On_SUB_CG_MATCH_APPLY(VOID * pData, WORD wDataSize, DWORD 
 	//获取数据
 	STR_SUB_CG_MATCH_APPLY *apply = (STR_SUB_CG_MATCH_APPLY *)pData;
 
+	//构造数据
+	STR_CMD_GC_MATCH_APPLY cmdApply;
+	ZeroMemory(&cmdApply, sizeof(STR_CMD_GC_MATCH_APPLY));
+
+	cmdApply.byResult = 0;
+
 	//获取比赛场
 	CMatchItem *match = CMatchManager::Find_Match_ByItemID(apply->wMatchID);
 	if (match->IsMatchStart())
 	{
-		g_GameCtrl->SendDataMsg(player->GetSocketID(), "比赛已经开始了！");
+		cmdApply.byResult = 1;
+		g_GameCtrl->SendData(player, MDM_GR_MATCH, CMD_GC_MATCH_APPLY, &cmdApply, sizeof(STR_CMD_GC_MATCH_APPLY));
 		return false;
 	}
 
 	//玩家报名
 	if (!match->On_User_Apply(player))
 	{
-		g_GameCtrl->SendDataMsg(player->GetSocketID(), "报名失败！");
+		cmdApply.byResult = 1;
+		g_GameCtrl->SendData(player, MDM_GR_MATCH, CMD_GC_MATCH_APPLY, &cmdApply, sizeof(STR_CMD_GC_MATCH_APPLY));
 		return false;
 	}
-
-	//构造数据
-	STR_CMD_GC_MATCH_APPLY cmdApply;
-	ZeroMemory(&cmdApply, sizeof(STR_CMD_GC_MATCH_APPLY));
-
-	cmdApply.wRule = match->GetConfig().wStartType;
-	cmdApply.wApplyCount = match->GetApplyCount();
-	cmdApply.wLeaveCount = match->GetConfig().dwLowestPlayer - match->GetApplyCount();
-	cmdApply.dwLeaveTime = match->GetConfig().dwStartTime - time(0);
 
 	//发送数据
 	g_GameCtrl->SendData(player, MDM_GR_MATCH, CMD_GC_MATCH_APPLY, &cmdApply, sizeof(STR_CMD_GC_MATCH_APPLY));
@@ -1619,23 +1632,122 @@ bool CHandleFromGate::On_SUB_CG_MATCH_UNAPPLY(VOID * pData, WORD wDataSize, DWOR
 	//获取数据
 	STR_SUB_CG_MATCH_UNAPPLY *apply = (STR_SUB_CG_MATCH_UNAPPLY *)pData;
 
+	//构造数据
+	STR_CMD_GC_MATCH_UNAPPLY cmdApply;
+	ZeroMemory(&cmdApply, sizeof(STR_CMD_GC_MATCH_UNAPPLY));
+
+	cmdApply.byResult = 0;
+
 	//获取比赛场
 	CMatchItem *match = CMatchManager::Find_Match_ByItemID(apply->wMatchID);
 	if (match->IsMatchStart())
 	{
-		g_GameCtrl->SendDataMsg(player->GetSocketID(), "比赛已经开始了！");
+		cmdApply.byResult = 1;
+		g_GameCtrl->SendData(player, MDM_GR_MATCH, CMD_GC_MATCH_UNAPPLY, &cmdApply, sizeof(STR_CMD_GC_MATCH_UNAPPLY));
 		return false;
 	}
 
 	//玩家报名
 	if (!match->On_User_UnApply(player))
 	{
-		g_GameCtrl->SendDataMsg(player->GetSocketID(), "取消报名失败！");
+		cmdApply.byResult = 1;
+		g_GameCtrl->SendData(player, MDM_GR_MATCH, CMD_GC_MATCH_UNAPPLY, &cmdApply, sizeof(STR_CMD_GC_MATCH_UNAPPLY));
 		return false;
 	}
 
 	//发送数据
-	g_GameCtrl->SendData(player, MDM_GR_MATCH, CMD_GC_MATCH_UNAPPLY, NULL, 0);
+	g_GameCtrl->SendData(player, MDM_GR_MATCH, CMD_GC_MATCH_UNAPPLY, &cmdApply, sizeof(STR_CMD_GC_MATCH_UNAPPLY));
+
+	return true;
+}
+
+//玩家请求信息
+bool CHandleFromGate::On_SUB_CG_MATCH_QUERY_PLAYER(VOID * pData, WORD wDataSize, DWORD dwSocketID)
+{
+	//玩家校验
+	CPlayer *player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	if (player == NULL)
+		return false;
+
+	//获取比赛项
+	std::list<CMatchItem *> array = CMatchManager::Find_Match_All();
+
+	//构造数据
+	WORD wPacketSize=0;
+	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
+	STR_CMD_GC_MATCH_QUERY_PLAYER * pinfo = NULL;
+	for (auto match : array)
+	{
+		CLog::Log(log_debug, "match ID: %d", match->GetMatchID());
+		if (match->IsMatchStart())	continue;
+
+		//发送信息
+		if ((wPacketSize+sizeof(STR_CMD_GC_MATCH_QUERY_PLAYER))>sizeof(cbBuffer))
+		{
+			g_GameCtrl->SendData(dwSocketID, MDM_GR_MATCH, CMD_GC_MATCH_QUERY_PLAYER, cbBuffer, wPacketSize);
+			wPacketSize=0;
+		}
+		
+		//读取信息
+		pinfo=(STR_CMD_GC_MATCH_QUERY_PLAYER *)(cbBuffer+wPacketSize);
+		pinfo->wMatchID = match->GetMatchID();
+		pinfo->dwApplyCount = match->GetApplyCount();
+		pinfo->dwTimer = match->GetConfig().dwStartTime - time(0);
+
+		if (match->GetConfig().wStartType == MATCH_START_TYPE_COUNT)
+			pinfo->dwTimer = 0;
+		CLog::Log(log_debug, "leave time: %d", pinfo->dwTimer);
+		CLog::Log(log_debug, "apply count: %d", pinfo->dwApplyCount);
+
+		wPacketSize+=sizeof(STR_CMD_GC_MATCH_QUERY_PLAYER);
+	}
+	if (wPacketSize>0) g_GameCtrl->SendData(dwSocketID, MDM_GR_MATCH, CMD_GC_MATCH_QUERY_PLAYER, cbBuffer, wPacketSize);
+}
+
+//更新所有人排名
+bool CHandleFromGate::On_SUB_CG_MATCH_RANKING(VOID * pData, WORD wDataSize, DWORD dwSocketID)
+{
+	//玩家校验
+	CPlayer *player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	if (player == NULL)
+		return false;
+
+	//比赛场房间校验
+	CMatchRoom *room = (CMatchRoom *)CTableManager::FindTableByTableID(player->GetTableID());
+	if (room == NULL)
+		return false;
+
+	//比赛校验
+	CMatchItem *match = room->GetMatchItem();
+	if (match == NULL)
+		return false;
+
+	//发送排名
+	match->Send_Ranking(player);
+
+	return true;
+}
+
+//更新自己排名
+bool CHandleFromGate::On_SUB_CG_MATCH_RANKING_MY(VOID * pData, WORD wDataSize, DWORD dwSocketID)
+{
+	//玩家校验
+	CPlayer *player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	if (player == NULL)
+		return false;
+
+	//比赛场房间校验
+	CMatchRoom *room = (CMatchRoom *)CTableManager::FindTableByTableID(player->GetTableID());
+	if (room == NULL)
+		return false;
+
+	//比赛校验
+	CMatchItem *match = room->GetMatchItem();
+	if (match == NULL)
+		return false;
+
+	//发送排名
+	match->Send_Self_Ranking(player);
 
 	return true;
 }
