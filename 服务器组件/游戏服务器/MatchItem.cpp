@@ -55,12 +55,13 @@ bool CMatchItem::On_User_Apply(CPlayer *player)
 		return false;
 
 	CLog::Log(log_debug, "报名玩家ID: %d", player->GetUserID());
-	m_Apply_Player.push_back(player);
 
 	//玩家加入等待房间
 	int ret = m_wait_room->PlayerEnterTable(player);
 	if (ret != 0)
 		return false;
+
+	m_Apply_Player.push_back(player);
 
 	//人满开赛
 	if ((m_config.wStartType == MATCH_START_TYPE_COUNT) &&
@@ -197,7 +198,6 @@ bool CMatchItem::On_Match_Start()
 	{
 		player_info item;
 		item.user = user;
-		swprintf(item.szname, LEN_NICKNAME, L"%S", user->GetNickName());
 		m_Cur_Ranking.push_back(item);
 	}
 
@@ -402,6 +402,8 @@ bool CMatchItem::On_Player_TaoTai(std::list<player_info> TaoTai_player)
 		}
 	}
 
+	CLog::Log(log_debug, "apply size: %d", m_Apply_Player.size());
+
 	//从排行表里删除玩家
 	for (auto taotai : TaoTai_player)
 	{
@@ -414,7 +416,7 @@ bool CMatchItem::On_Player_TaoTai(std::list<player_info> TaoTai_player)
 			}
 		}
 	}
-	
+	CLog::Log(log_debug, "ranking size: %d", m_Cur_Ranking.size());
 
 	return true;
 }
@@ -494,9 +496,8 @@ bool CMatchItem::Update_Ranking(CMatchRoom *room)
 			player_info *info = &(*ite);
 			if (info->user == player_list[i])
 			{
-				info->score = TotalScore[i];
+				info->score += TotalScore[i];
 				info->room_id = room->GetTableID();
-				info->seat = room->GetPlayerChair(player_list[i]);
 				break;
 			}
 		}
@@ -522,9 +523,6 @@ bool CMatchItem::Update_Ranking(CMatchRoom *room)
 		return item_1.score > item_2.score;
 	});
 
-	//向Client发送玩家排名
-	Send_Ranking();
-
 	return true;
 }
 
@@ -549,7 +547,7 @@ void CMatchItem::Send_Ranking(CPlayer *player)
 		rank = (STR_CMD_GC_MATCH_RANKING *)(byBuffer + wPacketSize);
 		rank->llScore = ranking.score;
 		rank->wRanking = ++dwindex;
-		memcpy(rank->szName, ranking.szname, sizeof(TCHAR)*LEN_NICKNAME);
+		memcpy(rank->szName, ranking.user->GetNickName(), sizeof(TCHAR)*LEN_NICKNAME);
 
 		wPacketSize += sizeof(STR_CMD_GC_MATCH_RANKING);
 	}
@@ -578,6 +576,8 @@ void CMatchItem::Send_Self_Ranking(CPlayer *player)
 	rank.dwAllCount = room->GetCustomRule()->GameCount;
 	rank.dwRanking = GetRanking(player);
 	memcpy(rank.szStageName, m_config.stage[m_Stage].szName, sizeof(TCHAR)*16);
+
+	CLog::Log(log_debug, "all user count: %d", rank.dwAllUserCount);
 
 	g_GameCtrl->SendData(player, MDM_GR_MATCH, CMD_GC_MATCH_RANKING_MY, &rank, sizeof(STR_CMD_CG_MATCH_RANKING_MY));
 }

@@ -12,17 +12,13 @@ struct player_info
 {
     CPlayer* user;
     int score;
-    int room_id;
-    int seat;
-	TCHAR szname[LEN_NICKNAME];
+	int room_id;
 
     player_info()
     {
         user = NULL;
         score = 0;
-        room_id = 0;
-        seat = -1;
-		ZeroMemory(&szname, sizeof(LEN_NICKNAME));
+		room_id = 0;
     }
 };
 
