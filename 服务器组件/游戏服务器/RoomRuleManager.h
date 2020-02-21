@@ -65,8 +65,6 @@ public:
 
 	//辅助函数
 private:
-	//获取字段 对应的描述
-	static string GetDescribe(string key_name);
 	//根据字段名字, 为结构体对应字段赋值
 	static void SetRoomRule(tagTableRule &roomrule, string key, byte value);
 

@@ -9,102 +9,6 @@ rule_arry						RoomRuleManager::m_rule_arry;
 ISubRoomRuleManager*            RoomRuleManager::m_SubRoomRuleManager = NULL;
 std::map<BYTE,  STR_CMD_GC_USER_GOLD_INFO> RoomRuleManager::s_RoomInfo; 
 
-// string 转为byte数组  TODONOW 暂时放在这里处理
-void StrToBin2(TCHAR* inWord, BYTE* OutBin, int source_len_begin, int source_len_end)
-{
-	TCHAR t2;
-	int count = 0;
-
-	for(int t = source_len_begin ;t < source_len_end; t ++)
-	{   
-		t2 = inWord[t];
-
-		BYTE intTemp = 0;
-		if(t2 == '0')
-		{
-			intTemp=0;
-		}
-		else if(t2 == '1')
-		{
-			intTemp=1;
-		}
-		else if(t2 == '2')
-		{
-			intTemp=2;
-		}
-		else if(t2 == '3')
-		{
-			intTemp=3;
-		}
-		else if(t2 == '4')
-		{
-			intTemp=4;
-		}
-		else if(t2 == '5')
-		{
-			intTemp=5;
-		}
-		else if(t2 == '6')
-		{
-			intTemp=6;
-		}
-		else if(t2 == '7')
-		{
-			intTemp=7;
-		}
-		else if(t2 == '8')
-		{
-			intTemp=8;
-		}
-		else if(t2 == '9')
-		{
-			intTemp=9;
-		}
-		else if(t2 == 'a' || t2 == 'A')
-		{
-			intTemp=10;
-		}
-		else if(t2 == 'b' || t2 == 'B')
-		{
-			intTemp=11;
-		}
-		else if(t2 == 'c' || t2 == 'C')
-		{
-			intTemp=12;
-		}
-		else if(t2 == 'd' || t2 == 'D')
-		{
-			intTemp=13;
-		}
-		else if(t2 == 'e' || t2 == 'E')
-		{
-			intTemp=14;
-		}
-		else if(t2 == 'f' || t2 =='F')
-		{
-			intTemp=15;
-		}
-
-		OutBin[t] = intTemp;
-	}
-}
-// byte数组转为 string  TODONOW 暂时放在这里处理
-const string toHexString2(const byte * input, const int datasize)
-{
-	string output;
-	char ch[3];
-
-	for(int i = 0; i < datasize; ++i)
-	{
-		if( (input+i) != NULL)
-		{
-			sprintf_s(ch, 3, "%01x", input[i]);
-			output += ch;
-		}
-	}
-	return output;
-} 
-
 //初始化
 void RoomRuleManager::Init(int kindid, string dll_name)
 {
@@ -132,7 +36,8 @@ void RoomRuleManager::InitFK(int kindid)
 		string strTemp;
 		iRet = CWHCfg::Instance()->GetItemValue(psz, "head", strTemp);
 		if(iRet != 0) continue;
-		swprintf(m_rule_arry.ItemArry[i].szHeadName, 15, L"%S", strTemp.c_str());
+		std::wstring wStr = CWConvert::s2ws(strTemp);
+		memcpy(m_rule_arry.ItemArry[i].szHeadName, wStr.c_str(), sizeof(TCHAR)*15);
 
 		for(int j=0; j<4; j++)
 		{
@@ -140,7 +45,8 @@ void RoomRuleManager::InitFK(int kindid)
 			sprintf(value, "value_%d", j);
 			iRet = CWHCfg::Instance()->GetItemValue(psz, value, strTemp);
 			if(iRet != 0) continue;
-			swprintf(m_rule_arry.ItemArry[i].szItemValue[j], 10, L"%S", strTemp.c_str());
+			std::wstring wStr = CWConvert::s2ws(strTemp);
+			memcpy(m_rule_arry.ItemArry[i].szItemValue[j], wStr.c_str(), sizeof(TCHAR)*10);
 		}
 	}
 
@@ -182,43 +88,11 @@ void RoomRuleManager::InitGold(int kindid)
 	CWHCfg::Instance()->CloseFile();
 }
 
-//TCHAR 2 string
-std::string TCHAR2STRING(TCHAR *STR)
-{	
-	int iLen = WideCharToMultiByte(CP_ACP, 0,STR, -1, NULL, 0, NULL, NULL);
-	char* chRtn =new char[iLen*sizeof(char)];
-	WideCharToMultiByte(CP_ACP, 0, STR, -1, chRtn, iLen, NULL, NULL);
-	std::string str(chRtn);
-	return str;
-}
-//char* 2 TCHAR
-TCHAR *chrTOwch(const char *buffer)
-{
-        size_t len = strlen(buffer);
-        size_t wlen = MultiByteToWideChar(CP_ACP, 0, (const char*)buffer, int(len), NULL, 0);
-        TCHAR *wBuf = new TCHAR[wlen + 1];
-        MultiByteToWideChar(CP_ACP, 0, (const char*)buffer, int(len), wBuf, int(wlen));
-        return wBuf;
-}
 
 //获取房卡场 房间配置选项
 rule_arry RoomRuleManager::GetRoomRuleSetting()
 {
-	rule_arry client_rule_item;
-	memcpy(&client_rule_item, &m_rule_arry, sizeof(rule_arry));
-	for(int i =0; i < 20; i ++)
-	{
-		TCHAR szTemp[15];
-		memcpy(szTemp, m_rule_arry.ItemArry[i].szHeadName, sizeof(TCHAR) *15);
-		string clientHead = GetDescribe(TCHAR2STRING(szTemp));
-		if(clientHead.empty()) continue;
-
-		TCHAR szTchar[15] ; 
-		memcpy(szTchar, chrTOwch(clientHead.c_str()), sizeof(TCHAR)*15);
-		memcpy(client_rule_item.ItemArry[i].szHeadName, szTchar, sizeof(TCHAR)*15);
-	}
-
-	return client_rule_item;
+	return m_rule_arry;
 }
 //获取房卡场 房间规则
 tagTableRule RoomRuleManager::GetFKRoomRule(byte value[20], byte GameMode)
@@ -232,9 +106,8 @@ tagTableRule RoomRuleManager::GetFKRoomRule(byte value[20], byte GameMode)
 
 	for(int i=0; i<20; i++)
 	{
-		TCHAR temp[15];
-		memcpy(temp, m_rule_arry.ItemArry[i].szHeadName, 15*sizeof(TCHAR));
-		string key_name = TCHAR2STRING(temp);
+		std::wstring wStr(m_rule_arry.ItemArry[i].szHeadName);
+		string key_name = CWConvert::ws2s(wStr);
 		if(key_name.empty())
 		{
 			continue;
@@ -293,7 +166,7 @@ tagTableRule RoomRuleManager::GetClubComRoomRule(DWORD dwClubID, DWORD dwRoomID)
 		TCHAR ch[20];
 		g_TreasureDB->GetValue_String(TEXT("RealRoomRule"), ch, 20);
 
-		StrToBin2(ch, value, 0, 19);
+		CWConvert::StrToBin2(ch, value, 0, 19);
 	}
 
 	//获取具体房间规则
@@ -406,66 +279,30 @@ int RoomRuleManager::CheckTickt(tagTableRule* rule, CPlayer* player)
 	return 0;
 }
 
-//获取字段 对应的描述
-string RoomRuleManager::GetDescribe(string key_name)
-{
-	string describe ;
-	if(key_name == "GameCount")
-	{
-		describe = "局数";
-	}
-	else if(key_name == "PlayerCount")
-	{
-		describe = "人数";
-	}
-	else if(key_name == "cbPayType")
-	{
-		describe = "支付模式";
-	}
-	else if(key_name == "bRefuseSameIP")
-	{
-		describe = "允许同IP";
-	}
-	else if(key_name == "bDistanceIn300")
-	{
-		describe = "允许300米";
-	}
-	else if(key_name == "bAllowStranger")
-	{
-		describe = "允许陌生人加入";
-	}
-	else 
-	{
-		std::cout << "key_name: " << key_name << std::endl;
-		return m_SubRoomRuleManager->GetDescribe(key_name); 
-	}
-
-	return describe;
-}
 //根据字段名字, 为结构体对应字段赋值
 void RoomRuleManager::SetRoomRule(tagTableRule &roomrule, string key_name, byte value)
 {
-	if(key_name == "GameCount")
+	if(key_name == "游戏局数")
 	{
 		roomrule.GameCount = (BYTE)atoi(GetRoomValByKey(key_name, value).c_str());
 	}
-	else if(key_name == "PlayerCount")
+	else if(key_name == "玩家人数")
 	{
 		roomrule.PlayerCount = atoi(GetRoomValByKey(key_name, value).c_str());
 	}
-	else if(key_name == "cbPayType")
+	else if(key_name == "支付方式")
 	{
 		roomrule.cbPayType = atoi(GetRoomValByKey(key_name, value).c_str());
 	}
-	else if(key_name == "bRefuseSameIP")
+	else if(key_name == "同IP检测")
 	{
 		roomrule.bRefuseSameIP = atoi(GetRoomValByKey(key_name, value).c_str());
 	}
-	else if(key_name == "bDistanceIn300")
+	else if(key_name == "距离检测")
 	{
 		roomrule.bDistanceIn300 = atoi(GetRoomValByKey(key_name, value).c_str());
 	}
-	else if(key_name == "bAllowStranger")
+	else if(key_name == "允许陌生人加入")
 	{
 		roomrule.bAllowStranger = atoi(GetRoomValByKey(key_name, value).c_str());
 	}
@@ -479,14 +316,12 @@ string RoomRuleManager::GetRoomValByKey(string key, byte value)
 {
 	for(int i=0; i<20; i++)
 	{
-		TCHAR szTemp[15];
-		memcpy(szTemp, m_rule_arry.ItemArry[i].szHeadName, sizeof(TCHAR) * 15);
-		string tempkey = TCHAR2STRING(szTemp);
+		std::wstring wStr(m_rule_arry.ItemArry[i].szHeadName);
+		string tempkey = CWConvert::ws2s(wStr);
 		if( tempkey == key)
 		{
-			TCHAR szVal[10];
-			memcpy(szVal, m_rule_arry.ItemArry[i].szItemValue[value], sizeof(TCHAR) * 10);
-			string val = TCHAR2STRING(szVal);
+			std::wstring wVal(m_rule_arry.ItemArry[i].szItemValue[value]);
+			string val = CWConvert::ws2s(wVal);
 			return val;
 		}
 	}
@@ -498,16 +333,14 @@ int RoomRuleManager::GetCountType(byte value)
 {
 	for(int i=0; i<20; i++)
 	{
-		TCHAR szTemp[15];
-		memcpy(szTemp, m_rule_arry.ItemArry[i].szHeadName, sizeof(TCHAR) * 15);
-		string tempkey = TCHAR2STRING(szTemp);
-		if( tempkey == "GameCount")
+		std::wstring wStr(m_rule_arry.ItemArry[i].szHeadName);
+		string tempkey = CWConvert::ws2s(wStr);		
+		if( tempkey == "游戏局数")
 		{
 			for(int j=0; j<4; j++)
 			{
-				TCHAR szVal[10];
-				memcpy(szVal, m_rule_arry.ItemArry[i].szItemValue[j], sizeof(TCHAR) * 10);
-				string val = TCHAR2STRING(szVal);
+				std::wstring wVal(m_rule_arry.ItemArry[i].szItemValue[j]);
+				string val = CWConvert::ws2s(wVal);
 				int iVal = atoi(val.c_str());
 				if(iVal == value)
 				{
@@ -523,5 +356,5 @@ int RoomRuleManager::GetCountType(byte value)
 //房间value -> DB字符串
 string RoomRuleManager::GetRuleHexString(BYTE vlaue[20])
 {
-	return toHexString2(vlaue, 20);
+	return  CWConvert::toHexString2(vlaue, 20);
 }

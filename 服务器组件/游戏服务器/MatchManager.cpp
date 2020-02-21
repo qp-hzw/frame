@@ -34,12 +34,14 @@ bool CMatchManager::ReadMatchConfig(DWORD kindid)
 		//±êÌâ
 		string strTemp;
 		CWHCfg::Instance()->GetItemValue("MATCH", "title", strTemp);
-		swprintf(config.szTitle, 32, L"%S", strTemp.c_str());
+		std::wstring wStr = CWConvert::s2ws(strTemp);
+		memcpy(config.szTitle, wStr.c_str(), sizeof(TCHAR) *32);
 
 		//ÃèÊö
 		strTemp = "";
 		CWHCfg::Instance()->GetItemValue("MATCH", "describe", strTemp);
-		swprintf(config.szDescribe, 128, L"%S", strTemp.c_str());
+		std::wstring wDescribe = CWConvert::s2ws(strTemp);
+		memcpy(config.szDescribe, wDescribe.c_str(), sizeof(TCHAR) *128);
 
 		for(int j=0; j<MAX_MATCH_STAGE; j++)
 		{
@@ -53,7 +55,8 @@ bool CMatchManager::ReadMatchConfig(DWORD kindid)
 
 			string tmp;
 			CWHCfg::Instance()->GetItemValue(psz, "name", tmp);
-			swprintf(config.stage[j].szName, 16, L"%S", tmp.c_str());
+			std::wstring wName = CWConvert::s2ws(strTemp);
+			memcpy(config.stage[j].szName, wName.c_str(), sizeof(TCHAR) *16);
 
 			config.wStageSize++;
 		}
