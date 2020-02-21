@@ -92,6 +92,8 @@ public:
 	CTableFrame();
 	//析构函数
 	virtual ~CTableFrame();
+	//拷贝构造
+	CTableFrame(const CTableFrame& table);
 
 	//管理接口
 public:
@@ -189,9 +191,9 @@ public:
 
 #pragma region 游戏流程函数
 	//自身调用，与子游戏无关
-private:
+protected:
 	//开始游戏
-	bool StartGame();
+	virtual bool StartGame();
 
 	//与子游戏交互函数
 public:

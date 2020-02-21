@@ -92,6 +92,27 @@ CTableFrame::~CTableFrame()
 	return;
 }
 
+//拷贝构造
+CTableFrame::CTableFrame(const CTableFrame& table)
+{
+	m_pITableFrameSink = table.m_pITableFrameSink; //浅拷贝
+	m_wTableID = table.m_wTableID;
+	m_wChairCount = table.m_wChairCount;
+	memcpy(&m_tagTableRule, &table.m_tagTableRule, sizeof(tagTableRule));
+	memcpy(&m_tagClubRoomRule, &table.m_tagClubRoomRule, sizeof(tagClubRoomRule));
+	m_dwTableOwner = table.m_dwTableOwner;
+	m_wCurGameRound = table.m_wCurGameRound;
+	m_cbGameStatus = table.m_cbGameStatus;
+	m_user_list = table.m_user_list;
+	m_player_list = table.m_player_list;
+	m_total_score = table.m_total_score;
+	memcpy(m_bAgree, table.m_bAgree, sizeof(MAX_CHAIR));
+	memcpy(m_bResponseDismiss, table.m_bResponseDismiss, sizeof(MAX_CHAIR));;
+	m_bUnderDissState = table.m_bUnderDissState;
+	m_dissmisserChaiID = table.m_dissmisserChaiID;
+	memcpy(&m_GameScoreRecordActive, &table.m_GameScoreRecordActive,sizeof(CGameScoreRecordArray));
+}
+
 /*************************************** 桌子属性设置与获取 ***************************************************/
 //设置房间自动解散时间
 void CTableFrame::SetTableAutoDismiss(DWORD dwMinutes) 
@@ -904,7 +925,9 @@ bool CTableFrame::OnEventTimer(DWORD dwTimerID, WPARAM dwBindParameter)
 	//回调事件
 	if ((dwTimerID>=0)&&(dwTimerID<TIME_TABLE_SINK_RANGE))
 	{
-		return m_pITableFrameSink->OnTimerMessage(dwTimerID,dwBindParameter);
+		int ret = m_pITableFrameSink->OnTimerMessage(dwTimerID,dwBindParameter);
+		CLog::Log(log_debug, "bug ret: %d", ret);
+		return ret;
 	}
 
 	//事件处理

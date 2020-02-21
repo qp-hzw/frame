@@ -21,6 +21,20 @@ CPlayer::CPlayer(tagUserInfo & UserInfo)
 	return;
 }
 
+//拷贝构造
+CPlayer::CPlayer(const CPlayer &player)
+{
+	m_dwSocketID = player.m_dwSocketID;
+	memcpy(&m_UserInfo, &player.m_UserInfo, sizeof(tagUserInfo));
+	memcpy(&m_UserProperty, &player.m_UserProperty, sizeof(tagUserProperty));
+	m_bAndroidUser = player.m_bAndroidUser;
+	m_bClientReady = player.m_bClientReady;
+	m_bModifyScore = player.m_bModifyScore;
+	m_dwClientAddr = player.m_dwClientAddr;
+	memcpy(m_szLogonPass, player.m_szLogonPass, sizeof(TCHAR)*LEN_PASSWORD);
+	memcpy(m_szMachineID, player.m_szMachineID, sizeof(TCHAR)*LEN_MACHINE_ID);
+}
+
 //用户使用道具
 bool CPlayer::UseProp(DWORD dwGoodsID)
 {

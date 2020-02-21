@@ -198,6 +198,11 @@ bool CMatchItem::On_Match_Start()
 	{
 		player_info item;
 		item.user = user;
+		if (m_config.stage[0].wJinJi_Rule == 3) //淘汰赛初始分为2000
+		{
+			item.score = 200;
+		}
+
 		m_Cur_Ranking.push_back(item);
 	}
 
@@ -215,9 +220,6 @@ bool CMatchItem::On_Match_Start()
 //开始当前阶段比赛
 bool CMatchItem::On_Stage_Start()
 {
-	//随机分配房间
-	//random_shuffle(m_Apply_Player.begin(), m_Apply_Player.end());
-
 	//初始化所有房间的游戏状态  --所有桌都打完了才开始下一阶段
 	m_Room_state.clear();
 	m_Room_state.resize(m_Apply_Player.size() / 3);
@@ -231,6 +233,12 @@ bool CMatchItem::On_Stage_Start()
 		{
 			CLog::Log(log_debug, "创建房间");
 			room = CTableManager::CreateMatchRoom(this, m_Stage);
+			if (room == NULL)
+			{
+				On_Match_Cancel();
+				return false;
+			}
+
 			room->set_index(index++);
 		}
 
@@ -330,6 +338,7 @@ bool CMatchItem::On_Room_End(CMatchRoom *room)
 		}
 		On_Player_JinJi(JinJi_Player);
 	}
+	//全桌比较
 	else if (stage.wJinJi_Rule == 2 && !Jue_Sai && stage_end)
 	{
 		std::list<player_info> TaoTai_Player;
@@ -386,7 +395,7 @@ bool CMatchItem::On_Player_TaoTai(std::list<player_info> TaoTai_player)
 
 		CLog::Log(log_debug, "玩家 :%d 淘汰！", item.user->GetUserID());
 		if (!item.user->IsAndroidUser())
-			g_GameCtrl->SendData(item.user, MDM_GR_MATCH, CMD_GC_MATCH_RESULT_TAOTAI, NULL, 0);
+			g_GameCtrl->SendData(item.user, MDM_GR_MATCH, CMD_GC_MATCH_RESULT_TAOTAI, &taotai, sizeof(STR_CMD_GC_MATCH_RESULT_TAOTAI));
 	}
 
 	//从列表里删除玩家
@@ -418,6 +427,15 @@ bool CMatchItem::On_Player_TaoTai(std::list<player_info> TaoTai_player)
 	}
 	CLog::Log(log_debug, "ranking size: %d", m_Cur_Ranking.size());
 
+	//给所有玩家更新自己的排名
+	for (auto player : m_Cur_Ranking)
+	{
+		if (player.user && !player.user->IsAndroidUser())
+		{
+			Send_Self_Ranking(player.user);
+		}
+	}
+
 	return true;
 }
 
@@ -442,8 +460,10 @@ bool CMatchItem::On_Player_JinJi(std::list<player_info> JinJi_player)
 		ZeroMemory(&msgjinji, sizeof(STR_CMD_GC_MATCH_RESULT_JINJI));
 
 		swprintf(msgjinji.szStageName, 16, L"%S", m_config.stage[m_Stage].szName);
-		msgjinji.wWaitCount = playing_count;
 		msgjinji.wRanking = GetRanking(jinji.user);
+
+		//发送等待房间数
+		Updata_WaitCount(jinji.user);
 
 		if (!jinji.user->IsAndroidUser())
 			g_GameCtrl->SendData(jinji.user, MDM_GR_MATCH, CMD_GC_MATCH_RESULT_JINJI, &msgjinji, sizeof(STR_CMD_GC_MATCH_RESULT_JINJI));
@@ -469,12 +489,14 @@ bool CMatchItem::On_Stage_End(CMatchRoom *room)
 		if (ite == m_room_player.end())
 			return false;
 
+		On_Player_TaoTai(ite->second);
+
 		//比赛结束
 		CMatchManager::On_Match_End(this, ite->second);
 		return true;
 	}
 
-	//开始下一轮
+	//开始下一阶段
 	m_Stage ++;
 	m_wait_room->SetStageTimer();
 
@@ -529,7 +551,6 @@ bool CMatchItem::Update_Ranking(CMatchRoom *room)
 //发送所有人排名
 void CMatchItem::Send_Ranking(CPlayer *player)
 {
-	DWORD	dwindex = 0;
 	DWORD	wPacketSize = 0;
 	BYTE	byBuffer[MAX_ASYNCHRONISM_DATA/10];
 	STR_CMD_GC_MATCH_RANKING  *rank = NULL;
@@ -546,7 +567,7 @@ void CMatchItem::Send_Ranking(CPlayer *player)
 
 		rank = (STR_CMD_GC_MATCH_RANKING *)(byBuffer + wPacketSize);
 		rank->llScore = ranking.score;
-		rank->wRanking = ++dwindex;
+		rank->wRanking = GetRanking(ranking.user);
 		memcpy(rank->szName, ranking.user->GetNickName(), sizeof(TCHAR)*LEN_NICKNAME);
 
 		wPacketSize += sizeof(STR_CMD_GC_MATCH_RANKING);
@@ -572,7 +593,7 @@ void CMatchItem::Send_Self_Ranking(CPlayer *player)
 	ZeroMemory(&rank, sizeof(STR_CMD_CG_MATCH_RANKING_MY));
 
 	rank.dwAllUserCount = m_Apply_Player.size();
-	rank.dwCurCount = room->GetCurGameRound();
+	rank.dwCurCount = room->GetCurGameRound()+1;
 	rank.dwAllCount = room->GetCustomRule()->GameCount;
 	rank.dwRanking = GetRanking(player);
 	memcpy(rank.szStageName, m_config.stage[m_Stage].szName, sizeof(TCHAR)*16);

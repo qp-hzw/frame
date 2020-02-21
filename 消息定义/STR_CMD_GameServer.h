@@ -423,7 +423,7 @@ struct MATCH_CONFIG
 		TCHAR	szName[16];	//初赛、半决赛、决赛..
 		DWORD	wXJCount;					//小局数
 		DWORD	wPlayerCount;				//人数
-		DWORD	wJinJi_Rule;				//晋级规则   同桌比较/全桌比较 1,2
+		DWORD	wJinJi_Rule;				//晋级规则   同桌比较/全桌比较 1,2,
 		DWORD	wJinJi_Count;				//晋级名额
 	};
 
@@ -490,7 +490,6 @@ struct STR_CMD_GC_MATCH_QUERY_PLAYER
 struct STR_CMD_GC_MATCH_RESULT_JINJI
 {
 	WORD			wRanking;			//排名
-	WORD			wWaitCount;			//等待桌数
 	TCHAR			szStageName[16];		//阶段名
 };
 

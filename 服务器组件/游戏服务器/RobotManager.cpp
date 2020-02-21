@@ -7,7 +7,7 @@
 #include "MatchManager.h"
 
 #define IDI_LOAD_ANDROID_USER			(IDI_MAIN_MODULE_START+1)			//加载机器人
-#define TIME_LOAD_ANDROID_USER				1000L							//加载机器
+#define TIME_LOAD_ANDROID_USER				3000L							//加载机器
 
 
 std::vector<CPlayer *> CRobotManager::s_RobotArray;

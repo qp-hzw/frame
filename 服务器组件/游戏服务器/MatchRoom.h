@@ -24,6 +24,7 @@ private:
 public:
 	CMatchRoom(CMatchItem *item, WORD stage);
 	~CMatchRoom(void);
+	CMatchRoom(const CMatchRoom& room);
 
 public:
 	//…Ë÷√∑øº‰◊¥Ã¨

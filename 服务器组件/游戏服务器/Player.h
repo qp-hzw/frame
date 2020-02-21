@@ -45,6 +45,8 @@ public:
 	CPlayer(tagUserInfo & UserInfo);
 	//析构函数
 	~CPlayer(){}
+	//拷贝构造
+	CPlayer(const CPlayer &player);
 
 	/**********************************  游戏静态数据 ****************************************/
 public:

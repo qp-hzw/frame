@@ -20,6 +20,13 @@ struct player_info
         score = 0;
 		room_id = 0;
     }
+
+	player_info(const player_info& info)
+	{
+		room_id = info.room_id;
+		score = info.score;
+		user = info.user;
+	}
 };
 
 class CMatchItem

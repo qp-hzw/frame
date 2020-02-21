@@ -25,6 +25,13 @@ CMatchRoom::~CMatchRoom(void)
 {
 }
 
+CMatchRoom::CMatchRoom(const CMatchRoom& room)
+{
+	m_state = room.m_state;
+	m_index = room.m_index;
+	m_Match_Item = room.m_Match_Item;
+}
+
 //玩家坐下
 int CMatchRoom::PlayerSitTable(CPlayer * pIServerUserItem, WORD wChairID, bool bCheckUserGPS)
 {
@@ -84,6 +91,17 @@ bool CMatchRoom::HandleDJGameEnd(BYTE cbGameStatus)
 //游戏开始
 bool CMatchRoom::StartGame()
 {
+	CTableFrame::StartGame();
+
+	//给所有玩家更新自己的排名
+	for (auto player : GetPlayer_list())
+	{
+		if (player && !player->IsAndroidUser())
+		{
+			m_Match_Item->Send_Self_Ranking(player);
+		}
+	}
+
 	return true;
 }
 
