@@ -53,6 +53,8 @@ public:
 
 	//获取ITableFrameSink
 	ITableFrameSink* GetITableFrameSink();
+	//释放ITableFrameSink
+	void FreeITableFrameSink(ITableFrameSink *p);
 
 	//获取ServerID
 	DWORD GetServerID(){return m_ServerID; }

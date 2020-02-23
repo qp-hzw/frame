@@ -144,8 +144,8 @@ bool CMatchManager::Delete_Match(CMatchItem *Item)
 		CMatchItem *match = *it;
 		if (match == Item)
 		{
-			it = s_Item_Array.erase(it);
-			//delete match;
+			s_Item_Array.erase(it);
+			delete match;
 			break;
 		}
 	}

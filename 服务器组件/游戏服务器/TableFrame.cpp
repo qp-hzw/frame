@@ -87,7 +87,8 @@ CTableFrame::~CTableFrame()
 	//释放对象
 	if ( NULL != m_pITableFrameSink )
 	{
-		SafeDelete(m_pITableFrameSink);
+		g_GameCtrl->FreeITableFrameSink(m_pITableFrameSink);
+		m_pITableFrameSink = NULL;
 	}
 	return;
 }
@@ -925,9 +926,7 @@ bool CTableFrame::OnEventTimer(DWORD dwTimerID, WPARAM dwBindParameter)
 	//回调事件
 	if ((dwTimerID>=0)&&(dwTimerID<TIME_TABLE_SINK_RANGE))
 	{
-		int ret = m_pITableFrameSink->OnTimerMessage(dwTimerID,dwBindParameter);
-		CLog::Log(log_debug, "bug ret: %d", ret);
-		return ret;
+		return m_pITableFrameSink->OnTimerMessage(dwTimerID,dwBindParameter);
 	}
 
 	//事件处理

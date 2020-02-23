@@ -174,7 +174,7 @@ bool CAttemperEngineSink::OnEventTCPSocketLink(WORD wServiceID, INT nErrorCode)
 
 		//·¢ËÍÊý¾Ý
 		g_TCPSocketEngine->SendData(MDM_REGISTER_CPD,CPR_REGISTER_SERVER,&ServerItem,sizeof(ServerItem));
-
+	
 		return true;
 	}
 

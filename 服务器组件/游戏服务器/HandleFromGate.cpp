@@ -1702,6 +1702,8 @@ bool CHandleFromGate::On_SUB_CG_MATCH_QUERY_PLAYER(VOID * pData, WORD wDataSize,
 		wPacketSize+=sizeof(STR_CMD_GC_MATCH_QUERY_PLAYER);
 	}
 	if (wPacketSize>0) g_GameCtrl->SendData(dwSocketID, MDM_GR_MATCH, CMD_GC_MATCH_QUERY_PLAYER, cbBuffer, wPacketSize);
+
+	return true;
 }
 
 //更新所有人排名

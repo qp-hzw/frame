@@ -54,6 +54,10 @@ bool CMatchItem::On_User_Apply(CPlayer *player)
 	if (m_Start)
 		return false;
 
+	//等待房间校验
+	if (m_wait_room == NULL)
+		return false;
+
 	CLog::Log(log_debug, "报名玩家ID: %d", player->GetUserID());
 
 	//玩家加入等待房间
@@ -189,7 +193,7 @@ bool CMatchItem::On_Match_Cancel()
 bool CMatchItem::On_Match_Start()
 {
 	//创建下一场比赛
-	CMatchManager::On_Match_Start(this);
+	//CMatchManager::On_Match_Start(this);
 	//设置比赛开始
 	m_Start = true;
 
@@ -260,9 +264,9 @@ bool CMatchItem::On_Stage_Start()
 			room->SendTableData(INVALID_CHAIR, CMD_GC_MATCH_START, NULL, 0, MDM_GR_MATCH);
 
 			//设置准备定时器
-			room->SetPlayerAutoReady();
+			//room->SetPlayerAutoReady();
 		}
-
+		room->PlayerReady(item);
 		//房间满了
 		if (room->IsRoomFull())
 		{

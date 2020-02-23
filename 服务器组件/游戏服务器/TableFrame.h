@@ -145,7 +145,8 @@ public:
 		m_player_list.resize(m_wChairCount, NULL);
 
 		//初始化子游戏规则
-		m_pITableFrameSink->Initialization(this, &m_tagTableRule);
+		if (m_pITableFrameSink != NULL)
+			m_pITableFrameSink->Initialization(this, &m_tagTableRule);
 	};
 
 	//读取工会房间规则

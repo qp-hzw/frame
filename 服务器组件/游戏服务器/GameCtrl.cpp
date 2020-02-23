@@ -185,6 +185,12 @@ ITableFrameSink* CGameCtrl::GetITableFrameSink()
 	return SubGameDll;
 }
 
+//释放ITableFrameSink
+void CGameCtrl::FreeITableFrameSink(ITableFrameSink *p)
+{
+	CWHModule::FreeSubGame(m_subgame_dll_name, p);
+}
+
 /************************************************消息发送*********************************************************/
 //发送数据
 bool CGameCtrl::SendData(DWORD dwSocketID, WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WORD wDataSize)

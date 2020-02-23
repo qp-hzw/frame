@@ -53,7 +53,10 @@ CMatchRoom* CTableManager::CreateMatchRoom(CMatchItem* Item, WORD stage)
 	//构建
 	CMatchRoom *pMatch = new CMatchRoom(Item, stage);
 	if (pMatch == NULL)
+	{
+		CLog::Log(log_debug, "pMatch == NULL");
 		return NULL;
+	}
 
 	//设置房间
 	pMatch->SetGameStatus(GAME_STATUS_FREE);
@@ -103,7 +106,7 @@ bool CTableManager::DeleteTable(CTableFrame* pTable)
 		{
 			CLog::Log(log_debug, "Delete Table : %d", pTable->GetTableID() );
 			ite = s_TableArray.erase(ite);
-			//delete pTable;
+			delete pTable;
 			pTable = NULL;
 			break;
 		}
