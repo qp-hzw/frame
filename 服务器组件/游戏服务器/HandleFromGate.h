@@ -110,6 +110,8 @@ public:
 protected: 
 	//校验 申请创建桌子
 	static bool CheckCreateRoom(CPlayer * player, BYTE gameMode);
+	//校验 是否可以加入房间
+	static bool CheckJoinRoom(CPlayer * player);
 	//检查 创建桌子的门票
 	static bool CheckCreateTableTicket(tagTableRule * pCfg, CPlayer *pCPlayer);
 

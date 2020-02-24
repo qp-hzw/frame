@@ -81,7 +81,7 @@ bool CMatchManager::MatchConfig()
 			if (config->dwStartTime < time(0))	//已经开始
 			{
 				//开始下一场
-				config->dwStartTime = time(0) + 60000*config->dwTimePeriod;	
+				config->dwStartTime = time(0) + 60*config->dwTimePeriod;	
 				//config->dwStartTime = time(0) + 10000;	
 			}
 		}
@@ -179,7 +179,7 @@ void CMatchManager::On_Match_Start(CMatchItem *Item)
 	MATCH_CONFIG cfg = Item->GetConfig();
 	if (cfg.wStartType == MATCH_START_TYPE_TIME)
 	{
-		cfg.dwStartTime = time(0) + 60000*Item->GetConfig().dwTimePeriod;
+		cfg.dwStartTime = time(0) + 60*Item->GetConfig().dwTimePeriod;
 	}
 	Create_Match(cfg);
 }

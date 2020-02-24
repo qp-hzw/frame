@@ -41,7 +41,7 @@ private:
 	WORD						m_Stage;			//当前阶段
 
 private:
-	std::list<CPlayer *>		m_Apply_Player;	//报名的玩家
+	std::vector<CPlayer *>		m_Apply_Player;	//报名的玩家
 	std::vector<player_info>	m_Cur_Ranking;	//正在比赛的玩家排名
 	std::map<int, std::list<player_info>>	m_room_player;	//在房间里的玩家  tableID ---> playerinfo
 

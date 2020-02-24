@@ -820,6 +820,13 @@ bool CHandleFromGate::On_SUB_CG_USER_JOIN_GOLD_HALL_ROOM(VOID * pData, WORD wDat
 	//数据定义
 	STR_SUB_CG_USER_JOIN_GOLD_HALL_ROOM *pJoin = (STR_SUB_CG_USER_JOIN_GOLD_HALL_ROOM *)pData;
 
+	//加房间校验
+	if( !CheckJoinRoom(player))
+	{
+		SendRequestFailure(player, TEXT("加入房间 失败"), REQUEST_FAILURE_NORMAL);
+		return true;
+	}
+
 	//门票检测
 	if(0 != RoomRuleManager::CheckTickt(&RoomRuleManager::GetGoldRoomRule(pJoin->byType), player))
 	{
@@ -1390,6 +1397,22 @@ bool CHandleFromGate::CheckCreateRoom(CPlayer * player, BYTE gameMode)
 	return false;
 }
 
+//校验 是否可以加入房间
+bool CHandleFromGate::CheckJoinRoom(CPlayer * player)
+{
+	//用户效验
+	if (INVALID_CHAIR != player->GetChairID()) 
+	{
+		SendRequestFailure(player, TEXT("正在游戏中,无法创建房间！"), REQUEST_FAILURE_NORMAL);
+		return false;
+	}
+	if(INVALID_TABLE != player->GetTableID())
+	{
+		SendRequestFailure(player, TEXT("正在房间中,无法创建房间！"), REQUEST_FAILURE_NORMAL);
+		return false;
+	}
+}
+
 //检查加入桌子门票
 bool CHandleFromGate::CheckJoinTableTicket(tagTableRule *pCfg, CPlayer *pIServerUserItem)
 {
@@ -1613,6 +1636,9 @@ bool CHandleFromGate::On_SUB_CG_MATCH_APPLY(VOID * pData, WORD wDataSize, DWORD 
 
 	//发送数据
 	g_GameCtrl->SendData(player, MDM_GR_MATCH, CMD_GC_MATCH_APPLY, &cmdApply, sizeof(STR_CMD_GC_MATCH_APPLY));
+
+	//发送比赛场信息
+	On_SUB_CG_MATCH_QUERY_PLAYER(NULL, 0, dwSocketID);
 
 	return true;
 }

@@ -36,7 +36,7 @@ void CMatchItem::Init()
 	//定时开赛定时器
 	if (m_config.wStartType == MATCH_START_TYPE_TIME)
 	{
-		g_GameCtrl->SetTimer(IDI_MATCH_TYPE_TIME + m_config.wMatchID, m_config.dwStartTime - time(0), 1, 0);
+		g_GameCtrl->SetTimer(IDI_MATCH_TYPE_TIME + m_config.wMatchID, (m_config.dwStartTime - time(0))*1000, 1, 0);
 	}
 }
 
@@ -149,7 +149,7 @@ bool CMatchItem::On_Apply_End()
 
 			//反向删除迭代器
 			m_wait_room->PlayerLeaveTable(player);
-			ite = std::list<CPlayer*>::reverse_iterator(m_Apply_Player.erase((++ite).base()));
+			ite = std::vector<CPlayer*>::reverse_iterator(m_Apply_Player.erase((++ite).base()));
 			break;
 		}
 	}
@@ -193,7 +193,7 @@ bool CMatchItem::On_Match_Cancel()
 bool CMatchItem::On_Match_Start()
 {
 	//创建下一场比赛
-	//CMatchManager::On_Match_Start(this);
+	CMatchManager::On_Match_Start(this);
 	//设置比赛开始
 	m_Start = true;
 
@@ -228,6 +228,10 @@ bool CMatchItem::On_Stage_Start()
 	m_Room_state.clear();
 	m_Room_state.resize(m_Apply_Player.size() / 3);
 	CLog::Log(log_debug, "阶段人数: %d", m_Apply_Player.size());
+
+	// 乱序玩家
+	random_shuffle(m_Apply_Player.begin(), m_Apply_Player.end());
+
 	CMatchRoom* room = NULL;
 	int index = 0;
 	for (auto item : m_Apply_Player)
@@ -264,9 +268,9 @@ bool CMatchItem::On_Stage_Start()
 			room->SendTableData(INVALID_CHAIR, CMD_GC_MATCH_START, NULL, 0, MDM_GR_MATCH);
 
 			//设置准备定时器
-			//room->SetPlayerAutoReady();
+			room->SetPlayerAutoReady();
 		}
-		room->PlayerReady(item);
+
 		//房间满了
 		if (room->IsRoomFull())
 		{
@@ -322,7 +326,7 @@ bool CMatchItem::On_Room_End(CMatchRoom *room)
 	{
 		//淘汰玩家
 		std::list<player_info> TaoTai_Player;
-		int flag = 0;	//对vector的无解
+		int flag = 0;
 		for (auto player : ranking)
 		{
 			if (flag >= stage.wJinJi_Count)
@@ -534,20 +538,25 @@ bool CMatchItem::Update_Ranking(CMatchRoom *room)
 	{
 		if (item_1.score == item_2.score)
 		{
-			auto order_1 = std::find_if(m_Apply_Player.begin(), m_Apply_Player.end(), [item_1](CPlayer* src)
-			{
-				return src == item_1.user;
-			});
-
-			auto order_2 = std::find_if(m_Apply_Player.begin(), m_Apply_Player.end(), [item_2](CPlayer* src)
-			{
-				return src == item_2.user;
-			});
-
-			return std::distance(order_1, order_2) > 0;
+			//return false;    //sort中如果 a==b  不能返回true 
 		}
 		return item_1.score > item_2.score;
 	});
+
+	for (auto item : m_Cur_Ranking)
+	{
+		if (item.user)
+			CLog::Log(log_debug, "UserID: %d, Score: %d", item.user->GetUserID(), item.score);
+	}
+
+	//给所有玩家更新自己的排名
+	for (auto player : m_Cur_Ranking)
+	{
+		if (player.user && !player.user->IsAndroidUser())
+		{
+			Send_Self_Ranking(player.user);
+		}
+	}
 
 	return true;
 }
