@@ -164,6 +164,8 @@ public:
 
 	//
 public:
+	//获取字段 对应的描述
+	virtual std::string GetDescribe(std::string key_name)= NULL;
 	//根据字段名字, 为结构体对应字段赋值
 	virtual void SetRoomRule(std::string key, std::string value)= NULL;
 	//
