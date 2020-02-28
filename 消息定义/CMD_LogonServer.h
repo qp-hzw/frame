@@ -108,18 +108,15 @@
 
 #define SUB_CL_SERVICE_PURE_RECORD_LIST			16							//大局战绩 查询
 #define CMD_LC_SERVICE_PURE_RECORD_LIST			116							//大局战绩 返回
-#define CMD_LC_SERVICE_PURE_RECORD_LIST_PINFO	216							//大局战绩玩家信息 返回
-#define CMD_LC_SERVICE_PURE_RECORD_FINISH		316							//大局战绩 结束
 
 #define SUB_CL_SERVICE_PURE_XJ_RECORD_LIST		17							//小局战绩 查询
 #define CMD_LC_SERVICE_PURE_XJ_RECORD_LIST		117							//小局战绩 返回
-#define CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_PINFO 217						//小局战绩玩家信息 返回
-#define CMD_LC_SERVICE_PURE_XJ_RECORD_FINISH	317							//小局战绩 结束
 
 #define CMD_LC_SERVICE_MARQUEE					18							//跑马灯消息
 
 #define SUB_CL_SERVICE_XJ_RECORD_PLAYBACK		20							//小局录像回放
 #define CMD_LC_SERVICE_XJ_RECORD_PLAYBACK		120							//小局录像回放 返回
+#define CMD_LC_SERVICE_XJ_RECORD_PLAYERINFO		220							//小局录像回放 玩家信息
 
 #define SUB_CL_SERVICE_GET_RANK_LIST			21							//获取指定排行榜			TOOD 真正的数据是从子游戏获取的，小局结算，但只有今日的数据，没有更新到昨日之类的
 #define CMD_LC_SERVICE_GET_RANK_LIST			121							//获取指定排行榜返回

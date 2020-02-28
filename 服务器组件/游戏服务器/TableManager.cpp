@@ -230,7 +230,7 @@ CTableFrame* CTableManager::GetGlodTable(BYTE byType)
 
 	if(pTableFrameReturn == NULL)
 	{
-		pTableFrameReturn = CreateTable(&(RoomRuleManager::GetGoldRoomRule(byType)), 0);
+		pTableFrameReturn = CreateTable(&(RoomRuleManager::GetGoldRoomRule(byType)), INVALID_CHAIR);
 		if(pTableFrameReturn == NULL)
 		{
 			CLog::Log(log_error, "GetGlodTable  type:%d  failed", byType);

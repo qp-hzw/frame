@@ -52,36 +52,6 @@ struct tagClubRoomRule
 	DWORD	dwDizhu;				//底注
 };
 
-//玩家基础信息 DB use player base info
-struct BASE_PLAYERINFO
-{
-	char					m_szAccID[54 + 1];
-	int				m_PlayerID;
-	char					m_szPlayerName[54 + 1];
-	unsigned int		m_LV;
-	unsigned int		m_dwExp;
-	//unsigned int		m_goldCoin;
-	int		m_goldCoin;
-	unsigned int		m_diamond;
-	unsigned int		m_vip;
-	time_t				m_registerDate;
-	char					m_szPassword[54 + 1];
-	unsigned int		m_sex;
-	char					m_szFaceUrl[54 + 1];
-	time_t				m_receiveTime;
-	unsigned int      m_RechTimes;
-	unsigned int      m_gameNumber;
-	unsigned int      m_winNumber;
-	unsigned int      m_invitecode;
-	char              m_szRegisterAddrip[54 + 1];
-	unsigned int      m_VoucherNum;								//带金卷数量
-	char              m_szLoginip[54 + 1];
-	char              m_szRealName[54 + 1];   //实名
-	int					m_PlayerModelID;							//玩家模型ID
-	int					m_Permissions;								//权限
-	int                 m_creditpoint;                              //比赛信用分
-	//int          m_match_score;                                 //比赛积分
-};
 /////////////////////////////////////////////////////////////////////
 
 //桌子接口
@@ -92,13 +62,11 @@ public:
 	virtual int GameType() = 0;
 	//is roboot
 	virtual bool IsRobot(WORD wChairID) = 0;
-	//get player base info
-	virtual BASE_PLAYERINFO GetPlayerBaseInfo(WORD wChairID) = 0;
 
 	//流程接口
 public:
 	//处理小局结束
-	virtual bool HandleXJGameEnd(BYTE cbCurGameCount, SCORE *lGameScore, VOID* pData, DWORD dwDataSize) = NULL;
+	virtual bool HandleXJGameEnd(BYTE cbCurGameCount, WORD *wIdentity, SCORE *lGameScore, VOID* pData, DWORD dwDataSize) = NULL;
 	//处理大局结束
 	virtual bool HandleDJGameEnd(BYTE cbGameStatus) = NULL;
 

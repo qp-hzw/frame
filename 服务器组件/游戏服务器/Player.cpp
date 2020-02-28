@@ -141,13 +141,14 @@ bool CPlayer::ModifyUserTreasure(BYTE byTreasureType,  SCORE lUserTreasuse, stri
 }
 
 //更新用户输赢记录表
-bool CPlayer::ModifyPlayerScore(BYTE round, SCORE lUserTreasuse, string Msg)
+bool CPlayer::ModifyPlayerScore(BYTE round, WORD wIdentity, SCORE lUserTreasuse, string Msg)
 {
 	//输入参数
 	g_TreasureDB->ResetParameter();
 	g_TreasureDB->AddParameter(TEXT("@UserID"), GetUserID());
 	g_TreasureDB->AddParameter(TEXT("@CurCount"),round);
 	g_TreasureDB->AddParameter(TEXT("@Score"),lUserTreasuse);
+	g_TreasureDB->AddParameter(TEXT("@PlayerIdentity"),wIdentity);
 	g_TreasureDB->AddParameter(TEXT("@OnlyID"), Msg.c_str());
 
 	//执行查询

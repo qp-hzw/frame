@@ -67,7 +67,8 @@ CTableFrame::CTableFrame()
 	/******************** 动态属性 **********************/
 	m_cbGameStatus=GAME_STATUS_FREE;
 	m_wCurGameRound=0;
-	
+	m_OnlyID = "";
+
 	m_user_list.clear();
 	m_player_list.clear();
 	m_total_score.clear();
@@ -224,10 +225,14 @@ bool CTableFrame::StartGame()
 }
 
 //小局结束处理函数
-bool CTableFrame::HandleXJGameEnd(BYTE byRound, SCORE *lUserTreasure, VOID* pData, DWORD dwDataSize)
+bool CTableFrame::HandleXJGameEnd(BYTE byRound, WORD *wIdentity, SCORE *lUserTreasure, VOID* pData, DWORD dwDataSize)
 {
 	m_wCurGameRound = byRound;
-	string OnlyID;
+	if (m_OnlyID.empty())
+	{
+		m_OnlyID = std::to_string(time(0)) + std::to_string(m_wTableID);
+	}
+
 #pragma region 用户信息
 	//扣除用户门票
 	if(byRound == 1)
@@ -256,7 +261,7 @@ bool CTableFrame::HandleXJGameEnd(BYTE byRound, SCORE *lUserTreasure, VOID* pDat
 	int i =0;
 	for(auto player : m_player_list)
 	{
-		player ->ModifyPlayerScore(byRound, lUserTreasure[i], OnlyID);
+		player ->ModifyPlayerScore(byRound, wIdentity[i], lUserTreasure[i], m_OnlyID);
 		player->ModifyPlayerExp();
 		i++;
 	}
@@ -270,10 +275,10 @@ bool CTableFrame::HandleXJGameEnd(BYTE byRound, SCORE *lUserTreasure, VOID* pDat
 	SetGameStatus(GAME_STATUS_FREE);
 
 	//更新桌子战绩
-	XJUpdateTableRecord(byRound, OnlyID);
+	XJUpdateTableRecord(byRound, m_OnlyID);
 
 	//更新桌子录像
-	XJUpdateTableVideo(byRound, OnlyID, pData, dwDataSize);
+	XJUpdateTableVideo(byRound, m_OnlyID, pData, dwDataSize);
 #pragma endregion
 	return true;
 }
@@ -283,6 +288,23 @@ bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 {
 	//关闭所有定时器
 	KillGameTimer(IDI_ROOM_AUTO_DISMISS);
+
+	if (!m_OnlyID.empty())
+	{
+		//更新玩家输赢情况表
+		int i =0;
+		for(auto player : m_player_list)
+		{
+			if (player)
+			{
+				player ->ModifyPlayerScore(0, 0, m_total_score[i], m_OnlyID);
+				i++;
+			}
+		}
+
+		//更新桌子战绩
+		XJUpdateTableRecord(0, m_OnlyID);
+	}
 
 	//结束等待续费，玩家需要从准备状态退出为坐下
 	if (cbGameStatus == GAME_CONCLUDE_CONTINUE)
@@ -619,10 +641,6 @@ int CTableFrame::PlayerLeaveTable(CPlayer* pPlayer)
 	{
 		*ite2 = NULL;
 	}
-
-	//检测房间里是否还有真人 没有真人大局结束   比赛场不走自动检测流程
-	if ((!pPlayer->IsAndroidUser()) && (m_tagTableRule.GameMode != TABLE_MODE_MATCH))
-		CheckRoomTruePlayer();
 
 	return 0;
 }
@@ -1824,8 +1842,8 @@ bool CTableFrame::OnEventApplyDismissRoom(WORD wChairID, bool bAgree)
 	{
 		//判断房间是否可以解散
 		tagTableRule* pCfg = (tagTableRule*)GetCustomRule();
-		//俱乐部模式 && 房间设置不可解散 时候才生效 金币场也不可以解散
-		if ((1 == GetClubRoomRule()->bDissolve) || (pCfg->GameMode == 2))
+		//俱乐部模式 && 房间设置不可解散 时候才生效 金币场也不可以解散  比赛不可解散
+		if ((1 == GetClubRoomRule()->bDissolve) || (pCfg->GameMode == 2) || (pCfg->GameMode == 1))
 		{
 			STR_CMD_GR_FRMAE_ASK_DISMISS_RESULT cmdResult;
 			ZeroMemory(&cmdResult, sizeof(cmdResult));
@@ -1865,6 +1883,11 @@ bool CTableFrame::OnEventApplyDismissRoom(WORD wChairID, bool bAgree)
 		ZeroMemory(&(m_bResponseDismiss), sizeof(m_bResponseDismiss));
 		ZeroMemory(&(m_bAgree), sizeof(m_bAgree));
 
+		//比赛场空闲状态也不可解散
+		tagTableRule* pCfg = (tagTableRule*)GetCustomRule();
+		if (pCfg->GameMode == 2)
+			return false;
+
 		//发送解散成功消息
 		STR_CMD_GR_FRAME_DISMISS_RESULT DismissResult;
 		ZeroMemory(&DismissResult, sizeof(DismissResult));
@@ -1891,6 +1914,9 @@ bool CTableFrame::OnEventApplyDismissRoom(WORD wChairID, bool bAgree)
 			{
 				return false;
 			}
+
+			//检测房间里是否还有真人 没有真人大局结束
+			CheckRoomTruePlayer();
 		}
 	}
 

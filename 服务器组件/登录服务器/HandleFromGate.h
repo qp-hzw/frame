@@ -106,26 +106,10 @@ private:
 
 	// pure大局战绩
 	static bool On_SUB_CL_SERVICE_PURE_RECORD_LIST(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//pure大局战绩 返回
-	static bool On_CMD_LC_SERVICE_PURE_RECORD_LIST( DWORD dwContextID, VOID * pData, WORD wDataSize );
-	//pure大局玩家信息 返回
-	static bool On_CMD_LC_SERVICE_PURE_RECORD_LIST_PINFO( DWORD dwContextID, VOID * pData, WORD wDataSize );
-	//pure大局战绩 结束
-	static bool On_CMD_LC_SERVICE_PURE_RECORD_FINISH( DWORD dwContextID, VOID * pData, WORD wDataSize );
-
 	// pure小局战绩
 	static bool On_SUB_CL_SERVICE_PURE_XJ_RECORD_LIST(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//pure小局战绩 返回
-	static bool On_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST( DWORD dwContextID, VOID * pData, WORD wDataSize );
-	//pure小局战绩 返回
-	static bool On_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_PINFO( DWORD dwContextID, VOID * pData, WORD wDataSize );
-	//pure小局战绩 结束
-	static bool On_CMD_LC_SERVICE_PURE_XJ_RECORD_FINISH( DWORD dwContextID, VOID * pData, WORD wDataSize );
-
 	//小局录像回放
 	static bool On_SUB_CL_Service_XJRecordPlayback(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//小局录像回放 返回
-	static bool On_CMD_LC_Service_XJRecordPlayback( DWORD dwContextID, VOID * pData, WORD wDataSize );
 
 	//请求比赛场信息
 	static bool On_SUB_CL_SERVICE_MATCH_INFO(VOID * pData, WORD wDataSize, DWORD dwSocketID);

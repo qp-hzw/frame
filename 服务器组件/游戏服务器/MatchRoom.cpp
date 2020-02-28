@@ -50,10 +50,10 @@ int CMatchRoom::PlayerSitTable(CPlayer * pIServerUserItem, WORD wChairID, bool b
 }
 
 //小局结束
-bool CMatchRoom::HandleXJGameEnd(BYTE byRound, SCORE *lUserTreasure, VOID* pData, DWORD dwDataSize)
+bool CMatchRoom::HandleXJGameEnd(BYTE byRound, WORD *wIdentity, SCORE *lUserTreasure, VOID* pData, DWORD dwDataSize)
 {
 	//正常小局结束流程
-	CTableFrame::HandleXJGameEnd(byRound, lUserTreasure, pData, dwDataSize);
+	CTableFrame::HandleXJGameEnd(byRound, wIdentity, lUserTreasure, pData, dwDataSize);
 	CLog::Log(log_debug, "小局结束！");
 	//更新排名
 	m_Match_Item->Update_Ranking(this);

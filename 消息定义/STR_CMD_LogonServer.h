@@ -433,73 +433,67 @@ struct STR_CMD_LC_QUERY_SCORE_INFO
 //大局战绩 查询
 struct STR_SUB_CL_SERVICE_PURE_RECORD_LIST
 {
-	DWORD						dwUserID;					//玩家ID
-	DWORD						dwClubID;					//牌友圈(版本2)索引, 为0表示是大厅
-	BYTE						byMask;						//1房卡场  2金币场
-	SYSTEMTIME					tmQueryStartData;			//所要查询的开始日期(最小单位为天)
-	//SYSTEMTIME					tmQueryEndData;				//所要查询的截止日期(最小单位为天)
+
+};
+//大局战绩 单个玩家信息
+struct RecordDjPlayerInfo
+{
+	DWORD					dwUserID;					//ID
+	TCHAR					szName[LEN_NICKNAME];		//玩家昵称
+	TCHAR					szHeadUrl[LEN_HEAD_URL];	//头像地址
+	SCORE					llScore;					//玩家总分
 };
 //大局战绩 返回
 struct STR_CMD_LC_SERVICE_PURE_RECORD_LIST
 {
-	BYTE						byMask;						//1房卡场  2金币场
-	DWORD						dwDrawID;					//大局记录 索引
-	TCHAR						szKindName[32];				//游戏名
-	DWORD						dwTableID;					//桌子id
-	TCHAR						szTime[128];				//开始时间 -- 结束时间  2018.4.16 14:00- 
-	//SYSTEMTIME					szStartDataTim;				//开始时间(2018.4.16 12.00-13.55)
-	//SYSTEMTIME					szEndDataTim;				//结束时间(2018.4.16 12.00-13.55)
-};
-//大局战绩 单个玩家信息
-struct STR_CMD_LC_SERVICE_PURE_RECORD_LIST_PLAYERINFO
-{
-	DWORD					 dwDrawID;						//大局记录 索引
-	DWORD					 dwUserID;						//玩家ID
-	TCHAR					 szNickName[32];				//昵称
-	TCHAR					 szHeadUrl[LEN_HEAD_URL];		//头像
-	SCORE					 lScore;						//玩家得分
-};
-//大局战绩 结束
-struct STR_CMD_LC_SERVICE_PURE_RECORD_LIST_FINIST
-{
-	BYTE					byMask;							//结束标志
+	DWORD					dwTableID;					//桌子id
+	WORD					wGameMode;					//桌子类型（0房、1比赛、2金、3房金、4工会）
+	WORD					wGameCount;					//总局数
+	WORD					wPlayerCount;				//玩家数
+	WORD					wKindID;					//游戏类型
+	TCHAR					szTime[128];				//时间
+	TCHAR					szOnlyID[32];				//大局唯一标识
+	RecordDjPlayerInfo		Info[MAX_CHAIR];			//玩家信息
 };
 
 //小局战绩 查询
 struct STR_SUB_CL_SERVICE_PURE_XJ_RECORD_LIST
 {
-	DWORD					 dwDrawID;						//大局记录 索引
+	TCHAR					szOnlyID[32];				//大局唯一标识
+};
+//小局战绩 单个玩家信息
+struct RecodeXjPlayerInfo
+{
+	DWORD					dwUserID;					//ID
+	TCHAR					szName[LEN_NICKNAME];		//玩家昵称
+	TCHAR					szHeadUrl[LEN_HEAD_URL];	//头像地址
+	SCORE					llScore;					//玩家得分
+	WORD					wIdentity;					//身份  （0农民 1地主）
 };
 //小局战绩 返回
 struct STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST
 {
-	BYTE					bRoundCount;					//局数
-	DWORD					dwRecordID;						//录像ID（唯一标识）
-};
-//小局战绩 单个玩家信息
-struct STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_PLAYERINFO
-{
-	BYTE					 bRoundCount;					//大局记录 索引
-	DWORD					 dwUserID;						//玩家ID
-	TCHAR					 szNickName[32];				//昵称
-	SCORE					 lScore;						//玩家得分
-};
-//小局战绩 结束
-struct STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_FINISH
-{
-	BYTE					byMask;						   //结束标志
+	DWORD					dwTableID;
+	WORD					wCurCount;					//当前局数
+	TCHAR					szTime[128];				//时间
+	WORD					wPlayerCount;				//玩家数
+	TCHAR					szOnlyID[32];				//唯一标识
+	RecodeXjPlayerInfo		Info[MAX_CHAIR];			//玩家信息
 };
 
 //小局录像回放
 struct STR_SUB_CL_SERVICE_XJ_RECORD_PLAYBACK
 {
-	DWORD					dwRecordID;						//录像ID
+	WORD					wCurCount;					//局数
+	TCHAR					szOnlyID[32];				//唯一标识
 };
 //小局录像回放返回
 struct STR_CMD_LC_SERVICE_XJ_RECORD_PLAYBACK
 {
-	BYTE					cbfinish;							//发送结束表示	0-未结束	1-结束
 	BYTE					cbRecordData[LEN_MAX_RECORD_SIZE/4];	//录像数据
+	BYTE					cbCurCount;								//
+	BYTE					cbAllCount;									
+	WORD					wKindID;
 };
 
 //客服提示消息

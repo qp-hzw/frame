@@ -6,6 +6,7 @@
 
 extern IDataBase         *g_AccountsDB;                     
 extern IDataBase		 *g_TreasureDB;
+extern IDataBase		 *g_spTreasureDB;
 
 //数据库类
 class CDataBaseEngineSink : public IDataBaseEngineSink
@@ -14,6 +15,7 @@ class CDataBaseEngineSink : public IDataBaseEngineSink
 protected:
 	IDataBase					*m_AccountsDB;					//用户数据库
 	IDataBase					*m_TreasureDB;					//游戏币数据库
+	IDataBase					*m_spTreasureDB;				//备用连接游戏币数据库
 
 	//函数定义
 public:
@@ -104,15 +106,6 @@ protected:
 	
 	//pure大厅排行榜 查询
 	bool On_DBR_CL_SERVICE_PURE_STANDING_LIST(DWORD dwContextID, void * pData, WORD wDataSize);
-
-	//pure大局战绩 查询
-	bool On_DBR_CL_SERVICE_PURE_RECORD_LIST(DWORD dwContextID, void * pData, WORD wDataSize);
-
-	//pure小局战绩 查询
-	bool On_DBR_CL_SERVICE_PURE_XJ_RECORD_LIST(DWORD dwContextID, void * pData, WORD wDataSize);
-
-	//小局录像回放
-	bool On_DBR_CL_Service_XJRecordPlayback(DWORD dwContextID, void * pData, WORD wDataSize);
 
 #pragma endregion
 

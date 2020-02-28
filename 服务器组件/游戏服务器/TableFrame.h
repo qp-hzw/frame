@@ -61,6 +61,8 @@ private:
 
 	DWORD							m_dwTableOwner;						//房主（第一个坐下的玩家）
 
+	std::string						m_OnlyID;							//战绩记录的唯一标识
+
 	/****************************************** 动态数据 **************************************************/
 private:
 	WORD                            m_wCurGameRound;                    //当前游戏局数
@@ -187,8 +189,6 @@ public:
 	virtual int GameType() { return m_tagTableRule.GameMode; }
 	//is roboot
 	virtual bool IsRobot(WORD wChairID);
-	//get player base info
-	virtual BASE_PLAYERINFO GetPlayerBaseInfo(WORD wChairID) { BASE_PLAYERINFO i; return i; }
 
 #pragma region 游戏流程函数
 	//自身调用，与子游戏无关
@@ -199,7 +199,7 @@ protected:
 	//与子游戏交互函数
 public:
 	//小局结束处理函数
-	virtual bool HandleXJGameEnd(BYTE cbCurGameCount, SCORE *lGameScore, VOID* pData, DWORD dwDataSize);
+	virtual bool HandleXJGameEnd(BYTE cbCurGameCount,WORD *wIdentity, SCORE *lGameScore, VOID* pData, DWORD dwDataSize);
 	//大局结束处理函数  之前名字为: HandleDJGameEnd
 	virtual bool HandleDJGameEnd(BYTE cbGameStatus);
 

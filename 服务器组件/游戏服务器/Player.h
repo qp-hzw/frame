@@ -125,7 +125,7 @@ public:
 	//更新用户财富信息
 	bool ModifyUserTreasure(BYTE byTreasureType, SCORE lUserTreasuse, string PayMsg);
 	//更新用户输赢记录表
-	bool ModifyPlayerScore(BYTE round, SCORE lUserTreasuse, string PayMsg);
+	bool ModifyPlayerScore(BYTE round, WORD wIdentity, SCORE lUserTreasuse, string PayMsg);
 	//玩家经验
 	bool ModifyPlayerExp();
 

@@ -8,23 +8,27 @@
 
 IDataBase		   *g_AccountsDB = NULL;				    //
 IDataBase		   *g_TreasureDB = NULL;					//
-
+IDataBase		   *g_spTreasureDB = NULL;					//备用
 
 //启动事件
 bool CDataBaseEngineSink::OnDataBaseEngineStart(IUnknownEx * pIUnknownEx)
 {
 	m_AccountsDB = static_cast<IDataBase*>(CWHModule::Database());
 	m_TreasureDB = static_cast<IDataBase*>(CWHModule::Database());
+	m_spTreasureDB = static_cast<IDataBase*>(CWHModule::Database());
 
 	if(m_AccountsDB == NULL) return false;
 	if(m_TreasureDB == NULL) return false;
+	if(m_spTreasureDB == NULL) return false;
 
 	//发起连接
 	m_AccountsDB->Connect(2);
 	m_TreasureDB->Connect(3);
+	m_spTreasureDB->Connect(3);
 
 	g_AccountsDB = m_AccountsDB;
 	g_TreasureDB = m_TreasureDB;
+	g_spTreasureDB = m_spTreasureDB;
 
 	return true;
 }
@@ -83,18 +87,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 	case DBR_CL_SERVICE_PURE_STANDING_LIST:		//pure大厅排行榜
 		{
 			return On_DBR_CL_SERVICE_PURE_STANDING_LIST(dwContextID,pData,wDataSize);
-		}
-	case DBR_CL_SERVICE_PURE_RECORD_LIST:		//pure大局战绩
-		{
-			return On_DBR_CL_SERVICE_PURE_RECORD_LIST(dwContextID,pData,wDataSize);
-		}
-	case DBR_CL_SERVICE_PURE_XJ_RECORD_LIST:	//pure小局战绩
-		{
-			return On_DBR_CL_SERVICE_PURE_XJ_RECORD_LIST(dwContextID,pData,wDataSize);
-		}
-	case DBR_CL_SERVICE_XJ_RECORD_PLAYBACK:		//小局录像回放
-		{
-			return On_DBR_CL_Service_XJRecordPlayback(dwContextID,pData,wDataSize);
 		}
 	case DBR_CL_USER_RECHARGE_INFO:				//充值信息
 		{
@@ -964,278 +956,6 @@ bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_STANDING_LIST(DWORD dwContextID
 	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_PURE_STANDING_LIST,dwContextID,cbBuffer,wPacketSize);
 
 	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_PURE_STANDING_FINISH,dwContextID,&DBOFinish,sizeof(DBOFinish));
-
-	return true;
-}
-
-//pure大厅 大局战绩 
-bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_RECORD_LIST(DWORD dwContextID, void * pData, WORD wDataSize)
-{
-	if (sizeof(STR_SUB_CL_SERVICE_PURE_RECORD_LIST) != wDataSize)
-	{
-		return false;
-	}
-
-	STR_SUB_CL_SERVICE_PURE_RECORD_LIST* pDbReq = (STR_SUB_CL_SERVICE_PURE_RECORD_LIST*)pData;
-
-#pragma region 大局信息
-	m_TreasureDB->ResetParameter();
-	m_TreasureDB->AddParameter(TEXT("dwUserID"), pDbReq->dwUserID);
-	m_TreasureDB->AddParameter(TEXT("dwClubID"), pDbReq->dwClubID);
-	m_TreasureDB->AddParameter(TEXT("tmQueryStartData"), pDbReq->tmQueryStartData);
-	m_TreasureDB->AddParameter(TEXT("byMask"), pDbReq->byMask);
-	//m_TreasureDB->AddParameter(TEXT("tmQueryEndData"), pDbReq->tmQueryEndData);
-
-	//执行查询,执行抽奖
-	LONG lResultCode = m_TreasureDB->ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_RECORD_LIST"), true);
-
-	//列表发送
-	WORD wPacketSize=0;
-	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
-	wPacketSize=0;
-	STR_CMD_LC_SERVICE_PURE_RECORD_LIST * pDBO=NULL;
-
-	while ((lResultCode == DB_SUCCESS) && (m_TreasureDB->IsRecordsetEnd()==false))
-	{
-		//发送信息
-		if ((wPacketSize+sizeof(STR_CMD_LC_SERVICE_PURE_RECORD_LIST))>sizeof(cbBuffer))
-		{
-			g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_PURE_RECORD_LIST,dwContextID,cbBuffer,wPacketSize);
-			wPacketSize=0;
-		}
-		//读取信息
-		pDBO=(STR_CMD_LC_SERVICE_PURE_RECORD_LIST *)(cbBuffer+wPacketSize);
-		BYTE gameMode = m_TreasureDB->GetValue_BYTE(TEXT("ModeID"));
-		//0房卡 1竞技  2金币  3房卡金币
-		if(0 == gameMode)
-		{
-			pDBO->byMask = 1;
-		}
-		else if((3 == gameMode) || (2 ==gameMode) )
-		{
-			pDBO->byMask = 2;
-		}
-
-		pDBO->dwDrawID = m_TreasureDB->GetValue_DWORD(TEXT("DrawID"));
-		m_TreasureDB->GetValue_String(TEXT("KindName"),pDBO->szKindName,CountArray(pDBO->szKindName));
-		pDBO->dwTableID=m_TreasureDB->GetValue_DWORD(TEXT("TableID"));
-		SYSTEMTIME timeStartTime,tiemEndTime;
-		m_TreasureDB->GetValue_SystemTime(TEXT("StartTime"), timeStartTime);
-		m_TreasureDB->GetValue_SystemTime(TEXT("EndTime"), tiemEndTime);
-
-		CString temp;
-		temp.Format(TEXT("%d/%d/%d %d:%d:%d - %d:%d:%d"),
-			timeStartTime.wYear, timeStartTime.wMonth, timeStartTime.wDay,
-			timeStartTime.wHour,timeStartTime.wMinute,timeStartTime.wSecond,
-			tiemEndTime.wHour,tiemEndTime.wMinute,tiemEndTime.wSecond
-			);
-
-		memcpy(pDBO->szTime, temp, sizeof(TCHAR)*128);
-
-		//设置位移
-		wPacketSize+=sizeof(STR_CMD_LC_SERVICE_PURE_RECORD_LIST);
-
-		//移动记录
-		m_TreasureDB->MoveToNext();
-	}
-	if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_PURE_RECORD_LIST,dwContextID,cbBuffer,wPacketSize);
-
-#pragma endregion
-
-#pragma region 大局上的玩家信息
-	m_TreasureDB->ResetParameter();
-	m_TreasureDB->AddParameter(TEXT("dwUserID"), pDbReq->dwUserID);
-	m_TreasureDB->AddParameter(TEXT("dwClubID"), pDbReq->dwClubID);
-	m_TreasureDB->AddParameter(TEXT("tmQueryStartData"), pDbReq->tmQueryStartData);
-	m_TreasureDB->AddParameter(TEXT("byMask"), pDbReq->byMask);
-	//m_TreasureDB->AddParameter(TEXT("tmQueryEndData"), pDbReq->tmQueryEndData);
-
-	//执行查询,执行抽奖
-	LONG lResultCode2 = m_TreasureDB->ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_RECORD_LIST_PLAYINFO"), true);
-
-	//列表发送
-	WORD wPacketSize2=0;
-	BYTE cbBuffer2[MAX_ASYNCHRONISM_DATA/10];
-	wPacketSize2=0;
-	STR_CMD_LC_SERVICE_PURE_RECORD_LIST_PLAYERINFO * pDBO2=NULL;
-
-	while ((lResultCode2 == DB_SUCCESS ) && (m_TreasureDB->IsRecordsetEnd()==false))
-	{
-		//发送信息
-		if ((wPacketSize2+sizeof(STR_CMD_LC_SERVICE_PURE_RECORD_LIST_PLAYERINFO))>sizeof(cbBuffer2))
-		{
-			g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_PURE_RECORD_LIST_PINFO,dwContextID,cbBuffer2,wPacketSize2);
-			wPacketSize2=0;
-		}
-		//读取信息
-		pDBO2=(STR_CMD_LC_SERVICE_PURE_RECORD_LIST_PLAYERINFO*)(cbBuffer2+wPacketSize2);
-		pDBO2->dwDrawID = m_TreasureDB->GetValue_DWORD(TEXT("DrawID"));
-		pDBO2->dwUserID = m_TreasureDB->GetValue_DWORD(TEXT("UserID"));
-		m_TreasureDB->GetValue_String(TEXT("NickName"),pDBO2->szNickName,CountArray(pDBO2->szNickName));
-		m_TreasureDB->GetValue_String(TEXT("HeadUrl"),pDBO2->szHeadUrl,CountArray(pDBO2->szHeadUrl));
-		//pDBO2->lScore=m_TreasureDB->GetValue_LONGLONG(TEXT("Score"));
-
-		//设置位移
-		wPacketSize2+=sizeof(STR_CMD_LC_SERVICE_PURE_RECORD_LIST_PLAYERINFO);
-
-		//移动记录
-		m_TreasureDB->MoveToNext();
-	}
-	if (wPacketSize2>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_PURE_RECORD_LIST_PINFO,dwContextID,cbBuffer2,wPacketSize2);
-
-#pragma endregion
-
-#pragma region 大局信息结束
-	STR_CMD_LC_SERVICE_PURE_RECORD_LIST_FINIST DBOFinish;
-	DBOFinish.byMask = 1;
-
-	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_PURE_RECORD_FINISH,dwContextID,&DBOFinish,sizeof(DBOFinish));
-
-	return true;
-#pragma endregion
-
-}
-
-//pure大厅 小局战绩 
-bool CDataBaseEngineSink::On_DBR_CL_SERVICE_PURE_XJ_RECORD_LIST(DWORD dwContextID, void * pData, WORD wDataSize)
-{
-	if (sizeof(STR_SUB_CL_SERVICE_PURE_XJ_RECORD_LIST) != wDataSize)
-	{
-		return false;
-	}
-
-	STR_SUB_CL_SERVICE_PURE_XJ_RECORD_LIST* pDbReq = (STR_SUB_CL_SERVICE_PURE_XJ_RECORD_LIST*)pData;
-
-#pragma region 小局信息
-	m_TreasureDB->ResetParameter();
-	m_TreasureDB->AddParameter(TEXT("dwDrawID"), pDbReq->dwDrawID);
-
-	//执行查询
-	LONG lResultCode = m_TreasureDB->ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_XJ_RECORD_LIST"), true);
-
-	//列表发送
-	WORD wPacketSize=0;
-	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
-	wPacketSize=0;
-	STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST * pDBO=NULL;
-
-	if(lResultCode == DB_SUCCESS)
-	{
-		while (m_TreasureDB->IsRecordsetEnd()==false)
-		{
-			//发送信息
-			if ((wPacketSize+sizeof(STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST))>sizeof(cbBuffer))
-			{
-				g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_PURE_XJ_RECORD_LIST,dwContextID,cbBuffer,wPacketSize);
-				wPacketSize=0;
-			}
-			//读取信息
-			pDBO=(STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST *)(cbBuffer+wPacketSize);
-			pDBO->bRoundCount = m_TreasureDB->GetValue_BYTE(TEXT("RoundCount"));
-			pDBO->dwRecordID = m_TreasureDB->GetValue_DWORD(TEXT("RoundID"));
-
-			//设置位移
-			wPacketSize+=sizeof(STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST);
-
-			//移动记录
-			m_TreasureDB->MoveToNext();
-		}
-		if (wPacketSize>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_PURE_XJ_RECORD_LIST,dwContextID,cbBuffer,wPacketSize);
-	}
-#pragma endregion
-
-#pragma region 小局上的玩家信息
-	m_TreasureDB->ResetParameter();
-	m_TreasureDB->AddParameter(TEXT("dwDrawID"), pDbReq->dwDrawID);
-
-	//执行查询,执行抽奖
-	LONG lResultCode2 = m_TreasureDB->ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_XJ_RECORD_LIST_PLAYINFO"), true);
-
-	//列表发送
-	WORD wPacketSize2=0;
-	BYTE cbBuffer2[MAX_ASYNCHRONISM_DATA/10];
-	STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_PLAYERINFO * pDBO2=NULL;
-
-	if(lResultCode2 == DB_SUCCESS)
-	{
-		while (m_TreasureDB->IsRecordsetEnd()==false)
-		{
-			//发送信息
-			if ((wPacketSize2+sizeof(STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_PLAYERINFO))>sizeof(cbBuffer2))
-			{
-				g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_PURE_XJ_RECORD_LIST_PINFO,dwContextID,cbBuffer2,static_cast<WORD>(wPacketSize2));
-				wPacketSize2=0;
-			}
-			//读取信息
-			pDBO2=(STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_PLAYERINFO*)(cbBuffer2+wPacketSize2);
-			pDBO2->bRoundCount = m_TreasureDB->GetValue_BYTE(TEXT("RoundCount"));
-			pDBO2->dwUserID = m_TreasureDB->GetValue_DWORD(TEXT("UserID"));
-			m_TreasureDB->GetValue_String(TEXT("NickName"),pDBO2->szNickName,CountArray(pDBO2->szNickName));
-			//pDBO2->lScore=m_TreasureDB->GetValue_LONGLONG(TEXT("Score"));
-
-			//设置位移
-			wPacketSize2+=sizeof(STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_PLAYERINFO);
-
-			//移动记录
-			m_TreasureDB->MoveToNext();
-		}
-		if (wPacketSize2>0) g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_PURE_XJ_RECORD_LIST_PINFO,dwContextID,cbBuffer2,wPacketSize2);
-	}
-#pragma endregion
-
-#pragma region 小局信息结束
-	STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_FINISH DBOFinish;
-	DBOFinish.byMask = 1;
-
-	g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_PURE_XJ_RECORD_FINISH,dwContextID,&DBOFinish,sizeof(DBOFinish));
-#pragma endregion
-
-
-	return true;
-}
-
-//小局录像回放
-bool CDataBaseEngineSink::On_DBR_CL_Service_XJRecordPlayback(DWORD dwContextID, void * pData, WORD wDataSize)
-{
-	if (sizeof(STR_DBR_CL_SERVICE_XJ_RECORD_PLAYBACK) != wDataSize)
-	{
-		return false;
-	}
-
-	STR_DBR_CL_SERVICE_XJ_RECORD_PLAYBACK* pDbReq = (STR_DBR_CL_SERVICE_XJ_RECORD_PLAYBACK*)pData;
-
-	//输入参数
-	m_TreasureDB->ResetParameter();
-	m_TreasureDB->AddParameter(TEXT("@dwRoundID"), pDbReq->dwRecordID);
-
-	//输出变量
-	WCHAR szDescribe[128] = L"";
-	m_TreasureDB->AddParameterOutput(TEXT("@strErrorDescribe"), szDescribe, sizeof(szDescribe), adParamOutput);
-
-	//执行查询
-	LONG lResultCode = m_TreasureDB->ExecuteProcess(TEXT("GSP_CL_GETVIDEORECORD"), true);
-	if (lResultCode == DB_SUCCESS)
-	{
-		//结果处理
-		CDBVarValue DBVarValue;
-		m_TreasureDB->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
-
-		//构造DBO数据
-		STR_DBO_LC_SERVICE_XJ_RECORD_PLAYBACK DBO;
-		ZeroMemory(&DBO, sizeof(STR_DBO_LC_SERVICE_XJ_RECORD_PLAYBACK));
-
-		//获取录像数据
-		TCHAR szData[2*LEN_MAX_RECORD_SIZE];
-		m_TreasureDB->GetValue_String(TEXT("VideoData"), szData, CountArray(szData));
-		StrToBin(szData, DBO.cbRecordData, 0, LEN_MAX_RECORD_SIZE*2-1);
-
-		DBO.dwDataSize = m_TreasureDB->GetValue_DWORD(TEXT("VideoSize"));
-		DBO.wCurrentCount =  m_TreasureDB->GetValue_WORD(TEXT("CurrentRound"));
-
-		g_AttemperEngineSink->OnEventDataBaseResult(DBO_LC_SERVICE_XJ_RECORD_PLAYBACK, dwContextID, &DBO, sizeof(STR_DBO_LC_SERVICE_XJ_RECORD_PLAYBACK));
-
-	}
-
 
 	return true;
 }

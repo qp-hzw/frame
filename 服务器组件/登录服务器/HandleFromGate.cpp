@@ -112,34 +112,6 @@ bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwScoketID, VOID * p
 		{
 			return On_CMD_LC_SERVICE_PURE_STANDING_FINISH(dwScoketID,pData,wDataSize);
 		}
-	case DBO_LC_SERVICE_PURE_RECORD_LIST:		//大局战绩
-		{
-			return On_CMD_LC_SERVICE_PURE_RECORD_LIST(dwScoketID,pData,wDataSize);
-		}
-	case DBO_LC_SERVICE_PURE_RECORD_LIST_PINFO:	//大局玩家信息
-		{
-			return On_CMD_LC_SERVICE_PURE_RECORD_LIST_PINFO(dwScoketID,pData,wDataSize);
-		}
-	case DBO_LC_SERVICE_PURE_RECORD_FINISH://大局战绩结束
-		{
-			return On_CMD_LC_SERVICE_PURE_RECORD_FINISH(dwScoketID,pData,wDataSize);
-		}
-	case DBO_LC_SERVICE_PURE_XJ_RECORD_LIST:		//小局战绩
-		{
-			return On_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST(dwScoketID,pData,wDataSize);
-		}
-	case DBO_LC_SERVICE_PURE_XJ_RECORD_LIST_PINFO:	//小局玩家信息
-		{
-			return On_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_PINFO(dwScoketID,pData,wDataSize);
-		}
-	case DBO_LC_SERVICE_XJ_RECORD_PLAYBACK:			//小局录像回放
-		{
-			return On_CMD_LC_Service_XJRecordPlayback(dwScoketID,pData,wDataSize);
-		}
-	case DBO_LC_SERVICE_PURE_XJ_RECORD_FINISH://小局战绩结束
-		{
-			return On_CMD_LC_SERVICE_PURE_XJ_RECORD_FINISH(dwScoketID,pData,wDataSize);
-		}
 			 
 #pragma region MDM_CLUB 牌友圈
 	case DBO_LC_CLUB_RANDOM_CLUB_LIST : //查询未满员随机牌友圈 返回
@@ -589,7 +561,7 @@ bool CHandleFromGate::On_CMD_LC_Logon_Account(DWORD dwScoketID, VOID * pData, WO
 	STR_CPR_LP_OFFLINE_PLAYERQUERY CPR;
 	CPR.dwUserID = pCMD->useInfo.dwUserID;
 	g_TCPSocketEngine->SendData(CPD_MDM_TRANSFER, CPR_LP_OFFLINE_PLAYERQUERY, &CPR, sizeof(CPR));
-
+	
 	/* TODONOW
 	//登录奖励
 	On_CMD_LC_Logon_Logon_Reward(dwScoketID, pCMD->LasLogonDate);
@@ -1348,56 +1320,78 @@ bool CHandleFromGate::On_CMD_LC_SERVICE_PURE_STANDING_FINISH( DWORD dwScoketID, 
 //pure大局战绩 查询
 bool CHandleFromGate::On_SUB_CL_SERVICE_PURE_RECORD_LIST(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//参数校验
-	if(wDataSize!=sizeof(STR_SUB_CL_SERVICE_PURE_RECORD_LIST))
+	//玩家校验
+	CPlayer *player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	if (player == NULL)
 		return false;
 
-	g_GameCtrl->PostDataBaseRequest(DBR_CL_SERVICE_PURE_RECORD_LIST,dwSocketID,pData, wDataSize);
+	g_TreasureDB->ResetParameter();
+	g_TreasureDB->AddParameter(TEXT("@dwUserID"), player->GetUserID());
+
+	//执行查询
+	LONG lResultCode = g_TreasureDB->ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_RECORD_LIST"),true);
+
+	//列表发送
+	WORD wPacketSize = 0;
+	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/4];
+	STR_CMD_LC_SERVICE_PURE_RECORD_LIST *pList = NULL;
+
+	while ( (lResultCode == DB_SUCCESS) && (g_TreasureDB->IsRecordsetEnd()==false))
+	{
+		//发送信息
+		if ((wPacketSize+sizeof(STR_CMD_LC_SERVICE_PURE_RECORD_LIST))>sizeof(cbBuffer))
+		{
+			g_GameCtrl->SendData(dwSocketID, MDM_SERVICE, CMD_LC_SERVICE_PURE_RECORD_LIST, cbBuffer, wPacketSize);
+			wPacketSize=0;
+		}
+
+		pList = (STR_CMD_LC_SERVICE_PURE_RECORD_LIST *)(cbBuffer + wPacketSize);
+		pList->dwTableID = g_TreasureDB->GetValue_DWORD(TEXT("TableID"));
+		pList->wGameMode = g_TreasureDB->GetValue_WORD(TEXT("GameMode"));
+		pList->wGameCount = g_TreasureDB->GetValue_WORD(TEXT("AllCount"));
+		pList->wPlayerCount = g_TreasureDB->GetValue_WORD(TEXT("PlayerCount"));
+		pList->wKindID = g_TreasureDB->GetValue_WORD(TEXT("KindID"));
+		g_TreasureDB->GetValue_String(TEXT("InsertTime"), pList->szTime, CountArray(pList->szTime));
+		g_TreasureDB->GetValue_String(TEXT("OnlyID"), pList->szOnlyID, CountArray(pList->szOnlyID));
+
+		CLog::Log(log_debug, "TableID: %d", pList->dwTableID);
+		CLog::Log(log_debug, "GameMode: %d", pList->wGameMode);
+		CLog::Log(log_debug, "AllCount: %d", pList->wGameCount);
+		CLog::Log(log_debug, "PlayerCount: %d", pList->wPlayerCount);
+
+		//下一个查询
+		g_spTreasureDB->ResetParameter();
+		g_spTreasureDB->AddParameter(TEXT("@OnlyID"), pList->szOnlyID);
+
+		//执行查询
+		LONG llResultCode = g_spTreasureDB->ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_RECORD_LIST_PLAYINFO"),true);
+		for (WORD i = 0; i < pList->wPlayerCount; i++)
+		{
+			//结束判断
+			if (g_spTreasureDB->IsRecordsetEnd()==true) break;
+
+			pList->Info[i].dwUserID = g_spTreasureDB->GetValue_DWORD(TEXT("UserID"));
+			pList->Info[i].llScore = g_spTreasureDB->GetValue_LONGLONG(TEXT("Score"));
+			g_spTreasureDB->GetValue_String(TEXT("NickName"), pList->Info[i].szName, CountArray(pList->Info[i].szName));
+			g_spTreasureDB->GetValue_String(TEXT("HeadUrl"), pList->Info[i].szHeadUrl, CountArray(pList->Info[i].szHeadUrl));
+
+			CLog::Log(log_debug, "info[%d]: dwUserID: %d", i, pList->Info[i].dwUserID);
+			CLog::Log(log_debug, "info[%d]: llScore: %d", i, pList->Info[i].llScore);
+
+			//移动记录
+			g_spTreasureDB->MoveToNext();
+		}
+
+		//设置位移
+		wPacketSize+=sizeof(STR_CMD_LC_SERVICE_PURE_RECORD_LIST);
+
+		//移动记录
+		g_TreasureDB->MoveToNext();
+	}
+	if (wPacketSize > 0)	g_GameCtrl->SendData(dwSocketID, MDM_SERVICE, CMD_LC_SERVICE_PURE_RECORD_LIST, cbBuffer, wPacketSize);
 
 	return true;
 }
-//pure大局战绩 返回
-bool CHandleFromGate::On_CMD_LC_SERVICE_PURE_RECORD_LIST( DWORD dwScoketID, VOID * pData, WORD wDataSize )
-{
-	//参数校验
-	DWORD Count = sizeof(STR_CMD_LC_SERVICE_PURE_RECORD_LIST);
-	if(wDataSize<Count || (wDataSize%Count != 0))
-		return false;
-
-	//发送数据
-	g_GameCtrl->SendData(dwScoketID,MDM_SERVICE, CMD_LC_SERVICE_PURE_RECORD_LIST, pData, wDataSize);
-
-	return true;
-}
-//pure大局玩家信息 返回
-bool CHandleFromGate::On_CMD_LC_SERVICE_PURE_RECORD_LIST_PINFO( DWORD dwScoketID, VOID * pData, WORD wDataSize )
-{
-	//参数校验
-	DWORD Count = sizeof(STR_CMD_LC_SERVICE_PURE_RECORD_LIST_PLAYERINFO);
-	if(wDataSize<Count || (wDataSize%Count != 0))
-		return false;
-
-	//发送数据
-	g_GameCtrl->SendData(dwScoketID,MDM_SERVICE, CMD_LC_SERVICE_PURE_RECORD_LIST_PINFO, pData, wDataSize);
-
-	return true;
-}
-//pure大局战绩 结束
-bool CHandleFromGate::On_CMD_LC_SERVICE_PURE_RECORD_FINISH( DWORD dwScoketID, VOID * pData, WORD wDataSize )
-{
-	//参数校验
-	if(wDataSize!=sizeof(STR_CMD_LC_SERVICE_PURE_RECORD_LIST_FINIST))
-		return false;
-
-	STR_CMD_LC_SERVICE_PURE_RECORD_LIST_FINIST *pLotteryResult = (STR_CMD_LC_SERVICE_PURE_RECORD_LIST_FINIST*)pData;
-	pLotteryResult->byMask = 1;
-
-	//发送数据
-	g_GameCtrl->SendData(dwScoketID,MDM_SERVICE, CMD_LC_SERVICE_PURE_RECORD_FINISH, pLotteryResult, sizeof(STR_CMD_LC_SERVICE_PURE_RECORD_LIST_FINIST));
-
-	return true;
-}
-
 //pure小局战绩 查询
 bool CHandleFromGate::On_SUB_CL_SERVICE_PURE_XJ_RECORD_LIST(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
@@ -1405,52 +1399,81 @@ bool CHandleFromGate::On_SUB_CL_SERVICE_PURE_XJ_RECORD_LIST(VOID * pData, WORD w
 	if(wDataSize!=sizeof(STR_SUB_CL_SERVICE_PURE_XJ_RECORD_LIST))
 		return false;
 
-	return g_GameCtrl->PostDataBaseRequest(DBR_CL_SERVICE_PURE_XJ_RECORD_LIST,dwSocketID,pData, wDataSize);
-}
-//pure小局战绩 返回
-bool CHandleFromGate::On_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST( DWORD dwScoketID, VOID * pData, WORD wDataSize )
-{
-	//参数校验
-	DWORD Count = sizeof(STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST);
-	if(wDataSize<Count || (wDataSize%Count != 0))
+	//玩家校验
+	CPlayer *player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	if (player == NULL)
 		return false;
 
-	STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST * pCMD = (STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST *) pData;
+	//获取对象
+	STR_SUB_CL_SERVICE_PURE_XJ_RECORD_LIST *data = (STR_SUB_CL_SERVICE_PURE_XJ_RECORD_LIST *)pData;
 
-	//发送数据
-	g_GameCtrl->SendData(dwScoketID,MDM_SERVICE, CMD_LC_SERVICE_PURE_XJ_RECORD_LIST, pData, wDataSize);
+	g_TreasureDB->ResetParameter();
+	g_TreasureDB->AddParameter(TEXT("@OnlyID"), data->szOnlyID);
+
+	//执行查询
+	LONG lResultCode = g_TreasureDB->ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_XJ_RECORD_LIST"),true);
+
+	//列表发送
+	WORD wPacketSize = 0;
+	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/4];
+	STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST *pList = NULL;
+
+	while ( (lResultCode == DB_SUCCESS) && (g_TreasureDB->IsRecordsetEnd()==false))
+	{
+		//发送信息
+		if ((wPacketSize+sizeof(STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST))>sizeof(cbBuffer))
+		{
+			g_GameCtrl->SendData(dwSocketID, MDM_SERVICE, CMD_LC_SERVICE_PURE_XJ_RECORD_LIST, cbBuffer, wPacketSize);
+			wPacketSize=0;
+		}
+
+		pList = (STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST *)(cbBuffer + wPacketSize);
+		pList->dwTableID = g_TreasureDB->GetValue_DWORD(TEXT("TableID"));
+		pList->wCurCount = g_TreasureDB->GetValue_WORD(TEXT("CurCount"));
+		pList->wPlayerCount = g_TreasureDB->GetValue_WORD(TEXT("PlayerCount"));
+		g_TreasureDB->GetValue_String(TEXT("InsertTime"), pList->szTime, CountArray(pList->szTime));
+		g_TreasureDB->GetValue_String(TEXT("OnlyID"), pList->szOnlyID, CountArray(pList->szOnlyID));
+
+		CLog::Log(log_debug, "TableID: %d", pList->dwTableID);
+		CLog::Log(log_debug, "CurCount: %d", pList->wCurCount);
+		CLog::Log(log_debug, "PlayerCount: %d", pList->wPlayerCount);
+
+		//下一个查询
+		g_spTreasureDB->ResetParameter();
+		g_spTreasureDB->AddParameter(TEXT("@CurCount"), pList->wCurCount);
+		g_spTreasureDB->AddParameter(TEXT("@OnlyID"), pList->szOnlyID);
+
+		//执行查询
+		LONG llResultCode = g_spTreasureDB->ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_XJ_RECORD_LIST_PLAYINFO"),true);
+		for (WORD i = 0; i < pList->wPlayerCount; i++)
+		{
+			//结束判断
+			if (g_spTreasureDB->IsRecordsetEnd()==true) { CLog::Log(log_debug, "End"); break;}
+
+			pList->Info[i].dwUserID = g_spTreasureDB->GetValue_DWORD(TEXT("UserID"));
+			pList->Info[i].llScore = g_spTreasureDB->GetValue_LONGLONG(TEXT("Score"));
+			pList->Info[i].wIdentity = g_spTreasureDB->GetValue_WORD(TEXT("PlayerIdentity"));
+			g_spTreasureDB->GetValue_String(TEXT("NickName"), pList->Info[i].szName, CountArray(pList->Info[i].szName));
+			g_spTreasureDB->GetValue_String(TEXT("HeadUrl"), pList->Info[i].szHeadUrl, CountArray(pList->Info[i].szHeadUrl));
+
+			CLog::Log(log_debug, "info[%d]: dwUserID: %d", i, pList->Info[i].dwUserID);
+			CLog::Log(log_debug, "info[%d]: llScore: %d", i, pList->Info[i].llScore);
+			CLog::Log(log_debug, "info[%d]: wIdentity: %d", i, pList->Info[i].wIdentity);
+
+			//移动记录
+			g_spTreasureDB->MoveToNext();
+		}
+
+		//设置位移
+		wPacketSize+=sizeof(STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST);
+
+		//移动记录
+		g_TreasureDB->MoveToNext();
+	}
+	if (wPacketSize > 0)	g_GameCtrl->SendData(dwSocketID, MDM_SERVICE, CMD_LC_SERVICE_PURE_XJ_RECORD_LIST, cbBuffer, wPacketSize);
 
 	return true;
 }
-//pure小局玩家信息 返回
-bool CHandleFromGate::On_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_PINFO( DWORD dwScoketID, VOID * pData, WORD wDataSize )
-{
-	//参数校验
-	DWORD Count = sizeof(STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_PLAYERINFO);
-	if(wDataSize<Count || (wDataSize%Count != 0))
-		return false;
-
-	//发送数据
-	g_GameCtrl->SendData(dwScoketID,MDM_SERVICE, CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_PINFO, pData, wDataSize);
-
-	return true;
-}
-//pure小局战绩 结束
-bool CHandleFromGate::On_CMD_LC_SERVICE_PURE_XJ_RECORD_FINISH( DWORD dwScoketID, VOID * pData, WORD wDataSize )
-{
-	//参数校验
-	if(wDataSize!=sizeof(STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_FINISH))
-		return false;
-
-	STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_FINISH *pLotteryResult = (STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_FINISH*)pData;
-	pLotteryResult->byMask = 1;
-
-	//发送数据
-	g_GameCtrl->SendData(dwScoketID,MDM_SERVICE, CMD_LC_SERVICE_PURE_XJ_RECORD_FINISH, pLotteryResult, sizeof(STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST_FINISH));
-
-	return true;
-}
-
 //小局录像回放
 bool CHandleFromGate::On_SUB_CL_Service_XJRecordPlayback(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
@@ -1458,45 +1481,86 @@ bool CHandleFromGate::On_SUB_CL_Service_XJRecordPlayback(VOID * pData, WORD wDat
 	if ( wDataSize != sizeof(STR_SUB_CL_SERVICE_XJ_RECORD_PLAYBACK) )
 		return false;
 
-	//SUB数据
-	STR_SUB_CL_SERVICE_XJ_RECORD_PLAYBACK *SUB = (STR_SUB_CL_SERVICE_XJ_RECORD_PLAYBACK *)pData;
-	
-	//构造DBR数据
-	STR_DBR_CL_SERVICE_XJ_RECORD_PLAYBACK DBR;
-	ZeroMemory(&DBR, sizeof(STR_DBR_CL_SERVICE_XJ_RECORD_PLAYBACK));
-	DBR.dwRecordID = SUB->dwRecordID;
-
-	return g_GameCtrl->PostDataBaseRequest(DBR_CL_SERVICE_XJ_RECORD_PLAYBACK, dwSocketID, &DBR, wDataSize);
-}
-//小局录像回放 返回
-bool CHandleFromGate::On_CMD_LC_Service_XJRecordPlayback( DWORD dwScoketID, VOID * pData, WORD wDataSize )
-{
-	//参数校验
-	if(wDataSize != sizeof(STR_DBO_LC_SERVICE_XJ_RECORD_PLAYBACK))
+	//玩家校验
+	CPlayer *player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	if (player == NULL)
 		return false;
 
-	//DBO数据
-	STR_DBO_LC_SERVICE_XJ_RECORD_PLAYBACK *pDBO = (STR_DBO_LC_SERVICE_XJ_RECORD_PLAYBACK*)pData;
+	//获取对象
+	STR_SUB_CL_SERVICE_XJ_RECORD_PLAYBACK *data = (STR_SUB_CL_SERVICE_XJ_RECORD_PLAYBACK *)pData;
 
-	BYTE cbBuffer[LEN_MAX_RECORD_SIZE];	
-	memcpy_s(cbBuffer, sizeof(cbBuffer), pDBO->cbRecordData, sizeof(cbBuffer));
+	g_TreasureDB->ResetParameter();
+	g_TreasureDB->AddParameter(TEXT("@OnlyID"), data->szOnlyID);
+	g_TreasureDB->AddParameter(TEXT("@CurCount"), data->wCurCount);
 
-	//分批发送
-	for (int i = 0; i < 4; i++)
+	//执行查询
+	LONG lResultCode = g_TreasureDB->ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_XJ_RECORD_INFO"),true);
+
+	if (lResultCode == DB_SUCCESS)
 	{
-		STR_CMD_LC_SERVICE_XJ_RECORD_PLAYBACK CMD;
-		ZeroMemory(&CMD, sizeof(STR_CMD_LC_SERVICE_XJ_RECORD_PLAYBACK));
-		memcpy_s(CMD.cbRecordData, sizeof(CMD.cbRecordData), cbBuffer+i*LEN_MAX_RECORD_SIZE/4, sizeof(CMD.cbRecordData));
-		CMD.cbfinish = (i==3) ? 1 : 0;
+		//获取录像数据
+		TCHAR szData[2*LEN_MAX_RECORD_SIZE];
+		g_TreasureDB->GetValue_String(TEXT("VideoData"), szData, CountArray(szData));
 
-		//发送数据
-		g_GameCtrl->SendData(dwScoketID, MDM_SERVICE, CMD_LC_SERVICE_XJ_RECORD_PLAYBACK, &CMD, sizeof(CMD));
+		//数据转换
+		BYTE cbBuffer[LEN_MAX_RECORD_SIZE];	
+		StrToBin(szData, cbBuffer, 0, LEN_MAX_RECORD_SIZE*2-1);
 
+		//分批发送
+		for (int i = 0; i < 4; i++)
+		{
+			STR_CMD_LC_SERVICE_XJ_RECORD_PLAYBACK CMD;
+			ZeroMemory(&CMD, sizeof(STR_CMD_LC_SERVICE_XJ_RECORD_PLAYBACK));
+			memcpy_s(CMD.cbRecordData, sizeof(CMD.cbRecordData), cbBuffer+i*LEN_MAX_RECORD_SIZE/4, sizeof(CMD.cbRecordData));
+			CMD.cbFinish = (i==3) ? 1 : 0;
+
+			//发送数据
+			g_GameCtrl->SendData(dwSocketID, MDM_SERVICE, CMD_LC_SERVICE_XJ_RECORD_PLAYBACK, &CMD, sizeof(CMD));
+		}
 	}
+
+	//发送玩家信息
+	g_TreasureDB->ResetParameter();
+	g_TreasureDB->AddParameter(TEXT("@CurCount"), data->wCurCount);
+	g_TreasureDB->AddParameter(TEXT("@OnlyID"), data->szOnlyID);
+
+	//执行查询
+	LONG llResultCode = g_TreasureDB->ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_XJ_RECORD_LIST_PLAYINFO"),true);
+
+	//列表发送
+	WORD wPacketSize = 0;
+	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/4];
+	RecodeXjPlayerInfo *pInfo = NULL;
+
+	while ( (llResultCode == DB_SUCCESS) && (g_TreasureDB->IsRecordsetEnd()==false))
+	{
+		//发送信息
+		if ((wPacketSize+sizeof(RecodeXjPlayerInfo))>sizeof(cbBuffer))
+		{
+			g_GameCtrl->SendData(dwSocketID, MDM_SERVICE, CMD_LC_SERVICE_XJ_RECORD_PLAYERINFO, cbBuffer, wPacketSize);
+			wPacketSize=0;
+		}
+
+		pInfo = (RecodeXjPlayerInfo *)(cbBuffer + wPacketSize);
+		pInfo->dwUserID = g_TreasureDB->GetValue_DWORD(TEXT("UserID"));
+		pInfo->llScore = g_TreasureDB->GetValue_LONGLONG(TEXT("Score"));
+		pInfo->wIdentity = g_TreasureDB->GetValue_WORD(TEXT("PlayerIdentity"));
+		g_TreasureDB->GetValue_String(TEXT("NickName"), pInfo->szName, CountArray(pInfo->szName));
+		g_TreasureDB->GetValue_String(TEXT("HeadUrl"), pInfo->szHeadUrl, CountArray(pInfo->szHeadUrl));
+
+		CLog::Log(log_debug, " dwUserID: %d", pInfo->dwUserID);
+		CLog::Log(log_debug, " llScore: %d", pInfo->llScore);
+
+		//设置位移
+		wPacketSize+=sizeof(RecodeXjPlayerInfo);
+
+		//移动记录
+		g_TreasureDB->MoveToNext();
+	}
+	if (wPacketSize > 0)	g_GameCtrl->SendData(dwSocketID, MDM_SERVICE, CMD_LC_SERVICE_XJ_RECORD_PLAYERINFO, cbBuffer, wPacketSize);
 
 	return true;
 }
-
 
 //修改个人资料
 bool CHandleFromGate::On_SUB_CL_Service_ModifyPersonalInfo(VOID * pData, WORD wDataSize, DWORD dwSocketID)
