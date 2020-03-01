@@ -487,6 +487,15 @@ struct STR_SUB_CL_SERVICE_XJ_RECORD_PLAYBACK
 	WORD					wCurCount;					//局数
 	TCHAR					szOnlyID[32];				//唯一标识
 };
+//小局录像 单个玩家信息
+struct RecodePlayerInfo
+{
+	DWORD					dwUserID;					//ID
+	TCHAR					szName[LEN_NICKNAME];		//玩家昵称
+	TCHAR					szHeadUrl[LEN_HEAD_URL];	//头像地址
+	SCORE					llScore;					//玩家得分
+	WORD					wChairID;
+};
 //小局录像回放返回
 struct STR_CMD_LC_SERVICE_XJ_RECORD_PLAYBACK
 {

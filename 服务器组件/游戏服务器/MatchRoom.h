@@ -45,7 +45,7 @@ public:
 	//玩家坐下	
 	virtual int PlayerSitTable(CPlayer * pIServerUserItem, WORD wChairID = INVALID_CHAIR, bool bCheckUserGPS = false);
 	//小局结束
-	virtual bool HandleXJGameEnd(BYTE byRound, WORD *wIdentity, SCORE *lUserTreasure, VOID* pData, DWORD dwDataSize);
+	virtual bool HandleXJGameEnd(BYTE byRound, WORD *wIdentity, SCORE *lUserTreasure);
 	//大局结束
 	virtual bool HandleDJGameEnd(BYTE cbGameStatus);
 	//游戏开始

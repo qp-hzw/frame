@@ -50,10 +50,10 @@ int CMatchRoom::PlayerSitTable(CPlayer * pIServerUserItem, WORD wChairID, bool b
 }
 
 //小局结束
-bool CMatchRoom::HandleXJGameEnd(BYTE byRound, WORD *wIdentity, SCORE *lUserTreasure, VOID* pData, DWORD dwDataSize)
+bool CMatchRoom::HandleXJGameEnd(BYTE byRound, WORD *wIdentity, SCORE *lUserTreasure)
 {
 	//正常小局结束流程
-	CTableFrame::HandleXJGameEnd(byRound, wIdentity, lUserTreasure, pData, dwDataSize);
+	CTableFrame::HandleXJGameEnd(byRound, wIdentity, lUserTreasure);
 	CLog::Log(log_debug, "小局结束！");
 	//更新排名
 	m_Match_Item->Update_Ranking(this);
@@ -73,6 +73,23 @@ bool CMatchRoom::HandleXJGameEnd(BYTE byRound, WORD *wIdentity, SCORE *lUserTrea
 //大局结束
 bool CMatchRoom::HandleDJGameEnd(BYTE cbGameStatus)
 {
+	if (!GetOnlyID().empty())
+	{
+		//更新玩家输赢情况表
+		int i =0;
+		for(auto player : GetPlayer_list())
+		{
+			if (player)
+			{
+				player ->ModifyPlayerScore(0, 0, GetTotalScore()[i], GetOnlyID());
+				i++;
+			}
+		}
+
+		//更新桌子战绩
+		XJUpdateTableRecord(0, GetOnlyID());
+	}
+
 	//玩家离开房间
 	for(auto player : GetPlayer_list())
 	{

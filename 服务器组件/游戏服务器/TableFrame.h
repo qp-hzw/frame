@@ -6,6 +6,7 @@
 #include "Stdafx.h"
 #include "Player.h"
 #include "TableFrameBase.h"
+#include "SubRecord.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -62,6 +63,8 @@ private:
 	DWORD							m_dwTableOwner;						//房主（第一个坐下的玩家）
 
 	std::string						m_OnlyID;							//战绩记录的唯一标识
+
+	CSubRecord						m_Record;							//录像回放
 
 	/****************************************** 动态数据 **************************************************/
 private:
@@ -145,6 +148,7 @@ public:
 		memcpy(&m_tagTableRule, pRule, sizeof(m_tagTableRule));
 		m_wChairCount = pRule->PlayerCount;
 		m_player_list.resize(m_wChairCount, NULL);
+		m_total_score.resize(m_wChairCount, 0);
 
 		//初始化子游戏规则
 		if (m_pITableFrameSink != NULL)
@@ -177,6 +181,8 @@ public:
 
 	//获取总分
 	std::vector<SCORE> GetTotalScore() { return m_total_score; }
+	//获取OnlyID
+	std::string GetOnlyID()	{ return m_OnlyID; }
 
 	//开始下一阶段比赛
 	virtual void StartNextStage() { CLog::Log(log_debug, "no"); }
@@ -199,12 +205,12 @@ protected:
 	//与子游戏交互函数
 public:
 	//小局结束处理函数
-	virtual bool HandleXJGameEnd(BYTE cbCurGameCount,WORD *wIdentity, SCORE *lGameScore, VOID* pData, DWORD dwDataSize);
+	virtual bool HandleXJGameEnd(BYTE cbCurGameCount,WORD *wIdentity, SCORE *lGameScore);
 	//大局结束处理函数  之前名字为: HandleDJGameEnd
 	virtual bool HandleDJGameEnd(BYTE cbGameStatus);
 
 	//小局大局结束辅助函数
-private:	
+protected:	
 	//每局游戏结束后, 判断并扣除用户门票
 	bool XJTickets();
 	//每局游戏结束后，更新用户财富信息

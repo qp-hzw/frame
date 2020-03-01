@@ -179,7 +179,7 @@
 #define LEN_GROUP_NOTICE					256									//牌友圈公告
 #define LEN_GROUP_MESSAGE					256									//牌友圈聊天信息长度
 
-#define LEN_MAX_RECORD_SIZE				 4096								//录像大小
+#define LEN_MAX_RECORD_SIZE				 2*4096								//录像大小
 #define LEN_MAX_SERVICE_MEG_SIZE		 50									//客服消息大小
 
 

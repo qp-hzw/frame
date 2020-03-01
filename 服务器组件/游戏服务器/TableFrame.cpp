@@ -207,6 +207,12 @@ bool CTableFrame::StartGame()
 		m_player_list.at(i)->SetUserStatus(US_PLAYING,m_wTableID,i);
 	}
 
+	//录像初始化
+	m_Record.Init();
+
+	//录像玩家信息
+	m_Record.AddPlayer(m_player_list);
+
 	/* 通知数据库, 桌子开始 */      
 	tagTableRule *pTableCfg = (tagTableRule*)GetCustomRule();
 	BYTE byClubOrHalGold = 0; //1表示俱乐部房间(房卡或者房卡金币模式);  2表示大厅的金币模式;  其他字段无须处理
@@ -225,9 +231,11 @@ bool CTableFrame::StartGame()
 }
 
 //小局结束处理函数
-bool CTableFrame::HandleXJGameEnd(BYTE byRound, WORD *wIdentity, SCORE *lUserTreasure, VOID* pData, DWORD dwDataSize)
+bool CTableFrame::HandleXJGameEnd(BYTE byRound, WORD *wIdentity, SCORE *lUserTreasure)
 {
 	m_wCurGameRound = byRound;
+	DWORD dwDataSize = 0;
+	VOID *pData = m_Record.GetData(m_tagTableRule.PlayerCount, dwDataSize);
 	if (m_OnlyID.empty())
 	{
 		m_OnlyID = std::to_string(time(0)) + std::to_string(m_wTableID);
@@ -248,7 +256,6 @@ bool CTableFrame::HandleXJGameEnd(BYTE byRound, WORD *wIdentity, SCORE *lUserTre
 	}
 
 	//记录分数 --比赛
-	if (m_total_score.empty())	m_total_score.resize(m_player_list.size(), 0);
 	for (int i = 0; i < m_total_score.size(); i++)
 	{
 		m_total_score[i] += lUserTreasure[i];
@@ -499,9 +506,9 @@ bool CTableFrame::XJUpdateTableVideo(BYTE round, string OnlyID, VOID* pData, DWO
 	g_TreasureDB->AddParameter(TEXT("@TableID"), m_wTableID);
 	g_TreasureDB->AddParameter(TEXT("@CurCount"),round);
 	
-	CString szData = toHexString(Data, LEN_MAX_RECORD_SIZE);
-	g_TreasureDB->AddParameter(TEXT("@VideoData"),szData);
-	g_TreasureDB->AddParameter(TEXT("@VideoSize"),LEN_MAX_RECORD_SIZE);
+	std::string szData = CWConvert::toHexString3(Data, LEN_MAX_RECORD_SIZE);
+	g_TreasureDB->AddParameter(TEXT("@VideoData"),szData.c_str());
+	g_TreasureDB->AddParameter(TEXT("@VideoSize"),dwDataSize);
 	g_TreasureDB->AddParameter(TEXT("@OnlyID"), OnlyID.c_str());
 
 	//执行查询
@@ -845,6 +852,12 @@ DWORD CTableFrame::GetTimerLeftTickCount(DWORD dwTimerID)
 //发送数据
 bool CTableFrame::SendTableData(WORD wChairID, WORD wSubCmdID, VOID * pData, WORD wDataSize, WORD wMainCmdID)
 {
+	//数据录像
+	if (wMainCmdID == MDM_GF_GAME)
+	{
+		m_Record.AddRecord(wChairID, wSubCmdID, pData, wDataSize);
+	}
+
 	//用户群发
 	if (wChairID == INVALID_CHAIR)
 	{

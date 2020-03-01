@@ -1499,12 +1499,32 @@ bool CHandleFromGate::On_SUB_CL_Service_XJRecordPlayback(VOID * pData, WORD wDat
 	if (lResultCode == DB_SUCCESS)
 	{
 		//获取录像数据
-		TCHAR szData[2*LEN_MAX_RECORD_SIZE];
+		CHAR szData[2*LEN_MAX_RECORD_SIZE];
 		g_TreasureDB->GetValue_String(TEXT("VideoData"), szData, CountArray(szData));
 
 		//数据转换
 		BYTE cbBuffer[LEN_MAX_RECORD_SIZE];	
-		StrToBin(szData, cbBuffer, 0, LEN_MAX_RECORD_SIZE*2-1);
+		CWConvert::StrToBin3(szData, cbBuffer, 0, LEN_MAX_RECORD_SIZE*2);
+
+		/*WORD *act = (WORD *)cbBuffer;
+		WORD *player = (WORD *)(cbBuffer+2);
+
+		RecodePlayerInfo *pinfo1 = (RecodePlayerInfo *)(cbBuffer+2+2*(*act));
+		RecodePlayerInfo *pinfo2 = (RecodePlayerInfo *)(cbBuffer+2+2*(*act)+sizeof(RecodePlayerInfo));
+		RecodePlayerInfo *pinfo3 = (RecodePlayerInfo *)(cbBuffer+2+2*(*act)+sizeof(RecodePlayerInfo)*2);
+
+		CLog::Log(log_debug, "act: %d", *act);
+		CLog::Log(log_debug, "player: %d", *player);
+
+		CLog::Log(log_debug, "dwUserID1: %d", pinfo1->dwUserID);
+		CLog::Log(log_debug, "dwUserID2: %d", pinfo2->dwUserID);
+		CLog::Log(log_debug, "dwUserID3: %d", pinfo3->dwUserID);
+		CLog::Log(log_debug, "llScore1: %d", pinfo1->llScore);
+		CLog::Log(log_debug, "llScore2: %d", pinfo2->llScore);
+		CLog::Log(log_debug, "llScore3: %d", pinfo3->llScore);
+		CLog::Log(log_debug, "wChairID1: %d", pinfo1->wChairID);
+		CLog::Log(log_debug, "wChairID2: %d", pinfo2->wChairID);
+		CLog::Log(log_debug, "wChairID3: %d", pinfo3->wChairID);*/
 
 		//分批发送
 		for (int i = 0; i < 4; i++)
@@ -1512,52 +1532,14 @@ bool CHandleFromGate::On_SUB_CL_Service_XJRecordPlayback(VOID * pData, WORD wDat
 			STR_CMD_LC_SERVICE_XJ_RECORD_PLAYBACK CMD;
 			ZeroMemory(&CMD, sizeof(STR_CMD_LC_SERVICE_XJ_RECORD_PLAYBACK));
 			memcpy_s(CMD.cbRecordData, sizeof(CMD.cbRecordData), cbBuffer+i*LEN_MAX_RECORD_SIZE/4, sizeof(CMD.cbRecordData));
-			CMD.cbFinish = (i==3) ? 1 : 0;
+			CMD.cbCurCount = i;
+			CMD.cbAllCount = 4;
+			CMD.wKindID = g_TreasureDB->GetValue_WORD(TEXT("KindID"));
 
 			//发送数据
 			g_GameCtrl->SendData(dwSocketID, MDM_SERVICE, CMD_LC_SERVICE_XJ_RECORD_PLAYBACK, &CMD, sizeof(CMD));
 		}
 	}
-
-	//发送玩家信息
-	g_TreasureDB->ResetParameter();
-	g_TreasureDB->AddParameter(TEXT("@CurCount"), data->wCurCount);
-	g_TreasureDB->AddParameter(TEXT("@OnlyID"), data->szOnlyID);
-
-	//执行查询
-	LONG llResultCode = g_TreasureDB->ExecuteProcess(TEXT("GSP_CL_SERVICE_PURE_XJ_RECORD_LIST_PLAYINFO"),true);
-
-	//列表发送
-	WORD wPacketSize = 0;
-	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/4];
-	RecodeXjPlayerInfo *pInfo = NULL;
-
-	while ( (llResultCode == DB_SUCCESS) && (g_TreasureDB->IsRecordsetEnd()==false))
-	{
-		//发送信息
-		if ((wPacketSize+sizeof(RecodeXjPlayerInfo))>sizeof(cbBuffer))
-		{
-			g_GameCtrl->SendData(dwSocketID, MDM_SERVICE, CMD_LC_SERVICE_XJ_RECORD_PLAYERINFO, cbBuffer, wPacketSize);
-			wPacketSize=0;
-		}
-
-		pInfo = (RecodeXjPlayerInfo *)(cbBuffer + wPacketSize);
-		pInfo->dwUserID = g_TreasureDB->GetValue_DWORD(TEXT("UserID"));
-		pInfo->llScore = g_TreasureDB->GetValue_LONGLONG(TEXT("Score"));
-		pInfo->wIdentity = g_TreasureDB->GetValue_WORD(TEXT("PlayerIdentity"));
-		g_TreasureDB->GetValue_String(TEXT("NickName"), pInfo->szName, CountArray(pInfo->szName));
-		g_TreasureDB->GetValue_String(TEXT("HeadUrl"), pInfo->szHeadUrl, CountArray(pInfo->szHeadUrl));
-
-		CLog::Log(log_debug, " dwUserID: %d", pInfo->dwUserID);
-		CLog::Log(log_debug, " llScore: %d", pInfo->llScore);
-
-		//设置位移
-		wPacketSize+=sizeof(RecodeXjPlayerInfo);
-
-		//移动记录
-		g_TreasureDB->MoveToNext();
-	}
-	if (wPacketSize > 0)	g_GameCtrl->SendData(dwSocketID, MDM_SERVICE, CMD_LC_SERVICE_XJ_RECORD_PLAYERINFO, cbBuffer, wPacketSize);
 
 	return true;
 }
