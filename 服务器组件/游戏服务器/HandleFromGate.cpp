@@ -138,6 +138,10 @@ bool CHandleFromGate::OnTCPNetworkMainUser(WORD wSubCmdID, VOID *pData, WORD wDa
 		{
 			return On_SUB_CG_USER_GOLD_INFO(pData, wDataSize, dwSocketID);
 		}
+	case SUB_CG_USER_CHANGE_GOLD_TABLE:	//金币场换桌
+		{
+			return On_SUB_CG_USER_CHANGE_GOLD_TABLE(pData, wDataSize, dwSocketID);
+		}
 	}
 
 	return false;
@@ -391,7 +395,10 @@ bool CHandleFromGate::On_SUB_CG_User_Ready(VOID * pData, WORD wDataSize, DWORD d
 	//获取桌子
 	CTableFrame *pTableFrame = CTableManager::FindTableByTableID(pIServerUserItem->GetTableID());
 	if (pTableFrame == NULL)
+	{
+		CLog::Log(log_error, "pTableFrame == NULL");
 		return false;
+	}
 
 	//准备处理
 	pTableFrame->PlayerReady(pIServerUserItem);
@@ -499,8 +506,6 @@ bool CHandleFromGate::On_SUB_RG_USER_ASK_DISMISS(VOID * pData, WORD wDataSize, D
 	CTableFrame *pTableFrame = CTableManager::FindTableByTableID(pIServerUserItem->GetTableID());
 	if (pTableFrame == NULL)
 		return false;
-
-	STR_SUB_RG_FRAME_ASK_DISMISS *pApply = (STR_SUB_RG_FRAME_ASK_DISMISS*)pData;
 
 	CLog::Log(log_debug, "DISMISS UserID: %d", pIServerUserItem->GetUserID());
 
@@ -836,6 +841,59 @@ bool CHandleFromGate::On_SUB_CG_USER_JOIN_GOLD_HALL_ROOM(VOID * pData, WORD wDat
 	
 	//获取table
 	CTableFrame *pTable = CTableManager::GetGlodTable(pJoin->byType);
+	if(pTable == NULL)
+	{
+		g_GameCtrl->SendDataMsg(dwSocketID, "没有桌子");
+		return true;
+	}
+
+	//用户坐下
+	if(pTable->PlayerSitTable(player) != 0)
+	{
+		g_GameCtrl->SendDataMsg(dwSocketID, "坐下失败");
+		return false;
+	}
+
+	//发送加入房间成功
+	g_GameCtrl->SendData(player, MDM_USER, CMD_GC_USER_ENTER_SUBGAME_ROOM, NULL, 0);
+
+	return true;
+}
+
+//金币场换桌
+bool CHandleFromGate::On_SUB_CG_USER_CHANGE_GOLD_TABLE(VOID * pData, WORD wDataSize, DWORD dwSocketID)
+{
+	//玩家校验
+	CPlayer *player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
+	if (player == NULL)
+		return false;
+
+	//桌子校验
+	CTableFrame *table = CTableManager::FindTableByTableID(player->GetTableID());
+	if (table == NULL)
+		return false;
+
+	//开始游戏校验
+	if ( GAME_STATUS_PLAY == table->GetGameStatus())
+		return false;
+
+	//获取金币桌子场次
+	BYTE cbType = table->GetGoldType();
+
+	//桌子号码
+	DWORD dwTableID = table->GetTableID();
+
+	//用户离开			
+	if (0 != table->PlayerLeaveTable(player))
+	{
+		return false;
+	}
+
+	//检测房间里是否还有真人 没有真人大局结束
+	table->CheckRoomTruePlayer();
+
+	//获取table
+	CTableFrame *pTable = CTableManager::ChangeGlodTable(cbType, dwTableID);
 	if(pTable == NULL)
 	{
 		g_GameCtrl->SendDataMsg(dwSocketID, "没有桌子");

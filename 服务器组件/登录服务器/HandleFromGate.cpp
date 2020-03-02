@@ -1351,13 +1351,12 @@ bool CHandleFromGate::On_SUB_CL_SERVICE_PURE_RECORD_LIST(VOID * pData, WORD wDat
 		pList->wGameCount = g_TreasureDB->GetValue_WORD(TEXT("AllCount"));
 		pList->wPlayerCount = g_TreasureDB->GetValue_WORD(TEXT("PlayerCount"));
 		pList->wKindID = g_TreasureDB->GetValue_WORD(TEXT("KindID"));
-		g_TreasureDB->GetValue_String(TEXT("InsertTime"), pList->szTime, CountArray(pList->szTime));
+		g_TreasureDB->GetValue_SystemTime(TEXT("@InsertDate"), pList->szTime);
 		g_TreasureDB->GetValue_String(TEXT("OnlyID"), pList->szOnlyID, CountArray(pList->szOnlyID));
 
-		CLog::Log(log_debug, "TableID: %d", pList->dwTableID);
-		CLog::Log(log_debug, "GameMode: %d", pList->wGameMode);
-		CLog::Log(log_debug, "AllCount: %d", pList->wGameCount);
-		CLog::Log(log_debug, "PlayerCount: %d", pList->wPlayerCount);
+		CLog::Log(log_debug, "year: %d", pList->szTime.wYear);
+		CLog::Log(log_debug, "year: %d", pList->szTime.wMonth);
+		CLog::Log(log_debug, "year: %d", pList->szTime.wDay);
 
 		//下一个查询
 		g_spTreasureDB->ResetParameter();
@@ -1374,9 +1373,6 @@ bool CHandleFromGate::On_SUB_CL_SERVICE_PURE_RECORD_LIST(VOID * pData, WORD wDat
 			pList->Info[i].llScore = g_spTreasureDB->GetValue_LONGLONG(TEXT("Score"));
 			g_spTreasureDB->GetValue_String(TEXT("NickName"), pList->Info[i].szName, CountArray(pList->Info[i].szName));
 			g_spTreasureDB->GetValue_String(TEXT("HeadUrl"), pList->Info[i].szHeadUrl, CountArray(pList->Info[i].szHeadUrl));
-
-			CLog::Log(log_debug, "info[%d]: dwUserID: %d", i, pList->Info[i].dwUserID);
-			CLog::Log(log_debug, "info[%d]: llScore: %d", i, pList->Info[i].llScore);
 
 			//移动记录
 			g_spTreasureDB->MoveToNext();
@@ -1431,12 +1427,8 @@ bool CHandleFromGate::On_SUB_CL_SERVICE_PURE_XJ_RECORD_LIST(VOID * pData, WORD w
 		pList->dwTableID = g_TreasureDB->GetValue_DWORD(TEXT("TableID"));
 		pList->wCurCount = g_TreasureDB->GetValue_WORD(TEXT("CurCount"));
 		pList->wPlayerCount = g_TreasureDB->GetValue_WORD(TEXT("PlayerCount"));
-		g_TreasureDB->GetValue_String(TEXT("InsertTime"), pList->szTime, CountArray(pList->szTime));
+		g_TreasureDB->GetValue_SystemTime(TEXT("InsertTime"), pList->szTime);
 		g_TreasureDB->GetValue_String(TEXT("OnlyID"), pList->szOnlyID, CountArray(pList->szOnlyID));
-
-		CLog::Log(log_debug, "TableID: %d", pList->dwTableID);
-		CLog::Log(log_debug, "CurCount: %d", pList->wCurCount);
-		CLog::Log(log_debug, "PlayerCount: %d", pList->wPlayerCount);
 
 		//下一个查询
 		g_spTreasureDB->ResetParameter();
@@ -1455,10 +1447,6 @@ bool CHandleFromGate::On_SUB_CL_SERVICE_PURE_XJ_RECORD_LIST(VOID * pData, WORD w
 			pList->Info[i].wIdentity = g_spTreasureDB->GetValue_WORD(TEXT("PlayerIdentity"));
 			g_spTreasureDB->GetValue_String(TEXT("NickName"), pList->Info[i].szName, CountArray(pList->Info[i].szName));
 			g_spTreasureDB->GetValue_String(TEXT("HeadUrl"), pList->Info[i].szHeadUrl, CountArray(pList->Info[i].szHeadUrl));
-
-			CLog::Log(log_debug, "info[%d]: dwUserID: %d", i, pList->Info[i].dwUserID);
-			CLog::Log(log_debug, "info[%d]: llScore: %d", i, pList->Info[i].llScore);
-			CLog::Log(log_debug, "info[%d]: wIdentity: %d", i, pList->Info[i].wIdentity);
 
 			//移动记录
 			g_spTreasureDB->MoveToNext();
@@ -1505,26 +1493,6 @@ bool CHandleFromGate::On_SUB_CL_Service_XJRecordPlayback(VOID * pData, WORD wDat
 		//数据转换
 		BYTE cbBuffer[LEN_MAX_RECORD_SIZE];	
 		CWConvert::StrToBin3(szData, cbBuffer, 0, LEN_MAX_RECORD_SIZE*2);
-
-		/*WORD *act = (WORD *)cbBuffer;
-		WORD *player = (WORD *)(cbBuffer+2);
-
-		RecodePlayerInfo *pinfo1 = (RecodePlayerInfo *)(cbBuffer+2+2*(*act));
-		RecodePlayerInfo *pinfo2 = (RecodePlayerInfo *)(cbBuffer+2+2*(*act)+sizeof(RecodePlayerInfo));
-		RecodePlayerInfo *pinfo3 = (RecodePlayerInfo *)(cbBuffer+2+2*(*act)+sizeof(RecodePlayerInfo)*2);
-
-		CLog::Log(log_debug, "act: %d", *act);
-		CLog::Log(log_debug, "player: %d", *player);
-
-		CLog::Log(log_debug, "dwUserID1: %d", pinfo1->dwUserID);
-		CLog::Log(log_debug, "dwUserID2: %d", pinfo2->dwUserID);
-		CLog::Log(log_debug, "dwUserID3: %d", pinfo3->dwUserID);
-		CLog::Log(log_debug, "llScore1: %d", pinfo1->llScore);
-		CLog::Log(log_debug, "llScore2: %d", pinfo2->llScore);
-		CLog::Log(log_debug, "llScore3: %d", pinfo3->llScore);
-		CLog::Log(log_debug, "wChairID1: %d", pinfo1->wChairID);
-		CLog::Log(log_debug, "wChairID2: %d", pinfo2->wChairID);
-		CLog::Log(log_debug, "wChairID3: %d", pinfo3->wChairID);*/
 
 		//分批发送
 		for (int i = 0; i < 4; i++)

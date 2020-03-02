@@ -35,6 +35,8 @@ public:
 
 	//获取 空闲金币场桌子 byType: 初级, 中级, 高级场次
 	static CTableFrame* GetGlodTable(BYTE byType);
+	//获取 金币场换桌桌子 --不能重复加入
+	static CTableFrame* ChangeGlodTable(BYTE byType, DWORD dwTableID);
 	//获取所有空闲金币场桌子
 	static std::list<CTableFrame*> GetAllGlodTable();
 

@@ -70,6 +70,7 @@
 
 //金币场
 #define SUB_CG_USER_JOIN_GOLD_HALL_ROOM	20									//加入金币大厅 金币场桌子
+#define SUB_CG_USER_CHANGE_GOLD_TABLE	21									//金币场换桌
 #pragma endregion
 
 #define SUB_GR_GET_TABLELIST			22									//获取房间列表		TODO 指的是竞技场的已开房间列表

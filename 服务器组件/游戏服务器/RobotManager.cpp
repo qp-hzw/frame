@@ -5,6 +5,7 @@
 #include "TableManager.h"
 #include "PlayerManager.h"
 #include "MatchManager.h"
+#include <algorithm>
 
 #define IDI_LOAD_ANDROID_USER			(IDI_MAIN_MODULE_START+1)			//加载机器人
 #define TIME_LOAD_ANDROID_USER				3000L							//加载机器
@@ -135,6 +136,9 @@ void CRobotManager::On_ANDROID_JOIN_GAME()
 //查找符合条件的机器人用户
 CPlayer* CRobotManager::GetFreeAndroid()
 {
+	//乱序机器人
+	random_shuffle(s_RobotArray.begin(), s_RobotArray.end());
+
 	for (size_t i = 0; i < s_RobotArray.size(); i++)
 	{
 		//获取机器人

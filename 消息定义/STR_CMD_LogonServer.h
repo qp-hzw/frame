@@ -451,7 +451,7 @@ struct STR_CMD_LC_SERVICE_PURE_RECORD_LIST
 	WORD					wGameCount;					//总局数
 	WORD					wPlayerCount;				//玩家数
 	WORD					wKindID;					//游戏类型
-	TCHAR					szTime[128];				//时间
+	SYSTEMTIME				szTime;						//时间
 	TCHAR					szOnlyID[32];				//大局唯一标识
 	RecordDjPlayerInfo		Info[MAX_CHAIR];			//玩家信息
 };
@@ -475,7 +475,7 @@ struct STR_CMD_LC_SERVICE_PURE_XJ_RECORD_LIST
 {
 	DWORD					dwTableID;
 	WORD					wCurCount;					//当前局数
-	TCHAR					szTime[128];				//时间
+	SYSTEMTIME				szTime;						//时间
 	WORD					wPlayerCount;				//玩家数
 	TCHAR					szOnlyID[32];				//唯一标识
 	RecodeXjPlayerInfo		Info[MAX_CHAIR];			//玩家信息

@@ -52,8 +52,6 @@ void CSubRecord::AddPlayer(std::vector<CPlayer*> list)
 			m_wDataSize += sizeof(RecodePlayerInfo);
 		}
 	}
-
-	m_wActionCount++;
 }
 
 //获取数据
@@ -61,6 +59,7 @@ VOID * CSubRecord::GetData(WORD wPlayerCount, DWORD &dwDataSize)
 {
 	//初始化
 	dwDataSize = 0;
+	m_wActionCount++;
 
 	//合并 1、动作数量
 	memcpy(m_cbMerge, &m_wActionCount, sizeof(WORD));

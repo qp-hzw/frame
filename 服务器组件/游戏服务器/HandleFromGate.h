@@ -100,6 +100,8 @@ public:
 	//加入桌子 -- 加入大厅金币场桌子
 	//需要数据库判断并返回可加入的桌子号, 如果没有则会创建一个新的桌子
 	static bool On_SUB_CG_USER_JOIN_GOLD_HALL_ROOM(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+	//金币场换桌
+	static bool On_SUB_CG_USER_CHANGE_GOLD_TABLE(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 
 	//申请创建房间
 	static bool On_SUB_CG_USER_CREATE_ROOM(VOID * pData, WORD wDataSize, DWORD dwSocketID);

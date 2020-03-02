@@ -240,6 +240,38 @@ CTableFrame* CTableManager::GetGlodTable(BYTE byType)
 	return pTableFrameReturn;
 }
 
+//查找金币场换桌桌子 --不能重复加入
+CTableFrame* CTableManager::ChangeGlodTable(BYTE byType, DWORD dwTableID)
+{
+	//变量定义
+	CTableFrame *pTableFrameReturn = NULL;
+
+	//寻找金币房空椅子
+	for(auto pTableFrame : s_TableArray)
+	{
+		if ( (NULL == pTableFrame) || 
+			(pTableFrame->GetGameStatus() != GAME_STATUS_FREE) || 
+			(pTableFrame->GetTableMode() != TABLE_MODE_GOLD) ||
+			(pTableFrame->GetGoldType() != byType) ||
+			(pTableFrame->GetTableID() == dwTableID))
+					continue;
+		
+		pTableFrameReturn = pTableFrame;
+		break;
+	}
+
+	if(pTableFrameReturn == NULL)
+	{
+		pTableFrameReturn = CreateTable(&(RoomRuleManager::GetGoldRoomRule(byType)), INVALID_CHAIR);
+		if(pTableFrameReturn == NULL)
+		{
+			CLog::Log(log_error, "GetGlodTable  type:%d  failed", byType);
+		}
+	}
+
+	return pTableFrameReturn;
+}
+
 //查找所有金币场桌子
 std::list<CTableFrame*> CTableManager::GetAllGlodTable()
 {

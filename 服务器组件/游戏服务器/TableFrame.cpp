@@ -786,8 +786,12 @@ int CTableFrame::CanPlayerReady(CPlayer* pPlayer)
 	//校验
 	if (pPlayer == NULL)  return PLAYER_NOT_EXISIT;
 
-	//只有做下才能准备
-	if (pPlayer->GetUserStatus() != US_SIT)	return STATUS_ERR;
+	//只有做下才能准备 && 断线重连上来 断线状态
+	if ((pPlayer->GetUserStatus() != US_SIT) && (pPlayer->GetUserStatus() != US_OFFLINE))	
+	{
+		CLog::Log(log_error, "pPlayer->GetUserStatus() != US_SIT");
+		return STATUS_ERR;
+	}
 
 	return 0;
 }
@@ -1898,7 +1902,7 @@ bool CTableFrame::OnEventApplyDismissRoom(WORD wChairID, bool bAgree)
 
 		//比赛场空闲状态也不可解散
 		tagTableRule* pCfg = (tagTableRule*)GetCustomRule();
-		if (pCfg->GameMode == 2)
+		if (pCfg->GameMode == 1)
 			return false;
 
 		//发送解散成功消息
@@ -1923,7 +1927,7 @@ bool CTableFrame::OnEventApplyDismissRoom(WORD wChairID, bool bAgree)
 			SendTableData(wChairID, CMD_GR_USER_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT), MDM_USER);
 
 			//用户离开			
-			if (PlayerLeaveTable(pApplyUserItem))
+			if (0 != PlayerLeaveTable(pApplyUserItem))
 			{
 				return false;
 			}

@@ -49,6 +49,9 @@
     <ClCompile Include="MatchRoom.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="SubRecord.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AttemperEngineSink.h">
@@ -103,6 +106,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="MatchRoom.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SubRecord.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
