@@ -196,6 +196,9 @@ public:
 	//is roboot
 	virtual bool IsRobot(WORD wChairID);
 
+	//发送托管
+	virtual bool SendPlayerTuoGuan(WORD wChairID);
+
 #pragma region 游戏流程函数
 	//自身调用，与子游戏无关
 protected:
@@ -274,6 +277,8 @@ public:
 	virtual int PlayerLeaveTable(CPlayer* pPlayer);
 	//玩家准备
 	virtual int PlayerReady(CPlayer* pPlayer);
+	//玩家取消准备
+	virtual int PlayerCancelReady(CPlayer* pPlayer);
 	//玩家断线
 	virtual int PlayerOffline(CPlayer* pPlayer);
 
@@ -284,6 +289,7 @@ private:
 	int CanPlayerUpTable(CPlayer* pPlayer);
 	int CanPlayerLeaveTable(CPlayer* pPlayer);
 	int CanPlayerReady(CPlayer* pPlayer);
+	int CanPlayerCancelReady(CPlayer* pPlayer);
 
 #pragma endregion
 
@@ -317,6 +323,9 @@ public:
 	void SetVoteDismissRoom();
 	//取消表决解散房间定时器
 	void KillVoteDismissRoom();
+
+	//解散状态断线重连
+	bool OnEventDismissOffline(WORD wChairID);
 
 	//设置房间自动解散时间 added by lizhihu
 	virtual void SetTableAutoDismiss(DWORD dwMinutes = 1);
@@ -352,6 +361,9 @@ public:
 		//辅助函数
 protected:
 	double GetDistance(double long1, double lat1, double long2, double lat2);
+
+	//判断大赢家
+	bool GetBigWinner(WORD wChairID);
 
 #pragma endregion
 

@@ -52,12 +52,10 @@
 //玩家动作	
 #define SUB_CG_USER_SITDOWN				10									//*坐下请求（用户加入/创建房间成功后，服务器主动让玩家坐下，不需要请求）
 #define SUB_CG_USER_READY				11									//用户准备
+#define CMD_GC_USER_READY				111									//准备返回
+
 #define SUB_CG_USER_STANDUP				12									//#起立请求		TODO 非房主解散房间，发送的是该消息，放在15的处理流程中
 #define SUB_GR_USER_CHAIR_REQ			13                                  //*请求更换位置
-
-#define SUB_CG_USER_INVITE_USER			14									//*邀请用户进入桌子
-#define CMD_GC_USER_INVITE_USER			15									//*邀请用户进入桌子返回
-#define SUB_CG_USER_KICK_USER			16                                   //*踢出用户		TODO 让玩家起立，返回系统消息，踢出用户
 
 #pragma region 创建| 加入 房间
 //房卡场, 房卡金币场
@@ -121,6 +119,8 @@
 #define CMD_GC_MATCH_JUESAI_RECODE	11									//决赛
 #define CMD_GC_MATCH_WAIT_COUNT		12									//等待桌数消息
 
+#define CMD_GC_MATCH_APPLY_OFFLINE	13									//报名阶段断线重连
+
 #pragma endregion
 
 #pragma region MDM_G_FRAME 框架命令
@@ -140,6 +140,15 @@
 
 #define CMD_GR_FRAME_GAME_STATUS			102								//游戏状态
 #define CMD_GR_FRAME_GAME_DISSMISS			701							    //解散面板状态
+
+//大局结束
+#define CMD_GR_TABLE_DJ_END					2								//大局结束
+
+//托管
+#define SUB_RG_TUOGUAN						3								//玩家托管
+#define CMD_GR_TUOGUAN						103								//托管	   返回
+#define SUB_RG_CANCEL_TUOGUAN				203								//取消托管
+#define CMD_GR_CANCEL_TUOGUAN				303								//取消托管 返回
 
 //GPS测距
 #define SUB_CG_COM_CHECK_USER_GPS			5								//请求校验用户GPS位置信息

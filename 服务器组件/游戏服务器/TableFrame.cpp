@@ -200,11 +200,11 @@ bool CTableFrame::StartGame()
 	//删除自动解散定时器
 	KillGameTimer(IDI_ROOM_AUTO_DISMISS);
 
-	//player状态
-	for(size_t i=0; i< m_player_list.size(); i++)
+	//玩家状态
+	for (int i = 0; i < m_player_list.size(); i++)
 	{
-		if(!m_player_list.at(i)) continue;
-		m_player_list.at(i)->SetUserStatus(US_PLAYING,m_wTableID,i);
+		if (m_player_list[i] == NULL)	continue;
+		m_player_list[i]->SetUserStatus(US_SIT, GetTableID(), i);
 	}
 
 	//录像初始化
@@ -251,8 +251,8 @@ bool CTableFrame::HandleXJGameEnd(BYTE byRound, WORD *wIdentity, SCORE *lUserTre
 	//玩家状态
 	for (int i = 0; i < m_player_list.size(); i++)
 	{
-		if (m_player_list[i] == NULL)	continue;
-		m_player_list[i]->SetUserStatus(US_SIT, GetTableID(), i);
+		//清空玩家托管状态 --放在frame
+		m_pITableFrameSink->PlayerCancelTuoGuan(i);
 	}
 
 	//记录分数 --比赛
@@ -296,22 +296,32 @@ bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 	//关闭所有定时器
 	KillGameTimer(IDI_ROOM_AUTO_DISMISS);
 
-	if (!m_OnlyID.empty())
-	{
-		//更新玩家输赢情况表
-		int i =0;
-		for(auto player : m_player_list)
-		{
-			if (player)
-			{
-				player ->ModifyPlayerScore(0, 0, m_total_score[i], m_OnlyID);
-				i++;
-			}
-		}
+	//消息构造 列表发送
+	WORD wPacketSize=0;
+	BYTE cbBuffer[MAX_ASYNCHRONISM_DATA/10];
+	STR_CMD_GR_TABLE_DJ_END * pinfo = NULL;
 
-		//更新桌子战绩
-		XJUpdateTableRecord(0, m_OnlyID);
+	for (int i = 0; i< m_wChairCount; i++)
+	{
+		if (m_player_list[i] == NULL)	continue;
+
+		//发送信息
+		if ((wPacketSize+sizeof(STR_CMD_GR_TABLE_DJ_END))>sizeof(cbBuffer))
+		{
+			SendTableData(INVALID_CHAIR, CMD_GR_TABLE_DJ_END, cbBuffer, wPacketSize, MDM_G_FRAME);
+			wPacketSize=0;
+		}
+		
+		//读取信息
+		pinfo=(STR_CMD_GR_TABLE_DJ_END *)(cbBuffer+wPacketSize);
+		pinfo->llScore = m_total_score[i];
+		pinfo->wBigWinner = GetBigWinner(i);
+		memcpy(pinfo->szName, m_player_list[i]->GetNickName(), sizeof(TCHAR)*LEN_NICKNAME);
+		memcpy(pinfo->szHeadUrl, m_player_list[i]->GetUserInfo()->szHeadUrl, sizeof(TCHAR)*LEN_HEAD_URL);
+
+		wPacketSize+=sizeof(STR_CMD_GR_TABLE_DJ_END);
 	}
+	if (wPacketSize != 0)	SendTableData(INVALID_CHAIR, CMD_GR_TABLE_DJ_END, cbBuffer, wPacketSize, MDM_G_FRAME);
 
 	//结束等待续费，玩家需要从准备状态退出为坐下
 	if (cbGameStatus == GAME_CONCLUDE_CONTINUE)
@@ -526,7 +536,7 @@ int CTableFrame::PlayerEnterTable(CPlayer * pPlayer)
 	if(ret != 0) return ret;
 
 	//2. Player
-	pPlayer->SetUserStatus(US_IN_TABLE, m_wTableID, INVALID_CHAIR);
+	pPlayer->SetUserStatus(US_STANDUP, m_wTableID, INVALID_CHAIR);
 
 	//3. Sendto Client
 	CMD_GF_GameStatus GameStatus;
@@ -594,7 +604,7 @@ bool CTableFrame::PlayerUpTable(CPlayer *pPlayer)
 	m_player_list.at(wChairID) = NULL;
 
 	//3. Player
-	pPlayer->SetUserStatus(US_IN_TABLE, m_wTableID, INVALID_CHAIR);
+	pPlayer->SetUserStatus(US_STANDUP, m_wTableID, INVALID_CHAIR);
 
 	//发送给客户端
 	CMD_GF_GameStatus GameStatus;
@@ -654,9 +664,22 @@ int CTableFrame::PlayerLeaveTable(CPlayer* pPlayer)
 //玩家准备
 int CTableFrame::PlayerReady(CPlayer* pPlayer) 
 {
+	//构建消息
+	STR_CMD_GC_USER_READY cmdret;
+	ZeroMemory(&cmdret, sizeof(STR_CMD_GC_USER_READY));
+
+	cmdret.cbType = 0;
+	cmdret.cbRet = 0;
+
 	//准备校验
 	int ret = CanPlayerReady(pPlayer);
-	if (ret != 0)	return ret;
+	if (ret != 0)	
+	{
+		cmdret.cbRet = 1;
+		SendTableData(pPlayer->GetChairID(), CMD_GC_USER_READY, &cmdret, sizeof(STR_CMD_GC_USER_READY), MDM_USER);
+		return ret;
+	}
+	SendTableData(pPlayer->GetChairID(), CMD_GC_USER_READY, &cmdret, sizeof(STR_CMD_GC_USER_READY), MDM_USER);
 
 	//获取参数
 	DWORD	dwTableID = pPlayer->GetTableID();
@@ -680,7 +703,7 @@ int CTableFrame::PlayerReady(CPlayer* pPlayer)
 	WORD ReadyNum = 0;
 	for (auto it = m_player_list.begin(); it != m_player_list.end(); it++)
 	{
-		if ((*it) != NULL && (US_READY == (*it)->GetUserStatus()))
+		if ((*it) != NULL && (US_READY == ((*it)->GetUserStatus()&0x0F)))
 			ReadyNum++;
 	}
 
@@ -692,13 +715,49 @@ int CTableFrame::PlayerReady(CPlayer* pPlayer)
 
 	return 0;
 }
+//玩家取消准备
+int CTableFrame::PlayerCancelReady(CPlayer* pPlayer)
+{
+	//构建消息
+	STR_CMD_GC_USER_READY cmdret;
+	ZeroMemory(&cmdret, sizeof(STR_CMD_GC_USER_READY));
+
+	cmdret.cbType = 1;
+	cmdret.cbRet = 0;
+
+	int ret = CanPlayerCancelReady(pPlayer);
+	if (ret != 0)
+	{
+		cmdret.cbRet = 1;
+		SendTableData(pPlayer->GetChairID(), CMD_GC_USER_READY, &cmdret, sizeof(STR_CMD_GC_USER_READY), MDM_USER);
+		return ret;
+	}
+	SendTableData(pPlayer->GetChairID(), CMD_GC_USER_READY, &cmdret, sizeof(STR_CMD_GC_USER_READY), MDM_USER);
+
+	//设置用户状态为坐下
+	pPlayer->SetUserStatus(US_SIT, m_wTableID, pPlayer->GetChairID());
+
+	//给客户端发送准备行为
+	CMD_GF_GameStatus GameStatus;
+	ZeroMemory(&GameStatus, sizeof(GameStatus));
+
+	//赋值
+	GameStatus.cbUserAction = pPlayer->GetUserStatus();
+	tagUserInfo *pUserInfo = pPlayer->GetUserInfo();
+	CopyMemory(&GameStatus.UserInfo, pUserInfo, sizeof(tagUserInfo));
+
+	//广播发送
+	SendTableData(INVALID_CHAIR, CMD_GR_USER_STATUS, &GameStatus, sizeof(GameStatus), MDM_G_FRAME);
+
+	return 0;
+}
 //玩家断线
 int CTableFrame::PlayerOffline(CPlayer* pPlayer) 
 {
 	CLog::Log(log_debug, "玩家%ld 掉线", pPlayer->GetUserID());
 
 	//设置用户状态为断线
-	pPlayer->SetUserStatus(US_OFFLINE, m_wTableID, pPlayer->GetChairID());
+	pPlayer->SetUserOffline();
 
 	//给客户端发送准备行为
 	CMD_GF_GameStatus GameStatus;
@@ -718,7 +777,7 @@ int CTableFrame::PlayerOffline(CPlayer* pPlayer)
 //玩家能否加入
 int CTableFrame::CanPlayerEnterTable(CPlayer* pPlayer)
 {
-	if (US_FREE != pPlayer->GetUserStatus())
+	if (US_FREE != (0x0F&pPlayer->GetUserStatus()))
 		return -1;
 
 	return 0;
@@ -774,10 +833,6 @@ int CTableFrame::CanPlayerLeaveTable(CPlayer* pPlayer)
 	if (m_wTableID != pPlayer->GetTableID())
 		return 3;
 
-	//如果玩家在游戏中 不可离开
-	if (US_PLAYING == pPlayer->GetUserStatus())
-		return 1;
-
 	return 0;
 }
 //玩家是否能准备
@@ -786,10 +841,23 @@ int CTableFrame::CanPlayerReady(CPlayer* pPlayer)
 	//校验
 	if (pPlayer == NULL)  return PLAYER_NOT_EXISIT;
 
-	//只有做下才能准备 && 断线重连上来 断线状态
-	if ((pPlayer->GetUserStatus() != US_SIT) && (pPlayer->GetUserStatus() != US_OFFLINE))	
+	//只有做下才能准备
+	if (((pPlayer->GetUserStatus()&0x0F) != US_SIT))	
 	{
-		CLog::Log(log_error, "pPlayer->GetUserStatus() != US_SIT");
+		CLog::Log(log_error, "pPlayer->GetUserStatus() != US_SIT: %d", (pPlayer->GetUserStatus()&0x0F));
+		return STATUS_ERR;
+	}
+
+	return 0;
+}
+//玩家是否能取消准备
+int CTableFrame::CanPlayerCancelReady(CPlayer* pPlayer)
+{
+	if (pPlayer == NULL)	return PLAYER_NOT_EXISIT;
+
+	if (m_cbGameStatus == GAME_STATUS_PLAY || (pPlayer->GetUserStatus()&0x0F) != US_READY)
+	{
+		CLog::Log(log_error, "m_cbGameStatus == GAME_STATUS_PLAY: %d || (pPlayer->GetUserStatus()&0x0F) != US_READY: %d", m_cbGameStatus, (pPlayer->GetUserStatus()&0x0F));
 		return STATUS_ERR;
 	}
 
@@ -1082,6 +1150,7 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 			STR_CMD_ROOM_RULE room_rule;
 			memcpy(&room_rule.common, &m_tagTableRule, sizeof(room_rule.common));
 			room_rule.TableID = m_wTableID;
+			room_rule.bStart = (m_cbGameStatus == 0) ? 0 : 1;
 			g_GameCtrl->SendData(pIServerUserItem, MDM_G_FRAME, CMD_GR_ROOM_RULE, &room_rule, sizeof(room_rule));
 
 			return true;
@@ -1139,6 +1208,18 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 			//发送场景
 			m_pITableFrameSink->OnEventSendGameScene(wChairID);
 
+			//比赛断线重连
+			if (GetTableMode() == TABLE_MODE_MATCH)
+			{
+				CMatchRoom *room = (CMatchRoom *)this;
+				room->On_Match_Offline(pIServerUserItem);
+			}
+
+			//解散房间状态重连
+			if (m_bUnderDissState)
+			{
+				OnEventDismissOffline(wChairID);
+			}
 			
 			//发送解散面板状态 -- 只有处于解散状态 才会发送
 			if(m_bUnderDissState)
@@ -1384,6 +1465,28 @@ bool CTableFrame::OnEventSocketFrame(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 
 			//处理
 			CheckUserIpAddress();
+			return true;
+		}
+	case SUB_RG_TUOGUAN:	//托管
+		{
+			m_pITableFrameSink->PlayerTuoGuan(pIServerUserItem->GetChairID());
+
+			//构建消息
+			STR_CMD_GR_TUOGUAN tuoguan;
+			tuoguan.dwUserID = pIServerUserItem->GetUserID();
+
+			SendTableData(INVALID_CHAIR, CMD_GR_TUOGUAN, &tuoguan, sizeof(STR_CMD_GR_TUOGUAN), MDM_G_FRAME);
+			return true;
+		}
+	case SUB_RG_CANCEL_TUOGUAN:		//取消托管
+		{
+			m_pITableFrameSink->PlayerCancelTuoGuan(pIServerUserItem->GetChairID());
+
+			//构建消息
+			STR_CMD_GR_CANCEL_TUOGUAN tuoguan;
+			tuoguan.dwUserID = pIServerUserItem->GetUserID();
+
+			SendTableData(INVALID_CHAIR, CMD_GR_CANCEL_TUOGUAN, &tuoguan, sizeof(STR_CMD_GR_TUOGUAN), MDM_G_FRAME);
 			return true;
 		}
 	}
@@ -1840,6 +1943,39 @@ void CTableFrame::OnEventClubDismissRoom()
 	m_pITableFrameSink->OnEventGameConclude(GER_DISMISS);
 }
 
+//判断大赢家
+bool CTableFrame::GetBigWinner(WORD wChairID)
+{
+	if (wChairID > m_wChairCount) return false;
+
+	SCORE tmp = m_total_score[wChairID];
+	bool flag = true;
+	for (int i = 0; i < m_wChairCount; i++)
+	{
+		if ((i != wChairID) && (tmp < m_total_score[i]))
+			flag = false;
+	}
+
+	return flag;
+}
+
+//发送托管
+bool CTableFrame::SendPlayerTuoGuan(WORD wChairID)
+{
+	if (wChairID > m_wChairCount)
+		return false;
+
+	if (NULL == m_player_list[wChairID])
+		return false;
+
+	//构建消息
+	STR_CMD_GR_TUOGUAN tuoguan;
+	tuoguan.dwUserID = m_player_list[wChairID]->GetUserID();
+
+	SendTableData(INVALID_CHAIR, CMD_GR_TUOGUAN, &tuoguan, sizeof(STR_CMD_GR_TUOGUAN), MDM_G_FRAME);
+	return true;
+}
+
 /****************************************    解散房间     ***************************************************/
 //申请解散房间
 bool CTableFrame::OnEventApplyDismissRoom(WORD wChairID, bool bAgree)
@@ -1847,6 +1983,10 @@ bool CTableFrame::OnEventApplyDismissRoom(WORD wChairID, bool bAgree)
 	//用户校验
 	CPlayer *pApplyUserItem = GetTableUserItem(wChairID);
 	if (NULL == pApplyUserItem)
+		return false;
+
+	//解散状态校验
+	if (m_bUnderDissState)
 		return false;
 
 	//变量赋值
@@ -2032,6 +2172,32 @@ bool CTableFrame::OnEventVoteDismissRoom(WORD wChairID, bool bAgree)
 	return false;
 }
 
+//解散状态断线重连
+bool CTableFrame::OnEventDismissOffline(WORD wChairID)
+{
+	if (!m_bUnderDissState)
+		return false;
+
+	for (int i = 0; i < m_wChairCount; i++)
+	{
+		if (m_bResponseDismiss[i])
+		{
+			//向Client发送玩家投票结果
+			STR_CMD_GR_FRMAE_VOTE_DISMISS VoteDismissRet;
+			ZeroMemory(&VoteDismissRet, sizeof(STR_CMD_GR_FRMAE_VOTE_DISMISS));
+
+			//赋值
+			VoteDismissRet.cbAgree = (m_bAgree[i] == true) ? 1 : 0;
+			VoteDismissRet.cbChairID = static_cast<BYTE>(i);
+			VoteDismissRet.cbApplyChair = static_cast<BYTE>(m_dissmisserChaiID); 
+
+			//广播发送
+			SendTableData(wChairID, CMD_GR_USER_VOTE_DISMISS, &VoteDismissRet, sizeof(STR_CMD_GR_FRMAE_VOTE_DISMISS), MDM_USER);
+		}
+	}
+
+	return true;
+}
 
 //房间是否处于解散状态
 bool CTableFrame::GetDismissState()

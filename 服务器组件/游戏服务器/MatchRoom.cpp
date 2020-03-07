@@ -73,23 +73,6 @@ bool CMatchRoom::HandleXJGameEnd(BYTE byRound, WORD *wIdentity, SCORE *lUserTrea
 //大局结束
 bool CMatchRoom::HandleDJGameEnd(BYTE cbGameStatus)
 {
-	if (!GetOnlyID().empty())
-	{
-		//更新玩家输赢情况表
-		int i =0;
-		for(auto player : GetPlayer_list())
-		{
-			if (player)
-			{
-				player ->ModifyPlayerScore(0, 0, GetTotalScore()[i], GetOnlyID());
-				i++;
-			}
-		}
-
-		//更新桌子战绩
-		XJUpdateTableRecord(0, GetOnlyID());
-	}
-
 	//玩家离开房间
 	for(auto player : GetPlayer_list())
 	{
@@ -126,4 +109,22 @@ bool CMatchRoom::StartGame()
 void CMatchRoom::StartNextStage()
 {
 	m_Match_Item->On_Stage_Start();
+}
+
+//比赛断线重连
+void CMatchRoom::On_Match_Offline(CPlayer *player)
+{
+	//游戏中发送自己排名 等待下阶段发送等待桌数
+	if (m_state == game)
+	{
+		m_Match_Item->Send_Self_Ranking(player);
+	}
+	else if(m_state == wait_next)
+	{
+		m_Match_Item->Updata_WaitCount(player);
+	}
+	else if(m_state == wait_start)
+	{
+		m_Match_Item->Apply_Offline(player);
+	}
 }

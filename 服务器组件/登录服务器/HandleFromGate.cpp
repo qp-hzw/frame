@@ -1354,10 +1354,6 @@ bool CHandleFromGate::On_SUB_CL_SERVICE_PURE_RECORD_LIST(VOID * pData, WORD wDat
 		g_TreasureDB->GetValue_SystemTime(TEXT("@InsertDate"), pList->szTime);
 		g_TreasureDB->GetValue_String(TEXT("OnlyID"), pList->szOnlyID, CountArray(pList->szOnlyID));
 
-		CLog::Log(log_debug, "year: %d", pList->szTime.wYear);
-		CLog::Log(log_debug, "year: %d", pList->szTime.wMonth);
-		CLog::Log(log_debug, "year: %d", pList->szTime.wDay);
-
 		//下一个查询
 		g_spTreasureDB->ResetParameter();
 		g_spTreasureDB->AddParameter(TEXT("@OnlyID"), pList->szOnlyID);

@@ -84,6 +84,9 @@ public:
 	//发送等待桌数
 	void Updata_WaitCount(CPlayer *player);
 
+	//报名断线重连
+	void Apply_Offline(CPlayer* player);
+
 
 	//功能函数
 public:

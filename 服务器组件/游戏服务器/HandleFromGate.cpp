@@ -94,14 +94,6 @@ bool CHandleFromGate::OnTCPNetworkMainUser(WORD wSubCmdID, VOID *pData, WORD wDa
 		{
 			return On_SUB_CG_User_Ready(pData, wDataSize, dwSocketID);
 		}
-	case SUB_CG_USER_INVITE_USER:	//邀请用户
-		{
-			return On_SUB_CG_User_InviteUser(pData,wDataSize,dwSocketID);
-		}
-	case SUB_CG_USER_KICK_USER:		//踢出用户
-		{
-			return On_SUB_CG_User_KickUser(pData,wDataSize,dwSocketID);
-		}
 	case SUB_GR_USER_CHAIR_REQ:    //请求更换位置
 		{
 			return OnTCPNetworkSubUserChairReq(pData,wDataSize,dwSocketID);
@@ -304,6 +296,9 @@ bool CHandleFromGate::On_CMD_GC_Logon_UserID(DWORD dwSocketID, VOID * pData, WOR
 	else //断线情形 && 重复登录
 	{
 		player->SetSocketID(dwSocketID);
+
+		//清空玩家断线状态
+		player->SetUserOffline(false);
 	}
 
 	return true;
@@ -361,13 +356,6 @@ bool CHandleFromGate::On_SUB_CG_User_StandUp(VOID * pData, WORD wDataSize, DWORD
 			bDynamicJoin = true;
 	}
 
-	//用户判断
-	if (!bDynamicJoin && (pIServerUserItem->GetUserStatus()==US_PLAYING))
-	{
-		SendRequestFailure(pIServerUserItem, TEXT("您正在游戏中，暂时不能离开，请先结束当前游戏！"), REQUEST_FAILURE_NORMAL);
-		return true;
-	}
-
 	//离开处理
 	if (wTableID != INVALID_TABLE)
 	{
@@ -386,6 +374,13 @@ bool CHandleFromGate::On_SUB_CG_User_StandUp(VOID * pData, WORD wDataSize, DWORD
 //用户准备
 bool CHandleFromGate::On_SUB_CG_User_Ready(VOID * pData, WORD wDataSize, DWORD dwSocketID) 
 {
+	//校验
+	if (sizeof(STR_SUB_CG_USER_READY) != wDataSize)
+		return false;
+
+	//获取包
+	STR_SUB_CG_USER_READY *sub = (STR_SUB_CG_USER_READY *)pData;
+
 	//获取用户
 	CPlayer * pIServerUserItem = CPlayerManager::FindPlayerBySocketID(dwSocketID);
 	//校验
@@ -401,87 +396,15 @@ bool CHandleFromGate::On_SUB_CG_User_Ready(VOID * pData, WORD wDataSize, DWORD d
 	}
 
 	//准备处理
-	pTableFrame->PlayerReady(pIServerUserItem);
-
-	return true;
-}
-
-//邀请用户
-bool CHandleFromGate::On_SUB_CG_User_InviteUser(VOID * pData, WORD wDataSize, DWORD dwSocketID)
-{
-	//效验数据
-	ASSERT(wDataSize==sizeof(CMD_GR_UserInviteReq));
-	if (wDataSize!=sizeof(CMD_GR_UserInviteReq)) return false;
-
-	//消息处理
-	CMD_GR_UserInviteReq * pUserInviteReq=(CMD_GR_UserInviteReq *)pData;
-
-	//获取用户
-	CPlayer * pIServerUserItem= CPlayerManager::FindPlayerBySocketID (dwSocketID);
-	if (pIServerUserItem==NULL) return false;
-
-	//效验状态
-	if (pUserInviteReq->wTableID==INVALID_TABLE) return true;
-	if (pIServerUserItem->GetTableID()!=pUserInviteReq->wTableID) return true;
-	if (pIServerUserItem->GetUserStatus()==US_PLAYING) return true;
-	if (pIServerUserItem->GetUserStatus()==US_OFFLINE) return true;
-
-	//目标用户
-	CPlayer * pITargetUserItem=CPlayerManager::FindPlayerByID(pUserInviteReq->dwUserID);
-	if (pITargetUserItem==NULL) return true;
-	if (pITargetUserItem->GetUserStatus()==US_PLAYING) return true;
-
-	//发送消息
-	CMD_GR_UserInvite UserInvite;
-	memset(&UserInvite,0,sizeof(UserInvite));
-	UserInvite.wTableID=pUserInviteReq->wTableID;
-	UserInvite.dwUserID=pIServerUserItem->GetUserID();
-	g_GameCtrl->SendData(pITargetUserItem, MDM_USER, CMD_GC_USER_INVITE_USER, &UserInvite, sizeof(UserInvite));
-
-	return true;
-}
-
-//踢出用户
-bool CHandleFromGate::On_SUB_CG_User_KickUser(VOID * pData, WORD wDataSize, DWORD dwSocketID)
-{
-	//效验参数
-	if (wDataSize!=sizeof(CMD_GR_KickUser)) return false;
-
-	//变量定义
-	CMD_GR_KickUser * pKickUser=(CMD_GR_KickUser *)pData;
-
-	//获取用户
-	CPlayer * pIServerUserItem=CPlayerManager::FindPlayerBySocketID (dwSocketID);
-
-	//目标用户
-	CPlayer * pITargetUserItem = CPlayerManager::FindPlayerByID(pKickUser->dwTargetUserID);
-	if(pITargetUserItem==NULL) return true;
-
-	//用户状态
-	if(pITargetUserItem->GetUserStatus()==US_PLAYING)
+	if (sub->byType == 0)
 	{
-		//变量定义
-		TCHAR szMessage[256]=TEXT("");
-		_sntprintf_s(szMessage,CountArray(szMessage),TEXT("由于玩家 [ %s ] 正在游戏中,您不能将它踢出游戏！"),pITargetUserItem->GetNickName());
-
-		//发送消息
-		g_GameCtrl->SendRoomMessage(pIServerUserItem,szMessage,0);
-		return true;
+		if (0 != pTableFrame->PlayerReady(pIServerUserItem))
+			return false;
 	}
-
-	//请离桌子
-	DWORD wTargerTableID = pITargetUserItem->GetTableID();
-	if(wTargerTableID != INVALID_TABLE)
+	else
 	{
-		//定义变量
-		TCHAR szMessage[64]=TEXT("");
-		_sntprintf_s(szMessage,CountArray(szMessage),TEXT("你已被%s请离桌子！"),pIServerUserItem->GetNickName());
-
-		//发送消息
-		g_GameCtrl->SendGameMessage(pITargetUserItem,szMessage,0);
-
-		CTableFrame * pTableFrame=CTableManager::FindTableByTableID(wTargerTableID);
-		if (pTableFrame->PlayerUpTable(pITargetUserItem)==false) return true;
+		if (0 != pTableFrame->PlayerCancelReady(pIServerUserItem))
+			return false;
 	}
 
 	return true;
@@ -505,7 +428,16 @@ bool CHandleFromGate::On_SUB_RG_USER_ASK_DISMISS(VOID * pData, WORD wDataSize, D
 	//3、房间校验
 	CTableFrame *pTableFrame = CTableManager::FindTableByTableID(pIServerUserItem->GetTableID());
 	if (pTableFrame == NULL)
-		return false;
+	{
+		//发送解散成功  金币场打完后返回大厅
+		STR_CMD_GR_FRAME_DISMISS_RESULT DismissResult;
+		ZeroMemory(&DismissResult, sizeof(DismissResult));
+
+		DismissResult.cbDismiss = 1;
+		g_GameCtrl->SendData(pIServerUserItem->GetSocketID(), MDM_USER, CMD_GR_USER_DISMISS_RESULT, &DismissResult, sizeof(STR_CMD_GR_FRAME_DISMISS_RESULT));
+
+		return true;
+	}
 
 	CLog::Log(log_debug, "DISMISS UserID: %d", pIServerUserItem->GetUserID());
 
@@ -1674,6 +1606,7 @@ bool CHandleFromGate::On_SUB_CG_MATCH_APPLY(VOID * pData, WORD wDataSize, DWORD 
 	ZeroMemory(&cmdApply, sizeof(STR_CMD_GC_MATCH_APPLY));
 
 	cmdApply.byResult = 0;
+	cmdApply.wMatchID = apply->wMatchID;
 
 	//获取比赛场
 	CMatchItem *match = CMatchManager::Find_Match_ByItemID(apply->wMatchID);
@@ -1704,26 +1637,33 @@ bool CHandleFromGate::On_SUB_CG_MATCH_APPLY(VOID * pData, WORD wDataSize, DWORD 
 //玩家取消报名
 bool CHandleFromGate::On_SUB_CG_MATCH_UNAPPLY(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//大小检验
-	if (sizeof(STR_SUB_CG_MATCH_UNAPPLY) != wDataSize)
-		return false;
-
 	//玩家校验
 	CPlayer *player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
 	if (player == NULL)
 		return false;
 
-	//获取数据
-	STR_SUB_CG_MATCH_UNAPPLY *apply = (STR_SUB_CG_MATCH_UNAPPLY *)pData;
+	//桌子校验
+	CMatchRoom *room = (CMatchRoom *)CTableManager::FindTableByTableID(player->GetTableID());
+	if (room == NULL)
+		return false;
+
+	//比赛校验
+	if (room->GetTableMode() != TABLE_MODE_MATCH)
+		return false;
 
 	//构造数据
 	STR_CMD_GC_MATCH_UNAPPLY cmdApply;
 	ZeroMemory(&cmdApply, sizeof(STR_CMD_GC_MATCH_UNAPPLY));
 
-	cmdApply.byResult = 0;
-
 	//获取比赛场
-	CMatchItem *match = CMatchManager::Find_Match_ByItemID(apply->wMatchID);
+	CMatchItem *match = room->GetMatchItem();
+	if (match == NULL)
+		return false;
+
+	cmdApply.byResult = 0;
+	cmdApply.wMatchID = match->GetMatchID();
+
+	//开始校验
 	if (match->IsMatchStart())
 	{
 		cmdApply.byResult = 1;
@@ -1731,7 +1671,7 @@ bool CHandleFromGate::On_SUB_CG_MATCH_UNAPPLY(VOID * pData, WORD wDataSize, DWOR
 		return false;
 	}
 
-	//玩家报名
+	//玩家取消报名
 	if (!match->On_User_UnApply(player))
 	{
 		cmdApply.byResult = 1;
@@ -1762,7 +1702,6 @@ bool CHandleFromGate::On_SUB_CG_MATCH_QUERY_PLAYER(VOID * pData, WORD wDataSize,
 	STR_CMD_GC_MATCH_QUERY_PLAYER * pinfo = NULL;
 	for (auto match : array)
 	{
-		CLog::Log(log_debug, "match ID: %d", match->GetMatchID());
 		if (match->IsMatchStart())	continue;
 
 		//发送信息
@@ -1780,8 +1719,6 @@ bool CHandleFromGate::On_SUB_CG_MATCH_QUERY_PLAYER(VOID * pData, WORD wDataSize,
 
 		if (match->GetConfig().wStartType == MATCH_START_TYPE_COUNT)
 			pinfo->dwTimer = 0;
-		CLog::Log(log_debug, "leave time: %d", pinfo->dwTimer);
-		CLog::Log(log_debug, "apply count: %d", pinfo->dwApplyCount);
 
 		wPacketSize+=sizeof(STR_CMD_GC_MATCH_QUERY_PLAYER);
 	}
@@ -1801,6 +1738,10 @@ bool CHandleFromGate::On_SUB_CG_MATCH_RANKING(VOID * pData, WORD wDataSize, DWOR
 	//比赛场房间校验
 	CMatchRoom *room = (CMatchRoom *)CTableManager::FindTableByTableID(player->GetTableID());
 	if (room == NULL)
+		return false;
+
+	//比赛模式校验
+	if (room->GetTableMode() != TABLE_MODE_MATCH)
 		return false;
 
 	//比赛校验
@@ -1825,6 +1766,10 @@ bool CHandleFromGate::On_SUB_CG_MATCH_RANKING_MY(VOID * pData, WORD wDataSize, D
 	//比赛场房间校验
 	CMatchRoom *room = (CMatchRoom *)CTableManager::FindTableByTableID(player->GetTableID());
 	if (room == NULL)
+		return false;
+
+	//比赛模式校验
+	if (room->GetTableMode() != TABLE_MODE_MATCH)
 		return false;
 
 	//比赛校验

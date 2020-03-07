@@ -52,6 +52,10 @@ public:
 	virtual bool StartGame();
 	//开始下一阶段比赛
 	virtual void StartNextStage();
+
+	//比赛场断线重连流程
+public:
+	void On_Match_Offline(CPlayer *player);
 };
 
 #endif

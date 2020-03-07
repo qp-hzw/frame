@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 #include "Stdafx.h"
+#include "TableFrame.h"
 using std::string;
 
 
@@ -56,7 +57,7 @@ public:
 	//门票检测
 public:
 	//检测玩家 门票是否符合条件
-	static int CheckTickt(tagTableRule* rule, CPlayer* player);
+	static int CheckTickt(tagTableRule* rule, CPlayer* player, CTableFrame *table = NULL);
 
 	//房间规则 存储在DB
 public:

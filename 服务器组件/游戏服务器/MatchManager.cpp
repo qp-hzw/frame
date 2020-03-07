@@ -55,7 +55,7 @@ bool CMatchManager::ReadMatchConfig(DWORD kindid)
 
 			string tmp;
 			CWHCfg::Instance()->GetItemValue(psz, "name", tmp);
-			std::wstring wName = CWConvert::s2ws(strTemp);
+			std::wstring wName = CWConvert::s2ws(tmp);
 			memcpy(config.stage[j].szName, wName.c_str(), sizeof(TCHAR) *16);
 
 			config.wStageSize++;

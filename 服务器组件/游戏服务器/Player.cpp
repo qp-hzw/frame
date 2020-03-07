@@ -89,9 +89,21 @@ bool CPlayer::SetUserStatus(BYTE cbUserStatus, DWORD wTableID, WORD wChairID)
 {
 	m_UserInfo.wTableID=wTableID;
 	m_UserInfo.wChairID=wChairID;
-	m_UserInfo.cbUserStatus=cbUserStatus;
+	m_UserInfo.cbUserStatus=(m_UserInfo.cbUserStatus & 0xF0) + cbUserStatus;
 
 	return true;
+}
+
+//断线状态
+void CPlayer::SetUserOffline(bool flag)
+{
+	if (!flag)
+		m_UserInfo.cbUserStatus = m_UserInfo.cbUserStatus & 0x0F;
+
+	else if (null == GetUserOffline())
+	{
+		m_UserInfo.cbUserStatus += (US_OFFLINE<<4);
+	}
 }
 
 //重置数据

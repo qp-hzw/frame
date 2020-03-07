@@ -218,7 +218,7 @@ STR_CMD_GC_USER_GOLD_INFO RoomRuleManager::GetRoomInfo(BYTE level)
 
 
 //检测玩家 门票是否符合条件
-int RoomRuleManager::CheckTickt(tagTableRule* rule, CPlayer* player)
+int RoomRuleManager::CheckTickt(tagTableRule* rule, CPlayer* player, CTableFrame *table)
 {
 	switch( rule->GameMode )
 	{
@@ -234,6 +234,9 @@ int RoomRuleManager::CheckTickt(tagTableRule* rule, CPlayer* player)
 			//房主支付， 房费为 countType * playerCount
 			if (0 == rule->cbPayType)
 			{
+				//加入房间
+				if (table != NULL) return 0;
+
 				//非房主 无须校验 TODONOW
 				DWORD pay = (rule->PlayerCount) * CountType;
 				if( player->GetUserRoomCard() < pay)

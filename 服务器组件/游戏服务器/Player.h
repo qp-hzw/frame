@@ -3,17 +3,22 @@
 #include "Stdafx.h"
 #include "TableFrameBase.h"
 
-//用户状态
-enum User_Action
+//用户状态 
+enum User_Low_Action
 {
 	US_SIT,        //坐下动作
-	US_IN_TABLE,   //在table中 -- 站立(旁观)动作
+	US_STANDUP,   // 站立(旁观)动作
 	US_READY,
 	US_LEAVE,		//玩家离开
-	US_OFFLINE,    //掉线动作
-	US_PLAYING,    //游戏状态
-	US_NULL,
+
 	US_FREE,       //没有状态 -- 没有在Table中
+};
+
+//用户状态 --高四位（断线）
+enum User_High_Action
+{
+	null,
+	US_OFFLINE,
 };
 
 class  CPlayer
@@ -78,6 +83,10 @@ public:
 	//用户状态
 	 BYTE GetUserStatus() { return m_UserInfo.cbUserStatus; }
 	 bool SetUserStatus(BYTE cbUserStatus, DWORD wTableID, WORD wChairID);
+
+	 //断线状态
+	 void SetUserOffline(bool flag = true);
+	 BYTE GetUserOffline() { return ((m_UserInfo.cbUserStatus & 0xF0) >> 4); }
 
 	/**********************************  socket信息 ****************************************/
 public:

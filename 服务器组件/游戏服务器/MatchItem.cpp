@@ -92,14 +92,14 @@ bool CMatchItem::On_User_UnApply(CPlayer *player)
 		if (m_player && m_player == player)
 		{
 			m_Apply_Player.erase(it);
-			return true;
+			break;
 		}
 	}
 
 	//玩家离开等待房间
 	m_wait_room->PlayerLeaveTable(player);
 
-	return false;
+	return true;
 }
 
 //报名结束
@@ -178,7 +178,16 @@ bool CMatchItem::On_Match_Cancel()
 	for (auto item : m_Apply_Player)
 	{
 		if (item)
+		{
+			//发送报名取消
+			STR_CMD_GC_MATCH_UNAPPLY cmdApply;
+			ZeroMemory(&cmdApply, sizeof(STR_CMD_GC_MATCH_UNAPPLY));
+			cmdApply.byResult = 0;
+			cmdApply.wMatchID = m_config.wMatchID;
+			g_GameCtrl->SendData(item, MDM_GR_MATCH, CMD_GC_MATCH_UNAPPLY, &cmdApply, sizeof(STR_CMD_GC_MATCH_UNAPPLY));
+
 			m_wait_room->PlayerLeaveTable(item);
+		}
 	}
 
 	m_Apply_Player.clear();
@@ -267,6 +276,9 @@ bool CMatchItem::On_Stage_Start()
 			// 通知比赛开始
 			room->SendTableData(INVALID_CHAIR, CMD_GC_MATCH_START, NULL, 0, MDM_GR_MATCH);
 
+			//设置房间状态
+			room->SetRoomState(game);
+
 			//设置准备定时器
 			room->SetPlayerAutoReady();
 		}
@@ -307,7 +319,7 @@ bool CMatchItem::On_Room_End(CMatchRoom *room)
 	//设置房间比赛状态
 	if (!stage_end)
 	{
-		room->SetRoomState(wait_next);
+		m_wait_room->SetRoomState(wait_next);
 	}
 
 	//获取房间玩家排名
@@ -684,4 +696,21 @@ WORD CMatchItem::GetRanking(CPlayer *player)
 	}
 
 	return 0;
+}
+
+//报名断线重连
+void CMatchItem::Apply_Offline(CPlayer *player)
+{
+	STR_CMD_GC_MATCH_APPLY_OFFLINE info;
+	ZeroMemory(&info, sizeof(STR_CMD_GC_MATCH_APPLY_OFFLINE));
+
+	info.dwApplyCount = m_Apply_Player.size();
+	info.dwLowPlayer = m_config.dwLowestPlayer;
+	info.dwStartType = m_config.wStartType;
+	if (m_config.wStartType == 0)
+		info.dwLeaveTime = 0;
+	else
+		info.dwLeaveTime = m_config.dwStartTime - time(0);
+
+	g_GameCtrl->SendData(player->GetSocketID(), MDM_GR_MATCH, CMD_GC_MATCH_APPLY_OFFLINE, &info, sizeof(STR_CMD_GC_MATCH_APPLY_OFFLINE));
 }

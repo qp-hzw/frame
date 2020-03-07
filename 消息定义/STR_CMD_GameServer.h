@@ -356,12 +356,21 @@ struct CMD_GF_OnlinePlayers
 //用户准备
 struct STR_SUB_CG_USER_READY
 {
+	BYTE byType;					//0-Ready  1-cancel
+};
+
+//准备返回
+struct STR_CMD_GC_USER_READY
+{
+	BYTE cbRet;						//0-成功 1-失败
+	BYTE cbType;					//0-准备返回 1-取消准备返回
 };
 
 struct STR_CMD_ROOM_RULE
 {
 	tagTableRule common;			 //创建房间 frame通用房间规则
 	DWORD TableID;                   //房间号
+	BYTE bStart;                     //游戏是否已开始 0未开始, 1开始
 };
 
 //金币场房间信息 返回
@@ -424,6 +433,7 @@ struct STR_SUB_CG_MATCH_APPLY
 struct STR_CMD_GC_MATCH_APPLY
 {
 	BYTE			byResult;			//0-成功  1-失败
+	WORD			wMatchID;
 };
 
 //比赛取消
@@ -432,16 +442,11 @@ struct STR_CMD_GC_MATCH_CANCEL
 	TCHAR			szDescribe[128];	//为啥取消
 };
 
-//取消报名
-struct STR_SUB_CG_MATCH_UNAPPLY
-{
-	WORD			wMatchID;		//比赛ID
-};
-
 //取消报名返回
 struct STR_CMD_GC_MATCH_UNAPPLY
 {
 	BYTE			byResult;			//0-成功  1-失败
+	WORD			wMatchID;
 };
 
 //比赛场请求返回
@@ -497,6 +502,15 @@ struct STR_CMD_GC_MATCH_JUESAI_RECODE
 struct STR_CMD_GC_MATCH_WAIT_COUNT
 {
 	WORD			wait_count;
+};
+
+//报名断线重连
+struct STR_CMD_GC_MATCH_APPLY_OFFLINE
+{
+	DWORD			dwStartType;
+	DWORD			dwApplyCount;
+	DWORD			dwLowPlayer;
+	DWORD			dwLeaveTime;
 };
 
 #pragma endregion
@@ -640,6 +654,26 @@ struct STR_CMD_GR_FRAME_GAME_DISSMISS
 	BYTE					cbAgree[MAX_CHAIR];						    //是否同意解散		0-不同意	1-同意   2-未表决
 };
 
+//大局结束
+struct STR_CMD_GR_TABLE_DJ_END
+{
+	TCHAR					szName[LEN_NICKNAME];
+	TCHAR					szHeadUrl[LEN_HEAD_URL];
+	SCORE					llScore;
+	BYTE					wBigWinner;					//大赢家 0-否 1-是
+};
+
+//托管返回
+struct STR_CMD_GR_TUOGUAN
+{
+	DWORD					dwUserID;
+};
+
+//取消托管返回
+struct STR_CMD_GR_CANCEL_TUOGUAN
+{
+	DWORD					dwUserID;
+};
 
 //消耗道具
 struct STR_SUB_CG_EFFECT
