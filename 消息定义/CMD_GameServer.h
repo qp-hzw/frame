@@ -150,6 +150,8 @@
 #define SUB_RG_CANCEL_TUOGUAN				203								//取消托管
 #define CMD_GR_CANCEL_TUOGUAN				303								//取消托管 返回
 
+#define CMD_GR_TABLE_GAME_ACT				4								//游戏开始,小局结束,大局结束 额外通知frame
+
 //GPS测距
 #define SUB_CG_COM_CHECK_USER_GPS			5								//请求校验用户GPS位置信息
 #define CMD_GC_COM_CHECK_USER_GPS			105								//校验用户GPS位置信息返回

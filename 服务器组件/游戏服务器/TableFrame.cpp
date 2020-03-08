@@ -191,6 +191,11 @@ void CTableFrame::SetStageTimer()
 //开始游戏
 bool CTableFrame::StartGame()
 {
+	//通知client frame
+	STR_CMD_GR_TABLE_GAME_ACT act;
+	act.act = 0;
+	SendTableData(INVALID_CHAIR, CMD_GR_TABLE_GAME_ACT, &act, sizeof(STR_CMD_GR_TABLE_GAME_ACT), MDM_G_FRAME);
+
 	//状态校验
 	if(GetGameStatus() != GAME_STATUS_FREE) return false;
 
@@ -233,6 +238,12 @@ bool CTableFrame::StartGame()
 //小局结束处理函数
 bool CTableFrame::HandleXJGameEnd(BYTE byRound, WORD *wIdentity, SCORE *lUserTreasure)
 {
+	//通知client frame
+	STR_CMD_GR_TABLE_GAME_ACT act;
+	act.act = 1;
+	SendTableData(INVALID_CHAIR, CMD_GR_TABLE_GAME_ACT, &act, sizeof(STR_CMD_GR_TABLE_GAME_ACT), MDM_G_FRAME);
+
+
 	m_wCurGameRound = byRound;
 	DWORD dwDataSize = 0;
 	VOID *pData = m_Record.GetData(m_tagTableRule.PlayerCount, dwDataSize);
@@ -293,6 +304,11 @@ bool CTableFrame::HandleXJGameEnd(BYTE byRound, WORD *wIdentity, SCORE *lUserTre
 //大局结束处理函数
 bool CTableFrame::HandleDJGameEnd(BYTE cbGameStatus)
 {
+	//通知client frame
+	STR_CMD_GR_TABLE_GAME_ACT act;
+	act.act = 2;
+	SendTableData(INVALID_CHAIR, CMD_GR_TABLE_GAME_ACT, &act, sizeof(STR_CMD_GR_TABLE_GAME_ACT), MDM_G_FRAME);
+
 	//关闭所有定时器
 	KillGameTimer(IDI_ROOM_AUTO_DISMISS);
 

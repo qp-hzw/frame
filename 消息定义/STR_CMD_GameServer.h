@@ -663,6 +663,12 @@ struct STR_CMD_GR_TABLE_DJ_END
 	BYTE					wBigWinner;					//大赢家 0-否 1-是
 };
 
+//游戏开始, 小局结束, 大局结束
+struct STR_CMD_GR_TABLE_GAME_ACT
+{
+	BYTE					act;					//0游戏开始, 1小局结束, 2大局结束
+};
+
 //托管返回
 struct STR_CMD_GR_TUOGUAN
 {
