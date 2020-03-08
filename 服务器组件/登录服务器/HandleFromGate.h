@@ -27,6 +27,11 @@ private:
 	//具体处理
 private:
 #pragma region MAIN_LOGON 登录模块
+	//游客登陆
+	static bool On_SUB_CL_LOGON_TEMP(VOID * pData, WORD wDataSize, DWORD dwSocketID);
+	//账号登录返回
+	static bool On_DBO_Logon_Accounts(DWORD dwResuleCode, LPCTSTR pszErrorString, DWORD dwSocketID);
+
 	//帐号登录
 	static bool On_SUB_CL_Logon_Accounts(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	//账号登录返回

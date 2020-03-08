@@ -258,6 +258,10 @@ bool CHandleFromGate::OnTCPNetworkMainLogon(WORD wSubCmdID, VOID * pData, WORD w
 {
 	switch (wSubCmdID)
 	{
+	case SUB_CL_LOGON_TEMP:			//游客登陆
+		{
+			return On_SUB_CL_LOGON_TEMP(pData,wDataSize,dwSocketID);
+		}
 	case SUB_CL_LOGON_ACCOUNTS:		//帐号登录
 		{
 			return On_SUB_CL_Logon_Accounts(pData,wDataSize,dwSocketID);
@@ -517,6 +521,93 @@ bool CHandleFromGate::On_MDM_GAME(WORD wSubCmdID, VOID * pData, WORD wDataSize, 
 
 #pragma region MDM_LOGON 登录模块
 /***************************************** 【登录处理函数-主消息1】 *******************************************/
+//游客登陆
+bool CHandleFromGate::On_SUB_CL_LOGON_TEMP(VOID * pData, WORD wDataSize, DWORD dwSocketID)
+{
+	//效验参数
+	if (wDataSize!=sizeof(STR_SUB_CL_LOGON_TEMP)) return false;
+
+	//请求处理
+	STR_SUB_CL_LOGON_TEMP * pDBRLogonAccounts=(STR_SUB_CL_LOGON_TEMP *)pData;
+
+	//构造参数
+	g_AccountsDB->ResetParameter();
+	g_AccountsDB->AddParameter(TEXT("@strAccounts"),pDBRLogonAccounts->szMachineID);
+
+	//输出参数
+	TCHAR szDescribeString[127]=TEXT("");
+	g_AccountsDB->AddParameterOutput(TEXT("@strErrorDescribe"),szDescribeString,sizeof(szDescribeString),adParamOutput);
+
+	//执行查询
+	LONG lResultCode = g_AccountsDB->ExecuteProcess(TEXT("GSP_CL_Logon_Temp"),true);
+
+	//结果处理
+	CDBVarValue DBVarValue;
+	g_AccountsDB->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
+
+	On_DBO_Logon_Accounts(lResultCode,CW2CT(DBVarValue.bstrVal), dwSocketID);
+
+	return true;
+}
+//账号登录返回
+bool CHandleFromGate::On_DBO_Logon_Accounts(DWORD dwResultCode, LPCTSTR pszErrorString, DWORD dwSocketID)
+{
+	//变量定义
+	STR_CMD_LC_LOGON_PLATFORM DBOLogonAccount;
+	ZeroMemory(&DBOLogonAccount,sizeof(DBOLogonAccount));
+
+	//登录成功获取信息
+	if(DB_SUCCESS == dwResultCode)
+	{
+		//用户标志
+		DBOLogonAccount.useInfo.dwUserID=g_AccountsDB->GetValue_DWORD(TEXT("UserID"));
+		//用户昵称
+		g_AccountsDB->GetValue_String(TEXT("NickName"),DBOLogonAccount.useInfo.szNickName,CountArray(DBOLogonAccount.useInfo.szNickName));
+		//用户性别
+		DBOLogonAccount.useInfo.cbGender=g_AccountsDB->GetValue_BYTE(TEXT("Gender"));
+		//头像索引
+		g_AccountsDB->GetValue_String(TEXT("HeadUrl"),DBOLogonAccount.useInfo.szHeadUrl,CountArray(DBOLogonAccount.useInfo.szHeadUrl));
+		//个性签名
+		g_AccountsDB->GetValue_String(TEXT("MySignature"),DBOLogonAccount.useInfo.szUnderWrite,CountArray(DBOLogonAccount.useInfo.szUnderWrite));
+
+		//社团ID
+		DBOLogonAccount.useInfo.dwGroupID=g_AccountsDB->GetValue_BYTE(TEXT("GroupID"));
+		//社团名字
+		g_AccountsDB->GetValue_String(TEXT("GroupName"),DBOLogonAccount.useInfo.szGroupName,CountArray(DBOLogonAccount.useInfo.szGroupName));
+
+		//会员等级
+		DBOLogonAccount.useInfo.cbMemberOrder=g_AccountsDB->GetValue_BYTE(TEXT("MemberOrder"));
+		//人物等级
+		DBOLogonAccount.useInfo.dwLevel=g_AccountsDB->GetValue_BYTE(TEXT("cbLevel"));
+		//经验数值
+		DBOLogonAccount.useInfo.dwExperience=g_AccountsDB->GetValue_DWORD(TEXT("Experience"));
+
+		//用户房卡
+		DBOLogonAccount.useInfo.lOpenRoomCard = g_AccountsDB->GetValue_LONGLONG(TEXT("UserRoomCard"));
+		//钻石
+		DBOLogonAccount.useInfo.lDiamond = g_AccountsDB->GetValue_LONGLONG(TEXT("UserDiamond"));
+		//用户游戏币
+		DBOLogonAccount.useInfo.lGold = g_AccountsDB->GetValue_LONGLONG(TEXT("UserGold"));
+	}
+
+	//构造数据
+	DBOLogonAccount.dwResultCode=dwResultCode;
+	lstrcpyn(DBOLogonAccount.szDescribeString,pszErrorString,CountArray(DBOLogonAccount.szDescribeString));
+
+	//插入玩家记录
+	tagUserInfo UserInfo;
+	ZeroMemory(&UserInfo, sizeof(UserInfo));
+	memcpy(&UserInfo, &(DBOLogonAccount.useInfo), sizeof(UserInfo));
+	CPlayerManager::InsertPlayer (dwSocketID, UserInfo);
+
+	//查询断线重连
+	STR_CPR_LP_OFFLINE_PLAYERQUERY CPR;
+	CPR.dwUserID = DBOLogonAccount.useInfo.dwUserID;
+	g_TCPSocketEngine->SendData(CPD_MDM_TRANSFER, CPR_LP_OFFLINE_PLAYERQUERY, &CPR, sizeof(CPR));
+	
+	return true;
+}
+
 //帐号登录
 bool CHandleFromGate::On_SUB_CL_Logon_Accounts(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {

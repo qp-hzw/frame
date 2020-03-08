@@ -39,6 +39,7 @@
 #define SUB_CL_LOGON_ACCOUNTS		1									//帐号登录
 #define SUB_CL_LOGON_REGISTER	    2									//帐号注册（返回的是登录成功）
 #define SUB_CL_LOGON_PLATFORM		3									//平台登陆（第三方登录）
+#define SUB_CL_LOGON_TEMP		    4									//游客登陆
 
 #define CMD_LC_LOGON_ACCOUNTS		101									//登录成功
 #define CMD_LC_LOGON_PLATFORM       103                                 //平台登陆返回

@@ -30,6 +30,13 @@ struct STR_SUB_CL_COMMON_ERROR
 #pragma endregion
 
 #pragma region MDM_LOGON 登录模块
+//游客登录
+struct STR_SUB_CL_LOGON_TEMP
+{
+	TCHAR							szMachineID[LEN_MACHINE_ID];		//机器序列
+	DWORD							dwProxyID;							//代理ID
+};
+
 //帐号登录  
 struct STR_SUB_CL_LOGON_ACCOUNTS
 {
