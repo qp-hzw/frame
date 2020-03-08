@@ -532,7 +532,7 @@ bool CHandleFromGate::On_SUB_CL_LOGON_TEMP(VOID * pData, WORD wDataSize, DWORD d
 
 	//构造参数
 	g_AccountsDB->ResetParameter();
-	g_AccountsDB->AddParameter(TEXT("@strAccounts"),pDBRLogonAccounts->szMachineID);
+	g_AccountsDB->AddParameter(TEXT("@strMachineID"),pDBRLogonAccounts->szMachineID);
 
 	//输出参数
 	TCHAR szDescribeString[127]=TEXT("");
