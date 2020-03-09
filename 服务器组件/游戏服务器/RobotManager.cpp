@@ -6,6 +6,7 @@
 #include "PlayerManager.h"
 #include "MatchManager.h"
 #include <algorithm>
+#include "RoomRuleManager.h"
 
 #define IDI_LOAD_ANDROID_USER			(IDI_MAIN_MODULE_START+1)			//加载机器人
 #define TIME_LOAD_ANDROID_USER				3000L							//加载机器
@@ -87,6 +88,12 @@ void CRobotManager::On_ANDROID_JOIN_GAME()
 		{
 			CLog::Log(log_debug, "金币场 桌子【%d】 没有找到机器人", pTable->GetTableID());
 			break;
+		}
+
+		//门票检测
+		if(0 != RoomRuleManager::CheckTickt(&RoomRuleManager::GetGoldRoomRule(pTable->GetGoldType()), pPlayer))
+		{
+			continue;
 		}
 
 		//坐下

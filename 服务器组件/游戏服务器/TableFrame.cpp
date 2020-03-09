@@ -259,6 +259,12 @@ bool CTableFrame::HandleXJGameEnd(BYTE byRound, WORD *wIdentity, SCORE *lUserTre
 		XJTickets();
 	}
 
+	//金币场算用户金币
+	if (m_tagTableRule.GameMode == TABLE_MODE_GOLD && byRound == 1)
+	{
+		SettleGold(wIdentity, lUserTreasure);
+	}
+
 	//玩家状态
 	for (int i = 0; i < m_player_list.size(); i++)
 	{
@@ -270,12 +276,6 @@ bool CTableFrame::HandleXJGameEnd(BYTE byRound, WORD *wIdentity, SCORE *lUserTre
 	for (int i = 0; i < m_total_score.size(); i++)
 	{
 		m_total_score[i] += lUserTreasure[i];
-	}
-
-	//金币场算金币
-	if (m_tagTableRule.GameMode == TABLE_MODE_GOLD && byRound == 1)
-	{
-		SettleGold(wIdentity);
 	}
 
 	//更新用户财富  -- 用户财富变更记录表
@@ -1982,7 +1982,7 @@ bool CTableFrame::GetBigWinner(WORD wChairID)
 }
 
 //金币场算金币
-bool CTableFrame::SettleGold(WORD *wIdentity)
+bool CTableFrame::SettleGold(WORD *wIdentity, SCORE *lUserTreasure)
 {
 	//金币场校验
 	if (m_tagTableRule.GameMode != TABLE_MODE_GOLD)
@@ -1999,7 +1999,7 @@ bool CTableFrame::SettleGold(WORD *wIdentity)
 		if (1 == wIdentity[i])
 		{
 			wBankerID = i;
-			if (GetBigWinner(i))
+			if (lUserTreasure[i] > 0)
 			{
 				bBankerWin = true;
 			}
@@ -2010,7 +2010,7 @@ bool CTableFrame::SettleGold(WORD *wIdentity)
 	if (bBankerWin)
 	{
 		CPlayer *banker = m_player_list[wBankerID];
-		if (m_total_score[wBankerID]*wBaseGold < banker->GetUserGold())
+		if (lUserTreasure[wBankerID]*wBaseGold < banker->GetUserGold())
 		{
 			SCORE llBankerScore = 0;
 			for (int i = 0; i < m_wChairCount; i++)
@@ -2018,20 +2018,20 @@ bool CTableFrame::SettleGold(WORD *wIdentity)
 				if (i != wBankerID)
 				{
 					CPlayer *player = m_player_list[i];
-					m_total_score[i] = m_total_score[wBankerID]*wBaseGold * (m_total_score[i])/m_total_score[wBankerID];
+					lUserTreasure[i] = lUserTreasure[wBankerID]*wBaseGold * (lUserTreasure[i])/lUserTreasure[wBankerID];
 
-					if (m_total_score[i] * (-1) < player->GetUserGold())
+					if (lUserTreasure[i] * (-1) < player->GetUserGold())
 					{
-						llBankerScore -= m_total_score[i];
+						llBankerScore -= lUserTreasure[i];
 					}
 					else
 					{
-						m_total_score[i] = (-1) * player->GetUserGold();
-						llBankerScore -= m_total_score[i];
+						lUserTreasure[i] = (-1) * player->GetUserGold();
+						llBankerScore -= lUserTreasure[i];
 					}
 				}
 			}
-			m_total_score[wBankerID] = llBankerScore;
+			lUserTreasure[wBankerID] = llBankerScore;
 		}
 		else
 		{
@@ -2041,26 +2041,26 @@ bool CTableFrame::SettleGold(WORD *wIdentity)
 				if (i != wBankerID)
 				{
 					CPlayer *player = m_player_list[i];
-					m_total_score[i] = banker->GetUserGold() * (m_total_score[i])/m_total_score[wBankerID];
+					lUserTreasure[i] = banker->GetUserGold() * (lUserTreasure[i])/lUserTreasure[wBankerID];
 
-					if (m_total_score[i] * (-1) < player->GetUserGold())
+					if (lUserTreasure[i] * (-1) < player->GetUserGold())
 					{
-						llBankerScore -= m_total_score[i];
+						llBankerScore -= lUserTreasure[i];
 					}
 					else
 					{
-						m_total_score[i] = (-1) * player->GetUserGold();
-						llBankerScore -= m_total_score[i];
+						lUserTreasure[i] = (-1) * player->GetUserGold();
+						llBankerScore -= lUserTreasure[i];
 					}
 				}
 			}
-			m_total_score[wBankerID] = llBankerScore;
+			lUserTreasure[wBankerID] = llBankerScore;
 		}
 	}
 	else
 	{
 		CPlayer *banker = m_player_list[wBankerID];
-		if ((-1)*m_total_score[wBankerID]*wBaseGold < banker->GetUserGold())
+		if ((-1)*lUserTreasure[wBankerID]*wBaseGold < banker->GetUserGold())
 		{
 			SCORE llBankerScore = 0;
 			for (int i = 0; i < m_wChairCount; i++)
@@ -2068,19 +2068,19 @@ bool CTableFrame::SettleGold(WORD *wIdentity)
 				if (i != wBankerID)
 				{
 					CPlayer *player = m_player_list[i];
-					if (m_total_score[i]*wBaseGold < player->GetUserGold())
+					if (lUserTreasure[i]*wBaseGold < player->GetUserGold())
 					{
-						m_total_score[i] *= wBaseGold;
-						llBankerScore -= m_total_score[i];
+						lUserTreasure[i] *= wBaseGold;
+						llBankerScore -= lUserTreasure[i];
 					}
 					else
 					{
-						m_total_score[i] = player->GetUserGold();
-						llBankerScore -= m_total_score[i];
+						lUserTreasure[i] = player->GetUserGold();
+						llBankerScore -= lUserTreasure[i];
 					}
 				}
 			}
-			m_total_score[wBankerID] = (-1) * llBankerScore;
+			lUserTreasure[wBankerID] = llBankerScore;
 		}
 		else
 		{
@@ -2090,24 +2090,28 @@ bool CTableFrame::SettleGold(WORD *wIdentity)
 				if (i != wBankerID)
 				{
 					CPlayer *player = m_player_list[i];
-					m_total_score[i] = banker->GetUserGold() * ((-1) * m_total_score[i])/m_total_score[wBankerID];
+					lUserTreasure[i] = banker->GetUserGold() * ((-1) * lUserTreasure[i])/lUserTreasure[wBankerID];
 
-					if (m_total_score[i] > player->GetUserGold())
+					if (lUserTreasure[i] > player->GetUserGold())
 					{
-						m_total_score[i] = player->GetUserGold();
-						llBankerScore -= m_total_score[i];
+						lUserTreasure[i] = player->GetUserGold();
+						llBankerScore -= lUserTreasure[i];
 					}
 					else 
 					{
-						llBankerScore -= m_total_score[i];
+						llBankerScore -= lUserTreasure[i];
 					}
 				}
 			}
-			m_total_score[wBankerID] = llBankerScore ; 
+			lUserTreasure[wBankerID] = llBankerScore ; 
 		}
 	}
 
 	//写入数据库
+	for (int i = 0; i < m_wChairCount; i++)
+	{
+		CLog::Log(log_debug, "chair: %d Gold: %d", i, lUserTreasure[i]);
+	}
 
 	return true;
 }
