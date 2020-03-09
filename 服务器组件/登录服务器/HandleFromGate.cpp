@@ -556,6 +556,19 @@ bool CHandleFromGate::On_DBO_Logon_Accounts(DWORD dwResultCode, LPCTSTR pszError
 	STR_CMD_LC_LOGON_PLATFORM DBOLogonAccount;
 	ZeroMemory(&DBOLogonAccount,sizeof(DBOLogonAccount));
 
+	//构造数据
+	DBOLogonAccount.dwResultCode=dwResultCode;
+	lstrcpyn(DBOLogonAccount.szDescribeString,pszErrorString,CountArray(DBOLogonAccount.szDescribeString));
+
+	//登陆失败 直接返回
+	if(DB_SUCCESS != dwResultCode)
+	{
+		CLog::Log(log_debug, "登陆失败 %d", dwResultCode);
+		//发送数据
+		g_GameCtrl->SendData(dwSocketID, MDM_LOGON, CMD_LC_LOGON_ACCOUNTS, &DBOLogonAccount, sizeof(DBOLogonAccount));
+		return true;
+	}
+
 	//登录成功获取信息
 	if(DB_SUCCESS == dwResultCode)
 	{
@@ -571,9 +584,9 @@ bool CHandleFromGate::On_DBO_Logon_Accounts(DWORD dwResultCode, LPCTSTR pszError
 		g_AccountsDB->GetValue_String(TEXT("MySignature"),DBOLogonAccount.useInfo.szUnderWrite,CountArray(DBOLogonAccount.useInfo.szUnderWrite));
 
 		//社团ID
-		DBOLogonAccount.useInfo.dwGroupID=g_AccountsDB->GetValue_BYTE(TEXT("GroupID"));
+		//DBOLogonAccount.useInfo.dwGroupID=g_AccountsDB->GetValue_BYTE(TEXT("GroupID"));
 		//社团名字
-		g_AccountsDB->GetValue_String(TEXT("GroupName"),DBOLogonAccount.useInfo.szGroupName,CountArray(DBOLogonAccount.useInfo.szGroupName));
+		//g_AccountsDB->GetValue_String(TEXT("GroupName"),DBOLogonAccount.useInfo.szGroupName,CountArray(DBOLogonAccount.useInfo.szGroupName));
 
 		//会员等级
 		DBOLogonAccount.useInfo.cbMemberOrder=g_AccountsDB->GetValue_BYTE(TEXT("MemberOrder"));
@@ -590,15 +603,13 @@ bool CHandleFromGate::On_DBO_Logon_Accounts(DWORD dwResultCode, LPCTSTR pszError
 		DBOLogonAccount.useInfo.lGold = g_AccountsDB->GetValue_LONGLONG(TEXT("UserGold"));
 	}
 
-	//构造数据
-	DBOLogonAccount.dwResultCode=dwResultCode;
-	lstrcpyn(DBOLogonAccount.szDescribeString,pszErrorString,CountArray(DBOLogonAccount.szDescribeString));
-
 	//插入玩家记录
 	tagUserInfo UserInfo;
 	ZeroMemory(&UserInfo, sizeof(UserInfo));
 	memcpy(&UserInfo, &(DBOLogonAccount.useInfo), sizeof(UserInfo));
 	CPlayerManager::InsertPlayer (dwSocketID, UserInfo);
+
+	CLog::Log(log_debug, "id: %ld,  name: %s", DBOLogonAccount.useInfo.dwUserID, DBOLogonAccount.useInfo.szNickName);
 
 	//查询断线重连
 	STR_CPR_LP_OFFLINE_PLAYERQUERY CPR;

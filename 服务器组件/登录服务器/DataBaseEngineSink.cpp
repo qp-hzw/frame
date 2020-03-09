@@ -313,9 +313,9 @@ bool CDataBaseEngineSink::On_DBO_Service_RefreshUserInfo(DWORD dwContextID, DWOR
 		m_AccountsDB->GetValue_SystemTime(TEXT("LastLogonDate"),UserInfo.LasLogonDate);
 		/* *****************************    附加数据     ****************************/
 		//社团标志 -- 牌友圈
-		UserInfo.dwGroupID=m_AccountsDB->GetValue_DWORD(TEXT("GroupID"));
+		//UserInfo.dwGroupID=m_AccountsDB->GetValue_DWORD(TEXT("GroupID"));
 		//社团名字 -- 牌友圈
-		m_AccountsDB->GetValue_String(TEXT("GroupName"),UserInfo.szGroupName,CountArray(UserInfo.szGroupName));
+		//m_AccountsDB->GetValue_String(TEXT("GroupName"),UserInfo.szGroupName,CountArray(UserInfo.szGroupName));
 
 		//用户积分
 		UserInfo.lUserScore = m_AccountsDB->GetValue_LONGLONG(TEXT("UserScore"));
@@ -1386,9 +1386,9 @@ bool CDataBaseEngineSink::On_DBO_Logon_Accounts(DWORD dwContextID, DWORD dwResul
 		m_AccountsDB->GetValue_String(TEXT("MySignature"),DBOLogonAccount.useInfo.szUnderWrite,CountArray(DBOLogonAccount.useInfo.szUnderWrite));
 
 		//社团ID
-		DBOLogonAccount.useInfo.dwGroupID=m_AccountsDB->GetValue_BYTE(TEXT("GroupID"));
+		//DBOLogonAccount.useInfo.dwGroupID=m_AccountsDB->GetValue_BYTE(TEXT("GroupID"));
 		//社团名字
-		m_AccountsDB->GetValue_String(TEXT("GroupName"),DBOLogonAccount.useInfo.szGroupName,CountArray(DBOLogonAccount.useInfo.szGroupName));
+		//m_AccountsDB->GetValue_String(TEXT("GroupName"),DBOLogonAccount.useInfo.szGroupName,CountArray(DBOLogonAccount.useInfo.szGroupName));
 
 		//会员等级
 		DBOLogonAccount.useInfo.cbMemberOrder=m_AccountsDB->GetValue_BYTE(TEXT("MemberOrder"));

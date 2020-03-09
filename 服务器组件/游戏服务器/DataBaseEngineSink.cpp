@@ -232,9 +232,9 @@ bool CDataBaseEngineSink::On_DBO_Logon_UserID(DWORD dwContextID, DWORD dwErrorCo
 		m_TreasureDB->GetValue_String(TEXT("MySignature"),DBOLogonAccount.useInfo.szUnderWrite,CountArray(DBOLogonAccount.useInfo.szUnderWrite));
 
 		//社团ID
-		DBOLogonAccount.useInfo.dwGroupID=m_TreasureDB->GetValue_BYTE(TEXT("GroupID"));
+		//DBOLogonAccount.useInfo.dwGroupID=m_TreasureDB->GetValue_BYTE(TEXT("GroupID"));
 		//社团名字
-		m_TreasureDB->GetValue_String(TEXT("GroupName"),DBOLogonAccount.useInfo.szGroupName,CountArray(DBOLogonAccount.useInfo.szGroupName));
+		//m_TreasureDB->GetValue_String(TEXT("GroupName"),DBOLogonAccount.useInfo.szGroupName,CountArray(DBOLogonAccount.useInfo.szGroupName));
 
 		//会员等级
 		DBOLogonAccount.useInfo.cbMemberOrder=m_TreasureDB->GetValue_BYTE(TEXT("MemberOrder"));
