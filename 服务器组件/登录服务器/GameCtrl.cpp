@@ -171,21 +171,12 @@ bool CGameCtrl::SendDataBatch(WORD wMainCmdID, WORD wSubCmdID, VOID * pData, WOR
 	return m_TCPNetworkEngine->SendDataBatch(wMainCmdID, wSubCmdID, pData, wDataSize);
 }
 
-//char* 2 TCHAR
-TCHAR *chr2wch(const char *buffer)
-{
-        size_t len = strlen(buffer);
-        size_t wlen = MultiByteToWideChar(CP_ACP, 0, (const char*)buffer, int(len), NULL, 0);
-        TCHAR *wBuf = new TCHAR[wlen + 1];
-        MultiByteToWideChar(CP_ACP, 0, (const char*)buffer, int(len), wBuf, int(wlen));
-        return wBuf;
-}
-
 //发送通用错误提示
 bool CGameCtrl::SendDataMsg(DWORD dwSocketID, string msg)
 {
+	std::wstring wStr =  CWConvert::s2ws(msg);
 	STR_SUB_CL_COMMON_ERROR cmd;
-	memcpy(cmd.szMsg, chr2wch(msg.c_str()), sizeof(TCHAR)*20);
+	memcpy(cmd.szMsg, wStr.c_str(), sizeof(TCHAR)*20);
 
 	SendData(dwSocketID, MDM_LOGON, CMD_LC_COMMON_ERROR, &cmd, sizeof(cmd));
 	return true;
