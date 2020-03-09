@@ -272,6 +272,12 @@ bool CTableFrame::HandleXJGameEnd(BYTE byRound, WORD *wIdentity, SCORE *lUserTre
 		m_total_score[i] += lUserTreasure[i];
 	}
 
+	//金币场算金币
+	if (m_tagTableRule.GameMode == TABLE_MODE_GOLD && byRound == 1)
+	{
+		SettleGold(wIdentity);
+	}
+
 	//更新用户财富  -- 用户财富变更记录表
 	XJModifyUserTreasure(lUserTreasure);
 
@@ -1973,6 +1979,137 @@ bool CTableFrame::GetBigWinner(WORD wChairID)
 	}
 
 	return flag;
+}
+
+//金币场算金币
+bool CTableFrame::SettleGold(WORD *wIdentity)
+{
+	//金币场校验
+	if (m_tagTableRule.GameMode != TABLE_MODE_GOLD)
+		return false;
+
+	//金币场金币底分
+	WORD wBaseGold = 10;
+
+	//判断赢家
+	bool bBankerWin = false;
+	WORD wBankerID = 0;
+	for (int i = 0; i < m_wChairCount; i++)
+	{
+		if (1 == wIdentity[i])
+		{
+			wBankerID = i;
+			if (GetBigWinner(i))
+			{
+				bBankerWin = true;
+			}
+		}
+	}
+
+	//赢的金币不能超过本身金币 输的金币也不能超过本身金币
+	if (bBankerWin)
+	{
+		CPlayer *banker = m_player_list[wBankerID];
+		if (m_total_score[wBankerID]*wBaseGold < banker->GetUserGold())
+		{
+			SCORE llBankerScore = 0;
+			for (int i = 0; i < m_wChairCount; i++)
+			{
+				if (i != wBankerID)
+				{
+					CPlayer *player = m_player_list[i];
+					m_total_score[i] = m_total_score[wBankerID]*wBaseGold * (m_total_score[i])/m_total_score[wBankerID];
+
+					if (m_total_score[i] * (-1) < player->GetUserGold())
+					{
+						llBankerScore -= m_total_score[i];
+					}
+					else
+					{
+						m_total_score[i] = (-1) * player->GetUserGold();
+						llBankerScore -= m_total_score[i];
+					}
+				}
+			}
+			m_total_score[wBankerID] = llBankerScore;
+		}
+		else
+		{
+			SCORE llBankerScore = 0;
+			for (int i = 0; i < m_wChairCount; i++)
+			{
+				if (i != wBankerID)
+				{
+					CPlayer *player = m_player_list[i];
+					m_total_score[i] = banker->GetUserGold() * (m_total_score[i])/m_total_score[wBankerID];
+
+					if (m_total_score[i] * (-1) < player->GetUserGold())
+					{
+						llBankerScore -= m_total_score[i];
+					}
+					else
+					{
+						m_total_score[i] = (-1) * player->GetUserGold();
+						llBankerScore -= m_total_score[i];
+					}
+				}
+			}
+			m_total_score[wBankerID] = llBankerScore;
+		}
+	}
+	else
+	{
+		CPlayer *banker = m_player_list[wBankerID];
+		if ((-1)*m_total_score[wBankerID]*wBaseGold < banker->GetUserGold())
+		{
+			SCORE llBankerScore = 0;
+			for (int i = 0; i < m_wChairCount; i++)
+			{
+				if (i != wBankerID)
+				{
+					CPlayer *player = m_player_list[i];
+					if (m_total_score[i]*wBaseGold < player->GetUserGold())
+					{
+						m_total_score[i] *= wBaseGold;
+						llBankerScore -= m_total_score[i];
+					}
+					else
+					{
+						m_total_score[i] = player->GetUserGold();
+						llBankerScore -= m_total_score[i];
+					}
+				}
+			}
+			m_total_score[wBankerID] = (-1) * llBankerScore;
+		}
+		else
+		{
+			SCORE llBankerScore = 0;
+			for (int i = 0; i < m_wChairCount; i++)
+			{
+				if (i != wBankerID)
+				{
+					CPlayer *player = m_player_list[i];
+					m_total_score[i] = banker->GetUserGold() * ((-1) * m_total_score[i])/m_total_score[wBankerID];
+
+					if (m_total_score[i] > player->GetUserGold())
+					{
+						m_total_score[i] = player->GetUserGold();
+						llBankerScore -= m_total_score[i];
+					}
+					else 
+					{
+						llBankerScore -= m_total_score[i];
+					}
+				}
+			}
+			m_total_score[wBankerID] = llBankerScore ; 
+		}
+	}
+
+	//写入数据库
+
+	return true;
 }
 
 //发送托管

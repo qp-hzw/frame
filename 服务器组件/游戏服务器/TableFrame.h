@@ -364,6 +364,8 @@ protected:
 
 	//判断大赢家
 	bool GetBigWinner(WORD wChairID);
+	//金币场算金币
+	bool SettleGold(WORD *wIdentity);
 
 #pragma endregion
 
