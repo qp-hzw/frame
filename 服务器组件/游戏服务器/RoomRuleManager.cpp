@@ -297,27 +297,27 @@ int RoomRuleManager::CheckTickt(tagTableRule* rule, CPlayer* player, CTableFrame
 //根据字段名字, 为结构体对应字段赋值
 void RoomRuleManager::SetRoomRule(tagTableRule &roomrule, string key_name, byte value)
 {
-	if(key_name == "游戏局数")
+	if(key_name == "局数")
 	{
 		roomrule.GameCount = (BYTE)atoi(GetRoomValByKey(key_name, value).c_str());
 	}
-	else if(key_name == "玩家人数")
+	else if(key_name == "人数")
 	{
 		roomrule.PlayerCount = atoi(GetRoomValByKey(key_name, value).c_str());
 	}
-	else if(key_name == "支付方式")
+	else if(key_name == "支付")
 	{
 		roomrule.cbPayType = atoi(GetRoomValByKey(key_name, value).c_str());
 	}
-	else if(key_name == "同IP检测")
+	else if(key_name == "IP检测")
 	{
 		roomrule.bRefuseSameIP = atoi(GetRoomValByKey(key_name, value).c_str());
 	}
-	else if(key_name == "距离检测")
+	else if(key_name == "距离")
 	{
 		roomrule.bDistanceIn300 = atoi(GetRoomValByKey(key_name, value).c_str());
 	}
-	else if(key_name == "允许陌生人加入")
+	else if(key_name == "陌生人")
 	{
 		roomrule.bAllowStranger = atoi(GetRoomValByKey(key_name, value).c_str());
 	}
