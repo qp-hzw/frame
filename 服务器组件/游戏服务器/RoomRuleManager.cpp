@@ -5,7 +5,7 @@
 #include "player.h"
 #include "DataBaseEngineSink.h"
 
-rule_arry						RoomRuleManager::m_rule_arry;
+rule_all_arry						RoomRuleManager::m_rule_arry;
 ISubRoomRuleManager*            RoomRuleManager::m_SubRoomRuleManager = NULL;
 std::map<BYTE,  STR_CMD_GC_USER_GOLD_INFO> RoomRuleManager::s_RoomInfo; 
 
@@ -47,6 +47,12 @@ void RoomRuleManager::InitFK(int kindid)
 			if(iRet != 0) continue;
 			std::wstring wStr = CWConvert::s2ws(strTemp);
 			memcpy(m_rule_arry.ItemArry[i].szItemValue[j], wStr.c_str(), sizeof(TCHAR)*10);
+
+			sprintf(value, "cvalue_%d", j);
+			iRet = CWHCfg::Instance()->GetItemValue(psz, value, strTemp);
+			if(iRet != 0) continue;
+			wStr = CWConvert::s2ws(strTemp);
+			memcpy(m_rule_arry.ItemArry[i].szItemValueForC[j], wStr.c_str(), sizeof(TCHAR)*10);
 		}
 	}
 
@@ -92,7 +98,13 @@ void RoomRuleManager::InitGold(int kindid)
 //获取房卡场 房间配置选项
 rule_arry RoomRuleManager::GetRoomRuleSetting()
 {
-	return m_rule_arry;
+	rule_arry ruleArry;
+	for(int i=0; i<20; i++)
+	{
+		memcpy(ruleArry.ItemArry[i].szHeadName, m_rule_arry.ItemArry[i].szHeadName, sizeof(TCHAR)*15);
+		memcpy(ruleArry.ItemArry[i].szItemValue, m_rule_arry.ItemArry[i].szItemValueForC, sizeof(TCHAR)*10*4);
+	}
+	return ruleArry;
 }
 //获取房卡场 房间规则
 tagTableRule RoomRuleManager::GetFKRoomRule(byte value[20], byte GameMode)

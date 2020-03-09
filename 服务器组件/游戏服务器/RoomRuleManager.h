@@ -7,6 +7,18 @@
 #include "TableFrame.h"
 using std::string;
 
+//单条房间规则
+struct rule_all_item
+{
+	TCHAR	                       szHeadName[15];						//房间头
+	TCHAR	                       szItemValue[4][10];				    //房间选择值
+	TCHAR	                       szItemValueForC[4][10];				//房间选择值 -- 展现给客户端看的
+};
+//房间规则
+struct rule_all_arry
+{
+	rule_all_item	                   ItemArry[20];						//房间规则
+};
 
 class CPlayer;
 class RoomRuleManager
@@ -15,7 +27,7 @@ private:
 	static ISubRoomRuleManager*            m_SubRoomRuleManager;      //子游戏 房间规则接口
 
 	static std::map<BYTE,  STR_CMD_GC_USER_GOLD_INFO> s_RoomInfo;     //金币场 房间数据  <房间等级, 房间信息> 
-	static rule_arry						m_rule_arry;			  //房卡场 房间配置选项
+	static rule_all_arry						m_rule_arry;			  //房卡场 房间配置选项
 
 public:
 	//初始化
