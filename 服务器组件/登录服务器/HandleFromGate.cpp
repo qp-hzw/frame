@@ -603,6 +603,9 @@ bool CHandleFromGate::On_DBO_Logon_Accounts(DWORD dwResultCode, LPCTSTR pszError
 		DBOLogonAccount.useInfo.lGold = g_AccountsDB->GetValue_LONGLONG(TEXT("UserGold"));
 	}
 
+	//重复登录处理
+	On_CMD_LC_Logon_RepeatLogon( DBOLogonAccount.useInfo.dwUserID, dwSocketID );
+
 	//插入玩家记录
 	tagUserInfo UserInfo;
 	ZeroMemory(&UserInfo, sizeof(UserInfo));
