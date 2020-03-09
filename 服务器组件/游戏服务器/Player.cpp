@@ -145,7 +145,7 @@ bool CPlayer::ModifyUserTreasure(BYTE byTreasureType,  SCORE lUserTreasuse, stri
 	g_TreasureDB->AddParameter(TEXT("@Comment"), strPayMsg.c_str());
 
 	//执行查询
-	LONG lResultCode = g_TreasureDB->ExecuteProcess(TEXT("GSP_TreasureRecord_Insert"), true);
+	LONG lResultCode = g_TreasureDB->ExecuteProcess(TEXT("GSP_TreasureRecord_Insert"), false);
 
 	//TODONOW 修改用户在server中的数据
 
@@ -164,7 +164,7 @@ bool CPlayer::ModifyPlayerScore(BYTE round, WORD wIdentity, SCORE lUserTreasuse,
 	g_TreasureDB->AddParameter(TEXT("@OnlyID"), Msg.c_str());
 
 	//执行查询
-	LONG lResultCode = g_TreasureDB->ExecuteProcess(TEXT("GSP_PlayerScore_Insert"), true);
+	LONG lResultCode = g_TreasureDB->ExecuteProcess(TEXT("GSP_PlayerScore_Insert"), false);
 
 	return true;
 }
@@ -179,7 +179,7 @@ bool CPlayer::ModifyPlayerExp()
 	g_TreasureDB->AddParameter(TEXT("@CurCount"),round);
 
 	//执行查询
-	LONG lResultCode = g_TreasureDB->ExecuteProcess(TEXT("GSP_PlayerScore_Insert"), true);
+	LONG lResultCode = g_TreasureDB->ExecuteProcess(TEXT("GSP_PlayerScore_Insert"), false);
 	*/
 
 	return true;

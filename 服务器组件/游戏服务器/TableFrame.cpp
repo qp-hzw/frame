@@ -512,7 +512,7 @@ bool CTableFrame::XJUpdateTableRecord(BYTE round, string OnlyID)
 	g_TreasureDB->AddParameter(TEXT("@OnlyID"), OnlyID.c_str());
 
 	//执行查询
-	LONG lResultCode = g_TreasureDB->ExecuteProcess(TEXT("GSP_TableRecord_Insert"), true);
+	LONG lResultCode = g_TreasureDB->ExecuteProcess(TEXT("GSP_TableRecord_Insert"), false);
 
 	return true;
 }
@@ -538,7 +538,7 @@ bool CTableFrame::XJUpdateTableVideo(BYTE round, string OnlyID, VOID* pData, DWO
 	g_TreasureDB->AddParameter(TEXT("@OnlyID"), OnlyID.c_str());
 
 	//执行查询
-	LONG lResultCode = g_TreasureDB->ExecuteProcess(TEXT("GSP_TableVideo_Insert"), true);
+	LONG lResultCode = g_TreasureDB->ExecuteProcess(TEXT("GSP_TableVideo_Insert"), false);
 
 	return true;
 }
