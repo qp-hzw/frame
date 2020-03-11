@@ -67,3 +67,14 @@ std::vector<tagUserProperty> CPlayer::GetProps()
 	}
 	return vec;
 }
+
+//¸üÐÂÍæ¼ÒUserInfo
+bool CPlayer::UpDataUserInfo(tagUserInfo &info)
+{
+	if (m_UserInfo.dwUserID != info.dwUserID)
+		return false;
+
+	memcpy(&m_UserInfo, &info, sizeof(tagUserInfo));
+
+	return true;
+}

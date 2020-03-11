@@ -1617,6 +1617,13 @@ bool CHandleFromGate::On_SUB_CG_MATCH_APPLY(VOID * pData, WORD wDataSize, DWORD 
 		return false;
 	}
 
+	//门票检测
+	if(0 != RoomRuleManager::CheckTickt(match->GetMatchRoom()->GetCustomRule(), player, match->GetMatchRoom()))
+	{
+		g_GameCtrl->SendDataMsg(dwSocketID, "门票不足");
+		return true;
+	}
+
 	//玩家报名
 	if (!match->On_User_Apply(player))
 	{

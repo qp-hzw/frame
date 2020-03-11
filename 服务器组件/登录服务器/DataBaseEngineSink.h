@@ -64,10 +64,6 @@ protected:
 #pragma region MDM_SERVICE 用户服务
 	/* **************************【MAIN:3    MDM_SERVICE    服务】*************************************/
 protected:
-	//刷新用户信息
-	bool On_DBR_Service_RefreshUserInfo(DWORD dwContextID, VOID * pData, WORD wDataSize);
-	//刷新用户信息返回
-	bool On_DBO_Service_RefreshUserInfo(DWORD dwContextID, DWORD dwResultCode, LPCTSTR pszErrorString);
 
 	//查询开房信息列表
 	bool On_DBR_Service_QueryRoomList(DWORD dwContextID, void * pData, WORD wDataSize);

@@ -63,11 +63,8 @@ private:
 	//关注, 取消关注
 	static bool On_SUB_CL_SERVICE_FLOWER_ACT(VOID * pData, WORD wDataSize, DWORD dwSocketID);
 	
-
 	//刷新用户信息
 	static bool On_SUB_CL_Service_RefreshUserInfo(VOID * pData, WORD wDataSize, DWORD dwSocketID);
-	//刷新用户信息返回
-	static bool On_CMD_LC_Service_RefreshUserInfo( DWORD dwContextID, VOID * pData);
 
 	//获取用户录像列表
 	static bool On_SUB_CL_Service_GetUserRecordList(VOID * pData, WORD wDataSize, DWORD dwSocketID);

@@ -39,6 +39,9 @@ public:
 	void AddProp(tagUserProperty prop);
 	//获取玩家道具
 	std::vector<tagUserProperty> GetProps();
+
+	//更新玩家UserInfo
+	bool UpDataUserInfo(tagUserInfo &info);
 };
 
 #endif

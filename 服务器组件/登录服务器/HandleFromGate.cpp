@@ -50,10 +50,6 @@ bool CHandleFromGate::HandlePacketDB(WORD wRequestID, DWORD dwScoketID, VOID * p
 		}
 #pragma endregion
 
-	case DBO_CL_SERVICE_REFRESH_USER_INFO:		//刷新用户信息返回
-		{
-			return On_CMD_LC_Service_RefreshUserInfo(dwScoketID, pData);
-		}
 	case DBO_CL_SERVICE_GET_USER_RECORD_LIST:	//获取用户录像列表返回（大局）
 		{
 			return On_CMD_LC_Service_GetUserRecordList(dwScoketID,pData,wDataSize);
@@ -1013,35 +1009,57 @@ bool CHandleFromGate::On_SUB_CL_SERVICE_FLOWER_ACT(VOID * pData, WORD wDataSize,
 //刷新用户信息
 bool CHandleFromGate::On_SUB_CL_Service_RefreshUserInfo(VOID * pData, WORD wDataSize, DWORD dwSocketID)
 {
-	//定义变量
-	STR_DBR_CL_SERCIVR_REFRESH_INFO UserRequest;
-	ZeroMemory(&UserRequest,sizeof(UserRequest));
-
+	//玩家校验
 	CPlayer *player = CPlayerManager::FindPlayerBySocketID(dwSocketID);
-	if(player)
+	if (player == NULL)
+		return false;
+
+	//执行查询
+	g_AccountsDB->ResetParameter();
+	g_AccountsDB->AddParameter(TEXT("@UserID"), player->GetUserID());
+
+	//执行查询
+	LONG lResultCode = g_AccountsDB->ExecuteProcess(TEXT("GSP_CL_Service_RefreshUserInfo"),true);
+
+	//变量定义
+	tagUserInfo info;
+	ZeroMemory(&info, sizeof(tagUserInfo));
+
+	//查询成功获取信息
+	if (lResultCode == DB_SUCCESS)
 	{
-		UserRequest.dwUserID = player->GetUserID();
-		g_GameCtrl->PostDataBaseRequest(DBR_CL_SERVICE_REFRESH_USER_INFO, dwSocketID, &UserRequest, sizeof(UserRequest));
+		//用户标志
+		info.dwUserID = player->GetUserID();
+		//用户昵称
+		g_AccountsDB->GetValue_String(TEXT("NickName"),info.szNickName,CountArray(info.szNickName));
+		//用户性别
+		info.cbGender=g_AccountsDB->GetValue_BYTE(TEXT("Gender"));
+		//头像索引
+		g_AccountsDB->GetValue_String(TEXT("HeadUrl"),info.szHeadUrl,CountArray(info.szHeadUrl));
+		//个性签名
+		g_AccountsDB->GetValue_String(TEXT("MySignature"),info.szUnderWrite,CountArray(info.szUnderWrite));
+
+		//会员等级
+		info.cbMemberOrder=g_AccountsDB->GetValue_BYTE(TEXT("MemberOrder"));
+		//人物等级
+		info.dwLevel=g_AccountsDB->GetValue_BYTE(TEXT("cbLevel"));
+		//经验数值
+		info.dwExperience=g_AccountsDB->GetValue_DWORD(TEXT("Experience"));
+
+		//用户房卡
+		info.lOpenRoomCard = g_AccountsDB->GetValue_LONGLONG(TEXT("UserRoomCard"));
+		//钻石
+		info.lDiamond = g_AccountsDB->GetValue_LONGLONG(TEXT("UserDiamond"));
+		//用户游戏币
+		info.lGold = g_AccountsDB->GetValue_LONGLONG(TEXT("UserGold"));
 	}
-	return true;
-}
 
-//刷新用户信息返回
-bool CHandleFromGate::On_CMD_LC_Service_RefreshUserInfo( DWORD dwScoketID, VOID * pData )
-{
-	//变量定义
-	STR_CMD_LC_SERVICE_REFRESH_INFO UserInfo;
-	ZeroMemory(&UserInfo,sizeof(UserInfo));
 
-	//变量定义
-	STR_DBO_CL_SERCIVR_REFRESH_INFO * pUserInfo=(STR_DBO_CL_SERCIVR_REFRESH_INFO *)pData;
+	//发送消息
+	g_GameCtrl->SendData(dwSocketID, MDM_SERVICE, CMD_CL_SERVICE_REFRESH_USER_INFO, &info, sizeof(tagUserInfo));
 
-	//构造数据
-	memcpy_s(&UserInfo, sizeof(STR_CMD_LC_SERVICE_REFRESH_INFO), pUserInfo, sizeof(STR_CMD_LC_SERVICE_REFRESH_INFO));
-
-	//发送数据
-	WORD wDataSize = sizeof(STR_CMD_LC_SERVICE_REFRESH_INFO);
-	g_GameCtrl->SendData(dwScoketID, MDM_SERVICE, CMD_CL_SERVICE_REFRESH_USER_INFO, &UserInfo, wDataSize);
+	//更新player
+	player->UpDataUserInfo(info);
 
 	return true;
 }

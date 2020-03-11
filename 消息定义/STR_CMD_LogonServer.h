@@ -158,40 +158,6 @@ struct STR_CMD_LC_SERVICE_FEEDBACK
 	TCHAR							szDescribeString[LEN_MESSAGE_DESCRIBE];		//消息描述
 };
 
-//刷新用户信息
-struct STR_SUB_CL_SERVICE_REFRESH_INFO
-{
-	DWORD							dwUserID;							//用户ID
-};
-//刷新用户信息返回
-struct STR_CMD_LC_SERVICE_REFRESH_INFO
-{
-	DWORD                           dwResultCode;                       //结果标识
-	TCHAR							szDescribeString[128];				//描述消息
-	DWORD							dwUserID;							//用户标识
-	TCHAR							szNickName[LEN_NICKNAME];			//用户昵称
-	BYTE							cbGender;							//用户性别
-	WORD							wFaceID;							//头像索引
-	TCHAR							szMySignature[LEN_MY_SIGNATURE];	//个性签名
-	SCORE                           dwUserDiamond;						//用户元宝
-	DWORD							dwUserMedal;						//用户奖牌
-	DWORD							dwExperience;						//经验数值
-	DWORD							dwLoveLiness;						//用户魅力
-	BYTE                            cbMasterOrder;                      //管理员等级 0表示非管理员
-	BYTE							cbMemberOrder;						//会员等级   0表示非管理员
-	SYSTEMTIME					MemberOverDate;						//会员到期时间
-	TCHAR                           szIdentityName[LEN_IDENTITY_NAME];  //真实姓名
-	TCHAR                           szIdentityNum[LEN_IDENTITY_NUM];    //身份证号
-	TCHAR                           szMobilePhone[LEN_MOBILE_PHONE];    //手机号码
-	TCHAR							szLasLogonIp[LEN_IP_ADDR];			//最后登录地址
-	SYSTEMTIME						LasLogonDate;						//最后上线时间		TODO 客户端没有最后上线时间，校验是不是等于数据包大小
-	DWORD							dwGroupID;							//社团标识
-	TCHAR							szGroupName[LEN_GROUP_NAME];		//社团名字
-	SCORE							lUserScore;							//用户积分
-	SCORE							lUserGold;							//用户金币
-	SCORE							lUserRoomCard;						//用户房卡
-};
-
 //开房信息列表
 struct STR_SUB_CL_SERVICE_QUERY_ROOMLIST
 {

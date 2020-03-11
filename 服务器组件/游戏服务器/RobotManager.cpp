@@ -131,6 +131,12 @@ void CRobotManager::On_ANDROID_JOIN_GAME()
 			continue;
 		}
 
+		//门票检测
+		if(0 != RoomRuleManager::CheckTickt(match->GetMatchRoom()->GetCustomRule(), pPlayer, match->GetMatchRoom()))
+		{
+			continue;
+		}
+
 		//机器人报名比赛
 		if (!match->On_User_Apply(pPlayer))
 		{

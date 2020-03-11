@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "player.h"
 #include "DataBaseEngineSink.h"
+#include "MatchItem.h"
 
 rule_all_arry						RoomRuleManager::m_rule_arry;
 ISubRoomRuleManager*            RoomRuleManager::m_SubRoomRuleManager = NULL;
@@ -137,7 +138,7 @@ tagTableRule RoomRuleManager::GetGoldRoomRule(BYTE byType)
 {
 	//数据初始化
 	m_SubRoomRuleManager->Init();
-	m_SubRoomRuleManager->SetGoldRule(byType);
+	m_SubRoomRuleManager->SetGoldRule(&s_RoomInfo[byType-1]);	//注意: client发来是顺序是1234 server的顺序是0123  TODOLATER
 
 	tagTableRule roomRule;
 	ZeroMemory(&roomRule, sizeof(tagTableRule));
@@ -266,6 +267,18 @@ int RoomRuleManager::CheckTickt(tagTableRule* rule, CPlayer* player, CTableFrame
 		}
 	case TABLE_MODE_MATCH: //比赛
 		{
+			CMatchRoom *room = (CMatchRoom *)table;
+			MATCH_CONFIG config = room->GetMatchItem()->GetConfig();
+
+			if (config.FeeType == 0 && (player->GetUserGold() < config.llFee)) //金币
+				return -1;
+
+			if (config.FeeType == 1 && (player->GetUserDiamond() < config.llFee)) //砖石
+				return -2;
+
+			if (config.FeeType == 2 && (player->GetUserRoomCard() < config.llFee)) //房卡
+				return -3;
+
 			break;
 		}
 	case TABLE_MODE_GOLD: //金币

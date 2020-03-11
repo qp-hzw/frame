@@ -26,11 +26,11 @@ bool CMatchManager::ReadMatchConfig(DWORD kindid)
 		CWHCfg::Instance()->GetItemValue("MATCH", "starttype", config.wStartType);
 		CWHCfg::Instance()->GetItemValue("MATCH", "leastcount", config.dwLowestPlayer);
 		CWHCfg::Instance()->GetItemValue("MATCH", "feetype", config.FeeType);
-		CWHCfg::Instance()->GetItemValue("MATCH", "fee", config.llFee);
+		CWHCfg::Instance()->GetItemValue("MATCH", "feecount", config.llFee);
 		CWHCfg::Instance()->GetItemValue("MATCH", "reword", config.llReword);
 		CWHCfg::Instance()->GetItemValue("MATCH", "robotcount", config.dwRobotCount);
 		CWHCfg::Instance()->GetItemValue("MATCH", "timeperiod", config.dwTimePeriod);
-
+		
 		//БъЬт
 		string strTemp;
 		CWHCfg::Instance()->GetItemValue("MATCH", "title", strTemp);

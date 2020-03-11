@@ -56,10 +56,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 		{
 			return On_DBR_Logon_Platform(dwContextID,pData,wDataSize);
 		}
-	case DBR_CL_SERVICE_REFRESH_USER_INFO:		//刷新用户信息
-		{
-			return On_DBR_Service_RefreshUserInfo(dwContextID,pData,wDataSize);
-		}
 	case DBR_CL_SERVICE_GET_USER_RECORD_LIST:	//获取用户戏录像列表
 		{
 			return On_DBR_Service_GetUserRecordList(dwContextID,pData,wDataSize);
@@ -231,110 +227,6 @@ bool CDataBaseEngineSink::OnDataBaseEngineRequest(WORD wRequestID, DWORD dwConte
 }
 
 /* **************************【MAIN:3    MDM_SERVICE    服务】*************************************/
-//刷新用户信息
-bool CDataBaseEngineSink::On_DBR_Service_RefreshUserInfo( DWORD dwContextID, VOID * pData, WORD wDataSize )
-{
-	//效验参数
-	ASSERT(wDataSize == sizeof(STR_DBR_CL_SERCIVR_REFRESH_INFO));
-	if (wDataSize != sizeof(STR_DBR_CL_SERCIVR_REFRESH_INFO)) return false;
-
-	//请求处理
-	STR_DBR_CL_SERCIVR_REFRESH_INFO * pUserRequest=(STR_DBR_CL_SERCIVR_REFRESH_INFO *)pData;
-
-	//构造参数
-	m_AccountsDB->ResetParameter();
-	m_AccountsDB->AddParameter(TEXT("@dwUserID"),pUserRequest->dwUserID);
-
-	WCHAR szDescribe[128]=L"";
-	m_AccountsDB->AddParameterOutput(TEXT("@strErrorDescribe"),szDescribe,sizeof(szDescribe),adParamOutput);
-
-	//结果处理
-	LONG lResultCode = m_AccountsDB->ExecuteProcess(TEXT("GSP_CL_Service_RefreshUserInfo"),true);
-
-	CDBVarValue DBVarValue;
-	m_AccountsDB->GetParameter(TEXT("@strErrorDescribe"),DBVarValue);
-
-
-	//结果处理
-	On_DBO_Service_RefreshUserInfo(dwContextID, lResultCode, CW2CT(DBVarValue.bstrVal));
-
-	return true;
-}
-
-//刷新用户信息返回
-bool CDataBaseEngineSink::On_DBO_Service_RefreshUserInfo(DWORD dwContextID, DWORD dwResultCode, LPCTSTR pszErrorString)
-{
-	//构造数据
-	STR_DBO_CL_SERCIVR_REFRESH_INFO UserInfo;
-	ZeroMemory( &UserInfo, sizeof(UserInfo));
-	UserInfo.dwResultCode = dwResultCode;
-	lstrcpyn(UserInfo.szDescribeString, pszErrorString, CountArray(UserInfo.szDescribeString));
-
-	if (dwResultCode == DB_SUCCESS)		//成功
-	{
-		/* *****************************    用户信息     ****************************/
-		//用户标志
-		UserInfo.dwUserID=m_AccountsDB->GetValue_DWORD(TEXT("UserID"));
-		//用户昵称
-		m_AccountsDB->GetValue_String(TEXT("NickName"),UserInfo.szNickName,CountArray(UserInfo.szNickName));
-		//用户性别
-		UserInfo.cbGender=m_AccountsDB->GetValue_BYTE(TEXT("Gender"));
-		//头像索引
-		UserInfo.wFaceID=m_AccountsDB->GetValue_WORD(TEXT("FaceID"));
-		//个性签名
-		m_AccountsDB->GetValue_String(TEXT("MySignature"),UserInfo.szMySignature,CountArray(UserInfo.szMySignature));
-
-		//用户元宝
-		UserInfo.dwUserDiamond=m_AccountsDB->GetValue_LONGLONG(TEXT("UserDiamond"));
-		//用户奖牌
-		//UserInfo.dwUserMedal=m_AccountsDB->GetValue_DWORD(TEXT("UserMedal"));
-		//经验数值
-		UserInfo.dwExperience=m_AccountsDB->GetValue_DWORD(TEXT("Experience"));
-		//用户魅力
-		UserInfo.dwLoveLiness=m_AccountsDB->GetValue_DWORD(TEXT("LoveLiness"));
-
-		//管理员等级
-		//UserInfo.cbMasterOrder=m_AccountsDB->GetValue_BYTE(TEXT("MasterOrder"));
-		//会员等级
-		UserInfo.cbMemberOrder=m_AccountsDB->GetValue_BYTE(TEXT("MemberOrder"));
-		//会员到期时
-		m_AccountsDB->GetValue_SystemTime(TEXT("MemberOverDate"),UserInfo.MemberOverDate);
-
-		//真实姓名
-		m_AccountsDB->GetValue_String(TEXT("IdentityName"),UserInfo.szIdentityName,CountArray(UserInfo.szIdentityName));
-		//身份证号
-		m_AccountsDB->GetValue_String(TEXT("IdentityNum"),UserInfo.szIdentityNum,CountArray(UserInfo.szIdentityNum));
-		//手机号码
-		m_AccountsDB->GetValue_String(TEXT("MobilePhone"),UserInfo.szMobilePhone,CountArray(UserInfo.szMobilePhone));
-		/* *****************************    账号信息     ****************************/
-		//最后登录地址
-		m_AccountsDB->GetValue_String(TEXT("LastLogonIP"),UserInfo.szLasLogonIp,CountArray(UserInfo.szLasLogonIp));
-		//最后上线时间 
-		m_AccountsDB->GetValue_SystemTime(TEXT("LastLogonDate"),UserInfo.LasLogonDate);
-		/* *****************************    附加数据     ****************************/
-		//社团标志 -- 牌友圈
-		//UserInfo.dwGroupID=m_AccountsDB->GetValue_DWORD(TEXT("GroupID"));
-		//社团名字 -- 牌友圈
-		//m_AccountsDB->GetValue_String(TEXT("GroupName"),UserInfo.szGroupName,CountArray(UserInfo.szGroupName));
-
-		//用户积分
-		UserInfo.lUserScore = m_AccountsDB->GetValue_LONGLONG(TEXT("UserScore"));
-		//用户游戏币
-		UserInfo.lUserGold = m_AccountsDB->GetValue_LONGLONG(TEXT("UserGold"));
-		//用户房卡
-		UserInfo.lUserRoomCard = m_AccountsDB->GetValue_LONGLONG(TEXT("UserRoomCard"));
-
-		//发送数据
-		g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_SERVICE_REFRESH_USER_INFO, dwContextID, &UserInfo, sizeof(UserInfo));
-	}
-	else								//失败处理
-	{
-		//发送数据
-		g_AttemperEngineSink->OnEventDataBaseResult(DBO_CL_SERVICE_REFRESH_USER_INFO, dwContextID, &UserInfo, sizeof(UserInfo));
-	}
-
-	return true;
-}
 
 //查询开房信息列表
 bool CDataBaseEngineSink::On_DBR_Service_QueryRoomList(DWORD dwContextID, void * pData, WORD wDataSize)
@@ -1384,11 +1276,6 @@ bool CDataBaseEngineSink::On_DBO_Logon_Accounts(DWORD dwContextID, DWORD dwResul
 		m_AccountsDB->GetValue_String(TEXT("HeadUrl"),DBOLogonAccount.useInfo.szHeadUrl,CountArray(DBOLogonAccount.useInfo.szHeadUrl));
 		//个性签名
 		m_AccountsDB->GetValue_String(TEXT("MySignature"),DBOLogonAccount.useInfo.szUnderWrite,CountArray(DBOLogonAccount.useInfo.szUnderWrite));
-
-		//社团ID
-		//DBOLogonAccount.useInfo.dwGroupID=m_AccountsDB->GetValue_BYTE(TEXT("GroupID"));
-		//社团名字
-		//m_AccountsDB->GetValue_String(TEXT("GroupName"),DBOLogonAccount.useInfo.szGroupName,CountArray(DBOLogonAccount.useInfo.szGroupName));
 
 		//会员等级
 		DBOLogonAccount.useInfo.cbMemberOrder=m_AccountsDB->GetValue_BYTE(TEXT("MemberOrder"));

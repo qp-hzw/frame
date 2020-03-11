@@ -373,15 +373,6 @@ struct STR_CMD_ROOM_RULE
 	BYTE bStart;                     //游戏是否已开始 0未开始, 1开始
 };
 
-//金币场房间信息 返回
-struct STR_CMD_GC_USER_GOLD_INFO
-{
-	BYTE bGoldMod;// 房间等级 1.初级 2.中级 3.高级 4.富豪
-
-	DWORD dwScore;  //底分
-	DWORD dwGold;  //入场金币
-};
-
 //////////////////////////////////////////////////////////////////////////////////
 
 //规则标志

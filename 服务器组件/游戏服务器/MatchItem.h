@@ -93,6 +93,9 @@ public:
 	//比赛初始化
 	void Init();
 
+	//获取等待房间
+	CMatchRoom * GetMatchRoom() { return m_wait_room; }
+
 	//获取MatchID
 	DWORD GetMatchID() {	return m_config.wMatchID; }
 	//获取比赛配置

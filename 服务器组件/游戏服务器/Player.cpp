@@ -147,7 +147,30 @@ bool CPlayer::ModifyUserTreasure(BYTE byTreasureType,  SCORE lUserTreasuse, stri
 	//执行查询
 	LONG lResultCode = g_TreasureDB->ExecuteProcess(TEXT("GSP_TreasureRecord_Insert"), false);
 
-	//TODONOW 修改用户在server中的数据
+	// 修改用户在server中的数据
+	switch(byTreasureType)
+	{
+	case TREASURE_FK:
+		{
+			SetUserRoomCard(m_UserInfo.lOpenRoomCard + lUserTreasuse);
+			break;
+		}
+	case TREASURE_GOLD:
+		{
+			SetUserGold(m_UserInfo.lGold + lUserTreasuse);
+			break;
+		}
+	case TREASURE_DIAMOND:
+		{
+			SetUserDiamond(m_UserInfo.lDiamond + lUserTreasuse);
+			break;
+		}
+	case TREASURE_JF:
+		{
+			
+			break;
+		}
+	}
 
 	return true;
 }
